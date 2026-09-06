@@ -194,11 +194,12 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
         "Rendering changes only the picture, never the numbers. Opacity is how much water you" +
         " see through, feature emphasis makes still water vanish so the thermocline stands out," +
         " ray steps trade smoothness for speed, and the water can be turned off entirely.",
-      covers: ["rendering", "opacity", "emphasis", "quality", "volumeEnabled"],
+      covers: ["rendering", "performance", "opacity", "emphasis", "quality", "volumeEnabled"],
       enter: () => {
         calm();
         store.setState({ windowMin: 0, windowMax: 1, volumeEnabled: true, touched: "emphasis" });
         open("rendering");
+        open("performance");
       },
     },
     {

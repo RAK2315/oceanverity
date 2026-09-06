@@ -516,6 +516,7 @@ export const useStore = create<State>((setState, getState) => ({
     depthSlice: false,
     surfaceLevel: false,
     rendering: false,
+    performance: false,
     isosurface: false,
     currents: false,
     instruments: false,

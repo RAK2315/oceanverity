@@ -518,13 +518,27 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Feature emphasis fades out still water and keeps the boundaries.",
       "Vertical exaggeration stretches the depth axis, because the region is 4000 times wider" +
         " than it is deep.",
-      "Ray steps is quality against speed.",
     ],
     look: [
       "A sheet or an arrow field has no water to make murky, so those two sliders disappear.",
       "The depth labels down the left stay correct at every exaggeration.",
     ],
     tryThis: "Slide Feature emphasis from 0 to 100% and watch the thermocline appear.",
+  },
+
+  performance: {
+    title: "Quality",
+    kind: "rendering",
+    does: "What the picture costs to draw. Neither of these changes a number.",
+    means: [
+      "Ray steps is how many samples each ray takes through the block: quality against speed.",
+      "Show volume turns the ray-marched water off and leaves the markers and the coastline.",
+    ],
+    look: [
+      "Fewer steps banks the water into visible shells. More costs frame rate and nothing else.",
+      "With the volume off the floats and their tracks are still live and still clickable.",
+    ],
+    tryThis: "Drop Ray steps to 48 and watch the banding appear, then put it back.",
   },
 
   currents: {

@@ -536,28 +536,19 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
           </li>
         ))}
       </ol>
-      <p className="note">
-        {rows.length} of {block.instruments.length}, worst first. The gap is what the model read
-        against what the instrument measured, at the cast that was compared. {block.cells.length}{" "}
-        of the {cell}&deg; boxes hold {store.residuals?.minCount ?? 3} instruments or more; the
-        rest are not drawn at all.
-      </p>
       {/*
-        * The map is a four-month composite, and until this line it did not say so.
-        *
-        * A residual belongs to its own cast, not to the Timestep on screen, so scrubbing the
-        * timeline changes the water and leaves the colours where they were. A reader watching
-        * that reasonably concludes the bias is being recomputed each step and is not.
+        * Counts and limits only. The sentence defining the gap said what `GUIDE.bias` already
+        * says, and the paragraph about the composite said what `GUIDE.bias` and the map key both
+        * already say - 225px of the 615px bay spent restating the panel on the right.
         */}
       <p className="note">
-        Every comparison is drawn where and when it was taken, across all{" "}
-        {manifest.timesteps.length} analyses, so the markers move when you turn the colours on
-        and the map does not change with the timeline. The eight worst all sit past the end of
-        the colour scale, which runs out at{" "}
+        {rows.length} of {block.instruments.length}, worst first. {block.cells.length} of the{" "}
+        {cell}&deg; boxes hold {store.residuals?.minCount ?? 3} instruments or more; the rest are
+        not drawn at all. The scale runs out at{" "}
         {saturateAt === undefined
           ? "the ninetieth percentile"
           : `${(saturateAt * Math.abs(spec.range[1] - spec.range[0])).toFixed(2)} ${spec.units}`}
-        , so their swatches show which way and not how far.
+        , so the worst rows show which way and not how far.
       </p>
     </Group>
   );
@@ -609,8 +600,8 @@ function Drift({ drift, inVolume }: { drift: DriftPath | null; inVolume: boolean
         * one clause a reader could otherwise get wrong, which is that this is not a forecast.
         */}
       <p className="note caution">
-        The drift the <strong>ocean analysis alone</strong> implies. Not a search forecast: no
-        wind, no waves, no leeway.
+        The <strong>ocean analysis alone</strong>. Not a search forecast: no wind, no waves, no
+        leeway.
       </p>
 
       {!inVolume ? (
@@ -688,11 +679,13 @@ function Drift({ drift, inVolume }: { drift: DriftPath | null; inVolume: boolean
           <strong>{spec.floats}</strong> Argo floats: a median{" "}
           <strong>{summary.medianKm.toFixed(0)} km</strong> out over one cycle,{" "}
           {summary.p90Km.toFixed(0)} km at the ninetieth percentile.
+          {/* The depth and the caveat, without the sentence explaining why shallow water is
+              harder - that is `GUIDE.drift`'s job and it says it there. */}
           {Math.abs(metres - spec.parkingDepthMetres) > 1 && (
             <>
               {" "}
-              Your line is at <strong>{metres.toFixed(0)} m</strong>, where the water moves
-              faster and changes more, so the score is not a bound on it.
+              Your line is at <strong>{metres.toFixed(0)} m</strong>, so the score is not a bound
+              on it.
             </>
           )}
         </p>
@@ -1219,32 +1212,36 @@ export function Controls({
               format={(v) => `${v.toFixed(0)}×`}
               onChange={(v) => set("exaggeration", v)}
             />
-            {drawsWater && (
-              <>
-                <Slider
-                  guide="quality"
-                  label="Ray steps"
-                  value={store.quality}
-                  min={48}
-                  max={320}
-                  step={8}
-                  format={(v) => v.toFixed(0)}
-                  onChange={(v) => set("quality", v)}
-                />
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={store.volumeEnabled}
-                    onChange={(e) => {
-                      set("touched", "volumeEnabled");
-                      set("volumeEnabled", e.target.checked);
-                    }}
-                  />
-                  <span>Show volume</span>
-                </label>
-              </>
-            )}
           </Group>
+
+          {/* Split off Rendering, which was five controls in one group and the only pairing a
+              reader is likely to want - Colourbar with it - overflowed the bay by 106px. These
+              two are about the cost of drawing rather than the look of it. */}
+          {drawsWater && (
+            <Group id="performance" title="Quality">
+              <Slider
+                guide="quality"
+                label="Ray steps"
+                value={store.quality}
+                min={48}
+                max={320}
+                step={8}
+                format={(v) => v.toFixed(0)}
+                onChange={(v) => set("quality", v)}
+              />
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={store.volumeEnabled}
+                  onChange={(e) => {
+                    set("touched", "volumeEnabled");
+                    set("volumeEnabled", e.target.checked);
+                  }}
+                />
+                <span>Show volume</span>
+              </label>
+            </Group>
+          )}
 
           {!isVolumeField ? null : spec.isosurface === false ? (
             <Group id="isosurface" title="Isosurface" readout="not applicable" readoutMuted>
