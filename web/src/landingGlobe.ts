@@ -77,6 +77,55 @@ if (canvas && wrap) {
 
 type Continent = number[][];
 
+/**
+ * Give every land texel the colour of the nearest water, keeping its alpha at zero.
+ *
+ * A transparent texel still has RGB, and `LinearFilter` blends it. Land was left at the array's
+ * initial (0,0,0), so every coastal texel was interpolated towards black and the fill grew a grey
+ * fringe over India, Sri Lanka and the Arabian peninsula - the alpha said "not here" while the
+ * colour said "black". Flooding the colour outwards means the blend only ever mixes water with
+ * water, and the alpha alone decides where the fill stops.
+ */
+function bleedColourIntoLand(
+  pixels: Uint8Array,
+  water: boolean[],
+  width: number,
+  height: number,
+): void {
+  let filled = water.slice();
+  // Four passes reach four cells inland, which is further than a bilinear tap can see.
+  for (let pass = 0; pass < 4; pass++) {
+    const next = filled.slice();
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        const cell = row * width + col;
+        if (filled[cell]) continue;
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let found = 0;
+        for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+          const nr = row + dr;
+          const nc = col + dc;
+          if (nr < 0 || nr >= height || nc < 0 || nc >= width) continue;
+          const near = nr * width + nc;
+          if (!filled[near]) continue;
+          r += pixels[near * 4] ?? 0;
+          g += pixels[near * 4 + 1] ?? 0;
+          b += pixels[near * 4 + 2] ?? 0;
+          found++;
+        }
+        if (!found) continue;
+        pixels[cell * 4] = Math.round(r / found);
+        pixels[cell * 4 + 1] = Math.round(g / found);
+        pixels[cell * 4 + 2] = Math.round(b / found);
+        next[cell] = true;
+      }
+    }
+    filled = next;
+  }
+}
+
 /** World coastlines as `number[][][]` of [lon, lat] rings, the study region in degrees, and the
  * near-surface temperature Grid the region is filled with. The fill is what the product
  * visualises - the model's own analysis at the surface, coloured by the same functions the
@@ -275,10 +324,14 @@ async function mountGlobe() {
             (lon - uRegion.x) / (uRegion.y - uRegion.x),
             (lat - uRegion.z) / (uRegion.w - uRegion.z)
           );
-          vec4 fieldSample = texture2D(uFieldTex, fieldUv);
+          vec4 fieldSample = texture2D(uFieldTex, clamp(fieldUv, 0.0, 1.0));
           float lit = smoothstep(0.05, 0.9, t);
           vec3 fieldCol = fieldSample.rgb * (0.35 + 0.65 * lit);
-          float reveal = fieldSample.a * smoothstep(0.0, 0.5, inset);
+          // 3 degrees, not 0.5. Half a degree is about two pixels at this radius, so the box
+          // ended on a hard rectangular edge and read as a sticker rather than as a region of
+          // the ocean. The fill still stops exactly where the analysis stops; only the last
+          // few pixels of it are a gradient.
+          float reveal = fieldSample.a * smoothstep(0.0, 3.0, inset);
           col = mix(col, fieldCol, reveal * uFieldStrength);
 
           gl_FragColor = vec4(col, 1.0);
@@ -306,22 +359,26 @@ async function mountGlobe() {
       const lifted = liftedPalette(fieldThermal, _theme);
       const pixels = new Uint8Array(fieldWidth * fieldHeight * 4);
       const spec = { range: fieldRange } as Parameters<typeof colourOf>[1];
+      const water: boolean[] = new Array(fieldWidth * fieldHeight).fill(false);
       for (let row = 0; row < fieldHeight; row++) {
         const latIndex = row * fieldWidth;
         for (let col = 0; col < fieldWidth; col++) {
           const value = fieldPlane[latIndex + col] ?? NaN;
           const colour = colourOf(value, spec, 0, 1, "linear", lifted);
-          const at = (row * fieldWidth + col) * 4;
+          const cell = row * fieldWidth + col;
+          const at = cell * 4;
           if (colour) {
             pixels[at] = colour[0];
             pixels[at + 1] = colour[1];
             pixels[at + 2] = colour[2];
             pixels[at + 3] = 255;
+            water[cell] = true;
           } else {
             pixels[at + 3] = 0;
           }
         }
       }
+      bleedColourIntoLand(pixels, water, fieldWidth, fieldHeight);
       const tex = new THREE.DataTexture(pixels, fieldWidth, fieldHeight, THREE.RGBAFormat, THREE.UnsignedByteType);
       tex.minFilter = THREE.LinearFilter;
       tex.magFilter = THREE.LinearFilter;

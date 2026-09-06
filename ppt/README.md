@@ -3,11 +3,13 @@
 Six slides. **PS 26067** (MoES / INCOIS), theme **Disaster Management**, category **Software**,
 team **Sigmoid**.
 
-Three things in here:
+Five things in here:
 
 | | |
 | --- | --- |
+| [`NOTES.md`](NOTES.md) | **Read first.** What actually gets a deck shortlisted, in one page: the five things that get decks rejected, the four-part structure, and what to resist on this project specifically. |
 | [`DECK.md`](DECK.md) | **The slide content.** What goes on each of the six slides, which screenshot goes with it, and prompts for the two diagrams if you want them. Suggested, not a script - say it better if you can. |
+| [`script.md`](script.md) | **The prototype video**, 4:30 to 5:30, narration beside the exact screen actions. It has to tell the same story as `DECK.md` in the same order - a deck and a demo that disagree is a named reason decks are rejected. |
 | [`FACTS.md`](FACTS.md) | **Every number the deck uses**, read off the build. Generated, so do not edit it. `cd pipeline && ../.venv/Scripts/python scripts/collect_facts.py` |
 | [`images/`](images/) | **Sixteen screenshots of the running software.** Nothing else. |
 

@@ -69,6 +69,8 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 | File | What it is |
 | --- | --- |
 | `CONTEXT.md` | Domain vocabulary and the scope cut line. Read first. |
+| `README.md` | **The submittable one.** Problem, what makes it different, the numbers, the architecture as text rather than only a picture, how to run it. Kept short on purpose; anything that wants a page of its own goes in `docs/`. |
+| `docs/README-full.md` | The long-form README this replaced: every PS clause answered, every variable explained, the full requirement audit. Nothing was deleted, only moved. |
 | `docs/adr/00*.md` | Seventeen decision records. **0017 is the newest**: the flow drawn as moving dots, which is the drift model's own integrator and is *not* the volumetric streamlines this project still refuses. Before it, 0015 (drift that publishes its own score) and 0016 (a real 1991-2020 climatological baseline). |
 | `docs/Samudra3D-Dossier.pdf` | Full project dossier including an anticipated-questions section. Regenerate with `web/render-dossier.mjs` from `scripts/dossier.html`. |
 | `docs/demo/script.md` | The demo script: what to say, what to do. |
@@ -78,6 +80,8 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 | `docs/plan/05-coverage-audit-and-ideas.md` | The PS audited clause by clause against what answers it, and the ideas that close what does not. Names the three operational mandates the PS lists and the build does not answer, and the outreach section it answers with one tour. |
 | `ppt/README.md` | **The deck folder's index**: the sixteen screenshots and what each is for. **Only screenshots go on a slide** - the nine "infographic boards" were pictures of text and are deleted; `DECK.md` carries their content as words to be typed natively. |
 | `ppt/DECK.md` | The content for each of the six slides, and a prompt for the two things that are genuinely diagrams. |
+| `ppt/NOTES.md` | **What actually gets a deck shortlisted**, in one page: a judge spends 3-5 minutes, the five things that get decks rejected, and what to resist on this project - the rendering is the least important thing about it. |
+| `ppt/script.md` | **The prototype video**, 4:30-5:30, narration beside the exact screen actions. Must tell the same story as `DECK.md` in the same order. Distinct from `docs/demo/script.md`, which is the live deck-plus-demo talk. |
 | `ppt/FACTS.md` | **Generated.** Every figure the deck may quote, read off the bake by `pipeline/scripts/collect_facts.py`. `DECK.md` has warned "do not adjust a number by arithmetic" for three rounds; this is what that warning points at. |
 | `assets/screenshots/{light,dark}/` | **The one copy of every screenshot**, named by what it shows. `docs/images/`, `web/public/images/` and `ppt/images/` are outputs, filled by `cd web && node capture.mjs --publish-only --publish`. |
 | `design/STITCH.md` | Per-screen prompts for Google Stitch. |

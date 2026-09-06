@@ -8,6 +8,11 @@
 **This file is suggested content, not a script.** If you can say something better, say it better.
 What is not negotiable is the figures, the six-slide limit and the mandated headings.
 
+**Read [`NOTES.md`](NOTES.md) first** - what actually gets a deck shortlisted, in one page. The
+video script is [`script.md`](script.md), and it has to tell the same story as these slides in the
+same order, because a deck and a demo that disagree is one of the five named ways decks are
+rejected.
+
 - **Team:** Sigmoid &middot; Team ID `<FILL IN>` &middot; **the only blank in this folder**
 - **Problem Statement:** 26067 &middot; **Theme:** Disaster Management &middot; **Category:** Software
 - **Organisation:** Ministry of Earth Sciences &middot; **Department:** INCOIS, Ocean Valley
@@ -514,3 +519,19 @@ Each was considered and rejected for a reason.
 | Claim the platform predicts a drift track | It integrates the analysed currents and nothing else - no wind, no Stokes drift, no leeway. What makes it worth showing is that it is **scored**: median 38.5 km out over one Argo cycle. |
 | Add a stock photo of the ocean | Every picture in this deck is the real software. That is itself the argument. |
 | Add a seventh slide | The portal caps it at six. |
+
+---
+
+# THREE LINKS THAT MUST BE ON THE DECK
+
+Judges reach for evidence when a claim is strong. Give them somewhere to go, on the slide rather
+than in an appendix.
+
+| Link | Where it goes | Why it earns its space |
+| --- | --- | --- |
+| **The live prototype** | https://rak2315.github.io/samudra-sih26/ | Nothing else on six slides proves execution as fast as a working link. It needs no install and no account, so a judge can open it while you are still talking. |
+| **The repository** | https://github.com/RAK2315/samudra-sih26 | 377 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
+| **The video** | the recording of [`script.md`](script.md) | The prototype walkthrough, guaranteed to run. A live demo can fail on the venue's network; this cannot. |
+
+Slide 1 carries the prototype link. Slide 6 carries all three, with the repository and the video
+beside the data sources.

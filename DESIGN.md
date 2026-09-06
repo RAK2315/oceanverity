@@ -219,8 +219,9 @@ bands measure each other rather than sharing a grid - the bays take their height
 `--topbar-height`, `--timeline-height` and `--attribution-height`, each published by the component
 that owns it, and the map key and the depth caption read their neighbours'
 `getBoundingClientRect()` and step clear, because a fixed offset is wrong at the next viewport.
-The landing page is the opposite: a 1320 px shell with the hero, the feature rail and the closing
-panel running full bleed.
+The landing page is the opposite: a 1400 px shell, and a hero that is two columns - the headline
+and its actions left, a live WebGL globe right - over a five-cell stat strip. The globe is hidden
+below 1180 px and the hero becomes one column.
 
 **Density is a feature.** The reference viewport is 1366x768, where the left bay has **615 px**
 between the bar and the foot. Anything added to it costs something already on screen. Measured
@@ -283,12 +284,23 @@ in both themes as well, and none of the twenty fails.
 
 ## Typography
 
-Two families, self-hosted from `web/public/fonts/`, on a hard rule: **no external request, ever**.
-A Google Fonts link is a build failure, not a style choice.
+Self-hosted from `web/public/fonts/`, on a hard rule: **no external request, ever**. A Google
+Fonts link is a build failure, not a style choice.
+
+**The console and the landing page do not currently share a typeface, and that is unresolved.**
+The console sets Chivo and IBM Plex Mono; `index.html`, since the globe hero arrived, sets Space
+Grotesk and Inter. All four are self-hosted so the rule above still holds, but two halves of one
+product reading as two products is a real cost. It needs a decision between the teams, not a
+unilateral fix, so it is written down here rather than quietly reconciled.
+
+In the console:
 
 - **Chivo** (400 / 500 / 700 / 900) for everything read as language.
 - **IBM Plex Mono** (400 / 500) for everything read as a value: readouts, labels, dates,
   coordinates, statistics, axis figures.
+
+On the landing page: **Space Grotesk** for display and every uppercase caption, **Inter** for
+body.
 
 The split is not decorative. A monospace face is what keeps a column of readings aligned and
 stops a changing digit from shifting the ones beside it during playback.
