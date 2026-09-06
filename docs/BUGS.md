@@ -43,17 +43,33 @@ The ranking is the one this file has always used:
       true in both themes and survives a re-capture. **A caption that names a colour is a caption
       with a shelf life.**
 
-- [ ] **47. Two control groups open scrolls the left panel.**
-      Measured 2026-09-04 at 1366x768, where the panel starts 74 px down and has **678 px**:
-      all groups closed **408 px**, Variable alone **527 px**, Variable and Colourbar together
-      **722 px**, everything open **2,664 px**. The rules file used to claim "every reasonable
-      working set fits", on figures (264 / 383 / 578) taken before the panel grew.
+- [x] **47. Two control groups open scrolls the left panel. Fixed 2026-09-06.**
+      It took two rounds and the first one made it worse, which is the part worth keeping.
 
-      **The numbers are corrected in `CLAUDE.md` and `web/CLAUDE.md`; the panel is not.** It
-      scrolls, and it has a scroll cue at both edges that says so. **It is not the scrollbar
-      gutter**: measured both ways, three open sets each, `stable both-edges` costs **no height
-      at all** against `stable` - 408, 527 and 722 either way. It costs 11 px of content width,
-      and buys a panel that is not lopsided.
+      **Round one made the deficit bigger, correctly.** Lifting the timeline off the source
+      credits meant the panel had to clear the credits too, so its `max-height` went from
+      `calc(100% - 118px)` to a measured expression - and at 1366x768, where the credits wrap to
+      two lines, the panel gave up 50 px. The deficit was never the 44 px the old figures imply:
+      re-measured, it was **94 px**, because the available height had gone 678 -> 628 while
+      nobody was looking.
+
+      **Round two closed it, and then the console redesign reopened it twice more.** The frame
+      rebuild moved the foot from a floating pill to a band, which cost the bay height again
+      (31 px), and reclaiming that left 11 px. Final measurement at 1366x768, with the bay at
+      **615 px**: all closed **347**, Variable alone **446**, **Variable and Colourbar 615 -
+      exactly the height available**, Variable and Depth slice 534, Variable and Instruments 557.
+
+      Where the height came from, in order of size: ten group headers at 10 px of vertical
+      padding were 348 px of pure chrome, and at 7 px they are 300; the date stamp in the time
+      axis went from two stacked lines to one, which is 14 px off the foot band; and the rest is
+      a pixel or two each from body padding, slider margins, the colourbar scale and the tab row.
+      **No control was removed and no explanation was cut** - `probe-guide.mjs` still measures a
+      median of 113 words across all 43 entries, unchanged.
+
+      **Still true, and still open in the smaller sense:** `Colourbar + Rendering` scrolls by
+      106 px, and at 1280x720 `Variable + Colourbar` scrolls by 48. Rendering carries four
+      sliders and a toggle; closing that case means splitting the group, which is a change to a
+      panel the team presents from rather than a spacing pass.
 
 ---
 

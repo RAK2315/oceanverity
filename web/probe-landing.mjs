@@ -185,9 +185,11 @@ const TYPE = [
   ["headline", ".hero h1"],
   ["headline accent", ".hero h1 em"],
   ["lede", ".hero .lede"],
-  ["sub", ".hero .sub"],
-  ["stat figure", ".hero-stats b"],
-  ["stat label", ".hero-stats span"],
+  // The five-tile strip is gone; the hero's figures are now the two residuals at display size.
+  ["gap figure", ".gap-num.gap-worse b"],
+  ["gap caption", ".gap-worse-of"],
+  ["gap figure, quieter", ".gap-num b"],
+  ["gap note", ".gap-say"],
 ];
 
 /** Every hero text block against the frame with the hero's words taken away. */
@@ -207,7 +209,7 @@ const heroContrast = async (theme, width) => {
     return { label, colour: getComputedStyle(el).color, x: box.x, y: box.y, w: box.width, h: box.height };
   }), TYPE);
   await p.addStyleTag({
-    content: ".hero h1, .hero .lede, .hero .sub, .hero-stats b, .hero-stats span { visibility: hidden !important; }",
+    content: ".hero h1, .hero .lede, .gap-num, .gap-of, .gap-say { visibility: hidden !important; }",
   });
   await p.waitForTimeout(400);
   const png = decodePng(await p.screenshot({ clip: { x: 0, y: 0, width, height: 1400 } }));

@@ -1,7 +1,35 @@
+import { useCallback, useRef } from "react";
 import { useStore } from "../store";
+
+/**
+ * Publish the axis band's measured height, so the bays above it end exactly where it starts.
+ *
+ * The frame is four bands - the bar, two bays and the foot - and each one measures itself rather
+ * than every other one guessing. The axis wraps its ticks differently at different widths, so a
+ * number written down here would be wrong at the next viewport.
+ */
+function usePublishedHeight(name: string) {
+  const watcher = useRef<ResizeObserver | null>(null);
+  return useCallback(
+    (el: HTMLElement | null) => {
+      watcher.current?.disconnect();
+      if (!el) return;
+      const publish = () =>
+        document.documentElement.style.setProperty(
+          name,
+          `${Math.ceil(el.getBoundingClientRect().height)}px`,
+        );
+      publish();
+      watcher.current = new ResizeObserver(publish);
+      watcher.current.observe(el);
+    },
+    [name],
+  );
+}
 
 export function Timeline() {
   const { manifest, timestepIndex, playing, set } = useStore();
+  const band = usePublishedHeight("--timeline-height");
   if (!manifest) return null;
 
   const steps = manifest.timesteps;
@@ -9,7 +37,7 @@ export function Timeline() {
   const shown = current ? new Date(current).toISOString().slice(0, 10) : "-";
 
   return (
-    <div className="timeline">
+    <div className="timeline" ref={band}>
       <button
         className="play"
         onClick={() => {

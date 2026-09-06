@@ -47,3 +47,8 @@ web/tsconfig.tsbuildinfo
 .copernicusmarine/
 .copernicusmarine-credentials
 .env
+
+# Impeccable's live-mode working state. `config.json` is project config and is committed; the
+# session journals and the annotation PNGs a reader draws in the browser are scratch.
+.impeccable/live/sessions/
+.impeccable/live/annotations/

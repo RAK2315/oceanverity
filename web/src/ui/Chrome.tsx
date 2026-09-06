@@ -14,24 +14,27 @@ import { applyTheme, useStore } from "../store";
  * credits wrap, and how many lines they take depends on the width and on how many sources the
  * bake holds. A number chosen for one viewport is wrong at the next.
  */
-function usePublishedHeight() {
+function usePublishedHeight(name: string) {
   const watcher = useRef<ResizeObserver | null>(null);
-  // A callback ref, not an effect. The footer only exists once the manifest has loaded, so an
+  // A callback ref, not an effect. The element only exists once the manifest has loaded, so an
   // effect with no dependencies would re-create the observer on every render - and `Chrome`
   // re-renders on every store change, which during playback is every frame.
-  return useCallback((el: HTMLElement | null) => {
-    watcher.current?.disconnect();
-    if (!el) return;
-    const publish = () => {
-      document.documentElement.style.setProperty(
-        "--attribution-height",
-        `${Math.ceil(el.getBoundingClientRect().height)}px`,
-      );
-    };
-    publish();
-    watcher.current = new ResizeObserver(publish);
-    watcher.current.observe(el);
-  }, []);
+  return useCallback(
+    (el: HTMLElement | null) => {
+      watcher.current?.disconnect();
+      if (!el) return;
+      const publish = () => {
+        document.documentElement.style.setProperty(
+          name,
+          `${Math.ceil(el.getBoundingClientRect().height)}px`,
+        );
+      };
+      publish();
+      watcher.current = new ResizeObserver(publish);
+      watcher.current.observe(el);
+    },
+    [name],
+  );
 }
 
 export function LoadingScreen() {
@@ -49,8 +52,10 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
   // What the copy button last did, so it can say so for a moment. A control that fires and
   // shows nothing is a control a user presses three times.
   const [copied, setCopied] = useState<"" | "copied" | "failed">("");
-  // Before the early return: a hook cannot be called conditionally.
-  const credits = usePublishedHeight();
+  // Before the early return: a hook cannot be called conditionally. Both bands of the frame
+  // publish their measured height, so the bays between them can be exactly as tall as the gap.
+  const credits = usePublishedHeight("--attribution-height");
+  const bar = usePublishedHeight("--topbar-height");
   if (!manifest) return null;
 
   const flipTheme = () => {
@@ -69,37 +74,32 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
 
   return (
     <>
-      <header className="topbar">
+      <header className="topbar" ref={bar}>
         <div className="brand">
           <span className="brand-mark">SAMUDRA<span className="brand-dim">·3D</span></span>
-          <span className="brand-sub">
-            Ocean model &amp; in-situ co-visualisation - INCOIS · SIH&nbsp;26067
+          <span className="brand-sub">INCOIS &middot; SIH&nbsp;26067</span>
+        </div>
+
+        {/*
+          * What you are looking at, as the largest thing on the bar.
+          *
+          * The hierarchy used to run the other way: "Dive into the water" was the loudest object
+          * up here and the Field and the date were two small mono readouts pushed against it, in
+          * a row of buttons. For the reader this console is built for that is backwards. A
+          * forecaster presses dive once and then checks *which field, which analysis* constantly
+          * - it is the state they are holding in their head, and the one thing that being wrong
+          * about invalidates everything they conclude. So the state gets the bar's centre and its
+          * biggest type, and the actions get the end and a quieter weight.
+          */}
+        <div className="topbar-state">
+          <span className="state-field">{spec?.label.replace("Sea Water ", "") ?? "-"}</span>
+          <span className="state-on">on</span>
+          <span className="state-date">
+            {stamp ? new Date(stamp).toISOString().slice(0, 10) : "-"}
           </span>
         </div>
 
         <div className="topbar-right">
-          {/*
-            * Two readouts, inline, with no boxes.
-            *
-            * These were bordered tiles with the label stacked over the value, which made two
-            * pieces of text look like two form fields and took about a third of the bar. They
-            * are readouts: a label and a number, on one line, in the same mono the rest of the
-            * console uses. The rule after them separates what the app is showing from what the
-            * user can press, which is the only division on this bar that means anything.
-            */}
-          <dl className="topbar-readouts">
-            <div>
-              <dt>Analysis</dt>
-              <dd>{stamp ? new Date(stamp).toISOString().slice(0, 10) : "-"}</dd>
-            </div>
-            <div>
-              <dt>Field</dt>
-              <dd className="topbar-field">{spec?.label.replace("Sea Water ", "") ?? "-"}</dd>
-            </div>
-          </dl>
-
-          <span className="topbar-rule" aria-hidden="true" />
-
           <button
             className="icon-button"
             onClick={flipTheme}

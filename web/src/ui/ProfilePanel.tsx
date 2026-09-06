@@ -113,6 +113,16 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
             <span className="profile-operator">{titleCase(chosen.country)}</span>
           )}
         </p>
+        {/* Out of the badge row and into the header's own corner: closing the panel is an action
+            on the panel, not a fact about the instrument, and it has to stay reachable at the top
+            right whatever the badges below it do. */}
+        <button
+          className="ghost profile-close"
+          onClick={() => set("selectedFloatId", null)}
+          aria-label="Close"
+        >
+          ✕
+        </button>
         <div className="profile-actions">
           {/* Say it at the top. The chlorophyll chart is the last thing in a long panel, and
               nothing above it hinted that there was anything below to scroll to. */}
@@ -124,9 +134,6 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
           <span className={`pill ${reporting ? "live" : "stale"}`}>
             {reporting ? "Reporting" : "Not reporting"}
           </span>
-          <button className="ghost" onClick={() => set("selectedFloatId", null)} aria-label="Close">
-            ✕
-          </button>
         </div>
       </div>
 

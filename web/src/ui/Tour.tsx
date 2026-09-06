@@ -496,7 +496,7 @@ export function Tour({ onDive }: { onDive: (into: boolean) => void }) {
         * it is what actually tells a reader where they are.
         */}
       <div className="tour-progress" aria-hidden="true">
-        <span style={{ width: `${((tourStep + 1) / steps.length) * 100}%` }} />
+        <span style={{ transform: `scaleX(${(tourStep + 1) / steps.length})` }} />
       </div>
       <div className="tour-actions">
         <button

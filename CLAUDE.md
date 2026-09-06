@@ -535,12 +535,32 @@ open together - so `toggleGroup` and `selectField` both **merge** into the previ
 than replacing it, and the map is kept complete. What actually fixed the fold was the tab strip,
 not the accordion, and that stays.
 
-**The fold figures in this paragraph were stale and are now re-measured, and one of them has
-stopped being true.** At 1366x768 the panel starts 74 px down and has **678 px**; measured as
-`scrollHeight`, all groups closed is **408 px**, Variable alone **527 px**, Variable and
-Colourbar together **722 px**, and every group open is **2,664 px**. So two groups open now
-scrolls, where the old figures said it fitted. That is the panel having grown since - it is not
-the scrollbar gutter, which was measured both ways and costs no height at all.
+**The chrome is a frame, and the fold figures move with it.** Four bands - the top bar, a bay
+down each side, the time axis and the credits along the foot - anchored to the edge of the glass,
+square outside, opaque, meeting on shared rules. Nothing floats, so nothing carries a blur or a
+drop shadow to explain why it floats. Each band measures its own height and publishes it
+(`--topbar-height`, `--timeline-height`, `--attribution-height`), and the bays are `calc(100%)`
+minus the three, so no band has to guess at another's size.
+
+At 1366x768 the left bay has **615 px**. Measured as `scrollHeight`: all groups closed **347**,
+Variable alone **446**, **Variable and Colourbar 615, which is exactly the height available**,
+and every group open **2,403**. Bug 47 is closed at that viewport and still open at two others -
+`Colourbar + Rendering` is 106 px over, and 1280x720 is 48 px over on the Variable pair.
+
+**Every one of those numbers moved three times during one session**, twice because a fix
+elsewhere took height away: lifting the timeline off the credits cost the panel 50 px, and
+turning the floating pill into a foot band cost it 31 more. A fold figure is a property of every
+band at once, so re-measure it after touching any of them rather than after touching the panel.
+
+**One signal fired uniformly stops being a signal.** Every label in the console used to be IBM
+Plex Mono, uppercase, at 0.16-0.18em - group names, legend titles, guide headings, chart
+captions, status pills and the anomaly panel's terms alike. Five marks of "technical" at once, on
+everything, is not emphasis; it is the texture of the thing, and it was the single loudest reason
+this console read as machine-generated. The split now is: **a name is language** and is set in
+Chivo, sentence case; **a value is a value** and stays mono, tabular and untracked; the wordmark
+is the one place letterspaced caps are still the point. Accent went the same way - it was on the
+active tab, the active Field button, every readout, every caret and the mode switch at once, so
+it had stopped marking interaction and become the colour scheme. A readout is ink now.
 
 **Hiding a control is not turning it off, and `selectField` is the only place that can.** The
 same leak, one field along: `isoEnabled` was not reset, so switching from Temperature with the

@@ -224,6 +224,7 @@ const INGEST = {
   "15-explore": "explore",
   "16-kiosk": "kiosk",
   "17-section": "section",
+  "18-bias": "bias",
 };
 
 /**
@@ -540,9 +541,27 @@ await page.evaluate(() => {
 await page.waitForTimeout(4000);
 await shot("17-section");
 
-await page.evaluate(() =>
-  window.__store.setState({ sectionFrom: null, sectionTo: null, explore: true }),
-);
+/*
+ * The bias map, which the harness could not shoot until now.
+ *
+ * The landing page claims it - "the whole basin's disagreement in one picture" - and pointed at
+ * `collocation.jpg`, a picture of one float's comparison panel, under alt text promising
+ * "instrument markers recoloured by how far the model sat from each measurement". The light
+ * frame had been grabbed from a real browser by hand and there was no dark one at all, so the
+ * card on a dark-by-default page had nothing true to show. A claim the documents make needs a
+ * state the harness can reach.
+ */
+await page.evaluate(() => {
+  window.__store.setState({ sectionFrom: null, sectionTo: null, selectedFloatId: null });
+  window.__store.getState().selectField("temperature");
+  // `biasMode`, not `bias` - `bias` is the panel group's open/shut entry in `openGroups`, and
+  // setting it would open a drawer rather than recolour a single marker.
+  window.__store.setState({ biasMode: true, showFloats: true });
+});
+await page.waitForTimeout(4000);
+await shot("18-bias");
+
+await page.evaluate(() => window.__store.setState({ biasMode: false, explore: true }));
 await page.waitForTimeout(1500);
 await shot("15-explore");
 

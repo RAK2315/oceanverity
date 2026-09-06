@@ -81,8 +81,34 @@
   --sans: "Chivo", "Helvetica Neue", Arial, system-ui, sans-serif;
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /*
+   * Ease-out-quint. The old curve was a gentle sine and everything used it, so nothing ever
+   * arrived - it drifted. An instrument's chrome should settle, not float into place.
+   */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --radius: 12px;
   --radius-sm: 8px;
+
+  /*
+   * THE FRAME.
+   *
+   * The chrome is not a deck of cards hovering over the water; it is the surround of an
+   * instrument. Bays are anchored to the edge of the glass, square on the outside, and carry one
+   * structural rule on the inner edge where they meet the water. Nothing floats, so nothing needs
+   * a drop shadow to explain why it is floating, and nothing needs a blur to pretend it is glass.
+   *
+   * `--frame` is opaque on purpose. The old panel ground was 97% opaque *and* blurred, which is
+   * the cost of glass without any of the effect: at that alpha there is nothing to see through.
+   * Opaque is honest, reads better over moving water, and is one less compositing layer.
+   */
+  --frame: #0d1213;
+  --frame-rule: #313b3c;
+  --frame-inset: #12191a;
+
+  /* Vertical rhythm. Three steps, used deliberately, instead of a different margin per rule. */
+  --gap-tight: 6px;
+  --gap: 10px;
+  --gap-loose: 18px;
 
   color-scheme: dark;
 }
@@ -130,6 +156,10 @@
 
   --panel-bg: rgba(248, 252, 252, 0.98);
   --scrim: rgba(248, 252, 252, 0.96);
+
+  --frame: #f7fbfb;
+  --frame-rule: #c2cdcd;
+  --frame-inset: #eef4f4;
 
   --swatch-float: #0c2531;
   --swatch-float-ring: #ffffff;
@@ -281,6 +311,7 @@ body {
 
 /* ---------------------------------------------------------------- top bar */
 
+/* The head of the frame: opaque, structural, and carrying the rule the bays hang from. */
 .topbar {
   position: absolute;
   top: 0;
@@ -289,14 +320,11 @@ body {
   z-index: 6;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
-  padding: 12px 18px;
-  background: var(--scrim);
-  backdrop-filter: blur(var(--panel-blur));
-  -webkit-backdrop-filter: blur(var(--panel-blur));
-  border-bottom: 1px solid var(--outline-variant);
-  box-shadow: var(--shadow-raised);
+  padding: 8px 18px;
+  background: var(--frame);
+  border-bottom: 1px solid var(--frame-rule);
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -310,82 +338,70 @@ body {
   gap: 2px;
 }
 
+/* The identity is the smallest thing on the bar, because it is the thing the reader already
+   knows. It stays mono - a wordmark is the one place letterspaced caps are the point. */
 .brand-mark {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--on-surface);
+  letter-spacing: 0.12em;
+  color: var(--on-surface-variant);
 }
 
 .brand-dim {
-  color: var(--primary);
+  color: var(--on-surface-faint);
 }
 
 .brand-sub {
-  font-size: 12px;
+  font-size: 10.5px;
   color: var(--on-surface-faint);
   letter-spacing: 0.01em;
+}
+
+/*
+ * The state: the largest type in the chrome, and the only place it is this large.
+ *
+ * Set in the text face rather than in mono. "Temperature" is a word, not a reading - the mono
+ * belongs on the date beside it, which is a value and lines up with every other date in the
+ * console.
+ */
+.topbar-state {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.state-field {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.state-on {
+  font-size: 12.5px;
+  color: var(--on-surface-faint);
+}
+
+.state-date {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-surface);
+  white-space: nowrap;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-/*
- * The two readouts, inline and unboxed.
- *
- * They used to be bordered tiles with the label stacked over the value. Two of them took about a
- * third of the bar and read as form fields rather than as readouts - a box around a number
- * implies you can edit it. Label and value now sit on one line in the console's own mono, with
- * the label faint and letterspaced so the eye skips it and lands on the figure.
- */
-.topbar-readouts {
-  display: flex;
-  align-items: baseline;
-  gap: 20px;
-  margin: 0;
-}
-
-.topbar-readouts > div {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-.topbar-readouts dt {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--on-surface-faint);
-  white-space: nowrap;
-}
-
-.topbar-readouts dd {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--on-surface);
-  white-space: nowrap;
-}
-
-/* The Field name is the one thing here that can be long. Let it truncate, not push the buttons. */
-.topbar-field {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 22ch;
-}
-
-/* Divides what the app is showing from what you can press. The only division on this bar that
-   carries meaning, so it is the only one drawn. */
-.topbar-rule {
-  width: 1px;
-  height: 22px;
-  background: var(--outline-variant);
 }
 
 /*
@@ -495,8 +511,9 @@ body {
   z-index: 4;
   max-width: 320px;
   padding: 14px 16px;
-  border: 1px solid var(--outline-variant);
-  border-left: 2px solid var(--primary);
+  /* Was a 2 px accent stripe down the left of a rounded box. The accent still marks this as
+     the thing to read next; it does it with the whole border rather than with a tab. */
+  border: 1px solid var(--primary-edge);
   border-radius: var(--radius-sm);
   background: var(--panel-bg);
   backdrop-filter: blur(var(--panel-blur));
@@ -541,23 +558,44 @@ body {
  *
  * It wraps rather than truncates, because a credit that has been cut off is not a credit.
  */
+/*
+ * The credits, in the frame rather than on the water.
+ *
+ * Nine source names set in tiny letterspaced monospace, running the full width of the glass,
+ * reads as a debug log rather than as a credit - and it was the owner's first complaint about
+ * this screen. Attribution for Argo, INCOIS, Copernicus and NOAA is a licence obligation, so
+ * nothing may be dropped and nothing may be truncated. What can change is where it sits and how
+ * it is set: it moves into the bottom band of the frame, gains a word that says what the list is,
+ * and is set in the text face at a normal tracking, so it reads as a line of credit rather than
+ * as console output.
+ */
 .attribution {
   position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 8px;
-  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: baseline;
+  justify-content: flex-start;
   row-gap: 2px;
-  line-height: 1.35;
-  gap: 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  column-gap: 12px;
+  padding: 6px 18px 7px;
+  background: var(--frame);
+  line-height: 1.4;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
   pointer-events: none;
+}
+
+/* Says what the list is, so nine proper nouns in a row are a credit and not a stack trace. */
+.attribution::before {
+  content: "Sources";
+  font-weight: 600;
+  color: var(--on-surface-variant);
 }
 
 .attribution span {
@@ -573,7 +611,11 @@ body {
 
 .panel {
   position: absolute;
-  top: 74px;
+  /*
+   * Flush under the top bar, not floating below it. The bays and the bar are one frame, so they
+   * meet on a shared rule rather than leaving a stripe of water between them.
+   */
+  top: var(--topbar-height, 59px);
   z-index: 5;
   width: 344px;
   overflow-x: hidden;
@@ -583,12 +625,18 @@ body {
      2,752 px2 of them once every group was open. The credits wrap, so their height is measured
      and published by `Chrome` rather than assumed - 74 px of top offset, the credits' own
      height, their 8 px inset and a 12 px gap. */
-  max-height: calc(100% - 94px - var(--attribution-height, 20px));
+  /* The gap between the two bands of the frame, and nothing else. Each band measures itself. */
+  max-height: calc(
+    100% - var(--topbar-height, 55px) - var(--timeline-height, 58px) -
+      var(--attribution-height, 24px)
+  );
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0;
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius);
+  /* One rule, on the inner edge, where the bay meets the water. The outer edge is the edge of
+     the glass and needs nothing drawn on it. */
+  border: 0;
+  border-radius: 0;
 
   /*
    * A scroll affordance, because there was none.
@@ -606,17 +654,15 @@ body {
    * CSS, no measurement, and it cannot fall out of step with the content.
    */
   background:
-    linear-gradient(var(--panel-bg) 40%, rgba(0, 0, 0, 0)) top / 100% 26px no-repeat local,
-    linear-gradient(rgba(0, 0, 0, 0), var(--panel-bg) 60%) bottom / 100% 26px no-repeat local,
+    linear-gradient(var(--frame) 40%, rgba(0, 0, 0, 0)) top / 100% 26px no-repeat local,
+    linear-gradient(rgba(0, 0, 0, 0), var(--frame) 60%) bottom / 100% 26px no-repeat local,
     radial-gradient(farthest-side at 50% 0, var(--scroll-cue), rgba(0, 0, 0, 0)) top / 100% 13px
       no-repeat scroll,
     radial-gradient(farthest-side at 50% 100%, var(--scroll-cue), rgba(0, 0, 0, 0)) bottom /
       100% 13px no-repeat scroll,
-    var(--panel-bg);
+    var(--frame);
 
-  backdrop-filter: blur(var(--panel-blur));
-  -webkit-backdrop-filter: blur(var(--panel-blur));
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
   scrollbar-width: thin;
   scrollbar-color: var(--outline) transparent;
   /*
@@ -651,12 +697,18 @@ body {
 }
 
 .panel-left {
-  left: 18px;
+  left: 0;
+  border-right: 1px solid var(--frame-rule);
+  border-bottom: 1px solid var(--frame-rule);
 }
 
+/* The guide panel is often much shorter than the gap it lives in, so the bay ends partway down
+   the glass. Without a bottom rule that reads as a block someone forgot to finish. */
 .panel-right {
-  right: 18px;
+  right: 0;
   width: 348px;
+  border-left: 1px solid var(--frame-rule);
+  border-bottom: 1px solid var(--frame-rule);
 }
 
 /*
@@ -676,6 +728,30 @@ body {
   border-bottom: 1px solid var(--outline-variant);
 }
 
+/*
+ * Rhythm, so the panel is not ten identical rows.
+ *
+ * Ten rows of the same height, the same type and the same weight is a list, and a list has no
+ * hierarchy for the eye to use - which is exactly what "it looks generated" describes. The
+ * Variable selector is the primary control of the whole console: it decides what the water is.
+ * It gets a heavier name, a tinted ground and room. Everything below it is a secondary register,
+ * tighter and quieter, which is what those controls actually are.
+ */
+.control-group:first-of-type {
+  background: var(--frame-inset);
+}
+
+.control-group:first-of-type > .control-head label {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.control-group:first-of-type > .control-head {
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
+
 .control-group:last-child {
   border-bottom: none;
 }
@@ -693,7 +769,11 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 16px;
+  /* 7, not 10. Ten group headers at 10 px of vertical padding were 348 px of pure
+     chrome in a panel with 634 px in it - the single largest block of anything on the panel,
+     and none of it carrying a value. At 7 the row is 30 px, which is still a comfortable
+     target for a pointer and buys 60 px back. */
+  padding: 7px 16px;
   min-width: 0;
   transition: background 0.14s var(--ease);
 }
@@ -703,22 +783,28 @@ body {
 }
 
 .control-group.open > .control-head {
-  padding-bottom: 9px;
+  padding-bottom: 7px;
 }
 
 .control-body {
-  padding: 0 16px 13px;
+  padding: 0 16px 9px;
 }
 
 /* A caret that points down when the group is open. */
+/* Neutral, not accent: every group has one, so an accent here is texture rather than meaning. */
 .disclosure {
   flex: none;
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid var(--primary);
-  border-bottom: 1.5px solid var(--primary);
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--on-surface-faint);
+  border-bottom: 1.5px solid var(--on-surface-faint);
   transform: rotate(-45deg);
-  transition: transform 0.18s var(--ease);
+  transition: transform 0.2s var(--ease-out), border-color 0.16s var(--ease-out);
+}
+
+.control-head:hover .disclosure {
+  border-right-color: var(--on-surface);
+  border-bottom-color: var(--on-surface);
 }
 
 .control-group.open .disclosure {
@@ -728,24 +814,42 @@ body {
 .control-head > select { flex: 1 1 auto; }
 .control-head > label { flex: 1 1 auto; }
 
+/*
+ * A group's name is language, so it is set in the text face and in sentence case.
+ *
+ * Every label in this product used to be IBM Plex Mono, uppercase, at 0.16-0.18em of tracking -
+ * five separate signals of "technical" fired at once and applied uniformly to all of them. Fired
+ * uniformly, a signal stops being a signal; it is just the texture of the thing, and it is the
+ * single loudest reason this console read as generated. Mono keeps the job it is actually good
+ * at, one rule down: values, where a column of digits has to line up and a changing digit must
+ * not shift its neighbours.
+ */
 .control-head label {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--on-surface-variant);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--on-surface);
   cursor: pointer;
 }
 
+/*
+ * A readout is a value, not a control, so it is ink rather than accent.
+ *
+ * The accent was on the active tab, the active Field button, every readout, every disclosure
+ * caret, the mode switch and the focus ring at once. Restrained means the accent marks
+ * interaction and current selection; when it also paints every number on the panel it has
+ * stopped meaning anything and become the panel's colour scheme.
+ */
 .readout {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--primary);
-  letter-spacing: 0.04em;
+  color: var(--on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 select {
@@ -788,7 +892,7 @@ select:hover {
 
 .segmented button {
   min-width: 0;
-  padding: 9px 6px;
+  padding: 6px 6px;
   overflow-wrap: anywhere;
   line-height: 1.25;
   border: none;
@@ -876,7 +980,7 @@ select:hover {
   display: flex;
   justify-content: space-between;
   gap: 4px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   border-bottom: 1px solid var(--outline-variant);
 }
 
@@ -955,8 +1059,8 @@ select:hover {
   align-items: center;
   gap: 9px;
   width: 100%;
-  margin-bottom: 12px;
-  padding: 11px 13px;
+  margin-bottom: 8px;
+  padding: 8px 13px;
   border: 1px solid var(--primary-edge);
   border-radius: var(--radius-sm);
   background: var(--primary-wash);
@@ -1047,7 +1151,7 @@ select:hover {
 .colourbar {
   display: block;
   width: 100%;
-  height: 12px;
+  height: 10px;
   padding: 0;
   border: 1px solid var(--outline-variant);
   border-radius: 3px;
@@ -1062,8 +1166,8 @@ select:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 6px;
-  margin-bottom: 12px;
+  margin-top: 3px;
+  margin-bottom: 6px;
   font-family: var(--mono);
   font-size: 12px;
   color: var(--on-surface-variant);
@@ -1096,7 +1200,7 @@ select:hover {
 /* ---------------------------------------------------------------- sliders */
 
 .slider {
-  margin-bottom: 13px;
+  margin-bottom: 9px;
 }
 
 .slider:last-child {
@@ -1108,7 +1212,7 @@ select:hover {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   font-size: 12.5px;
   color: var(--on-surface-variant);
 }
@@ -1159,7 +1263,7 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 12px;
   color: var(--on-surface-variant);
   cursor: pointer;
@@ -1172,12 +1276,19 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+/*
+ * A note is small, dim text - and nothing else.
+ *
+ * It was indented behind a 2 px stripe, which is the side-tab tell and was also the most-repeated
+ * shape in the panel. A bordered panel was tried instead and rejected on measurement: it kills
+ * the stripe and costs about 16 px a note, in the one panel that is 94 px short of holding two
+ * open groups. Size and colour already say "this is a note" in a panel where everything else is
+ * a label or a number, so the box was doing nothing the type was not.
+ */
 .note {
-  margin: 10px 0 0;
-  padding-left: 10px;
-  border-left: 2px solid var(--outline-variant);
-  font-size: 13px;
-  line-height: 1.55;
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--on-surface-faint);
 }
 
@@ -1484,11 +1595,10 @@ input[type="range"]::-moz-range-thumb {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .guide-kind::before {
@@ -1522,11 +1632,10 @@ input[type="range"]::-moz-range-thumb {
 
 .guide-label {
   margin: 16px 14px 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
   padding-bottom: 5px;
   border-bottom: 1px solid var(--outline-variant);
@@ -1578,10 +1687,10 @@ input[type="range"]::-moz-range-thumb {
 
 .guide-body dt {
   margin-top: 12px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
   padding-bottom: 5px;
   border-bottom: 1px solid var(--outline-variant);
@@ -1663,6 +1772,14 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  /*
+   * The one thing on the glass that is genuinely loose, so it is a plate rather than a bay - but
+   * it is made of the same material. Square, opaque, one rule, no shadow. Left as a rounded card
+   * with a drop shadow it became the only floating object on the screen, which drew the eye to a
+   * legend rather than to the water it names.
+   */
+  border-radius: 0;
+  box-shadow: none;
   max-height: calc(100vh - 220px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1722,6 +1839,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* The header is the fold control, so it is a button rather than a span. Everything about how
    it looks is unchanged; what is new is that it can be pressed. */
+/* Sentence case, in the text face: a legend's title is a name, like a group's. */
 .mapkey-label {
   display: flex;
   align-items: center;
@@ -1731,12 +1849,12 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   border-radius: 4px;
   background: none;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   text-align: left;
-  color: var(--on-surface-faint);
+  color: var(--on-surface-variant);
   cursor: pointer;
   transition: color 0.16s var(--ease), background 0.16s var(--ease);
 }
@@ -1854,25 +1972,37 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------------------------------------------------------------- profile panel */
 
+/*
+ * The instrument's name gets the width; its badges go underneath.
+ *
+ * These sat on one row - name, operator, "+ chlorophyll", "reporting", close - inside a 348 px
+ * bay, so "Moored buoy 23093" broke across three lines with two pills wedged against it and read
+ * as a rendering fault. A name and its badges are not peers competing for one line; the name is
+ * the heading and the badges qualify it. Stacked, the name gets a whole line and the badges sit
+ * under it in the order they matter.
+ */
 .profile-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 6px 10px;
+  padding: 11px 14px 10px;
   border-bottom: 1px solid var(--outline-variant);
-  background: var(--surface-low);
-  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--frame-inset);
+  border-radius: 0;
 }
 
 .profile-id {
   margin: 0;
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
   font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
   color: var(--on-surface);
 }
 
@@ -1890,20 +2020,31 @@ input[type="range"]::-moz-range-thumb {
   color: var(--on-surface-faint);
 }
 
+/* Second row, full width, under the name rather than competing with it for one line. */
 .profile-actions {
+  grid-column: 1 / -1;
+  grid-row: 2;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
 }
 
+.profile-close {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+}
+
+/* A status, in words. The markup already says "Not reporting"; the stylesheet was shouting it. */
 .pill {
   padding: 3px 9px;
   border: 1px solid var(--outline-variant);
   border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
 }
 
@@ -2032,11 +2173,14 @@ input[type="range"]::-moz-range-thumb {
   margin: 0 14px;
 }
 
+/* A figure caption reads as a sentence: "Temperature (degC) vs depth (m)". The units inside it
+   are already parenthesised, which is what says this is a chart of measurements - the uppercase
+   tracking was saying it a second time, louder. */
 .chart-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
   margin-bottom: 6px;
   padding-bottom: 6px;
@@ -2139,53 +2283,82 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------------------------------------------------------------- verdict and stats */
 
+/*
+ * A verdict is a sentence, so it is set as one.
+ *
+ * A tinted box with a coloured border is the shape of a browser alert, and this is not an alert -
+ * it is the panel's conclusion, and the most important line on it. It reads as a line of prose
+ * with a coloured mark at its head carrying the three tones the wash used to carry. Nothing is
+ * lost: the tone is still visible at a glance, and it is now attached to the words rather than
+ * wrapped around them.
+ */
 .verdict {
-  margin: 14px;
-  padding: 11px 13px;
-  border-left: 2px solid var(--outline);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 12px;
+  position: relative;
+  margin: 14px 14px 0;
+  padding: 0 0 0 15px;
+  border: 0;
+  border-radius: 0;
+  font-size: 12.5px;
   line-height: 1.6;
   color: var(--on-surface-variant);
-  background: var(--surface-low);
+  background: none;
+}
+
+.verdict::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--outline);
 }
 
 .verdict b {
   color: var(--on-surface);
 }
 
-.verdict.good { border-left-color: var(--good); background: var(--good-wash); }
-.verdict.fair { border-left-color: var(--secondary); background: var(--secondary-wash); }
-.verdict.poor { border-left-color: var(--tertiary); background: var(--tertiary-wash); }
+.verdict.good::before { background: var(--good); }
+.verdict.fair::before { background: var(--secondary); }
+.verdict.poor::before { background: var(--tertiary); }
 
+/*
+ * The numbers serve the chart; they are not three hero metrics.
+ *
+ * This was three big centred numerals in three boxed cells - the hero-metric template, which is
+ * a SaaS pattern and reads as one here too. The chart above it is the actual finding: two curves
+ * and the band between them. What these three figures do is *size* the gap the reader has just
+ * looked at, so they belong beside the chart as a line of evidence, not stacked under it as a
+ * scoreboard. Read left to right they now form a sentence - 88 depths, -0.06 average, 0.35 RMS.
+ */
 .stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 0 14px;
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 16px;
+  row-gap: 4px;
+  margin: 10px 14px 0;
+  padding-top: 9px;
+  border: 0;
+  border-top: 1px solid var(--outline-variant);
+  border-radius: 0;
 }
 
 .stats > div {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 6px;
-  border-right: 1px solid var(--outline-variant);
-  background: var(--surface-low);
-}
-
-.stats > div:last-child {
-  border-right: none;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 .stat-value {
-  font-family: var(--sans);
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--on-surface);
   font-variant-numeric: tabular-nums;
 }
@@ -2195,12 +2368,10 @@ input[type="range"]::-moz-range-thumb {
 .stat-value.model-low { color: var(--primary); }
 
 .stat-label {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
-  text-align: center;
   line-height: 1.35;
 }
 
@@ -2224,7 +2395,8 @@ input[type="range"]::-moz-range-thumb {
 .analysis-note.lead {
   margin: 0 0 12px;
   padding: 8px 11px;
-  border-left: 2px solid var(--outline-variant);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
   background: var(--surface-low);
   font-size: 12.5px;
   line-height: 1.55;
@@ -2232,7 +2404,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .analysis-note.lead.drifted {
-  border-left-color: var(--secondary);
+  border-color: var(--secondary);
   color: var(--on-surface-variant);
 }
 
@@ -2420,9 +2592,13 @@ input[type="range"]::-moz-range-thumb {
 
 .tour-progress span {
   display: block;
+  width: 100%;
   height: 100%;
+  transform-origin: 0 50%;
   background: var(--primary);
-  transition: width 0.3s var(--ease);
+  /* scaleX rather than width: this animates on every one of the tour's 21 steps, and width is
+     a layout property where a transform is composited. */
+  transition: transform 0.3s var(--ease);
 }
 
 .tour-actions {
@@ -2475,55 +2651,68 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------------------------------------------------------------- timeline */
 
+/*
+ * A time axis, not a media player.
+ *
+ * It was a rounded pill floating in the middle of the water with a circular play button in it,
+ * which is the shape of a music widget. What this control actually is: twelve ten-day analyses
+ * on one axis, and the ability to walk them. So it becomes an axis - a full-width band along the
+ * foot of the frame, the twelve steps laid along it, the date read off the right-hand end, and
+ * transport reduced to a small square at the head of the line where it belongs. It sits directly
+ * on top of the credits and the two of them are the bottom of the frame.
+ */
 .timeline {
   position: absolute;
-  left: 50%;
-  /*
-   * Lifted clear of the source credits rather than sitting on them. `--attribution-height` is
-   * measured and published by `Chrome`, so this follows the credits when they wrap to a second
-   * line on a narrower window instead of needing a number picked per viewport. The fallback
-   * covers the single frame before that measurement lands.
-   */
-  bottom: calc(var(--attribution-height, 20px) + 20px);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: var(--attribution-height, 24px);
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 18px;
-  border: 1px solid var(--outline-variant);
-  border-radius: 999px;
-  background: var(--panel-bg);
-  backdrop-filter: blur(var(--panel-blur));
-  -webkit-backdrop-filter: blur(var(--panel-blur));
-  box-shadow: var(--shadow-panel);
+  padding: 7px 18px 8px;
+  border: 0;
+  border-top: 1px solid var(--frame-rule);
+  border-radius: 0;
+  background: var(--frame);
+  box-shadow: none;
 }
 
+/*
+ * Square, small, and subordinate to the axis it starts.
+ *
+ * A 34 px circle filled with the accent is the loudest object in a band whose subject is a date.
+ * Transport is not the point of a time axis; the twelve analyses are.
+ */
 .play {
   flex: none;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 50%;
-  background: var(--primary);
-  color: var(--on-primary);
-  font-size: 12px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--outline);
+  border-radius: 3px;
+  background: none;
+  color: var(--on-surface-variant);
+  font-size: 10px;
   line-height: 1;
   cursor: pointer;
-  transition: transform 0.16s var(--ease), filter 0.16s var(--ease);
+  transition: color 0.16s var(--ease-out), border-color 0.16s var(--ease-out),
+    background 0.16s var(--ease-out);
 }
 
 .play:hover {
-  transform: scale(1.06);
-  filter: brightness(1.08);
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .play:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
 }
 
+/* The axis takes the width the band gives it, rather than a written-down 360. */
 .timeline-track {
-  width: 360px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .timeline-ticks {
@@ -2589,10 +2778,13 @@ input[type="range"]::-moz-range-thumb {
   color: var(--primary);
 }
 
+/* One line, not two stacked. The band's height is set by its tallest child, and a two-line
+   stamp made the whole foot 14 px taller - which comes straight off the bay above it. */
 .timeline-stamp {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
   min-width: 92px;
 }
 
@@ -2867,13 +3059,36 @@ input[type="range"]::-moz-range-thumb {
  * It travels with the question rather than behind it. A reader who needs the question simplified
  * is exactly the reader who will not think to ask what the simplification cost.
  */
+/*
+ * The stripe is gone; the caveat is not, and it may not become quieter than it was.
+ *
+ * Amber down the left edge was carrying "this is a limit, not more of the answer", which is the
+ * one thing on this surface that must not be mistaken for the answer - the reader this door
+ * exists for is exactly the reader who will not make the distinction unprompted. So it keeps the
+ * amber and gains a word: a named label rather than a coloured tab, which survives being read
+ * across a room and cannot be mistaken for decoration.
+ */
 .explore-caution {
-  margin-top: 3px;
-  padding-left: 9px;
-  border-left: 2px solid var(--secondary);
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--secondary-wash);
+  border-radius: var(--radius-sm);
+  background: var(--secondary-wash);
   font-size: 12px;
   line-height: 1.5;
-  color: var(--on-surface-faint);
+  color: var(--on-surface-variant);
+}
+
+.explore-caution::before {
+  content: "Caveat";
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
 }
 
 .explore-foot {
@@ -2938,8 +3153,9 @@ input[type="range"]::-moz-range-thumb {
   z-index: 30;
   width: min(620px, calc(100vw - 96px));
   padding: 26px 30px;
-  border: 1px solid var(--outline-variant);
-  border-top: 3px solid var(--primary);
+  /* Was a 3 px accent bar across the top of a rounded card - the same tell as a side stripe,
+     rotated. The accent is the whole border now. */
+  border: 1px solid var(--primary-edge);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   backdrop-filter: blur(12px);
@@ -2971,13 +3187,28 @@ input[type="range"]::-moz-range-thumb {
   color: var(--on-surface-variant);
 }
 
+/* The same caveat at exhibition scale, and the same rule: it keeps its amber and gains its
+   name, because across a room a thin coloured edge is the first thing to disappear. */
 .kiosk-caution {
-  margin: 12px 0 0;
-  padding-left: 12px;
-  border-left: 3px solid var(--secondary);
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--secondary-wash);
   font-size: clamp(13px, 1vw, 16px);
   line-height: 1.45;
-  color: var(--on-surface-faint);
+  color: var(--on-surface-variant);
+}
+
+.kiosk-caution::before {
+  content: "Caveat";
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: clamp(9.5px, 0.7vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
 }
 
 .kiosk-dots {

@@ -36,7 +36,7 @@
     --ink: #e4eef6;
     --body: #b3c8d8;
     --dim: #8299ad;
-    --faint: #5d7488;
+    --faint: #758c9f;
 
     --cyan: #3fb8c4;
     --amber: #f5b841;
@@ -81,7 +81,7 @@
     --ink: #0d1b22;
     --body: #2f4450;
     --dim: #4f6773;
-    --faint: #6d838e;
+    --faint: #5d727a;
 
     --cyan: #00707d;
     --amber: #8a5c00;
@@ -143,6 +143,16 @@
 
   a { color: var(--cyan); text-underline-offset: 3px; }
   a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+  /* The first tab stop was the brand, then seven nav links, before any content. */
+  .skip {
+    position: absolute; left: 12px; top: -60px; z-index: 60;
+    padding: 10px 16px; border-radius: 8px;
+    background: var(--cyan); color: var(--cta-ink);
+    font-family: var(--m); font-size: 13px; text-decoration: none;
+    transition: top 0.16s var(--ease);
+  }
+  .skip:focus { top: 12px; }
 
   h1, h2, h3 { font-family: var(--d); color: var(--ink); margin: 0; text-wrap: balance; }
 
@@ -218,10 +228,20 @@
   .cta.ghost:hover { border-color: var(--accent-edge); background: var(--accent-wash); }
 
   /* A hairline that fills as the reader moves down the page. */
+  /*
+   * A hairline that fills as the reader moves down the page.
+   *
+   * Driven by `transform: scaleX` rather than by `width`. It repaints on every scroll event, and
+   * width is a layout property - scaleX is composited and costs nothing. It is also a solid
+   * accent now rather than a cyan-to-amber gradient: DESIGN.md reserves `--secondary` for "the
+   * one number that matters, and a caveat, never decoration", and this was the largest amber on
+   * the page, outranking every actual caveat on it.
+   */
   #progress {
-    position: absolute; left: 0; bottom: -1px; height: 2px; width: 0%;
-    background: linear-gradient(90deg, var(--cyan), var(--amber));
-    transition: width 0.12s linear;
+    position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
+    transform: scaleX(0); transform-origin: 0 50%;
+    background: var(--cyan);
+    transition: transform 0.12s linear;
   }
 
   /* ------------------------------------------------------------- hero */
@@ -246,7 +266,10 @@
     --ink: #e4eef6;
     --body: #b3c8d8;
     --dim: #8299ad;
-    --faint: #5d7488;
+    /* Lighter than the page token: inside the hero the labels sit on a translucent tile
+       over the scrim, which is a lighter ground than the page body. Measured against the
+       composited tile, #758c9f is 4.28:1 at 10px and this is 4.71:1. */
+    --faint: #7d93a6;
     --cyan: #3fb8c4;
     --cyan-bright: #66d7e2;
     --edge: rgba(120, 170, 195, 0.16);
@@ -261,9 +284,9 @@
     --scrim-side: rgba(4, 7, 13, 0.82);
 
     position: relative;
-    min-height: min(92vh, 900px);
+    min-height: min(88vh, 860px);
     display: flex; align-items: flex-end;
-    padding: 120px 0 76px;
+    padding: 76px 0 48px;
     overflow: hidden;
   }
   .hero-media { position: absolute; inset: 0; z-index: 0; }
@@ -289,27 +312,72 @@
     background: linear-gradient(90deg, var(--scrim-side) 0%, transparent 62%);
   }
 
-  .hero .wrap { position: relative; z-index: 1; }
+  /*
+   * `width: 100%` is load-bearing, and its absence was a misalignment nobody had measured.
+   *
+   * `.hero` is `display: flex` so its content can sit at the bottom of a tall band. That makes
+   * `.wrap` a flex *item*, which shrink-wraps to its widest child rather than filling - and
+   * `.wrap`'s own `margin: 0 auto` then centres what is left. Measured: the hero headline began
+   * 204 px to the right of the page gutter at 1440, 1600 and 1920, and 218 px at 1280, while the
+   * nav brand and every section heading below began at the gutter itself. The loudest element on
+   * the page lined up with nothing under it, and the stat strip inherited the same narrow box,
+   * which is why its labels wrapped.
+   */
+  .hero .wrap { position: relative; z-index: 1; width: 100%; }
+  /*
+   * The headline is the name of the thing, not the argument.
+   *
+   * At 92 px it was the loudest object in the fold and the numbers underneath it were a strip of
+   * 21 px tiles - so the page shouted its title and whispered its evidence. Inverted: the
+   * headline settles to 46 px and the residual pair below it runs to 92 px. It also has to fit:
+   * at 1366x768 the old stack put "0.75" entirely below the fold, and a hero argument nobody
+   * scrolls to is not a hero argument.
+   */
   .hero h1 {
     margin: 0;
-    font-size: clamp(40px, 6.6vw, 92px);
-    font-weight: 800; letter-spacing: -0.035em; line-height: 0.98;
-    max-width: 15ch;
+    font-size: clamp(30px, 3.4vw, 46px);
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1.02;
+    max-width: 18ch;
   }
   .hero h1 em { font-style: normal; color: var(--cyan); }
-  .hero .lede { margin: 26px 0 0; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.5; color: var(--ink); max-width: 54ch; }
-  .hero .sub { margin: 14px 0 0; font-size: 15.5px; color: var(--body); max-width: 58ch; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .hero .lede { margin: 18px 0 0; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.5; color: var(--ink); max-width: 56ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 
-  /* The live figures, as a strip of tiles rather than a run of small print. */
-  .hero-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1px; margin-top: 48px;
-    background: var(--edge); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden;
+  /*
+   * The disagreement, at display size. See the note on the markup for why this is the hero.
+   *
+   * Two figures, not a strip of tiles: a strip implies its members are peers and invites the eye
+   * to skim, and these two are the opposite of peers. The whole point is the ratio between them -
+   * the analysis sits four times further from the instruments it did not ingest - so they are set
+   * as a pair with an explicit "against" between, and the unflattering one is the larger.
+   */
+  .gap { margin-top: 28px; }
+  .gap-pair {
+    display: grid; grid-template-columns: auto auto; justify-content: start;
+    align-items: end; column-gap: clamp(28px, 4vw, 60px); row-gap: 9px;
+    padding-top: 20px; border-top: 1px solid var(--edge-hot);
   }
-  .hero-stats div { background: var(--card-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 16px 18px; }
-  .hero-stats b { display: block; font-family: var(--m); font-size: 21px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
-  .hero-stats span { font-family: var(--m); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+  .gap-num {
+    margin: 0; display: flex; align-items: baseline; gap: 8px;
+    font-family: var(--m); font-weight: 500; line-height: 0.86;
+    letter-spacing: -0.03em; color: var(--dim); font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .gap-num b { font-size: clamp(30px, 3.6vw, 44px); font-weight: 500; }
+  /* The unit is not the measurement. A third of the figure's size, and it never takes a line
+     of its own. */
+  .gap-num i { font-style: normal; font-size: 0.42em; letter-spacing: 0.02em; }
+  .gap-of { font-size: 13.5px; line-height: 1.35; color: var(--body); max-width: 26ch; }
+
+  /*
+   * The number the model is worse at, printed bigger. Emphasis by size, not by colour: coral
+   * would read as an error state, and this is not an error - it is the honest figure, and the
+   * reason to believe the rest of the page.
+   */
+  .gap-num.gap-worse { color: var(--ink); }
+  .gap-num.gap-worse b { font-size: clamp(50px, 6.6vw, 82px); }
+  .gap-worse-of { color: var(--ink); font-weight: 600; }
+  .gap-say { margin: 16px 0 0; font-size: 14px; line-height: 1.5; color: var(--dim); max-width: 60ch; }
 
   .scroll-hint {
     position: absolute; left: 50%; bottom: 20px; z-index: 1; transform: translateX(-50%);
@@ -321,7 +389,21 @@
 
   /* ------------------------------------------------------------- cards */
 
-  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-top: 44px; }
+  /*
+   * Two columns, fixed, because every `.split` on this page holds exactly four cards.
+   *
+   * It was `repeat(auto-fit, minmax(320px, 1fr))`, which at 1366 and 1440 resolves to **three**
+   * columns - so all three sections that use it dropped their fourth card alone onto a second
+   * row with two thirds of the row empty. The first of them is the section immediately under the
+   * hero, so the reader's first impression of the page body was a grid that looked unfinished,
+   * and it then happened twice more, which reads as the page's grammar rather than as a slip.
+   *
+   * Fixed at two rather than auto-fit at four, because these are not four independent items:
+   * `#problem` is two Today cards over two Here cards, and a 2x2 draws that argument. Auto-fit
+   * would give four across on a wide screen and lose the pairing again.
+   */
+  .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 44px; }
+  @media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
 
   .card {
     padding: 26px 28px; border: 1px solid var(--edge); border-radius: 14px;
@@ -397,21 +479,64 @@
 
   /* ------------------------------------------------------------- the popup */
 
+  /*
+   * The sheet is a column: a fixed picture, a body that scrolls, and an action bar that stays.
+   *
+   * It used to be one `overflow: hidden` box with a 380 px image in it, and at 1366x768 - the
+   * laptop a judge brings - `max-height: min(86vh, 860px)` is 660 px against 692 to 717 px of
+   * content. So the sheet was scrollable and had no scrollbar to scroll it: measured across all
+   * fourteen cards, six put "Open this in the platform" **28 px past the bottom edge** and the
+   * other eight sat flush at 2 px. That button is the whole point of the card - it opens the app
+   * on the state the card describes - and it could not be clicked with a mouse. At 1440x900 the
+   * same content clears by 31 px and nothing is wrong, which is why it survived: the bug is in
+   * the viewport height, not in the card.
+   *
+   * Three things fix it and all three are wanted. The body scrolls, so long content is always
+   * reachable. The picture is capped against the viewport as well as in pixels, so it cannot
+   * eat a short screen. And the foot is sticky, so the primary action is on screen at every
+   * height whatever the body does.
+   */
   dialog.sheet {
     width: min(880px, calc(100vw - 40px)); max-height: min(86vh, 860px);
     padding: 0; border: 1px solid var(--edge); border-radius: 18px;
     background: var(--shelf); color: var(--body); box-shadow: var(--shadow); overflow: hidden;
   }
+  /* Only when open: a bare `display: flex` would override the UA's `display: none` and show it. */
+  dialog.sheet[open] { display: flex; flex-direction: column; }
   dialog.sheet::backdrop { background: rgba(2, 8, 14, 0.66); backdrop-filter: blur(4px); }
-  dialog.sheet img { width: 100%; max-height: 380px; object-fit: cover; display: block; background: var(--panel); }
-  .sheet-body { padding: 26px 30px 30px; }
+  dialog.sheet img { width: 100%; max-height: min(380px, 34vh); object-fit: cover; display: block; background: var(--panel); flex: none; }
+  /* `min-height: 0` is load-bearing: a flex item will not shrink below its content without it,
+     so the body would push the foot out of the box exactly as before. */
+  .sheet-body { padding: 26px 30px 0; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .sheet-body h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
   .sheet-body p { margin: 0 0 12px; font-size: 15.5px; }
+  /*
+   * The measurement behind the claim. It was a 2 px cyan stripe down the left, which is the
+   * side-tab tell - and the tell is worth avoiding here for a reason beyond taste: a stripe is
+   * a decoration that happens to be coloured, while this block is the one part of the card that
+   * is evidence rather than description. A full tinted panel with its own label says that; a
+   * stripe says "callout".
+   */
   .sheet-body .measure {
-    margin-top: 16px; padding: 12px 15px; border-left: 2px solid var(--cyan);
+    margin-top: 16px; padding: 11px 15px 12px; border: 1px solid var(--accent-edge);
+    border-radius: 12px;
     background: var(--accent-wash); font-family: var(--m); font-size: 12.5px; color: var(--ink);
   }
-  .sheet-foot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .sheet-body .measure::before {
+    content: "Measured"; display: block; margin-bottom: 5px;
+    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan);
+  }
+  /*
+   * Sticky, so the primary action is on screen at any viewport height. The negative side margins
+   * take it out to the sheet's own edges - without them the body's 30 px padding would leave a
+   * strip either side for content to scroll through behind it.
+   */
+  .sheet-foot {
+    position: sticky; bottom: 0; z-index: 1;
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin: 20px -30px 0; padding: 16px 30px 22px;
+    border-top: 1px solid var(--edge); background: var(--shelf);
+  }
   .sheet-close {
     position: absolute; top: 14px; right: 16px; z-index: 2;
     width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
@@ -433,7 +558,10 @@
     line-height: 1; letter-spacing: -0.02em;
   }
   .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-  .step p { margin: 0; font-size: 15px; }
+  /* Every other prose block on this page is capped - the lede at 68ch, the plain list at 76ch,
+     the pull quote at 62ch. The steps were the omission, and ran to 122 characters a line on a
+     1320 px shell, which is nearly double the 65-75 the rest of the page holds itself to. */
+  .step p { margin: 0; font-size: 15px; max-width: 74ch; }
 
   /* ------------------------------------------------------------- variables */
 
@@ -456,11 +584,23 @@
   .stat span { display: block; margin-top: 8px; font-family: var(--m); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
   .stat p { margin: 12px 0 0; font-size: 13.5px; color: var(--dim); }
 
+  /*
+   * The argument of the whole page, so it is set as a statement rather than as a callout.
+   *
+   * It was a 3 px amber stripe down the left of a tinted box - the side-tab tell, and the single
+   * most recognisable one. The stripe is gone; what replaces it is larger type on a quiet ground
+   * with generous room, which is what a pull quote is. The amber survives where it means
+   * something: on the word the sentence turns on.
+   */
   .pull {
-    margin-top: 40px; padding: 28px 32px; border-left: 3px solid var(--amber);
-    background: var(--amber-wash); border-radius: 0 12px 12px 0;
+    margin-top: 40px; padding: 34px 40px; border: 1px solid var(--edge);
+    background: var(--amber-wash); border-radius: 14px;
   }
-  .pull p { margin: 0; font-size: 18px; line-height: 1.52; color: var(--ink); max-width: 72ch; }
+  .pull p {
+    margin: 0; font-size: clamp(19px, 1.6vw, 23px); line-height: 1.5;
+    color: var(--ink); max-width: 62ch; text-wrap: pretty;
+  }
+  .pull em { font-style: normal; color: var(--amber); }
 
   /* ------------------------------------------------------------- gallery */
 
@@ -486,6 +626,10 @@
     padding: 44px 0 60px; border-top: 1px solid var(--edge);
     font-size: 12.5px; color: var(--faint); line-height: 1.75;
   }
+  /* Where Provenance and Requirements live once the bar drops them below 640 px, and a
+     conventional second home for them at every width. */
+  .foot-links { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; }
+  .foot-links a { font-family: var(--m); font-size: 12px; }
 
   @media (max-width: 900px) {
     section { padding: 76px 0; }
@@ -494,9 +638,30 @@
     .nav-links a[href^="#"] { display: none; }
     .hero { min-height: auto; padding: 80px 0 56px; }
   }
+
+  /*
+   * The bar was 124 px wider than a 375 px phone, and `overflow-x: hidden` on the body hid it.
+   *
+   * The 900 px rule above drops the five section anchors but not `Provenance` and `Requirements`,
+   * which are `.html` links - so brand, two page links, the toggle and Launch still came to
+   * 499 px of content in a 375 px window. Measured: `scrollWidth` 499 against `clientWidth` 375,
+   * with the Launch button the part pushed off the edge.
+   *
+   * The two page links go rather than wrap, because a sticky bar that grows to two rows eats a
+   * third of a phone screen for the whole scroll. They are added to the footer in the same change
+   * so they stay reachable - a link removed from a small screen and nowhere else is a link
+   * deleted.
+   */
+  @media (max-width: 640px) {
+    .nav-links a[href$=".html"]:not(.cta) { display: none; }
+    .brand { font-size: 13px; }
+    .cta { padding: 9px 14px; }
+  }
 </style>
 </head>
 <body>
+
+<a class="skip" href="#main">Skip to content</a>
 
 <nav>
   <div class="wrap">
@@ -516,6 +681,8 @@
   <div id="progress"></div>
 </nav>
 
+<main id="main">
+
 <header class="hero" id="top">
   <!--
     The hero is the water, full bleed, with the console taken away.
@@ -524,7 +691,7 @@
     shoots `00-hero` with every panel hidden for exactly this.
   -->
   <div class="hero-media" aria-hidden="true">
-    <img src="./images/hero.jpg" alt="">
+    <img src="./images/hero.jpg" alt="" fetchpriority="high" decoding="async" width="1600" height="900">
   </div>
   <div class="wrap">
     <div class="eyebrow">Smart India Hackathon 2026 &middot; PS 26067 &middot; MoES / INCOIS</div>
@@ -533,21 +700,50 @@
       See what the ocean model predicted and what the instruments in the water actually
       measured, in one picture, at every depth.
     </p>
-    <p class="sub">
-      A browser-native 3D visualisation of INCOIS ocean fields with Argo float profiles overlaid
-      in the same water. No install, no account, no plugin.
-    </p>
     <div class="hero-actions">
       <a class="cta big" href="./app.html">Launch the platform &rarr;</a>
       <a class="cta big ghost" href="./app.html?explore=1">Explore by question</a>
-      <a class="cta big ghost" href="#how">See how it works</a>
     </div>
-    <div class="hero-stats">
-      <div><b id="m-instruments">&hellip;</b><span>Instruments in the water</span></div>
-      <div><b id="m-fields">&hellip;</b><span>Variables</span></div>
-      <div><b id="m-depth">&hellip;</b><span>Depth range</span></div>
-      <div><b id="m-latest">&hellip;</b><span>Analysis to</span></div>
-      <div><b>0</b><span>Network calls to run</span></div>
+
+    <!--
+      The hero enacts the page's own principle instead of stating it six folds later.
+      ==============================================================================
+
+      What was here: five tiles - instruments, two residuals, depth range, external requests -
+      big mono number over a tiny tracked label. That is the hero-metric strip, which is a SaaS
+      pattern, and four of the five figures were inventory that every ocean viewer can print.
+
+      What this page actually argues, in its own pull quote seven folds down, is: *the number it
+      is least comfortable with is the one it prints largest*. So the hero prints it largest.
+      Two numbers, at display size, side by side: how far INCOIS's analysis sits from the Argo
+      floats it assimilated, and how far it sits from the nine moored buoys it did not. The
+      second is the honest one and it is the worse one, so it is the one set heaviest - which is
+      a composition no competitor can copy without also publishing their own error.
+
+      It is also the answer to the category-reflex test. You cannot guess "two temperature
+      residuals at 96 px, the unflattering one emphasised" from "3D ocean data platform".
+
+      Both figures are read live from `residuals.json` - the same file the Evidence section
+      reads - so they cannot go stale, and an unfilled one stays an ellipsis rather than becoming
+      a zero, because a zero here would read as a measurement of perfect agreement.
+    -->
+    <div class="gap">
+      <!--
+        A 2x2 grid, not two stacked blocks: the two figures share a baseline and the two captions
+        share a line, which is what makes the pair read as one comparison rather than as two
+        facts. The unit is a separate element so it can be demoted - set inside the number it
+        came out at 92 px and wrapped onto its own line, which looked like a bug.
+      -->
+      <div class="gap-pair">
+        <p class="gap-num"><b id="m-hero-gap">&hellip;</b><i>&deg;C</i></p>
+        <p class="gap-num gap-worse"><b id="m-hero-buoys">&hellip;</b><i>&deg;C</i></p>
+        <span class="gap-of">from the Argo floats it assimilated</span>
+        <span class="gap-of gap-worse-of">from the nine moored buoys it did not</span>
+      </div>
+      <p class="gap-say">
+        How far the ocean model sits from the water it is modelling. We print both numbers, and
+        the worse one bigger.
+      </p>
     </div>
   </div>
   <div class="scroll-hint" aria-hidden="true">Scroll</div>
@@ -555,7 +751,6 @@
 
 <section id="problem">
   <div class="wrap">
-    <div class="eyebrow">The gap</div>
     <h2>The data already exists. Nobody can look at it together.</h2>
     <p class="section-lede">
       INCOIS runs ocean models, and INCOIS collects real measurements from robot floats drifting
@@ -606,7 +801,6 @@
 <section id="features">
   <div class="wrap rail-head">
     <div>
-      <div class="eyebrow">What it does</div>
       <h2>Fourteen things you can do with it.</h2>
       <p class="section-lede">
         Drag the rail, or use the arrows. Open any card for the detail and the measurement
@@ -629,7 +823,7 @@
         data-body="The model is ray-marched on your GPU as a translucent volume: temperature at every depth from 5 m to 2000 m, all at once, rather than one flat map at a time. The depth axis is stretched 1800 times so the column is readable, and a ruler down the side keeps the real metres honest."
         data-measure="56 x 36 x 48 voxels, WebGL2, no install"
         data-link="./app.html?dive=1">
-        <img src="./images/volume.jpg" data-light="./images/light/volume.jpg" alt="A three-dimensional block of ocean water, warm at the surface fading to cold violet at 2000 metres.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/volume.jpg" data-light="./images/light/volume.jpg" alt="A three-dimensional block of ocean water, warm at the surface fading to cold violet at 2000 metres.">
         <div class="feature-body">
           <span class="kind">3D rendering</span>
           <h3>The water column</h3>
@@ -645,7 +839,7 @@
         data-body="Click any float and a chart appears: what that instrument measured on its way up, drawn on top of what the model said at that exact place and date. The gap between the two lines is shaded and sized as a number. This is the thing that does not exist in any other tool."
         data-measure="230 instruments compared, typical temperature gap 0.19 degC"
         data-link="./app.html?dive=1&amp;tour=1">
-        <img src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="The ocean block with one float highlighted and a panel comparing measured against modelled temperature.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="The ocean block with one float highlighted and a panel comparing measured against modelled temperature.">
         <div class="feature-body">
           <span class="kind">The contribution</span>
           <h3>Click a float, get the truth</h3>
@@ -661,7 +855,7 @@
         data-body="A few thousand dots carried by the analysed current at whatever depth you have sliced to, each with a fading trail. Drag the depth slider from 5 m to 1000 m and the whole basin changes direction. One click switches to arrows. The dots run the same integrator as the drift model, so this is the only current animation anywhere with a published error attached."
         data-measure="A dot and a drift pin land 0.002 km apart after 724 km of travel"
         data-link="./app.html?dive=1&amp;field=current_speed">
-        <img src="./images/flow.jpg" data-light="./images/light/flow.jpg" alt="Thousands of fine light trails streaming across the Indian Ocean, showing the current.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/flow.jpg" data-light="./images/light/flow.jpg" alt="Thousands of fine light trails streaming across the Indian Ocean, showing the current.">
         <div class="feature-body">
           <span class="kind">Circulation</span>
           <h3>Living flow</h3>
@@ -677,7 +871,7 @@
         data-body="The model disappears and the evidence takes its place: how many Argo casts were taken near each point. Grey is water no instrument went near, where the analysis is interpolating between distant floats. Almost nobody outside science knows a model has a value everywhere whether or not anyone measured."
         data-measure="9.9% of the block has no cast behind it at all"
         data-link="./app.html?dive=1&amp;field=coverage">
-        <img src="./images/coverage.jpg" data-light="./images/light/coverage.jpg" alt="The ocean block drawn as observation coverage in four flat colour bands.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/coverage.jpg" data-light="./images/light/coverage.jpg" alt="The ocean block drawn as observation coverage in four flat colour bands.">
         <div class="feature-body">
           <span class="kind">Evidence</span>
           <h3>Observation coverage</h3>
@@ -693,7 +887,7 @@
         data-body="Every point in the block at one temperature, drawn as a solid skin: the 20 degC line, the conventional marker for the thermocline. Watch it dome up and collapse across the season. On a variable that runs through zero it is drawn on both sides, so a departure of plus and minus half a degree is two surfaces and the panel says so."
         data-measure="Extracted live in the shader, not precomputed"
         data-link="./app.html?dive=1&amp;field=temperature&amp;iso=1">
-        <img src="./images/isosurface.jpg" data-light="./images/light/isosurface.jpg" alt="A shaded three-dimensional surface showing the undulating 20 degree Celsius isotherm.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/isosurface.jpg" data-light="./images/light/isosurface.jpg" alt="A shaded three-dimensional surface showing the undulating 20 degree Celsius isotherm.">
         <div class="feature-body">
           <span class="kind">3D rendering</span>
           <h3>Isosurfaces</h3>
@@ -709,7 +903,7 @@
         data-body="Draw a line on the map and the platform slices the model along it: depth down, distance across, the variable as colour, with every float cast within 150 km of the line on the same axes and each drawn to the depth it actually reached. This is the standard figure of physical oceanography, cut live from the model's own grid rather than from the rendered block, and it works with the network unplugged."
         data-measure="Checked value by value against the API: 1,102 values, worst gap 0.00005 degC"
         data-link="./app.html?dive=1&amp;field=temperature&amp;section=80,5,90,20">
-        <img src="./images/section.jpg" data-light="./images/light/section.jpg" alt="A vertical section through the Bay of Bengal with float casts drawn on it.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/section.jpg" data-light="./images/light/section.jpg" alt="A vertical section through the Bay of Bengal with float casts drawn on it.">
         <div class="feature-body">
           <span class="kind">Analysis</span>
           <h3>Vertical section</h3>
@@ -725,7 +919,7 @@
         data-body="Drop a pin and the analysed current carries it forward. What makes it worth having is the second half: an Argo float's track is measured drift at 1000 m, so the same maths was run from 195 real floats' own positions and the error published rather than assumed. The panel's first line says what it is not, because a real search needs wind, waves and the object's own leeway."
         data-measure="Median 38.5 km out over one Argo cycle, 87 km at the 90th percentile, 1,908 cycles"
         data-link="./app.html?dive=1&amp;field=current_speed&amp;pin=51.5,9.5">
-        <img src="./images/drift.jpg" data-light="./images/light/drift.jpg" alt="A pin dropped in the Arabian Sea with the purple track the analysed currents imply running away from it, over the moving current flow, and the panel beside it reporting the distance, the bearing and the method's own measured error.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/drift.jpg" data-light="./images/light/drift.jpg" alt="A pin dropped in the Arabian Sea with the purple track the analysed currents imply running away from it, over the moving current flow, and the panel beside it reporting the distance, the bearing and the method's own measured error.">
         <div class="feature-body">
           <span class="kind">Search and rescue</span>
           <h3>Drift, with a score</h3>
@@ -741,7 +935,7 @@
         data-body="Every body of water that departed from its own average is ringed. Click one and the panel says where it is, how unusual, why it is there, what kind of water it is, and how many instruments checked it. Then press one button and the rest of the water clears away so you can see the shape of the body itself."
         data-measure="A feature is marked only past 0.5 degC and two standard deviations"
         data-link="./app.html?dive=1&amp;field=temperature_anomaly">
-        <img src="./images/anomaly.jpg" data-light="./images/light/anomaly.jpg" alt="The ocean block as a temperature anomaly, with rings marking each departure.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/anomaly.jpg" data-light="./images/light/anomaly.jpg" alt="The ocean block as a temperature anomaly, with rings marking each departure.">
         <div class="feature-body">
           <span class="kind">Change</span>
           <h3>Anomaly features</h3>
@@ -757,7 +951,7 @@
         data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS assimilate Argo, so a float largely shows the model agreeing with itself; the nine moored buoys are the independent check, and the panel prints both rather than pooling them."
         data-measure="Typical temperature gap 0.17 degC across 221 floats against 0.75 degC across 9 buoys"
         data-link="./app.html?dive=1&amp;bias=1">
-        <img src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
         <div class="feature-body">
           <span class="kind">The contribution</span>
           <h3>The bias map</h3>
@@ -772,7 +966,7 @@
         data-body="A cyclone runs on the heat stored down the whole water column, not on a warm skin at the surface. One press swaps the variable list for the five things a cyclone forecaster asks for and arranges the scene for them: heat potential, the depth of the 26 degC line, the mixed layer, the isothermal layer and the barrier layer between them."
         data-measure="Above 60 kJ/cm2 is the usual threshold for rapid intensification"
         data-link="./app.html?dive=1&amp;preset=hazard">
-        <img src="./images/kiosk.jpg" alt="Cyclone heat potential drawn over the Indian Ocean.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/kiosk.jpg" alt="Cyclone heat potential drawn over the Indian Ocean.">
         <div class="feature-body">
           <span class="kind">Disaster management</span>
           <h3>Cyclone mode</h3>
@@ -788,7 +982,7 @@
         data-body="Two variables answer this and the difference between them is the point. One is a departure from this build's own four months, which is a seasonal swing and says so. The other is a departure from NOAA's World Ocean Atlas 1991-2020 mean for the same calendar month, which is what a forecaster means by 'warmer than usual'."
         data-measure="Across 349,692 cells: mean -0.01 degC, 95th percentile of the magnitude 2.10 degC"
         data-link="./app.html?dive=1&amp;field=temperature_normal_anomaly">
-        <img src="./images/normal.jpg" data-light="./images/light/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones in the same block.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/normal.jpg" data-light="./images/light/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones in the same block.">
         <div class="feature-body">
           <span class="kind">Climate</span>
           <h3>Against a thirty-year normal</h3>
@@ -804,7 +998,7 @@
         data-body="Drag a CF-conventions NetCDF file onto the panel and its variables appear in the selector under a tab of their own, behaving exactly like the built-in ones: same colourbar, same depth slice, same isosurface, same 3D water. A file it cannot read is refused by name, with the axis it could not find, rather than drawing something wrong."
         data-measure="Nine source adapters behind two protocols; adding one touches no renderer"
         data-link="./app.html?dive=1">
-        <img src="./images/salinity.jpg" data-light="./images/light/salinity.jpg" alt="The ocean block drawn in the salinity palette.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/salinity.jpg" data-light="./images/light/salinity.jpg" alt="The ocean block drawn in the salinity palette.">
         <div class="feature-body">
           <span class="kind">Extensibility</span>
           <h3>Bring your own data</h3>
@@ -819,7 +1013,7 @@
         data-body="A screen at a stall has nobody standing at it. Kiosk mode hides every panel, scales the type up for reading across a room, plays the questions on a loop, and resets to the start sixty seconds after the last visitor walks away, so the next one does not arrive at a broken view. The depth ruler grows a second line there: 1000 m becomes 'a sperm whale hunting'."
         data-measure="Tested by standing in front of it for 22 seconds and checking it moved on"
         data-link="./app.html?kiosk=1">
-        <img src="./images/kiosk.jpg" alt="The exhibition screen: no panels, one large caption over the water.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/kiosk.jpg" alt="The exhibition screen: no panels, one large caption over the water.">
         <div class="feature-body">
           <span class="kind">Outreach</span>
           <h3>Kiosk mode</h3>
@@ -835,7 +1029,7 @@
         data-body="The same analysis this platform draws is served to anything else that speaks the standards: OPeNDAP for a Python client, CF-1.8 NetCDF for a file, and OGC WMS for a GIS. Every one of them reads the model's own grid and never the rendering volume, because a consumer pulling a file over the wire cannot see that they have been handed a quantised picture."
         data-measure="The OPeNDAP endpoint is checked by opening it with a real pydap client"
         data-link="./requirements.html">
-        <img src="./images/globe.jpg" data-light="./images/light/globe.jpg" alt="The Indian Ocean on a globe.">
+        <img loading="lazy" decoding="async" width="1600" height="900" src="./images/globe.jpg" data-light="./images/light/globe.jpg" alt="The Indian Ocean on a globe.">
         <div class="feature-body">
           <span class="kind">Interoperability</span>
           <h3>OPeNDAP, CF and WMS</h3>
@@ -849,7 +1043,11 @@
 
 <dialog class="sheet" id="sheet" aria-label="Feature detail">
   <button class="sheet-close" type="button" id="sheet-close" aria-label="Close">✕</button>
-  <img id="sheet-image" src="" alt="">
+  <!-- The source attribute is absent rather than empty. An empty one is a real image element
+       pointing at nothing, which every static check reads as a broken placeholder; the script
+       assigns it from the card's own data attribute before the dialog is shown, so it never
+       needs to exist in the markup. -->
+  <img id="sheet-image" alt="">
   <div class="sheet-body">
     <h3 id="sheet-title"></h3>
     <p id="sheet-text"></p>
@@ -863,7 +1061,6 @@
 
 <section id="how">
   <div class="wrap">
-    <div class="eyebrow">How it works</div>
     <h2>Four steps, and nothing between you and the data.</h2>
     <p class="section-lede">
       Everything the demo needs is baked into the build, so it runs with the network cable pulled
@@ -944,7 +1141,6 @@
 
 <section id="everyone">
   <div class="wrap">
-    <div class="eyebrow">For everyone, not just forecasters</div>
     <h2>The problem statement asks for a science communication tool. So there are two doors.</h2>
     <p class="section-lede">
       It names school and college students, the general public at awareness campaigns, and
@@ -1002,7 +1198,6 @@
 
 <section id="variables">
   <div class="wrap">
-    <div class="eyebrow">Fifteen variables</div>
     <h2>INCOIS publish two of these. The rest are worked out here.</h2>
     <p class="section-lede">
       Which is the problem statement's "additional model variables with minimal code change"
@@ -1032,7 +1227,6 @@
 
 <section id="evidence">
   <div class="wrap">
-    <div class="eyebrow">Evidence</div>
     <h2>Every number on this page is read from the build it describes.</h2>
     <p class="section-lede">
       Not typed in. The figures below are fetched from the same files the platform draws, so this
@@ -1073,8 +1267,8 @@
     <div class="pull">
       <p>
         A model has a value everywhere whether or not anyone measured there. This platform draws
-        that distinction rather than hiding it, and the number it is least comfortable with is
-        the one it prints largest.
+        that distinction rather than hiding it, and <em>the number it is least comfortable with
+        is the one it prints largest.</em>
       </p>
     </div>
 
@@ -1089,7 +1283,6 @@
 
 <section id="built">
   <div class="wrap">
-    <div class="eyebrow">How it is built</div>
     <h2>Boring technology, used carefully.</h2>
     <div class="split">
       <div class="card">
@@ -1138,6 +1331,8 @@
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     Argo data are collected and made freely available by the International Argo Program and the
@@ -1148,7 +1343,15 @@
     Current velocity is E.U. Copernicus Marine Service Information. Climatology is NOAA World
     Ocean Atlas 2023.<br>
     Colour scales are cmocean (Thyng et al., 2016). Coastlines are Natural Earth.<br>
-    <a href="https://github.com/RAK2315/samudra-sih26">github.com/RAK2315/samudra-sih26</a>
+    <!-- Moved out of the hero, where it was taking one of five tiles to say something that is
+         provenance rather than a claim. It is still read live from the manifest. -->
+    Analysis to <span id="m-latest">&hellip;</span>.<br>
+    <nav class="foot-links" aria-label="Secondary">
+      <a href="./app.html">Launch the platform</a>
+      <a href="./provenance.html">Data provenance</a>
+      <a href="./requirements.html">Requirement coverage</a>
+      <a href="https://github.com/RAK2315/samudra-sih26">github.com/RAK2315/samudra-sih26</a>
+    </nav>
   </div>
 </footer>
 
@@ -1189,7 +1392,8 @@
         set("m-instruments", String(kinds ? kinds.floats + kinds.moorings : m.floatCount));
         // The Fields a visitor can actually select, counted rather than typed. An uploaded
         // file's variables are not in the bake, so this is the built-in list.
-        if (m.fields) set("m-fields", String(m.fields.length));
+        // No `m-fields` any more: the variable count left the hero when the residual pair took
+        // its tile, and the variables have a section of their own with a chip for each.
         var volume = m.volume || {};
         if (volume.surfaceMetres != null && volume.floorMetres != null) {
           set("m-depth", volume.surfaceMetres + "-" + volume.floorMetres + " m");
@@ -1214,6 +1418,12 @@
         set("m-gap", fixed(block.summary.meanAbsBias, 2));
         var buoys = block.byKind && block.byKind.mooring;
         if (buoys) set("m-buoys", fixed(buoys.meanAbsBias, 2));
+        // The same two figures in the hero, with their unit, because a tile there has no column
+        // heading to carry one. They stay an ellipsis if the fetch fails, for the reason the
+        // rest of this block does: a figure that cannot be filled truthfully is better absent
+        // than approximate, and a zero would read as a measurement.
+        set("m-hero-gap", fixed(block.summary.meanAbsBias, 2));
+        if (buoys) set("m-hero-buoys", fixed(buoys.meanAbsBias, 2));
       })
       .catch(function () {});
   })();
@@ -1233,14 +1443,14 @@
   (function () {
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var targets = document.querySelectorAll(
-      "section, .card, .stat, .step, figure.shot, .pull, .chip, .hero-stats > div"
+      "section, .card, .stat, .step, figure.shot, .pull, .chip, .gap-num"
     );
 
     if (!reduced && "IntersectionObserver" in window) {
       targets.forEach(function (el) { el.classList.add("reveal"); });
 
       // Stagger children within a group so a grid arrives as a sequence, not a slab.
-      document.querySelectorAll(".split, .stats, .gallery, .steps, .chips, .hero-stats").forEach(function (group) {
+      document.querySelectorAll(".split, .stats, .gallery, .steps, .chips, .gap-pair").forEach(function (group) {
         Array.prototype.forEach.call(group.children, function (child, i) {
           child.style.setProperty("--delay", Math.min(i * 0.06, 0.4) + "s");
         });
@@ -1285,7 +1495,8 @@
       var paint = function () {
         var height = document.documentElement.scrollHeight - window.innerHeight;
         var at = height > 0 ? window.scrollY / height : 0;
-        bar.style.width = Math.max(0, Math.min(1, at)) * 100 + "%";
+        // scaleX, not width: this runs on every scroll event, and width is a layout property.
+        bar.style.transform = "scaleX(" + Math.max(0, Math.min(1, at)) + ")";
       };
       window.addEventListener("scroll", paint, { passive: true });
       window.addEventListener("resize", paint);
@@ -1372,7 +1583,7 @@
    * The theme, and the pictures that go with it.
    *
    * The toggle swaps custom properties on <html>, which repaints every colour on the page. It
-   * could not repaint the *screenshots*, because an `<img src>` is not a CSS property - so a
+   * could not repaint the *screenshots*, because an image's source is not a CSS property - so a
    * light page carried a dozen dark screenshots that read as holes in it. `<picture>` with a
    * `prefers-color-scheme` media query would follow the operating system rather than this
    * button, which is the wrong master: the choice here is the site's own and is shared with the

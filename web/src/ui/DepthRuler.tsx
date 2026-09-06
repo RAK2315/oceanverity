@@ -58,11 +58,14 @@ const KIOSK_LEFT = 300;
 const CAPTION_DROP = 20;
 /** Further, on the exhibition screen, where the deepest figure carries a landmark under it. */
 const CAPTION_DROP_KIOSK = 44;
+/** How far clear of the source credits the caption stops, once it has to stop. */
+const CAPTION_CLEAR = 10;
 
 export function DepthRuler({ scene }: { scene: OceanScene | null }) {
   const { manifest, exaggeration, morph, kiosk } = useStore();
   const [ticks, setTicks] = useState<Tick[]>([]);
   const [caption, setCaption] = useState<{ x: number; y: number } | null>(null);
+  const note = useRef<HTMLParagraphElement | null>(null);
   const frame = useRef(0);
 
   const active = morph > 0.55 && !!scene && !!manifest;
@@ -98,7 +101,37 @@ export function DepthRuler({ scene }: { scene: OceanScene | null }) {
       const visible = next.filter((t) => t.visible);
       const foot = visible[visible.length - 1];
       const drop = kiosk ? CAPTION_DROP_KIOSK : CAPTION_DROP;
-      setCaption(foot ? { x: clear - 58, y: foot.y + drop } : null);
+      /*
+       * The caption follows the block, and the block does not know the credits are there.
+       *
+       * `foot.y` is the projection of the deepest figure, so on a short window the column's foot
+       * lands low and the caption lands on the source attribution. Measured across four
+       * viewports: clear at 1920x1080, 1,384 px2 at 1600x900, and 3,602 px2 at both 1366x768 and
+       * 1280x720 - which is 257 x 14, the caption's whole height inside the credits' band.
+       * Attribution for Argo, INCOIS, Copernicus and NOAA is a licence obligation, so it is the
+       * one thing on the canvas that may not be sat on.
+       *
+       * The credits' top edge is measured rather than assumed, for the reason the panel above is:
+       * they wrap, so their height changes with the window and with how many sources the bake
+       * holds. The caption's own height is measured too - it is one line at a fixed size, but
+       * reading it costs nothing and a written-down 14 would be wrong the moment the type moves.
+       */
+      const tall = note.current?.getBoundingClientRect().height ?? 0;
+      // The foot of the frame is two bands now - the time axis over the credits - so the caption
+      // has to clear whichever of them starts higher, not just the credits. Clamping to the
+      // credits alone put it behind the axis, where it was invisible rather than overlapping,
+      // which is the same bug wearing a hat.
+      let top = Number.POSITIVE_INFINITY;
+      // The map key is in this list because the bays are anchored to the glass now, so the key's
+      // step-clear puts it in the same column the ruler sits in - measured, 1,767 px2 of overlap
+      // at 1280x720. It is draggable, so where it is cannot be assumed; it is measured like the
+      // rest.
+      for (const sel of [".timeline", ".attribution", ".mapkey"]) {
+        const band = document.querySelector(sel)?.getBoundingClientRect();
+        if (band && band.height > 0) top = Math.min(top, band.top);
+      }
+      const floor = Number.isFinite(top) ? top - CAPTION_CLEAR - tall : Number.POSITIVE_INFINITY;
+      setCaption(foot ? { x: clear - 58, y: Math.min(foot.y + drop, floor) } : null);
 
       frame.current = requestAnimationFrame(update);
     };
@@ -111,7 +144,11 @@ export function DepthRuler({ scene }: { scene: OceanScene | null }) {
   return (
     <div className="ruler" aria-hidden="true">
       {caption && (
-        <p className="ruler-note" style={{ transform: `translate(${caption.x}px, ${caption.y}px)` }}>
+        <p
+          ref={note}
+          className="ruler-note"
+          style={{ transform: `translate(${caption.x}px, ${caption.y}px)` }}
+        >
           Depth axis is stretched, not linear
         </p>
       )}
