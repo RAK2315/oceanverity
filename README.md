@@ -122,9 +122,59 @@ hand.
 **It is a fork, not a pipeline.** That is the one thing worth understanding, and it exists to
 enforce the rule above.
 
-**Eight providers → one adapter seam → one Grid → four ways out.**
+**Nine providers → one adapter seam → one Grid → four ways out.** The fork is at step 3, and
+it is the whole of the rule above: the Grid keeps the numbers, the Volume gets the pixels, and
+nothing joins them back up.
 
-### 1 · Providers, all public, each tested and dated
+```
+  ┌─ 1 · NINE PROVIDERS - public, dated, re-fetchable ────────────────────┐
+  │ INCOIS ERDDAP · VAM           Argo GDAC · Ifremer                     │
+  │ INCOIS ERDDAP · McCreary      Argo BGC · chlorophyll                  │
+  │ NOAA OSMC · moored buoys      Copernicus Marine · uo, vo              │
+  │ EGO glider GDAC               World Ocean Atlas 2023                  │
+  │ your own NetCDF file, dropped on the page                             │
+  └──────────────────────────────┬────────────────────────────────────────┘
+                                 │  NetCDF · CSV · FTP index
+                                 │  subset at the server, not after download
+                                 ▼
+  ┌─ 2 · ONE ADAPTER SEAM - samudra/sources/base.py ──────────────────────┐
+  │ GridSource / ProfileSource · nine classes                             │
+  │ the only code in the project that has heard of ERDDAP                 │
+  │ quality control per channel · land masked, never filled               │
+  └──────────────────────────────┬────────────────────────────────────────┘
+                                 │  Grid and Profile objects,
+                                 │  on the provider's own axes
+                                 ▼
+  ╔═ 3 · THE GRID - the scientific truth ═════════════════════════════════╗
+  ║ float64 · land is NaN · 24 levels · 56 x 36 · 1 degree                ║
+  ║ every collocation, tooltip, section, API response and served          ║
+  ║ byte is read from here                                                ║
+  ╚═════════════╤══════════════════════════════╤══════════════════════════╝
+                │                              │
+                │ numbers,                     │ the BAKE: quantise to
+                │ unchanged                    │ 4 bytes, warp the depth axis
+                │                              ▼
+                │                ┌─ ─ ─ ─ ─ ─ ─  THE VOLUME ─ ─ ─ ─ ─ ─ ─ ┐
+                │                │ 56 x 36 x 48 · 1 byte a value          │
+                │                │ value · coverage · gradient · spare    │
+                │                │ a picture for the GPU, and a dead      │
+                │                │ end for numbers                        │
+                │                └─ ─ ─ ─ ─ ─ ─┬─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+                │                              │  pixels only,
+                │                              │  never a reading
+                ▼                              ▼
+  ┌─ 4 · FOUR WAYS OUT ───────────────────────────────────────────────────┐
+  │ REST API         Grid only   FastAPI · 15 routes                      │
+  │ Open standards   Grid only   OPeNDAP · CF-1.8 · WMS 1.3.0             │
+  │ Static bake      both        71.1 MB committed · 0 network calls      │
+  │ Browser          both        reads the bake, never the API            │
+  └───────────────────────────────────────────────────────────────────────┘
+```
+
+### 1 · The providers, in full
+
+Each one public, each tested and dated in
+[`docs/plan/00-data-sources-verified.md`](docs/plan/00-data-sources-verified.md).
 
 | Provider | What it gives us |
 | --- | --- |
@@ -138,46 +188,28 @@ enforce the rule above.
 | **World Ocean Atlas 2023** · NOAA NCEI | The 1991-2020 climatological normal |
 | **Your own NetCDF file**, dropped on the page | The ninth adapter, `POST /api/netcdf` |
 
-### 2 · The adapter seam · Python
+### 2 · What the seam actually is
 
-```
-   NetCDF · CSV · FTP index          subset at the SERVER, not after download
-              │
-              ▼
-   ┌──────────────────────────────────────────────────┐
-   │  GridSource / ProfileSource                      │   samudra/sources/base.py
-   │  ─────────────────────────────                   │
-   │  one class per provider                          │   9 classes - the only code
-   │  column layout is data, not code                 │   in the project that has
-   │  quality control per channel                     │   ever heard of ERDDAP
-   │  land masked, never filled                       │
-   └──────────────────────────────────────────────────┘
-              │
-              ▼   Grid and Profile objects, on the provider's own axes
-```
+[`samudra/sources/base.py`](pipeline/samudra/sources/base.py) declares `GridSource` and
+`ProfileSource` and nothing else. Nine classes implement them, and **they are the only code in
+the project that has ever heard of ERDDAP**, or of a column layout, or of an FTP index. Each
+subsets *at the server*, so one region and one window come down rather than a global archive.
 
-### 3 · Two representations, and only one of them is the truth
+The claim that this is a seam rather than a wish was tested by the September 2026 round, which
+added **four providers** - INCOIS's second analysis, Copernicus Marine, the EGO glider archive
+and the World Ocean Atlas - and **touched no renderer, no endpoint and no UI file.**
 
-```
-   ┌════════════════════════════════════════════════════════════┐
-   ║  THE GRID                                                  ║
-   ║  float64 · land is NaN · 24 levels · 56 × 36 · 1°          ║
-   ║                                                            ║
-   ║  The scientific truth. Every collocation, tooltip,         ║
-   ║  section, API response and served byte is read from here.  ║
-   └════════════════════════════════════════════════════════════┘
-              │
-              │  the BAKE: quantise to 4 bytes a voxel, warp the depth axis
-              ▼
-   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
-      THE VOLUME
-   │  56 × 36 × 48 · 1 byte a value                            │
-      value · coverage · gradient · spare
-   │                                                           │
-      A picture for the GPU, and a dead end for numbers:
-   │  nothing reads a value back out of it.                    │
-   └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
-```
+### 3 · Why there are two representations, and only one is the truth
+
+The **Grid** is `time × depth × lat × lon` in float64 on INCOIS's own 1° mesh, with land left as
+`NaN`. It is what every collocation, tooltip, vertical section, API response and served byte is
+read from.
+
+The **Volume** is what a GPU can sample: the same field resampled onto an evenly spaced lattice,
+quantised to one byte a value, with the depth axis warped so the upper ocean gets more of it,
+and back-filled across land so the ray marcher does not tear at the coast. Every one of those
+four steps is a lie a shader needs and a scientist must never be told. So the Volume is a **dead
+end**: it is written by the bake, read by the shader, and nothing reads a value back out of it.
 
 ### 4 · Four ways out
 
@@ -185,8 +217,8 @@ enforce the rule above.
 | --- | --- | --- |
 | **Static bake** | Grid **and** Volume | 71.1 MB committed · **0 network calls** |
 | **Browser** | Grid **and** Volume | Three.js · WebGL2 · GLSL ES 3.00 |
-| **REST API** | **Grid only** | FastAPI · 21 routes |
-| **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 |
+| **REST API** | **Grid only** | FastAPI · 15 routes |
+| **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 · 5 endpoints |
 
 > ### The rule the shape is drawn to show
 >
@@ -214,7 +246,8 @@ works with no server behind it at all.
 
 ### The data path
 
-1. **Provider** - eight public endpoints, each tested and dated in
+1. **Provider** - nine adapters, eight of them public endpoints and the ninth a file a
+   visitor drops on the page. Each tested and dated in
    [`docs/plan/00-data-sources-verified.md`](docs/plan/00-data-sources-verified.md).
 2. **Adapter** - one class per provider, subsetting *at the server* so we pull one region and one
    window. Argo's own QC flags are read per channel, then a regional salinity floor catches what

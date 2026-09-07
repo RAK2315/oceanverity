@@ -7,9 +7,9 @@ Plain text is what you say out loud. Read it as written.
 > **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
 > control, so you never have to guess what to click.
 
-**Length: 841 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
-40 by trading eight claims for more careful ones. That is **5:15 at a brisk 160 words a minute** or
-**5:36 at a comfortable 150**, plus the marked silences. Expect **about 5:45 on the recording**,
+**Length: 850 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
+49 by trading eleven claims for more careful ones. That is **5:19 at a brisk 160 words a minute**
+or **5:40 at a comfortable 150**, plus the marked silences. Expect **about 5:50 on the recording**,
 which leaves room to slow down on the numbers.
 
 **Numbers are written the way they are said**, because this page is read aloud: "twenty-six
@@ -49,8 +49,8 @@ the name of the international float programme, not an acronym.
 India runs a computer model of the ocean around it. It feeds cyclone warnings, search and rescue,
 and the advisories that tell fishermen where to go.
 
-India also has two hundred and twenty-eight robot floats drifting in that same water, taking real
-measurements, right now.
+There are also two hundred and twenty-eight Argo floats represented here, collecting real
+measurements from that same water.
 
 The gap was not a lack of data. It was the lack of one interactive, depth-resolved view that put
 the model and measurements together.
@@ -116,7 +116,7 @@ But this is the moment that matters. Those white markers are real instruments, d
 actually were on this date. Click one.
 
 **The solid line is what the instrument measured. The dashed line is what the model predicted at
-the same location and time, evaluated at the observation depths.** The shaded band shows their
+the same location and time, evaluated at the observation depths.** The band between them is the
 disagreement.
 
 > **On screen ·** Read the two figures off the panel as they appear - the depths compared and the
@@ -223,7 +223,7 @@ It hands its data back out in the standard formats ocean institutes already use,
 what they have instead of replacing it. And you can **drag your own data file onto the page** and
 see it in the same viewer.
 
-Adding a new data source is one small piece of code. **That is not a promise. That is the
+Adding a new data source can be one adapter class. **That is not a promise. That is the
 architecture we already built.**
 
 ---
