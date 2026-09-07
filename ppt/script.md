@@ -7,10 +7,16 @@ Plain text is what you say out loud. Read it as written.
 > **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
 > control, so you never have to guess what to click.
 
-**Length: 820 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
-19 by trading four claims for more careful ones. That is **5:08 at a brisk 160 words a minute** or
-**5:28 at a comfortable 150**, plus the marked silences. Expect **about 5:40 on the recording**,
+**Length: 834 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
+33 by trading seven claims for more careful ones. That is **5:13 at a brisk 160 words a minute** or
+**5:34 at a comfortable 150**, plus the marked silences. Expect **about 5:45 on the recording**,
 which leaves room to slow down on the numbers.
+
+**Numbers are written the way they are said**, because this page is read aloud: "twenty-six
+degrees", not "26 degrees". The one figure that resists it is the Argo floats' 0.17 degC, which
+cannot be spelled out without either a decimal or a rounding that makes the sentence false - two
+tenths is the all-instrument figure and gives 3.9x, not 4.5 - so that sentence names the floats
+instead of restating the number.
 
 **The audience is not technical.** A judge watching this may never have opened an ocean model.
 Nothing here needs a science background to follow, and no sentence uses a term the picture on
@@ -134,9 +140,9 @@ warmth, but heat stored down the whole column.
 
 And this is the one that needs three dimensions.
 
-That surface shows the depth of the 26-degree isotherm - a commonly used indicator of how deep the
-warm water extends. **Where it bulges downward, the warm layer is deeper**, so a passing storm
-cannot churn up cold water to weaken itself.
+That surface shows the depth of the twenty-six degree isotherm - a commonly used indicator of how
+deep the warm water extends. **Where it bulges downward, the warm layer is deeper**, so a passing
+storm cannot churn up cold water to weaken itself.
 
 Look at the central Bay of Bengal. **Here, the warm layer extends deeper** - meaning greater ocean
 heat is available to a passing storm.
@@ -163,13 +169,14 @@ Switch to circulation and the ocean starts moving. Those are the real analysed c
 
 Now the honest part.
 
-Across **230 instruments**, the typical gap is **about two tenths of a degree**.
+Across **two hundred and thirty instruments**, the typical gap is **about two tenths of a
+degree**.
 
 But the model assimilates Argo observations, so agreement with those floats is not a fully
 independent test.
 
 Against the **nine moored buoys it did not use**, the gap is **three quarters of a degree** - about
-**four and a half times** the 0.17-degree gap seen across the Argo floats.
+**four and a half times** what the Argo floats show.
 
 **We could have shown one flattering average. We show the number that makes us look worse, because
 that is the one a forecaster actually needs.**
@@ -182,16 +189,18 @@ that is the one a forecaster actually needs.**
 > there is no observational data at all.
 
 Same principle here. This view does nothing except show **where nobody has measured anything** -
-almost ten percent of this ocean. Most tools quietly colour that in. **We draw the gap as a gap.**
+nine point nine percent of this block has no observational coverage behind it. Most tools quietly
+colour that in. **We draw the gap as a gap.**
 
-> **On screen ·** Back to the platform. Turn the wifi off on camera if you can, then keep clicking
-> float markers. Everything continues to work.
+> **On screen ·** Back to the platform. Once it has loaded, turn the Wi-Fi off on camera if you
+> can, then keep clicking float markers. The core demo continues to work because the required
+> dataset is already local.
 
 Every figure on this screen can be traced to the public dataset it came from, with the date we
 tested it. Nothing is typed in by hand.
 
-And **this makes no network calls at all.** Watch. The whole dataset ships inside the page. **A
-dead venue network cannot kill this demo.**
+Once the platform is loaded, **the demo makes zero external network calls.** The required demo
+dataset is shipped with the build, so **a dead venue network cannot kill the demonstration.**
 
 ---
 
