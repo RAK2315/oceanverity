@@ -3101,6 +3101,16 @@ input[type="range"]::-moz-range-thumb {
  * colourbar by seeing it, and four gradients squeezed into a 2-column grid are four smudges.
  * The label is there for the reader who cannot separate two of the ramps by hue, which is the
  * whole reason `gray` is on the list at all.
+ *
+ * Folded, because that list cost 132 px of a 635 px bay and made Colourbar the one group too
+ * tall to open on its own - 333 px against 258 of room. The 2-column grid was measured against
+ * the fold and lost: 12 px back against 110. Counting rows says it should be 49, but a 144 px
+ * cell leaves the widest label about 83 px of the 173 it needs, so all five wrap and three
+ * double-height rows are barely shorter than five single ones. The paragraph above was right
+ * about the grid for the wrong reason - not four smudges, four wrapped labels.
+ *
+ * What is folded is the *choice*; the colourbar on screen is still named and drawn on the row
+ * that does the folding, so nothing is hidden that was reporting.
  */
 .palette-choice {
   display: flex;
@@ -3109,7 +3119,49 @@ input[type="range"]::-moz-range-thumb {
   margin: 10px 0 2px;
 }
 
-.palette-choice button {
+/* The folded row. Same shape as a list entry so the list looks like it grew out of it. */
+.palette-current {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 4px;
+  background: none;
+  color: var(--on-surface);
+  font-family: var(--sans);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+
+.palette-current .disclosure {
+  margin-left: auto;
+}
+
+.palette-current:hover {
+  background: var(--surface-mid);
+}
+
+.palette-current:hover .disclosure {
+  border-right-color: var(--on-surface);
+  border-bottom-color: var(--on-surface);
+}
+
+.palette-current.open .disclosure {
+  transform: rotate(45deg);
+}
+
+.palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.palette-list button {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -3126,12 +3178,12 @@ input[type="range"]::-moz-range-thumb {
     border-color 0.16s var(--ease);
 }
 
-.palette-choice button:hover {
+.palette-list button:hover {
   background: var(--surface-mid);
   color: var(--on-surface);
 }
 
-.palette-choice button.on {
+.palette-list button.on {
   border-color: var(--primary-edge);
   background: var(--primary-wash);
   color: var(--on-surface);

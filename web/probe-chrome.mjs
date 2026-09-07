@@ -47,6 +47,8 @@ const ROLES = [
   ".generated",
   ".mode-switch",
   ".field-tabs button",
+  ".palette-current",
+  ".palette-list button:not(.on)",
   ".profile-facts",
   ".pill",
   ".why > summary",
@@ -87,6 +89,8 @@ for (const theme of ["dark", "light"]) {
     store.set("selectedFloatId", store.floats[0].id);
     store.set("touched", "");
     store.set("openGroups", { ...store.openGroups, palette: true, field: true });
+    // The alternates fold, so their text is not in the DOM until it is unfolded.
+    store.set("paletteAlternates", true);
   });
   await page.waitForTimeout(1500);
   await page

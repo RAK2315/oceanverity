@@ -158,25 +158,71 @@ The ranking is the one this file has always used:
       session changed anything, that pair was already **641 px against a 616 px bay, 25 over**.
 
       Then the colourbar switcher landed, and it **cost the Colourbar group 139 px** - five or six
-      palette buttons in a vertical list, each carrying a 46 px swatch. Re-measured at 1366x768:
+      palette buttons in a vertical list, each carrying a 46 px swatch.
 
-      | Panel state | Content | Against a 636 px bay |
-      | --- | --- | --- |
-      | all groups closed | 377 px | fits |
-      | Variable alone | 477 px | fits |
-      | Variable + Colourbar | **780 px** | over by 144 |
-      | Colourbar + Rendering | **806 px** | over by 170 |
-      | bias | 918 px | over by 282 |
-      | everything open | 2,115 px | over by 1,479 |
+      **Paid for on 2026-09-07 by folding the alternates. 108 of the 139 are back.** The bay is
+      **635 px**, measured as the panel's own `clientHeight` at its cap; the 636 both documents
+      carried was arithmetic (615 plus the 20 the credits fold returned) and never a reading.
+      `max-height` cannot be read instead - it is a `calc()` and `getComputedStyle` returns it
+      unresolved, which is a `NaN` that formats as a number. Measured at 1366x768, **in both
+      themes, which agree to the pixel**:
 
-      **This is a regression with a name on it, not a mystery.** The switcher is a control the
-      user asked for twice and it is not going away, but it has not been paid for out of the bay.
-      A two-column grid of swatches, or putting the alternates behind their own fold, would get
-      most of the 139 px back; neither has been tried. Nothing here needs a readout removed.
+      | Panel state | Before | After | Against a 635 px bay |
+      | --- | --- | --- | --- |
+      | all groups closed | 377 px | 377 px | fits |
+      | **Colourbar alone** | **680 px** | **572 px** | was 45 over, now fits |
+      | Variable alone | 477 px | 477 px | fits |
+      | Variable + Colourbar | 780 px | **672 px** | over by 37 |
+      | Colourbar + Rendering | 806 px | **698 px** | over by 63 |
+      | bias | 918 px | 918 px | over by 283 |
+      | everything open | 2,115 px | 2,007 px | over by 1,372 |
+
+      **The sharper statement of the bug was never "the Variable pair is 144 over".** It was that
+      the Colourbar group had become the one group in the panel too tall to open **on its own** -
+      333 px against the 258 px left once the 377 px floor of group headers is paid. It opens
+      alone with 63 px to spare now.
+
+      What went in: the five labelled swatches (132 px) fold behind one 24 px row that carries the
+      chip and the name of the colourbar actually on screen. That row **reports while it is shut**,
+      which is the same rule that lets a collapsed group keep its readout - a bare "more"
+      affordance would have hidden the one line in the group that says what is drawn.
+      `store.paletteAlternates` holds the fold, and `selectField` deliberately leaves it alone
+      where it resets `paletteOverride`: this is a panel preference, not a data choice.
+
+      **The two-column grid lost on measurement, and by far more than arithmetic predicted.**
+      Five rows become three, so counting rows says it halves 132 px to about 83 - 49 px back.
+      Measured by forcing `grid-template-columns: 1fr 1fr` onto the real list: the list goes
+      132 px to **120**, which is **12 px**, against the fold's 110. The cell drops from 291 px
+      wide to 144, the widest label needs 173 px of text and is left about 83, and **all five
+      labels wrap to two lines** - three double-height rows are barely shorter than five single
+      ones. `styles.css` had already argued against the grid and was right for a different reason
+      than it gave: not four smudges, four wrapped labels. **Counting rows is not measuring
+      height**, which is the same mistake as calling Rendering 62 px over below.
+
+      **`probe-palette.mjs` and `probe-chrome.mjs` had to move with it, and one of them could
+      have passed vacuously.** The probe read `.palette-choice button`, which after the change
+      matches only the folded row - so the fifteen-Field offer check would have read one button
+      per Field and reported it as correct. It reads `.palette-list button` now and unfolds first,
+      which is exactly the lesson `.colourbar` and the shut Colourbar group taught a round ago,
+      one level further in. It also gained an assertion that the folded row names the colourbar
+      actually drawn, and **that assertion was made to fail on purpose**: pinning the row's label
+      to a constant turned 13 of the 15 Fields red with the drawn palette printed beside the
+      claimed one. `probe-chrome.mjs` gained `.palette-current` and `.palette-list button` as text
+      roles - neither the old chooser nor the new one had ever been contrast-checked. Measured:
+      16.91:1 and 9.12:1, both themes.
+
+      **What is left is older than the switcher and is structural.** The floor is 377 px of group
+      headers before a control is drawn, leaving 258 px. Opened one at a time beside Variable and
+      **measured rather than added up** - the arithmetic got Rendering wrong, calling it 62 px over
+      where the panel fits it with 32 to spare - **7 of the 10 fit and 3 do not**: Colourbar by 37,
+      Drift by 73, the bias map by 383. Closing the last 37 needs a control removed or the 30 px
+      group header cut to 26, which is a design token and a click target at the WCAG 2.2 floor.
+      Neither was done unilaterally. **Narrowed, not closed.**
 
       The other lesson is the one this file exists for: **a fold figure written down goes stale
       silently.** Two documents carried "615 - exactly the height available" through a round in
-      which it was already 25 px wrong, because a number in prose has nothing that can fail.
+      which it was already 25 px wrong, and then carried a 636 that was arithmetic rather than a
+      reading, because a number in prose has nothing that can fail.
 
 ---
 
@@ -271,8 +317,16 @@ cd web && npm run typecheck && npx vite build
 cd web && for p in landing guide tour controls hazard bias particles isolate                    outreach requirements drift section upload; do node probe-$p.mjs; done
 ```
 
-`probe-section` and `probe-upload` need the API; the other eleven do not. **All thirteen were
-green on 2026-09-04**, along with 377 tests, the typecheck and the build.
+`probe-section` and `probe-upload` need the API; the other thirteen do not. **All fifteen were
+green on 2026-09-07**, along with 377 tests, the typecheck and the build.
+
+**Run the API-needing two separately, and stop the API afterwards.** `probe-outreach` failed on
+`page.goto("app.html?kiosk=1")` with a 60 s navigation timeout, twice in a row, while `uvicorn`
+was up on 8000 - and **failed identically on a clean `HEAD` build**, which is how it was ruled out
+as a regression rather than argued about. With the API stopped it passes first time. The server
+holds the native Grids in memory and is competing with swiftshader for exactly the re-navigation
+that rebuilds the whole scene, which is the shape of item 101. So the contention warning is not
+only probe-against-probe: **a probe that does not need the API loses to one that is running.**
 
 **And all thirteen can now go red.** Four of them - `requirements`, `controls`, `hazard`,
 `isolate` - used to collect what they measured, print it and exit 0 regardless, which is why

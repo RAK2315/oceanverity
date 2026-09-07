@@ -183,7 +183,15 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       enter: () => {
         calm();
         store.getState().selectField("temperature");
-        store.setState({ windowMin: 0.55, windowMax: 0.8, touched: "window" });
+        // Unfold the alternates too. They are shut by default because they were 132 px of a
+        // 635 px bay, and a control nobody is ever shown is the cost of folding one - so the
+        // tour is where it gets shown, once.
+        store.setState({
+          windowMin: 0.55,
+          windowMax: 0.8,
+          touched: "window",
+          paletteAlternates: true,
+        });
         open("palette");
       },
     },

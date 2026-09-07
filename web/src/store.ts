@@ -243,6 +243,17 @@ interface State {
    * `selectField` resets it, for the same reason it resets `emphasis` and `isoEnabled`.
    */
   paletteOverride: string | null;
+
+  /**
+   * Whether the list of alternate colourbars is unfolded.
+   *
+   * Measured at 1366x768: the five labelled swatches are 132 px of a 635 px bay, which took the
+   * Colourbar group from 201 px to 333 and made it the one group that does not fit on its own.
+   * Folded, the group reports the colourbar on screen in a 24 px row and is 225. It is a
+   * panel preference and not a data choice, so `selectField` leaves it alone where it resets
+   * `paletteOverride`.
+   */
+  paletteAlternates: boolean;
   opacity: number;
 
   /**
@@ -499,6 +510,7 @@ export const useStore = create<State>((setState, getState) => ({
   windowMax: 1,
   scale: "linear",
   paletteOverride: null,
+  paletteAlternates: false,
   opacity: DEFAULT_OPACITY,
   currentStyle: "particles",
 

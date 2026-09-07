@@ -7,9 +7,10 @@ Plain text is what you say out loud. Read it as written.
 > **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
 > control, so you never have to guess what to click.
 
-**Length: 801 spoken words**, counted from this file. That is **5:00 at a brisk 160 words a
-minute** or **5:20 at a comfortable 150**, plus the marked silences. Expect **about 5:30 on the
-recording**, which leaves room to slow down on the numbers.
+**Length: 820 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
+19 by trading four claims for more careful ones. That is **5:08 at a brisk 160 words a minute** or
+**5:28 at a comfortable 150**, plus the marked silences. Expect **about 5:40 on the recording**,
+which leaves room to slow down on the numbers.
 
 **The audience is not technical.** A judge watching this may never have opened an ocean model.
 Nothing here needs a science background to follow, and no sentence uses a term the picture on
@@ -45,7 +46,8 @@ and the advisories that tell fishermen where to go.
 India also has two hundred and twenty-eight robot floats drifting in that same water, taking real
 measurements, right now.
 
-Until this project, there was no way to look at the two of them together.
+The gap was not a lack of data. It was the lack of one interactive, depth-resolved view that put
+the model and measurements together.
 
 > **On screen ·** Hold one more beat on the rotating water before cutting away.
 
@@ -56,13 +58,14 @@ Until this project, there was no way to look at the two of them together.
 > **On screen ·** Cut to the opening globe view. Reload `app.html` and do **not** press "Dive into
 > the water". You will see the sphere with the Indian Ocean region coloured on it.
 
-This is roughly what a forecaster has today. A flat map of the sea surface. One variable, one day.
+This is closer to the traditional workflow: a map of the ocean, often viewed one variable and one
+depth at a time.
 
 > **On screen ·** Press play at the left of the timeline along the bottom. Let the twelve analyses
 > run so the colours visibly change. Leave it playing through the next lines.
 
-The model's output opens in one desktop program. The float measurements open in another. Both draw
-the ocean the same way - flat, and one depth at a time.
+The model output and float measurements are often handled through separate tools or workflows.
+Both draw the ocean the same way - flat, and one depth at a time.
 
 So the question that actually matters has no tool behind it. Not "what does the model say", because
 it always says something. The question is: **is the model right - here, at this depth, today?**
@@ -89,8 +92,9 @@ Let me fly into it.
 That is the Indian Ocean as one solid body of water. **Five metres down to two kilometres, all at
 once.**
 
-That sharp band across the middle is the thermocline - the boundary between the warm surface layer
-and the cold deep. It is the layer a cyclone feeds on.
+That sharp band is the thermocline - the transition between the warm surface layer and the colder
+deep ocean. The depth of that warm layer matters because it affects how much heat a tropical
+cyclone can draw from the ocean.
 
 > **On screen ·** In the Variable group, under "Ocean state", click "Salinity", then "Density",
 > then back to "Temperature". Pause about a second on each so the water re-colours.
@@ -105,8 +109,9 @@ worked out here rather than simply passed through.
 But this is the moment that matters. Those white markers are real instruments, drawn where they
 actually were on this date. Click one.
 
-**The solid line is what the instrument measured. The dashed line is what the model predicted.**
-Same water, same day, all the way down. The band between them is the disagreement.
+**The solid line is what the instrument measured. The dashed line is what the model predicted at
+the same location and time, evaluated at the observation depths.** The shaded band shows their
+disagreement.
 
 > **On screen ·** Read the two figures off the panel as they appear - the depths compared and the
 > average gap. They move with every re-bake, so say what is on screen rather than a memorised
@@ -129,17 +134,18 @@ warmth, but heat stored down the whole column.
 
 And this is the one that needs three dimensions.
 
-That surface is the depth where the ocean drops below twenty-six degrees - the floor a cyclone
-needs to form at all. **Where it bulges downwards, the warm water runs deep**, so a passing storm
+That surface shows the depth of the 26-degree isotherm - a commonly used indicator of how deep the
+warm water extends. **Where it bulges downward, the warm layer is deeper**, so a passing storm
 cannot churn up cold water to weaken itself.
 
-Look at the central Bay of Bengal. **That is the deepest fuel in the region.**
+Look at the central Bay of Bengal. **Here, the warm layer extends deeper** - meaning greater ocean
+heat is available to a passing storm.
 
 > **On screen ·** Rotate slowly west, towards Somalia and Oman, where the same sheet rises almost
 > to the surface.
 
-Off Somalia the same surface comes almost to the top, because cold water is being pulled up from
-below. **That is a thin lid, not fuel.**
+Off Somalia and Oman, the same surface rises toward the top, because cold water is being pulled up
+from below. **That is a thin lid, not fuel.**
 
 On a flat map, that difference is a number in a table. Here it is a shape you see at a glance.
 
@@ -157,14 +163,13 @@ Switch to circulation and the ocean starts moving. Those are the real analysed c
 
 Now the honest part.
 
-Across **two hundred and thirty instruments**, the typical gap between the model and reality is
-**about two tenths of a degree**. Which sounds excellent.
+Across **230 instruments**, the typical gap is **about two tenths of a degree**.
 
-But the model is *built* partly from those Argo floats. So a float agreeing with it is largely the
-model agreeing with itself.
+But the model assimilates Argo observations, so agreement with those floats is not a fully
+independent test.
 
-The real test is the **nine moored buoys the model does not use** - and there the gap is
-**three quarters of a degree. Four and a half times worse.**
+Against the **nine moored buoys it did not use**, the gap is **three quarters of a degree** - about
+**four and a half times** the 0.17-degree gap seen across the Argo floats.
 
 **We could have shown one flattering average. We show the number that makes us look worse, because
 that is the one a forecaster actually needs.**

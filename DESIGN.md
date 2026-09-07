@@ -337,6 +337,33 @@ Grotesk and Inter. All four are self-hosted so the rule above still holds, but t
 product reading as two products is a real cost. It needs a decision between the teams, not a
 unilateral fix, so it is written down here rather than quietly reconciled.
 
+**It is three pages against one, not two halves.** `provenance.html` and `requirements.html` set
+Chivo and IBM Plex Mono like the console; only `index.html` sets the other pair. So unifying on
+the landing faces changes three documents to match one.
+
+**And it is not a token swap. Measured 2026-09-07**, at 1366x768, by loading the two shipped
+landing faces onto `app.html` (they live inside `index.html`'s own `<style>`, so the console
+cannot see them at all - that is the first, small cost) and swapping `--sans`:
+
+| Panel state | Chivo | Inter | Space Grotesk |
+| --- | --- | --- | --- |
+| all groups closed | **377 px** | 389 | 400 |
+| Variable alone | **477 px** | 490 | 502 |
+| Variable + Colourbar | **672 px** | 688 | 705 |
+| everything open | **2,007 px** | 2,031 | 2,062 |
+| labels that wrap | 7 | 7 | 7 |
+
+**Chivo is the most compact of the three in the panel, and the panel is the scarcest space in the
+product.** Inter costs 16 px on the pair the fold just recovered 108 px on, and Space Grotesk
+costs 33. Nothing wraps that did not wrap before, so the risk is height and not layout. The mono
+is not in question either way: neither landing face has a monospace companion, and a column of
+readings that shifts as a digit changes is the one thing `PRODUCT.md` will not trade.
+
+A first attempt at this measured Inter at +24 px and was wrong - `addStyleTag` with `"Inter"` on
+a page that never loaded it silently measured **Segoe UI**. `document.fonts.check` says `true` for
+a system font of the same name and cannot be used to catch it; `[...document.fonts]` lists what
+the document actually has, and `document.fonts.load()` is what forces the real file down.
+
 In the console:
 
 - **Chivo** (400 / 500 / 700 / 900) for everything read as language.
@@ -351,8 +378,8 @@ stops a changing digit from shifting the ones beside it during playback.
 
 | Role | Size | Weight | Tracking | Where |
 | --- | --- | --- | --- | --- |
-| display | `clamp(40px, 6.6vw, 92px)` | 800 | -0.035em | Landing hero only |
-| headline | `clamp(28px, 3.4vw, 44px)` | 800 | -0.025em | Landing section headings |
+| display | `clamp(46px, 7.2vw, 103px)` | 400 | -0.012em, uppercase | Landing hero only |
+| headline | `clamp(30px, 4vw, 46px)` | 400 | 0.002em | Landing section headings |
 | title | 17px | 700 | -0.01em | Panel titles |
 | body | 13px | 400 | normal | Console body |
 | label | 13px Chivo | 600 | -0.005em, sentence case | Every group heading |
@@ -385,9 +412,15 @@ loses the uppercase and the 0.16em, which is the micro-label rule rather than an
 The scale is fixed in the console (product register: users are at consistent DPI, and a fluid
 heading inside a 344 px panel looks worse, not better) and fluid on the landing page.
 
-**Known discrepancy:** `display` and `headline` ask for weight 800 and no 800 face ships, so the
-browser resolves upward to 900. It is not broken, but the weight on screen is not the weight in
-the file. Either ship 800 or write 900.
+**The 800 in the two rows above is not what ships, and the old note about it was wrong twice.**
+Measured on the built landing page: `index.html:131` sets `h1, h2, h3, h4 { font-weight: 400 }`
+and there is **no `font-weight: 800` anywhere in the file**, so the hero renders at 400. The note
+this replaced said the browser "resolves upward to 900", which could not happen either: Space
+Grotesk is declared as one variable file over `300 700`, and asking for 800 or 900 gives exactly
+the 700 width - 846.56 px on a 70 px test string, identical to three decimal places. The axis is
+nearly inert at that size in any case: 300 to 700 moves the same string 843.06 to 846.56 px,
+**3.5 px in 846, or 0.41%**. Either write the weight the page actually uses in the table, or set
+the headings to the weight the table wants and check it moves.
 
 Prose is capped at 65-75ch. The guide panel is held tighter still by `probe-guide.mjs`: one
 sentence of definition plus bullets, **max 4 bullets, max 2 lines each**, median 113 words
@@ -488,6 +521,13 @@ Shape vocabulary: `12px` for a panel, `8px` for a button or a callout, `6px` for
   Label left, live value right in mono, on a shared baseline.
 - **Readout** - mono, `--primary`, sits on the group header so a closed group still reports its
   value. This is the component that makes a collapsed panel usable.
+- **Folded chooser** (`.palette-current`) - one row carrying the swatch and the name of the
+  colourbar on screen, with a caret; the alternates open under it. Measured, the open list was
+  132 px of a 635 px bay and made Colourbar the only group too tall to open on its own. The row
+  **reports while it is shut**, which is the readout rule one level in: fold a choice, never the
+  only line that says what is drawn. A 2-column grid of swatches was measured against it and lost
+  **12 px against 110**: halving the cell to 144 px wraps all five labels to two lines, so three
+  double-height rows are barely shorter than five single ones.
 - **Note** (`.note`) - the small caveat under a control. Currently a left stripe; see Don'ts.
 - **Map key** - names everything drawn on the water, folds, drags, remembers its position, and
   **swaps entirely** for the bias map's scale when the dots stop meaning "an instrument".

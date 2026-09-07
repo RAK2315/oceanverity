@@ -1,8 +1,15 @@
-"""Pull the two typefaces into the build, so the demo makes no network calls.
+"""Pull the console's two typefaces into the build, so the demo makes no network calls.
 
-The three pages used to link a stylesheet from fonts.googleapis.com. Measured, that was three
+The pages used to link a stylesheet from fonts.googleapis.com. Measured, that was three
 requests and about 63 KB on every load - which quietly falsified the property the whole bake
 exists to protect. `CLAUDE.md` states it as a rule and the README carries it as a badge.
+
+**This fetches Chivo and IBM Plex Mono only, which is app.html, provenance.html and
+requirements.html.** `index.html` sets Space Grotesk and Inter, declares them in its own
+`<style>` block, and its two woff2 files arrived with the globe hero rather than through here -
+so re-running this refreshes three of the four pages and leaves the landing page alone. Whether
+that split should exist at all is an open decision; see the Typography section of `DESIGN.md`,
+which carries what the console's panel measures under each of the three faces.
 
 Run this again only if the typefaces change:
 

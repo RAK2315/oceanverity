@@ -118,6 +118,7 @@ function Group({
 function Colourbar() {
   const store = useStore();
   const { manifest, windowMin, windowMax, toValue, set, field, theme, scale } = store;
+  const { paletteAlternates } = store;
   const spec = field();
   if (!manifest || !spec) return null;
 
@@ -134,6 +135,14 @@ function Colourbar() {
   const note = PALETTES[spec.palette];
   const short = spec.label.replace("Sea Water ", "");
   const explain = () => set("touched", "palette");
+  // The folded row and the list draw the same ramp, so the gradient is built in one place.
+  const chipOf = (name: string) => ({
+    background: `linear-gradient(90deg, ${paletteGradient(
+      manifest.palettes[name] ?? [],
+      theme,
+      "linear",
+    )})`,
+  });
 
   return (
     <Group id="palette" title="Colourbar" readout={PALETTE_LOOKS[palette] ?? palette} readoutMuted>
@@ -206,35 +215,47 @@ function Colourbar() {
         * the window are all unchanged; only the ramp between them is.
         */}
       {choices.length > 1 && (
-        <div className="palette-choice" role="group" aria-label="Colourbar">
-          {choices.map((name) => (
-            <button
-              key={name}
-              type="button"
-              className={name === palette ? "on" : ""}
-              aria-pressed={name === palette}
-              title={PALETTE_LOOKS[name] ?? name}
-              onClick={() => {
-                set("touched", "palette");
-                // The Field's own is `null`, not its name: an override that happens to match is
-                // still an override, and it would survive a Field switch as a stale choice.
-                set("paletteOverride", name === spec.palette ? null : name);
-              }}
-            >
-              <span
-                className="palette-chip"
-                style={{
-                  background: `linear-gradient(90deg, ${paletteGradient(
-                    manifest.palettes[name] ?? [],
-                    theme,
-                    "linear",
-                  )})`,
-                }}
-                aria-hidden="true"
-              />
-              {PALETTE_LOOKS[name] ?? name}
-            </button>
-          ))}
+        <div className="palette-choice">
+          {/* Folded, because five labelled swatches were 132 px of a 635 px bay and made the
+              Colourbar group the only one too tall to open on its own. The row that replaces
+              them is not a bare "more" affordance: it carries the chip and the name of the
+              colourbar actually on screen, so shut it reports rather than merely promising. */}
+          <button
+            type="button"
+            className={`palette-current${paletteAlternates ? " open" : ""}`}
+            aria-expanded={paletteAlternates}
+            onClick={() => {
+              set("touched", "palette");
+              set("paletteAlternates", !paletteAlternates);
+            }}
+          >
+            <span className="palette-chip" style={chipOf(palette)} aria-hidden="true" />
+            {PALETTE_LOOKS[palette] ?? palette}
+            <span className="disclosure" aria-hidden="true" />
+          </button>
+          {paletteAlternates && (
+            <div className="palette-list" role="group" aria-label="Colourbar">
+              {choices.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  className={name === palette ? "on" : ""}
+                  aria-pressed={name === palette}
+                  title={PALETTE_LOOKS[name] ?? name}
+                  onClick={() => {
+                    set("touched", "palette");
+                    // The Field's own is `null`, not its name: an override that happens to match
+                    // is still an override, and it would survive a Field switch as a stale
+                    // choice.
+                    set("paletteOverride", name === spec.palette ? null : name);
+                  }}
+                >
+                  <span className="palette-chip" style={chipOf(name)} aria-hidden="true" />
+                  {PALETTE_LOOKS[name] ?? name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

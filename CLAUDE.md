@@ -570,23 +570,47 @@ drop shadow to explain why it floats. Each band measures its own height and publ
 (`--topbar-height`, `--timeline-height`, `--attribution-height`), and the bays are `calc(100%)`
 minus the three, so no band has to guess at another's size.
 
-At 1366x768 the left bay has **636 px** - it was 615 until the source credits were folded, which
-gave it 20 back. Re-measured 2026-09-07 as `scrollHeight`, after the colourbar switcher:
+At 1366x768 the left bay has **635 px**, measured as the panel's own `clientHeight` at its cap
+rather than read off `max-height`, which is a `calc()` and comes back unresolved. It was 615 until
+the source credits were folded, which gave it 20 back; the 636 this file carried for a round was
+that arithmetic rather than a measurement. Re-measured 2026-09-07, in **both themes, which agree
+to the pixel**, before and after the alternates were folded:
 
-| Panel state | Content | Against a 636 px bay |
-| --- | --- | --- |
-| all groups closed | 377 px | fits |
-| Variable alone | 477 px | fits |
-| Variable + Colourbar | **780 px** | over by 144 |
-| Colourbar + Rendering | **806 px** | over by 170 |
-| bias | 918 px | over by 282 |
-| everything open | 2,115 px | over by 1,479 |
+| Panel state | Before | After | Against a 635 px bay |
+| --- | --- | --- | --- |
+| all groups closed | 377 px | 377 px | fits |
+| Variable alone | 477 px | 477 px | fits |
+| **Colourbar alone** | **680 px** | **572 px** | was 45 over, now fits |
+| Variable + Colourbar | 780 px | **672 px** | over by 37 |
+| Colourbar + Rendering | 806 px | **698 px** | over by 63 |
+| bias | 918 px | 918 px | over by 283 |
+| everything open | 2,115 px | 2,007 px | over by 1,372 |
 
-**The colourbar switcher cost the Colourbar group 139 px** and is the reason the Variable pair
-went from 5 px over to 144. Five or six palette buttons in a vertical list, each with a 46 px
-swatch, is the most expensive thing added to that bay in three rounds. It buys a control the user
-asked for twice; it has not been paid for. A two-column grid or a fold would get most of it back
-and neither has been tried.
+**The colourbar switcher cost the Colourbar group 139 px and 108 of them are back.** Five labelled
+swatches in a vertical list were 132 px; folded behind a row that carries the chip and the name of
+the colourbar actually on screen, they are 24. That row is not a bare "more" affordance - shut, it
+still reports, which is the same rule that lets a collapsed group carry its readout. The
+**two-column grid lost on measurement and by more than the arithmetic said**: five rows become
+three, so it should have halved 132 px, and measured it returns **12**. In a 144 px cell instead
+of a 291 px one the widest label needs 173 px of text and gets about 83, so **all five wrap to two
+lines** - three double-height rows are barely shorter than five single ones. The comment in
+`styles.css` was right for a different reason than it gave: not four smudges, four wrapped
+labels.
+
+**The Colourbar group was the one group too tall to open on its own** - 333 px against 258 px of
+room once the 377 px floor is paid - and that was the sharper way to say it than "the Variable
+pair is 144 over". It now opens alone with 63 px to spare.
+
+**What is left is older than the switcher and structural.** The floor is 377 px of group headers
+before a single control is drawn, which leaves 258 px for whatever is open. Measured open on their
+own: Variable 137, Colourbar 225, Depth slice 115, Rendering 156, Quality 102, Isosurface 67,
+Instruments 141, Model vs instruments 571, Drift 261, Vertical section 88, Your own data 105.
+Opened one at a time beside Variable and measured rather than added up - **the arithmetic got
+Rendering wrong**, calling it 62 px over where the panel fits it with 32 to spare - **7 of the 10
+fit and 3 do not**: Colourbar by 37, Drift by 73 and the bias map by 383. The bias group has never
+fitted on its own; it is 571 px of measurements, and a readout may not be approximated for layout.
+Closing the last 37 px needs either a control removed or the 30 px group header cut to 26, which
+is a design token and a click target at the WCAG floor, so neither was done unilaterally.
 
 **Every one of those numbers moved three times during one session**, twice because a fix
 elsewhere took height away: lifting the timeline off the credits cost the panel 50 px, and

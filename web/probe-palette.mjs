@@ -76,6 +76,10 @@ await page.waitForTimeout(800);
 const offers = await page.evaluate(async () => {
   const store = window.__store.getState();
   store.set("openGroups", { ...store.openGroups, palette: true });
+  // And the alternates within it, which fold: they cost 132 px of a 635 px bay, so they are shut
+  // by default and a check that reads them without unfolding reads the one row that is left. The
+  // group itself learned this a round earlier and it is the same failure one level in.
+  store.set("paletteAlternates", true);
   await new Promise((r) => setTimeout(r, 120));
   const out = [];
   for (const field of store.manifest.fields) {
@@ -86,9 +90,14 @@ const offers = await page.evaluate(async () => {
       own: field.palette,
       // From the range, exactly as `isDiverging` decides it - never from the palette name.
       diverging: field.range[0] < 0 && field.range[1] > 0,
-      choices: [...document.querySelectorAll(".palette-choice button")].map((b) =>
+      // `.palette-list`, not `.palette-choice`: the latter now also holds the folded row, which
+      // names the colourbar on screen and is not one of the choices.
+      choices: [...document.querySelectorAll(".palette-list button")].map((b) =>
         b.textContent.trim(),
       ),
+      // The folded row has to report what is actually drawn, or the group's one visible line is
+      // a lie while the list is shut.
+      folded: document.querySelector(".palette-current")?.textContent.trim() ?? null,
     });
   }
   store.selectField("temperature");
@@ -135,6 +144,15 @@ for (const offer of offers) {
       `${got.length}: ${got.join(" | ") || "(none)"}`,
   );
   if (!ok) problems.push(`${offer.key} was offered ${JSON.stringify(got)}`);
+  // The folded row is the group's only visible line while the list is shut, so it has to name
+  // the colourbar actually on screen. Nothing set an override in this loop, so that is the
+  // Field's own.
+  if (got.length > 0 && offer.folded !== OWN_LOOK[offer.own]) {
+    problems.push(
+      `${offer.key}: the folded row says ${JSON.stringify(offer.folded)}, ` +
+        `drawn is ${OWN_LOOK[offer.own]}`,
+    );
+  }
 }
 
 // ---- 2 and 3. the water repaints, and the bar draws the same table ---------------------------
@@ -176,6 +194,7 @@ await page.evaluate(() => {
   store.selectField("temperature");
   store.set("paletteOverride", null);
   store.set("openGroups", { ...store.openGroups, palette: true });
+  store.set("paletteAlternates", true);
 });
 await page.waitForTimeout(1400);
 const before = await frame();
