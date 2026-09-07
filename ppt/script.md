@@ -7,9 +7,9 @@ Plain text is what you say out loud. Read it as written.
 > **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
 > control, so you never have to guess what to click.
 
-**Length: 834 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
-33 by trading seven claims for more careful ones. That is **5:13 at a brisk 160 words a minute** or
-**5:34 at a comfortable 150**, plus the marked silences. Expect **about 5:45 on the recording**,
+**Length: 841 spoken words**, counted from this file - 801 until the 2026-09-07 pass, which added
+40 by trading eight claims for more careful ones. That is **5:15 at a brisk 160 words a minute** or
+**5:36 at a comfortable 150**, plus the marked silences. Expect **about 5:45 on the recording**,
 which leaves room to slow down on the numbers.
 
 **Numbers are written the way they are said**, because this page is read aloud: "twenty-six
@@ -216,8 +216,8 @@ the caveat that simplifying it costs.
 > **On screen ·** Return to the platform, back out to the full block of water, and let it rotate
 > slowly. This is the last thing on screen.
 
-It runs in any browser, on any laptop, so INCOIS could put it in front of forecasters tomorrow.
-**No installation, no licences, nothing to procure.**
+It runs in a modern browser on a normal laptop, with **no installation or licence required**. So it
+can be deployed as a browser-based tool for forecasters without requiring a desktop installation.
 
 It hands its data back out in the standard formats ocean institutes already use, so it fits beside
 what they have instead of replacing it. And you can **drag your own data file onto the page** and
