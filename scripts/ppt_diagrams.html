@@ -125,6 +125,125 @@
         font-size:12.5px;line-height:1.55;color:var(--body)}
   .lawn b{color:var(--green)}
   .lawn .num{font-family:var(--m);font-weight:500;color:var(--amber)}
+
+  /* ================= technical approach: the slide-shaped board ================= */
+  /*
+   * 16:9 at 1600x900. `#arch` above stays as it is: it is the README's figure, wider than a slide
+   * and carrying its argument in a paragraph. This one is read across a room in about eight
+   * seconds, so the prose goes and the type is set to fill the frame rather than to fit a page.
+   *
+   * It replaces a hand-built slide that named Leaflet and GeoPandas - neither is installed in
+   * this project - drew five of the nine sources, and pointed the browser at FastAPI. The last is
+   * the costly one: the deployed site has no API at all, so feeding the browser from the backend
+   * throws away the property the whole demo is built on. The absence of a map library is stated
+   * here as a decision rather than left as a hole.
+   *
+   * The flow is three zones across with the fourth underneath, because the fork out of zone 3 is
+   * two arrows and they need somewhere to land. Drawn as one row it left the bottom 40% empty.
+   * Sizes were set by rendering and measuring, twice: the first pass filled 620 px of 900 and the
+   * second 690, which is a slide with a hole in it either way.
+   */
+  #approach{width:1600px;height:900px;padding:0;display:flex;flex-direction:column;
+            margin:24px;background:var(--paper)}
+  #approach .head{display:flex;align-items:baseline;gap:18px;
+                  padding:24px 36px 16px;border-bottom:2px solid var(--ink)}
+  #approach .head h3{margin:0;font-size:40px;font-weight:900;letter-spacing:-.015em;
+                     text-transform:uppercase;line-height:1}
+  #approach .head .sub{font-family:var(--m);font-size:13px;letter-spacing:.08em;
+                       text-transform:uppercase;color:var(--cyan)}
+  #approach .head .team{margin-left:auto;font-family:var(--m);font-size:12px;
+                        letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
+  #approach .main{flex:1;display:grid;grid-template-columns:1fr 382px;min-height:0}
+  #approach .left{padding:18px 24px 0 36px;min-width:0;display:flex;flex-direction:column}
+  #approach .right{padding:18px 36px 0 26px;border-left:1px solid var(--edge);min-width:0;
+                   display:flex;flex-direction:column}
+
+  .zh2{font-family:var(--m);font-size:11px;letter-spacing:.11em;text-transform:uppercase;
+       color:var(--faint);margin-bottom:9px;border-bottom:1px solid var(--edge);
+       padding-bottom:6px;white-space:nowrap}
+  .zh2 span{color:var(--teal);font-weight:700}
+
+  /* Three zones across, two arrow gutters. */
+  .sz{display:grid;grid-template-columns:1.04fr 78px 1.02fr 78px 1fr;align-items:start}
+  .sn{display:flex;flex-direction:column;gap:7px}
+  .sn.two{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-content:start}
+  .sn .node{border:1px solid var(--edge);border-radius:6px;background:var(--panel);
+            padding:8px 11px}
+  .sn .node b{display:block;font-size:14.5px;line-height:1.22;font-weight:700}
+  .sn .node span{display:block;font-family:var(--m);font-size:10.5px;line-height:1.5;
+                 color:var(--faint);margin-top:3px;word-break:break-word}
+  .sn .node.wide{grid-column:1 / -1}
+
+  .sflow{display:flex;flex-direction:column;align-items:center;padding:0 4px;margin-top:44px}
+  .sflow .head2{font-size:27px;line-height:1;color:var(--edge-hot);font-weight:700}
+  .sflow .what{font-family:var(--m);font-size:10px;line-height:1.55;letter-spacing:.03em;
+               color:var(--teal);text-align:center;margin-top:7px;text-transform:uppercase}
+
+  .struth{border:2px solid var(--green);border-radius:8px;background:#EEF7F2;padding:12px 14px}
+  .struth b{display:block;font-size:18px;font-weight:900;color:var(--green);letter-spacing:.01em}
+  .struth span{display:block;font-family:var(--m);font-size:10.5px;line-height:1.55;
+               color:var(--body);margin-top:5px}
+  .struth em{display:block;font-style:normal;font-size:12.5px;line-height:1.42;color:var(--body);
+             margin-top:7px}
+  .sdrop{display:flex;flex-direction:column;align-items:center;margin-top:9px}
+  .sdrop .down{font-size:19px;line-height:1;color:var(--edge-hot);font-weight:700}
+  .sdrop .why{font-family:var(--m);font-size:9.5px;line-height:1.45;letter-spacing:.03em;
+              color:var(--amber);text-align:center;margin:4px 0 6px;text-transform:uppercase}
+  .spic{border:2px dashed var(--cyan);border-radius:8px;background:#EAF5F8;padding:12px 14px;
+        width:100%}
+  .spic b{display:block;font-size:17px;font-weight:900;color:var(--cyan);letter-spacing:.01em}
+  .spic span{display:block;font-family:var(--m);font-size:10.5px;line-height:1.55;
+             color:var(--body);margin-top:5px}
+  .spic em{display:block;font-style:normal;font-size:12.5px;line-height:1.42;color:var(--body);
+           margin-top:7px}
+
+  /*
+   * The fork, drawn downward into zone 4. Two arrows, two labels, in the colours of the boxes
+   * they leave - that difference is the whole point of the drawing.
+   */
+  .forkdown{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:16px 0 14px;
+            padding:0 0 0 62%;flex:1;min-height:40px}
+  .forkdown > div{display:flex;flex-direction:column;align-items:center}
+  /* The stem grows, so the two arrows reach zone 4 from wherever zone 3 happens to end. Drawn
+     as a line rather than a glyph because the gap is 150 px and a lone arrowhead floating in it
+     reads as a bullet, not as a connection. */
+  .forkdown .stem{flex:1;width:2px;min-height:12px;margin-top:6px;background:currentColor}
+  .forkdown .a{font-size:22px;line-height:.75;font-weight:700}
+  .forkdown .l{font-family:var(--m);font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+               text-align:center;line-height:1.45}
+  .forkdown .num{color:var(--green)}
+  .forkdown .pix{color:var(--cyan)}
+
+  .outrow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .outrow .node{border:1px solid var(--edge);border-left:3px solid var(--teal);border-radius:6px;
+                background:var(--panel);padding:10px 13px}
+  .outrow .node b{display:block;font-size:15px;line-height:1.25;font-weight:700}
+  .outrow .node span{display:block;font-family:var(--m);font-size:10.5px;line-height:1.55;
+                     color:var(--faint);margin-top:4px}
+  .outrow .node em{display:block;font-style:normal;font-size:12px;line-height:1.4;
+                   color:var(--body);margin-top:6px}
+  .outrow .node.pixels{border-left-color:var(--cyan)}
+
+  /* The stack. Every row is a name and its answer, so it is a list and not a paragraph. */
+  .stack{display:flex;flex-direction:column}
+  .stack .row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #EDF3F7;
+              align-items:baseline}
+  .stack .row:last-of-type{border-bottom:0}
+  .stack .k{flex:none;width:106px;font-size:12.5px;font-weight:700;color:var(--teal);
+            line-height:1.35}
+  .stack .v{font-size:13.5px;line-height:1.42;color:var(--ink)}
+  .stack .v i{font-style:normal;color:var(--faint);font-family:var(--m);font-size:10.5px}
+
+  /* What is deliberately absent, stated as a decision rather than left out. */
+  .nomap{margin-top:auto;margin-bottom:6px;padding:12px 14px;border:1px solid var(--edge);
+         border-left:3px solid var(--amber);border-radius:7px;background:#FDF7EE;
+         font-size:12.5px;line-height:1.5;color:var(--body)}
+  .nomap b{color:var(--amber)}
+
+  .sfoot{margin:0 36px 20px;padding:13px 16px;border:1px solid var(--edge);
+         border-left:3px solid var(--green);border-radius:7px;background:#F1F8F4;
+         font-size:13.5px;line-height:1.5;color:var(--body)}
+  .sfoot b{color:var(--green)}
 </style>
 </head>
 <body>
@@ -233,5 +352,131 @@
   </div>
 </div>
 
+<!--
+  Slide 3 of the SIH deck. Every label is checked against the repository: the nine adapters are
+  the files in samudra/sources/ plus the second one each of incois.py and argo.py carry, the route
+  counts come from api/*.py, and the stack rows come from package.json and requirements.txt.
+  Nothing is named here that is not installed.
+-->
+<div class="board" id="approach">
+
+  <div class="head">
+    <h3>Technical approach</h3>
+    <div class="sub">Nine providers &middot; one seam &middot; one Grid &middot; four ways out</div>
+    <div class="team">Team Sigmoid &middot; PS 26067</div>
+  </div>
+
+  <div class="main">
+    <div class="left">
+
+      <div class="sz">
+        <div class="zone">
+          <div class="zh2"><span>1</span> &nbsp;Sources &middot; public, dated, re-fetchable</div>
+          <div class="sn two">
+            <div class="node"><b>INCOIS ERDDAP</b><span>incois_argo_10d_VAM</span></div>
+            <div class="node"><b>INCOIS ERDDAP</b><span>_10day_McCreary</span></div>
+            <div class="node"><b>Argo GDAC</b><span>Ifremer &middot; ArgoFloats</span></div>
+            <div class="node"><b>Argo BGC</b><span>Ifremer &middot; synthetic</span></div>
+            <div class="node"><b>NOAA OSMC</b><span>GTS &middot; moored buoys</span></div>
+            <div class="node"><b>Copernicus Marine</b><span>uo, vo &middot; 1/12&deg;</span></div>
+            <div class="node"><b>EGO glider GDAC</b><span>ftp.ifremer.fr</span></div>
+            <div class="node"><b>World Ocean Atlas</b><span>2023 &middot; NOAA NCEI</span></div>
+            <div class="node wide"><b>Your own NetCDF file, dropped on the page</b><span>the ninth adapter &middot; same interface &middot; no new renderer, no new endpoint</span></div>
+          </div>
+        </div>
+
+        <div class="sflow">
+          <div class="head2">&rarr;</div>
+          <div class="what">NetCDF &middot; CSV<br>FTP index</div>
+        </div>
+
+        <div class="zone">
+          <div class="zh2"><span>2</span> &nbsp;Bake &middot; Python, once, offline</div>
+          <div class="sn">
+            <div class="node"><b>One adapter per provider</b><span>sources/base.py &middot; the only code that knows ERDDAP</span></div>
+            <div class="node"><b>Quality control, per channel</b><span>Argo flags 3/4/9 refused + a regional salinity floor</span></div>
+            <div class="node"><b>Land masked, never filled</b><span>absence stays absence</span></div>
+            <div class="node"><b>Derived here, not downloaded</b><span>5 hazard fields &middot; collocation &middot; bias &middot; drift</span></div>
+            <div class="node"><b>Density from TEOS-10</b><span>gsw &middot; the standard, not an approximation</span></div>
+          </div>
+        </div>
+
+        <div class="sflow">
+          <div class="head2">&rarr;</div>
+          <div class="what">Grid objects<br>on the provider's axes</div>
+        </div>
+
+        <div class="zone">
+          <div class="zh2"><span>3</span> &nbsp;Two representations &middot; one truth</div>
+          <div class="struth">
+            <b>GRID</b>
+            <span>float64 &middot; land is NaN<br>24 levels &middot; 56 x 36 &middot; 1&deg;</span>
+            <em>Every collocation, tooltip, section, API response and served byte is read from
+            here.</em>
+          </div>
+          <div class="sdrop">
+            <div class="down">&darr;</div>
+            <div class="why">quantise to bytes,<br>warp the depth axis</div>
+            <div class="spic">
+              <b>VOLUME</b>
+              <span>56 x 36 x 48 &middot; 1 byte a value</span>
+              <em>A picture for the GPU, and a dead end for numbers: nothing reads a value back
+              out of it.</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="forkdown">
+        <div class="num">
+          <div class="l">numbers, unchanged</div>
+          <div class="stem"></div>
+          <div class="a">&darr;</div>
+        </div>
+        <div class="pix">
+          <div class="l">pixels only, never a reading</div>
+          <div class="stem"></div>
+          <div class="a">&darr;</div>
+        </div>
+      </div>
+
+      <div class="zh2"><span>4</span> &nbsp;Four ways out</div>
+      <div class="outrow">
+        <div class="node"><b>Static bake</b><span>71.1 MB in the build</span><em>Both forms, committed. Zero network calls at demo time.</em></div>
+        <div class="node pixels"><b>Browser</b><span>the bake, not the API</span><em>The deployed site runs with no server behind it at all.</em></div>
+        <div class="node"><b>REST API</b><span>FastAPI &middot; 15 routes</span><em>Grid only. Answers what a static bundle cannot precompute.</em></div>
+        <div class="node"><b>Open standards</b><span>OPeNDAP &middot; CF-1.8 &middot; WMS</span><em>Grid only. Read it in xarray, QGIS or Panoply.</em></div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="zh2">Technology stack</div>
+      <div class="stack">
+        <div class="row"><div class="k">Frontend</div><div class="v">React + TypeScript<br><i>Vite &middot; Zustand</i></div></div>
+        <div class="row"><div class="k">3D</div><div class="v">Three.js + WebGL2<br><i>ray marching in GLSL ES 3.00</i></div></div>
+        <div class="row"><div class="k">Pipeline</div><div class="v">Python + NumPy + xarray<br><i>SciPy &middot; netCDF4</i></div></div>
+        <div class="row"><div class="k">Oceanography</div><div class="v">TEOS-10 via gsw<br><i>cmocean palettes</i></div></div>
+        <div class="row"><div class="k">API</div><div class="v">FastAPI + Uvicorn<br><i>15 REST routes</i></div></div>
+        <div class="row"><div class="k">Standards</div><div class="v">OPeNDAP DAP2 &middot; CF-1.8<br>OGC WMS 1.3.0 <i>&middot; 5 endpoints</i></div></div>
+        <div class="row"><div class="k">Verified by</div><div class="v">377 pytest + 15 browser probes<br><i>each probe made to fail on purpose first</i></div></div>
+      </div>
+      <div class="nomap">
+        <b>No map library, on purpose.</b> The globe, the coastlines and the EEZ are drawn in the
+        same WebGL scene as the water, so there is no second 2D map to keep in step with the 3D
+        one.
+      </div>
+    </div>
+  </div>
+
+  <div class="sfoot">
+    <b>The shape is the argument.</b> Adding a provider means adding an adapter and touching no
+    renderer, no endpoint and no UI file - the September round added four and proved it. And every
+    number a human or a machine reads comes from the Grid, never the Volume: that matters most at
+    the API, where a consumer pulling NetCDF over the wire cannot see they were handed a
+    quantised, depth-warped approximation.
+  </div>
+</div>
+
 </body>
+
 </html>

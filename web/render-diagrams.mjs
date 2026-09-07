@@ -33,6 +33,9 @@ await page.waitForTimeout(1200);
 
 const boards = {
   arch: "architecture.png",
+  // The slide-shaped one. Same facts, 16:9, with the stack beside the flow - it replaces a
+  // hand-built slide that named two libraries this project does not install.
+  approach: "technical-approach.png",
 };
 
 await mkdir(out, { recursive: true });

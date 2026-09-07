@@ -140,7 +140,17 @@ is and exactly how to rebuild it by hand if you would rather. Keep everything el
 
 ### Block A - the architecture diagram
 
-**The shape is the argument, and the shape is a fork, not a pipeline.** Eight providers go through
+**There are two renders of this, and they are not interchangeable.**
+[`docs/images/technical-approach.png`](../docs/images/technical-approach.png) is **the whole slide**
+- 1600 x 900, 16:9, title, flow, technology stack and all - so it drops onto slide 3 full-bleed
+with nothing typed on top. [`docs/images/architecture.png`](../docs/images/architecture.png) is the
+**figure only**, 2.78:1, for the README and for a slide you want to lay out yourself. Both come out
+of `cd web && node render-diagrams.mjs` reading the same file, so they cannot disagree about a
+label. The slide render replaced a hand-built one that named **Leaflet and GeoPandas** - neither is
+installed in this project - drew **five of the nine** sources, and fed the browser from FastAPI,
+which is backwards: the deployed site has no API at all.
+
+**The shape is the argument, and the shape is a fork, not a pipeline.** Nine providers go through
 one seam into one Grid. From the Grid, *numbers* go straight out to the API, the standards and
 every panel in the browser. The Volume hangs **off** the Grid and its only arrow goes to the
 screen. Drawn that way, the picture itself says that nothing reads a number back out of the
