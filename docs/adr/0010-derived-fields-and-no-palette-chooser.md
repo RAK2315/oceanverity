@@ -96,3 +96,60 @@ off the value that means "no departure", which is the one thing ADR 0007 exists 
 **The palette chooser stays gone.** Five palettes were added in this round - `deep`, `amp`,
 `speed`, `tempo`, `matter` - and every one of them arrived attached to a `FieldSpec` and to
 nothing else, which is the rule this record set.
+
+---
+
+## Amendment, 2026-09-07: the chooser comes back, and the rule it broke does not
+
+**The colourbar can be switched again.** Every Field offers its own palette plus three or four
+alternates, in the Colourbar group.
+
+This record deleted a chooser and was right to. It is worth being exact about **which** part was
+wrong, because the two are easy to confuse and only one of them is a design principle.
+
+The dropdown offered nine palettes and **seven of them named quantities this platform does not
+carry**. Picking `algae` recoloured temperature in the colours of a chlorophyll measurement nobody
+had taken; `oxy` did the same for dissolved oxygen. There was a warning line under the control
+admitting the colours meant nothing, which is the shape of a defect rather than a feature. The
+failure was **a palette naming a quantity**. It was not **a reader having a choice**.
+
+So the choice is back with the first half kept whole, and four constraints hold it there:
+
+1. **An alternate is labelled by the colours it contains, never by an ocean variable.** The
+   buttons read "Navy to yellow", "Black to white", "Navy, white, purple". `PALETTE_LOOKS` in
+   `web/src/palette.ts` is that list, and it was read off the shipped tables at positions 0, 128
+   and 255 rather than written from memory. Nothing in the interface offers "chlorophyll" as a
+   way of drawing temperature, which is the whole of what this ADR threw out.
+
+2. **A diverging Field is only ever offered diverging alternates, and the reverse.** `isDiverging`
+   decides which a Field is from its range crossing zero - never from its palette name - and a
+   diverging Field's midpoint is a real value: the ray marcher draws two isosurface skins about it
+   and the panel prints a `±`. A sequential ramp in its place would put the pale part of the scale
+   at an arbitrary number and quietly break the reading. ADR 0007's rule that a midpoint means
+   something is what this protects.
+
+3. **A banded palette is offered nothing at all.** Observation Coverage is four flat bands whose
+   edges sit at whole cast counts, with a key beside it that names them. A gradient in its place
+   repaints every cell holding 1, 2 or 3 casts as "4 or more casts" - the exact bug the log scale
+   already shipped once, measured and written up in `transfer.ts`.
+
+4. **One lookup, not two.** `store.activePalette()` is the only answer to "which colourbar is on
+   screen", and the GPU texture, the pushed `ViewState`, the colourbar swatch, the vertical
+   section and the guide panel all go through it. A second copy disagreeing with the first is
+   precisely what got the log scale cut the first time round, and it is the standing rule in
+   `styles.css`.
+
+**Five palettes were added to carry it** - `ice`, `gray`, `delta`, `curl`, `diff` - and unlike the
+nine this record deleted, none of them names a quantity. `gray` earns its place twice over: it is
+the one ramp that survives being projected badly or photocopied, and the one a reader who cannot
+separate two of the others can still read.
+
+**`probe-palette.mjs` holds all four constraints**, and it was made to fail on purpose before it
+was kept: with the legend pointed at the Field's own table while the water drew the chosen one,
+and with the override left to leak across a Field switch, it reported a channel spread of 149 on a
+grey ramp and named the leak. Its first draft passed both of those, which is why the ritual exists.
+
+**What has not changed:** a palette still belongs to a Field. `FieldSpec.palette` is still the
+default and still the thing `selectField` resets to, exactly as it resets `emphasis`, `scale` and
+`isoEnabled` - a chosen colourbar that survived a Field switch would be a hint leaking forwards,
+which is a bug this project has fixed three times in other clothes.

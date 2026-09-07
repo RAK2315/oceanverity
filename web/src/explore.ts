@@ -23,6 +23,7 @@
  * These are also the entire content of kiosk mode, which plays them on a loop. See `Explore.tsx`.
  */
 
+import type { CameraPose } from "./scene/OceanScene";
 import { useStore } from "./store";
 
 export interface Question {
@@ -40,10 +41,18 @@ export interface Question {
 }
 
 export interface ExploreHelpers {
-  /** Swing the camera onto a point. */
+  /**
+   * Swing the camera onto a point.
+   *
+   * On the exhibition screen this is wired to `panTo` instead, so a question re-centres without
+   * ever taking the operator's framing away - see the note on `cameraPose` in `OceanScene`.
+   */
   focusOn: (lon: number, lat: number) => void;
   /** Re-centre without changing the distance. Right for a body of water, wrong for a point. */
   panTo: (lon: number, lat: number) => void;
+  /** The camera as it stands, and putting it back. Used by the exhibition screen only. */
+  cameraPose?: () => CameraPose | undefined;
+  setCameraPose?: (pose: CameraPose) => void;
 }
 
 const store = useStore;
@@ -227,11 +236,20 @@ export const QUESTIONS: Question[] = [
  * Eased rather than linear, because a linear run from 1800 to 1 spends most of its time in the
  * last hundredth of the journey where nothing more is happening.
  */
+let trueScaleFrame: number | null = null;
+
 export function trueScale(seconds = 9): void {
   const from = 1800;
   const settle = 1;
   const start = performance.now();
   store.setState({ exaggeration: from });
+
+  // One run at a time. This animation is 9 s long and the exhibition screen holds a question for
+  // 5, so a second call used to start a second loop over the top of the first - and every loop
+  // writes `exaggeration` to the store on every frame, so they compound. Left uncancelled it
+  // degraded the whole tab: measured, after three minutes of kiosk the browser could no longer
+  // load a page at all, while the same soak with no overlap was fine.
+  if (trueScaleFrame !== null) cancelAnimationFrame(trueScaleFrame);
 
   const tick = () => {
     const t = Math.min((performance.now() - start) / (seconds * 1000), 1);
@@ -239,10 +257,14 @@ export function trueScale(seconds = 9): void {
     const phase = t < 0.42 ? t / 0.42 : t < 0.58 ? 1 : (1 - t) / 0.42;
     const eased = 1 - Math.pow(1 - Math.min(Math.max(phase, 0), 1), 3);
     store.setState({ exaggeration: from + (settle - from) * eased });
-    if (t < 1) requestAnimationFrame(tick);
-    else store.setState({ exaggeration: from });
+    if (t < 1) {
+      trueScaleFrame = requestAnimationFrame(tick);
+    } else {
+      trueScaleFrame = null;
+      store.setState({ exaggeration: from });
+    }
   };
-  requestAnimationFrame(tick);
+  trueScaleFrame = requestAnimationFrame(tick);
 }
 
 /**

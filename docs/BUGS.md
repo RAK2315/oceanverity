@@ -1,6 +1,6 @@
 # Known defects and open suspicions
 
-**Worked through 2026-09-03, revisited four times on 2026-09-04. Two items are open; 100 are
+**Worked through 2026-09-03, revisited four times on 2026-09-04 and again on 2026-09-06. Three items are open; 100 are
 fixed.** The fixed ones are summarised rather than listed, which is this file's own convention: a
 defect whose measurement has been folded into `CLAUDE.md`, an ADR or a probe does not need a
 paragraph here, and a file that is 90% solved problems is a file nobody opens to find the two
@@ -17,6 +17,84 @@ The ranking is the one this file has always used:
 ---
 
 ## Still open
+
+- [x] **102. The exhibition screen kept whatever camera one question zoomed to. Fixed 2026-09-07.**
+      Reported as "the kiosk zooms in on a particular spot, not where I set the view".
+
+      `focusOn` hard-sets the camera to a fixed radius and `panTo` preserves whatever distance it
+      finds, so the one question that zooms to a float - *What does one robot float actually do?* -
+      left **every question after it** framed at float distance, with nothing that would ever put
+      it back. Measured: `focusOn` took the camera from **79.9 units to 22.1**, and the next
+      `panTo` came back 22.1. An operator who set the screen up on a wide view of the basin got
+      that view for four questions and a close-up for the rest of the day.
+
+      Two halves, because either alone leaves the other. The loop remembers the pose it opened on
+      and restores it before each question, and it is handed a `focusOn` that pans - so a question
+      can neither take the framing away nor leak a distance forward. Restoring between questions
+      is safe because the loop already pauses while anybody is touching the screen, so a visitor's
+      own drag is never undone under their hand. Measured after: **79.9 held across all six
+      questions, worst change 0.0 units.**
+
+      Explore keeps the zoom. There a reader pressed the question deliberately and the comparison
+      panel is on screen to read; on an unattended screen it is a camera move nobody asked for.
+
+- [x] **103. Playing the timeline with the bias map on looked like a broken animation. Fixed
+      2026-09-07 - by saying so, not by moving anything.**
+      Reported as "when I hit play it works, but with *Colour instruments by disagreement* enabled
+      the Argo animation is not happening, they pause at the position they are at".
+
+      **The markers are right and must not move.** Every instrument on the bias map is drawn at
+      the cast its own comparison was taken from, across all twelve analyses, because a residual
+      measured at one position on one date is a number on the wrong water anywhere else. Measured:
+      marker 0 sits at 62.447 E, 17.748 N at step 2 and at exactly the same place at step 11.
+
+      So this was never a motion defect. It was a **communication** one, and the information was
+      already on screen in the wrong place: the map key says "each one is where its own comparison
+      was taken ... not where it was on this date", and the map key **folds, and is remembered
+      folded per browser**. A reader with it shut sees a field animating and every instrument
+      standing still, with nothing anywhere admitting why.
+
+      The time axis says it now, in `--secondary`, whenever the mode is on: **"Instruments pinned
+      to their own cast dates"**. A caveat belongs beside the control that provoked the question,
+      not two panels away behind a disclosure somebody shut last week.
+
+
+- [ ] **101. `probe-outreach.mjs` fails intermittently, and the failure moves between steps.**
+      Found 2026-09-06 while shortening the kiosk hold from 20 s to 5 s. **The kiosk itself is
+      fine** - soaked for three minutes, all **8 questions played**, the WebGL context stayed
+      alive, and a heavy page still loaded in 3.2 s afterwards. It is the probe that is unstable.
+
+      Six runs, and the failing step is not the same one twice:
+
+      | Kiosk hold | `trueScale` cancellation | Result |
+      | --- | --- | --- |
+      | 5 s | no | timeout at step 5 (the copied link) |
+      | 5 s | no | timeout at step 5 |
+      | 5 s | no | timeout at step 3 (kiosk page load) |
+      | 20 s | no | **clean** - no timeout, truescale passed |
+      | 5 s | yes | no timeout, but the truescale check failed |
+      | 5 s | yes | timeout at step 3 |
+
+      The URL that times out loads in **1.7 s in a fresh browser**, so it is not the page. The
+      probe drives **one reused page** through eight full scene rebuilds, then kiosk, then a
+      deeplink round trip; and its own source already says the truescale check "ran fine and then
+      failed a run later ... under software rendering that is a coin toss".
+
+      **Two theories were proposed and both were disproved by measurement**, which is why this
+      entry has no cause in it: browser degradation (the soak's heavy page load refutes it) and
+      overlapping `trueScale` loops (the timeout came back with the cancellation in place). The
+      5 s hold correlates with the flakiness but does not explain it, and n is small.
+
+      **The obvious fix was deliberately not applied.** Step 5 tests that a copied link
+      round-trips, which has nothing to do with the state steps 1 to 4 leave behind, so giving it
+      a fresh page would probably make it green and would arguably be more correct. Editing a
+      test until it passes, against a failure nobody has explained, is the move this file exists
+      to discourage. It wants a deliberate decision, not a tidy-up.
+
+      Related and kept: `trueScale()` in `web/src/explore.ts` now cancels a run still in flight
+      before starting another. A 9 s animation on a 5 s cadence really did stack loops fighting
+      over one value. That is a real defect and the fix stands on its own; it is simply not the
+      cause of this one.
 
 - [ ] **44. Nothing checks that a caption still describes its picture.**
       Every landing-page and README picture carries written prose beside it, and some of it names
@@ -64,12 +142,41 @@ The ranking is the one this file has always used:
       axis went from two stacked lines to one, which is 14 px off the foot band; and the rest is
       a pixel or two each from body padding, slider margins, the colourbar scale and the tab row.
       **No control was removed and no explanation was cut** - `probe-guide.mjs` still measures a
-      median of 113 words across all 43 entries, unchanged.
+      median of 112 words across all 44 entries, unchanged.
 
-      **Still true, and still open in the smaller sense:** `Colourbar + Rendering` scrolls by
-      106 px, and at 1280x720 `Variable + Colourbar` scrolls by 48. Rendering carries four
-      sliders and a toggle; closing that case means splitting the group, which is a change to a
-      panel the team presents from rather than a spacing pass.
+      **Narrowed on 2026-09-06, not closed:** `Colourbar + Rendering` scrolls by
+      53 px, down from 106, after Ray steps and Show volume moved into their own `Quality` group.
+      The bias group came down from 1,293 px to 918 the same day. What is left in both is
+      measurements, and a readout may not be approximated for layout - see item 101 and `CLAUDE.md`.
+
+      **Reopened wider on 2026-09-07, and the figures above were already stale before that.**
+      Two things happened in opposite directions and the second is much larger than the first.
+
+      Folding the source credits took the foot band from 48 px to 28 and **gave the bay 20 px**,
+      615 to 636. But the "Variable and Colourbar 615 - exactly the height available" line was
+      **never re-measured after the round that produced it**: measured against `HEAD` before this
+      session changed anything, that pair was already **641 px against a 616 px bay, 25 over**.
+
+      Then the colourbar switcher landed, and it **cost the Colourbar group 139 px** - five or six
+      palette buttons in a vertical list, each carrying a 46 px swatch. Re-measured at 1366x768:
+
+      | Panel state | Content | Against a 636 px bay |
+      | --- | --- | --- |
+      | all groups closed | 377 px | fits |
+      | Variable alone | 477 px | fits |
+      | Variable + Colourbar | **780 px** | over by 144 |
+      | Colourbar + Rendering | **806 px** | over by 170 |
+      | bias | 918 px | over by 282 |
+      | everything open | 2,115 px | over by 1,479 |
+
+      **This is a regression with a name on it, not a mystery.** The switcher is a control the
+      user asked for twice and it is not going away, but it has not been paid for out of the bay.
+      A two-column grid of swatches, or putting the alternates behind their own fold, would get
+      most of the 139 px back; neither has been tried. Nothing here needs a readout removed.
+
+      The other lesson is the one this file exists for: **a fold figure written down goes stale
+      silently.** Two documents carried "615 - exactly the height available" through a round in
+      which it was already 25 px wrong, because a number in prose has nothing that can fail.
 
 ---
 

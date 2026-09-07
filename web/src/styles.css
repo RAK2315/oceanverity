@@ -278,11 +278,6 @@ body {
   to { stroke-dashoffset: 0; }
 }
 
-@keyframes breathe {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -318,7 +313,17 @@ body {
   left: 0;
   right: 0;
   z-index: 6;
-  display: flex;
+  /*
+   * Three tracks, the outer two equal, so the middle one is centred on the glass by geometry
+   * rather than by luck. A flex row centred the state group between its two neighbours instead,
+   * and the masthead and the control cluster are nothing like the same width - measured at
+   * 1366x768 it sat 197 px left of the centre it is meant to be on.
+   *
+   * `minmax(0, 1fr)` on the flanks rather than `1fr`: an `auto` minimum refuses to shrink below
+   * its content, so at a narrow window the bar would have overflowed rather than tightened.
+   */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
   padding: 8px 18px;
@@ -332,10 +337,14 @@ body {
   pointer-events: auto;
 }
 
+/* One baseline, not a two-line lockup. See the note in `Chrome.tsx`. */
 .brand {
+  grid-column: 1;
+  justify-self: start;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
 }
 
 /* The identity is the smallest thing on the bar, because it is the thing the reader already
@@ -345,15 +354,18 @@ body {
   font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.12em;
-  color: var(--on-surface-variant);
+  color: var(--on-surface);
 }
 
 .brand-dim {
   color: var(--on-surface-faint);
 }
 
+/* Past a rule, at the weight of a caption, because that is what it is. */
 .brand-sub {
-  font-size: 10.5px;
+  padding-left: 9px;
+  border-left: 1px solid var(--outline-variant);
+  font-size: 11px;
   color: var(--on-surface-faint);
   letter-spacing: 0.01em;
 }
@@ -365,16 +377,50 @@ body {
  * belongs on the date beside it, which is a value and lines up with every other date in the
  * console.
  */
+/*
+ * Centred on the bar, not centred in the space the bar has left over.
+ *
+ * `flex: 1` with `justify-content: center` centres the group between its two neighbours, and the
+ * masthead and the control cluster are nothing like the same width - measured at 1366x768 the
+ * group sat at x=486 against a viewport centre of 683, **197 px left of where it looks like it
+ * is meant to be**. That near-miss is most of why the bar read as assembled rather than laid
+ * out. Taken out of the flow it is centred on the glass at every width, and the flanks keep the
+ * space they need.
+ */
+/*
+ * A title after the masthead, at one alignment, at every width.
+ *
+ * `DESIGN.md` asked for this group to hold the bar's centre and it never did: `flex: 1` with
+ * `justify-content: center` centres a group between its two neighbours, and the masthead is
+ * 148 px against a control cluster of 533, so at 1366x768 it sat at x=486 against a viewport
+ * centre of 683 - **197 px short**, which is the near-miss that made the bar read as assembled.
+ *
+ * A true centre was built and measured and then rejected on the numbers. Centred, the group has
+ * only `min(centre - masthead, cluster - centre)` to spend on either side, which at 1366 is
+ * 132 px a side; **"Barrier Layer Thickness on 2026-07-30" is 310 px**, so two of the fifteen
+ * Fields would either sit 23 px under the buttons or be ellipsised - and this is a readout,
+ * which `PRODUCT.md` says may not be approximated for layout. A breakpoint that centred only
+ * above 1460 px would have given the reference viewport one arrangement and the demo laptop
+ * another, for a difference nobody asked for.
+ *
+ * So: left, next to the identity, at every width and for every Field. The hierarchy the centre
+ * was carrying is carried by the type instead - this is still the largest thing on the bar and
+ * the only place it is that size.
+ */
 .topbar-state {
-  flex: 1 1 auto;
+  grid-column: 2;
+  /* Stretched to the track rather than sized to its content: `justify-self: start` lets a grid
+     item overflow, and at the 980 px floor the widest Field name ran 66 px under the buttons. */
   display: flex;
   align-items: baseline;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 9px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .state-field {
+  min-width: 0;
   font-family: var(--sans);
   font-size: 17px;
   font-weight: 700;
@@ -398,10 +444,34 @@ body {
   white-space: nowrap;
 }
 
+/*
+ * Three groups, not five peers. See the note in `Chrome.tsx`.
+ *
+ * `margin-left: auto` rather than a flex spacer, because `.topbar-state` no longer occupies the
+ * middle of the flow and there is nothing left to push against.
+ */
 .topbar-right {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
+}
+
+.topbar-utilities {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The two doors read as a pair: one rule between them and the settings, and the tighter gap
+   inside the pair than around it. */
+.topbar-doors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 20px;
+  border-left: 1px solid var(--frame-rule);
 }
 
 /*
@@ -420,10 +490,21 @@ body {
   border-radius: 50%;
   background: var(--surface-low);
   color: var(--on-surface-variant);
-  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   transition: color 0.16s var(--ease), border-color 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The copy button reporting what it just did. It is the one moment of `--good` in the frame,
+   and it is a state that lasts 2.4 s. */
+.icon-button.done {
+  color: var(--good);
+  border-color: var(--good);
 }
 
 .icon-button:hover {
@@ -574,14 +655,14 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 5;
+  z-index: 6;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: flex-start;
   row-gap: 2px;
   column-gap: 12px;
-  padding: 6px 18px 7px;
+  padding: 5px 18px 6px;
   background: var(--frame);
   line-height: 1.4;
   font-family: var(--sans);
@@ -591,20 +672,98 @@ body {
   pointer-events: none;
 }
 
-/* Says what the list is, so nine proper nouns in a row are a credit and not a stack trace. */
-.attribution::before {
-  content: "Sources";
+/* The fold. A real button, because it is a control and the tick strip already taught this
+   project what a clickable span costs a keyboard.
+   The padding and the matching negative margin buy a 24 px press target out of a 16 px line
+   without giving the band back any of the height the fold was for. */
+.attribution-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: -4px 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Says what the list is, so a row of proper nouns is a credit and not a stack trace. */
+.attribution-label {
   font-weight: 600;
   color: var(--on-surface-variant);
 }
 
-.attribution span {
+.attribution-lead,
+.attribution-more {
+  color: var(--on-surface-faint);
+}
+
+.attribution-toggle:hover .attribution-lead,
+.attribution-toggle:hover .attribution-more,
+.attribution-toggle:focus-visible .attribution-lead {
+  color: var(--on-surface-variant);
+}
+
+/* The same two-border caret the control groups use, so a fold looks like a fold anywhere in
+   the frame. */
+.attribution-caret {
+  align-self: center;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-135deg) translate(-1px, -1px);
+  transition: transform 0.16s var(--ease);
+}
+
+.attribution-caret.open {
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+/*
+ * The open list floats above the closed line rather than growing the band.
+ *
+ * In flow it took the footer from 27 px to 81, and the time axis sits at
+ * `bottom: var(--attribution-height)` - so asking who supplied the data threw the timeline 54 px
+ * up the screen. A band that changes height is a band every other band has to react to, and the
+ * whole point of folding the credits was to stop them costing the frame height. Anchored to the
+ * top of the footer it costs nothing, nothing else moves, and it is one of the two things in the
+ * chrome that genuinely floats - so it is one of the two allowed a shadow.
+ */
+.attribution-list {
+  position: absolute;
+  left: 18px;
+  bottom: 100%;
+  z-index: 1;
+  /* As wide as the eight names, not as wide as the glass. It opens into the band directly above
+     it, which is the time axis - the one thing nobody is reading while they check a credit. */
+  width: max-content;
+  max-width: calc(100% - 36px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 3px;
+  column-gap: 14px;
+  padding: 9px 12px;
+  border: 1px solid var(--frame-rule);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--frame);
+  box-shadow: var(--shadow-raised);
+  pointer-events: auto;
+}
+
+.attribution-list span {
   cursor: help;
   pointer-events: auto;
 }
 
 .generated {
-  opacity: 0.72;
+  margin-left: auto;
 }
 
 /* ---------------------------------------------------------------- panels */
@@ -1009,10 +1168,10 @@ select:hover {
   margin-bottom: -1px;
   background: none;
   color: var(--on-surface-faint);
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1065,8 +1224,8 @@ select:hover {
   border-radius: var(--radius-sm);
   background: var(--primary-wash);
   color: var(--primary);
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 13px;
   letter-spacing: 0.04em;
   text-align: left;
   cursor: pointer;
@@ -1436,7 +1595,6 @@ input[type="range"]::-moz-range-thumb {
 /* A note that is a caution rather than a footnote. The drift panel's first line is the limit of
    what the feature can claim, and it must not read like small print. */
 .note.caution {
-  border-left-color: var(--secondary);
   background: var(--secondary-wash);
   padding: 8px 10px;
   color: var(--on-surface-variant);
@@ -1572,8 +1730,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* A figure in running text that is also a control. Underlined, because a coloured word alone is
-   not a link to a reader who cannot separate the hues. */
+   not a link to a reader who cannot separate the hues.
+   `.analysis-note` was missing from this list, so the Anomaly Feature panel's one inline link
+   fell all the way back to the browser's default button - a grey bordered box sitting in the
+   middle of a sentence. Same shape as the `.guide-body` loss: nothing compiles CSS against the
+   markup that uses it, so a selector list is only as complete as the last person to check. */
 .note .link,
+.analysis-note .link,
 .readout-line .link {
   padding: 0;
   border: 0;
@@ -1839,10 +2002,8 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid var(--outline-variant);
   border-radius: 4px;
   background: none;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11px;
   color: var(--on-surface-faint);
   transition: color 0.16s var(--ease), border-color 0.16s var(--ease);
 }
@@ -2030,12 +2191,6 @@ input[type="range"]::-moz-range-thumb {
   flex: none;
 }
 
-.profile-meta {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--on-surface-faint);
-}
-
 /* Second row, full width, under the name rather than competing with it for one line. */
 .profile-actions {
   grid-column: 1 / -1;
@@ -2072,13 +2227,16 @@ input[type="range"]::-moz-range-thumb {
   color: var(--primary);
 }
 
+/* No pulse. `PRODUCT.md` says nothing is animated that is not reporting a state change, and a
+   dot breathing forever reports nothing - "Reporting" is a state that does not change while you
+   look at it. The dot, the accent and the word carry it; the animation was the console's last
+   piece of motion-as-decoration. */
 .pill.live::before {
   content: "";
   width: 5px;
   height: 5px;
   border-radius: 50%;
   background: var(--primary);
-  animation: breathe 2.4s ease-in-out infinite;
 }
 
 /* A Float that was not surfacing near this Timestep. Its marker is off the water, so the pill
@@ -2141,7 +2299,8 @@ input[type="range"]::-moz-range-thumb {
  */
 .profile-facts {
   margin: 10px 14px 12px;
-  font-family: var(--mono);
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
   font-size: 11.5px;
   line-height: 1.6;
   color: var(--on-surface-variant);
@@ -2161,10 +2320,9 @@ input[type="range"]::-moz-range-thumb {
 
 .why > summary {
   padding: 9px 0 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
   color: var(--on-surface-faint);
   cursor: pointer;
   list-style: none;
@@ -2177,7 +2335,9 @@ input[type="range"]::-moz-range-thumb {
   color: var(--on-surface-faint);
 }
 
-.why[open] > summary::after { content: " 2"; }
+/* A minus sign lost its encoding and became U+0091 followed by the digit 2, so an open
+   disclosure read "Why this comparison 2". Plain hyphen, which is the house rule anyway. */
+.why[open] > summary::after { content: " -"; }
 
 .why > summary:hover { color: var(--on-surface); }
 
@@ -2393,11 +2553,11 @@ input[type="range"]::-moz-range-thumb {
 
 .analysis-note {
   margin: 12px 14px 14px;
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 12px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   color: var(--on-surface-faint);
-  text-align: center;
+  text-align: left;
 }
 
 /*
@@ -2484,10 +2644,8 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   margin: 0;
   transform-origin: left center;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11px;
   /* The same ink as the figures it captions. It was --ruler-ink-dim, which is a hairline
      colour chosen for a rule, and as a caption over bright surface water it disappeared. */
   color: var(--ruler-ink);
@@ -2504,9 +2662,9 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 6px;
   background: none;
   color: var(--primary);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.16s var(--ease), color 0.16s var(--ease);
 }
@@ -2570,9 +2728,8 @@ input[type="range"]::-moz-range-thumb {
 
 .tour-count {
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
   color: var(--primary);
 }
 
@@ -2627,8 +2784,8 @@ input[type="range"]::-moz-range-thumb {
 .tour-actions button {
   padding: 7px 14px;
   border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -2654,8 +2811,8 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 6px;
   background: none;
   color: var(--on-surface-variant);
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -2778,15 +2935,13 @@ input[type="range"]::-moz-range-thumb {
 
 .profile-operator {
   margin-left: 8px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
   color: var(--on-surface-faint);
 }
 
 .timeline-ticks button.bare {
-  color: var(--outline);
+  color: var(--on-surface-faint);
   letter-spacing: 0;
 }
 
@@ -2804,18 +2959,29 @@ input[type="range"]::-moz-range-thumb {
   min-width: 92px;
 }
 
-.timeline-date {
+/* A name in the text face, its two figures in mono, on one baseline. */
+.timeline-step {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  color: var(--on-surface-faint);
+}
+
+.timeline-step b {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--on-surface);
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+  color: var(--on-surface);
+}
+
+/* Amber, because it is a caveat rather than a label - the one role `--secondary` carries. */
+.timeline-note.pinned {
+  color: var(--secondary);
 }
 
 .timeline-note {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
   color: var(--on-surface-faint);
 }
 
@@ -2847,11 +3013,10 @@ input[type="range"]::-moz-range-thumb {
   color: var(--on-surface-faint);
   font-size: 12px;
   cursor: pointer;
-  opacity: 0.7;
 }
 
 .notice button:hover {
-  opacity: 1;
+  color: var(--on-surface);
 }
 
 /* ---------------------------------------------------------------- loading and fatal */
@@ -2929,6 +3094,58 @@ input[type="range"]::-moz-range-thumb {
   body { min-width: 980px; overflow-x: auto; }
 }
 
+/*
+ * The colourbar chooser: a swatch of the actual ramp, and what it looks like in words.
+ *
+ * A list rather than a segmented row, because the swatch is the control - a reader picks a
+ * colourbar by seeing it, and four gradients squeezed into a 2-column grid are four smudges.
+ * The label is there for the reader who cannot separate two of the ramps by hue, which is the
+ * whole reason `gray` is on the list at all.
+ */
+.palette-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 10px 0 2px;
+}
+
+.palette-choice button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--on-surface-variant);
+  font-family: var(--sans);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s var(--ease), color 0.16s var(--ease),
+    border-color 0.16s var(--ease);
+}
+
+.palette-choice button:hover {
+  background: var(--surface-mid);
+  color: var(--on-surface);
+}
+
+.palette-choice button.on {
+  border-color: var(--primary-edge);
+  background: var(--primary-wash);
+  color: var(--on-surface);
+}
+
+/* Wide enough to read a three-stop ramp off, which a 16 px square is not. */
+.palette-chip {
+  flex: none;
+  width: 46px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--outline-variant);
+}
+
 /* ---------------------------------------------------------------- band key */
 
 /*
@@ -2977,7 +3194,6 @@ input[type="range"]::-moz-range-thumb {
 /* Says the chart is showing a different Field from the one selected, and why. */
 .note.substituted {
   margin: 14px 14px 0;
-  border-left-color: var(--secondary);
   color: var(--on-surface-variant);
 }
 
@@ -3016,15 +3232,6 @@ input[type="range"]::-moz-range-thumb {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-}
-
-.explore-kicker {
-  margin: 0 0 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--primary);
 }
 
 .explore-title {
@@ -3110,11 +3317,9 @@ input[type="range"]::-moz-range-thumb {
   content: "Caveat";
   display: block;
   margin-bottom: 3px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
   color: var(--secondary);
 }
 
@@ -3133,8 +3338,9 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 6px;
   background: var(--primary);
   color: var(--on-primary);
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -3191,10 +3397,9 @@ input[type="range"]::-moz-range-thumb {
 
 .kiosk-kicker {
   margin: 0 0 10px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--primary);
 }
 
@@ -3230,11 +3435,9 @@ input[type="range"]::-moz-range-thumb {
   content: "Caveat";
   display: block;
   margin-bottom: 4px;
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: clamp(9.5px, 0.7vw, 12px);
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-weight: 700;
   color: var(--secondary);
 }
 

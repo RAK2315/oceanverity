@@ -28,7 +28,7 @@ function usePublishedHeight(name: string) {
 }
 
 export function Timeline() {
-  const { manifest, timestepIndex, playing, set } = useStore();
+  const { manifest, timestepIndex, playing, biasMode, set } = useStore();
   const band = usePublishedHeight("--timeline-height");
   if (!manifest) return null;
 
@@ -99,9 +99,35 @@ export function Timeline() {
         </div>
       </div>
 
+      {/*
+        * What the axis knows that nothing else on screen does: which of twelve, and what a step
+        * is worth.
+        *
+        * It used to print the date, which is the **third** copy of that date on the glass - the
+        * top bar carries it at 14 px in the centre of the screen, and the tick under the handle
+        * is highlighted with it. `DESIGN.md` says a figure that is already a readout somewhere
+        * else belongs in one place; the position in the run was the figure nothing was carrying.
+        */}
       <div className="timeline-stamp">
-        <span className="timeline-date">{shown}</span>
-        <span className="timeline-note">10-day analysis</span>
+        <span className="timeline-step">
+          Step <b>{timestepIndex + 1}</b> of <b>{steps.length}</b>
+        </span>
+        {/*
+          * The bias map does not move with the timeline, and the only place that was said was
+          * inside the map key - which folds, and is remembered folded.
+          *
+          * Each marker is drawn where its own comparison was taken, across all twelve analyses,
+          * because a residual measured at one position on one date would be a number on the
+          * wrong water anywhere else. That is right and it is documented. What it looked like
+          * was pressing play, watching the field animate, and watching every instrument stand
+          * still - which reads as a broken animation. So the axis says it, on the band whose
+          * button was just pressed, whenever the mode is on.
+          */}
+        {biasMode ? (
+          <span className="timeline-note pinned">Instruments pinned to their own cast dates</span>
+        ) : (
+          <span className="timeline-note">10-day analysis</span>
+        )}
       </div>
     </div>
   );

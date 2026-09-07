@@ -223,7 +223,7 @@ in five groups is the right toolkit for a forecaster and the wrong first minute 
 So there are two more ways in, and **the control panel gained nothing**.
 
 - **Show me around.** A guided walk in **six chapters and 21 steps** that visits **every one of
-  the 43 controls the platform explains**. Each step drives the scene, opens the group the
+  the 44 controls the platform explains**. Each step drives the scene, opens the group the
   control lives in on the left, and opens its explanation on the right. `probe-tour.mjs` fails if
   a control ever has no step, so "it covers everything" is a measurement and not a promise.
 - **Explore.** The same platform as **eight questions**: *Where could a cyclone get stronger?
@@ -233,7 +233,7 @@ So there are two more ways in, and **the control panel gained nothing**.
   Every question carries the caveat its simplification costs, beside the answer and never after
   it - the cyclone one says in as many words that it is a map of conditions and not a forecast.
 - **`?kiosk=1`.** The exhibition screen: no panels, type at reading-from-across-a-room size, the
-  questions on a loop, and a **reset 60 seconds after the last visitor walks away**, so the next
+  questions on a loop, and a **reset 30 seconds after the last visitor walks away**, so the next
   one does not arrive at a broken view. The depth ruler grows a second line there - 1000 m
   becomes *a sperm whale hunting*. Escape puts the console back.
 - **Copy this view.** The link button on the top bar writes whatever is on screen - the variable,
@@ -361,7 +361,7 @@ each one that opens the platform with the control that answers it already set.
 | **OGC WMS / WCS** | **Partly** | WMS 1.3.0 is served, with both axis orders handled and tested. It publishes the fields that exist nowhere else - density and the anomaly - because INCOIS's own ERDDAP already serves WMS for their temperature, so re-serving that is re-publishing. **WCS is not built**, deliberately: no maintained Python server, and the numbers are already on OPeNDAP |
 | **Interoperability with data portals** | **Partly** | We read **8** independent sources through open APIs - INCOIS ERDDAP twice, Ifremer Coriolis for Argo and for BGC, NOAA AOML's OSMC feed, Copernicus Marine, Ifremer's EGO glider archive and NOAA NCEI - each behind one adapter, plus a ninth that reads a NetCDF file a visitor supplies, and expose OPeNDAP, CF-1.8 NetCDF and WMS so another system can read us back. We are not listed in anybody's catalogue, which a prototype should not be |
 | **Climate monitoring**, named in the PS's own list of impeded mandates | **Met** | Two Change variables, and the difference between them is the point. The Temperature Anomaly is a departure from this bake's own four months and says so. **Temperature vs Normal** is a departure from NOAA's World Ocean Atlas 2023 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual". Read anonymously over OPeNDAP at bake time - no account at any point. Measured across 349,692 cells: mean -0.014 °C, 95th percentile of the magnitude 2.104 °C. Below 1500 m the atlas has no normal and the field is blank rather than zero. `docs/adr/0016` |
-| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 21 steps that visits all **43** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as eight questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 60 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
+| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 21 steps that visits all **44** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as eight questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
 
 ### The honest summary
 
@@ -466,12 +466,12 @@ protocol, the colour-vision ordering of the coverage bands, the current-tile ari
 OPeNDAP and WMS endpoints - the DAP2 one checked by opening it with a real `pydap` client rather
 than by asserting on our own bytes.
 
-**And thirteen probes**, which are a different thing from tests: they drive the built app in a
+**And fifteen probes**, which are a different thing from tests: they drive the built app in a
 real browser and measure what reaches the screen, because every bad bug in this project's history
 looked like a shader bug and was not. They check that the browser's drift integrator and vertical
 section agree with the pipeline's; that every control has an explanation and every figure in one
 came from the bake; that the moving flow is the drift model and puts no dot on land; that the
-guided walk visits all 43 controls and survives every step; that each Explore question sets up
+guided walk visits all 44 controls and survives every step; that each Explore question sets up
 its own answer and the exhibition screen advances with nobody standing at it; and that the
 landing page names no picture that is not there and keeps its headline readable in both themes.
 

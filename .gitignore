@@ -28,6 +28,8 @@ web/probe*.mjs
 !web/probe-tour.mjs
 !web/probe-outreach.mjs
 !web/probe-landing.mjs
+!web/probe-palette.mjs
+!web/probe-chrome.mjs
 # Not a probe: the PNG decoder the probes measure with. CLAUDE.md forbids diffing PNG bytes for
 # a magnitude, and this is what makes that possible without an image dependency.
 !web/probe-pixels.mjs

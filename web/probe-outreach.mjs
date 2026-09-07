@@ -160,14 +160,14 @@ console.log(
 
 // ---- 4. it advances with nobody standing there -------------------------------------------
 //
-// The exhibition claim in one measurement. Slow on purpose: a hold is twenty seconds, and a
-// probe that shortened it would be testing a different thing from the one that ships.
+// The exhibition claim in one measurement. A hold is five seconds, so seven is one full tick
+// plus slack - the probe waits the shipped cadence and not a number of its own.
 const first = await page.evaluate(() => document.querySelector(".kiosk-question")?.textContent);
-await page.waitForTimeout(22000);
+await page.waitForTimeout(7000);
 const second = await page.evaluate(() => document.querySelector(".kiosk-question")?.textContent);
-console.log(`kiosk after 22 s: "${first}" -> "${second}"`);
+console.log(`kiosk after 7 s: "${first}" -> "${second}"`);
 if (first === second) {
-  problems.push("kiosk mode did not advance in 22 seconds - the exhibition loop is not running");
+  problems.push("kiosk mode did not advance in 7 seconds - the exhibition loop is not running");
 }
 
 await page.keyboard.press("Escape");

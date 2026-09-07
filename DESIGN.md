@@ -223,10 +223,26 @@ The landing page is the opposite: a 1400 px shell, and a hero that is two column
 and its actions left, a live WebGL globe right - over a five-cell stat strip. The globe is hidden
 below 1180 px and the hero becomes one column.
 
-**Density is a feature.** The reference viewport is 1366x768, where the left bay has **615 px**
-between the bar and the foot. Anything added to it costs something already on screen. Measured
-there: all groups closed **347 px**, Variable alone 446, Variable and Colourbar together **615 -
-which is exactly the height available**, and every group open 2,403.
+**Density is a feature.** The reference viewport is 1366x768. Anything added to the left bay
+costs something already on screen, so the bay's height is a design figure and is re-measured after
+touching **any** band, not only the panel.
+
+The foot bought the bay 20 px back. The source credits laid nine full attribution strings out
+flat, wrapped to two lines and measured **48 px** - a third of the chrome, on a licence obligation
+that nobody reads twice. Folded behind a control they are **28 px**, and the bay went from
+**616 px to 636**. Measured there, before and after, on the same harness:
+
+| Panel state | Content | Over a 616 px bay | Over a 636 px bay |
+| --- | --- | --- | --- |
+| all groups closed | 377 px | fits | fits |
+| Variable | 476 px | fits | fits |
+| Variable + Colourbar | 641 px | 25 | **5** |
+| Colourbar + Rendering | 668 px | 52 | **32** |
+| bias | 918 px | 302 | **282** |
+| everything open | 1,976 px | 1,360 | 1,340 |
+
+The type pass that ran at the same time cost the panel **nothing**: content is identical to the
+pixel in all six states, which is the point of checking a claim rather than asserting it.
 
 ## Colors
 
@@ -254,6 +270,13 @@ The accent inverts in lightness between themes (`#64d7e3` → `#00666e`) rather 
 because a pale cyan on white is unreadable and a deep teal on near-black is invisible. Anything
 new must do the same.
 
+**The data palettes are the reader's to *look* at differently, and nobody's to rename.** Each
+Field still owns its palette and `selectField` still resets to it. What the Colourbar group adds
+is three or four alternates of the Field's own kind, labelled `Navy to yellow`, `Black to white`,
+`Navy, white, purple` - by their colours, never by a quantity. `gray` is on the list on purpose:
+it is the ramp that survives a bad projector and the one a reader who cannot separate two of the
+others can still read. See the ADR 0010 amendment.
+
 **Out of scope: the data palettes.** cmocean scales belong to a Field, are lifted per theme in
 `web/src/palette.ts` so the water and the colourbar agree, and there is deliberately no chooser
 (ADR 0010). Recolouring the chrome is design work; recolouring the data is not.
@@ -271,6 +294,27 @@ undocumented colours, so they are named here rather than left to be "fixed" by s
 - **The feature chips** (`feature-warm`, `feature-cool`) and the currents swatch, which is the
   literal cmocean speed ramp `#fffcf4 → #a4d5a0 → #3f9b8e → #24555f`. Both take their colour from
   the data they describe, so a chip and the ring in the water agree. Same rule as ADR 0007.
+
+**Opacity is not a colour role, and it cannot be theme-aware.** The landing page carried its
+whole secondary ink ramp as `opacity` on the element - eleven distinct values from 0.3 to 0.85,
+with `0.55` and `0.6` doing most of the work on 11px captions. One alpha over two grounds is two
+contrast ratios: measured, `opacity: 0.55` on caption text is **5.44:1** on the dark parchment and
+**3.54:1** on the light one, so **ten captions failed WCAG AA on light and passed on dark from the
+same declaration** - the section kickers, the hero meta, the stat labels, the card tags, the step
+numbers, the chip and stat captions, the pull-quote cite and the stack headings. It is now two
+tokens whose alpha belongs to the theme, `--ink-2` and `--ink-3`, at 0.80/0.60 on dark and
+0.82/0.70 on light. Measured after: **zero failures in either theme**, and the two sides sit within
+half a point of each other. A new secondary ink is a token, never an `opacity`.
+
+**The landing page carries its own token set, and that is the typeface decision's shadow.** While
+`index.html` sets Space Grotesk and Inter it also sets its own four-colour ground
+(`--color-parchment` / `--color-ink` / `--color-paper` / `--color-ash`), its own 10px radius
+tokens and the CSS globe fallback's gradient - `#e3f3fc -> #86c1ea -> #2f6fa8 -> #0a2540`, which
+is a rehearsal of the WebGL sphere and belongs to the picture rather than to the surface ramp,
+the same argument the `viewport-*` set makes. A detector reads all of it as drift, so it is named
+here. **It collapses when the typeface question is settled and not before**; do not tidy half of
+it in the meantime, because a page on two half-merged token sets is worse than a page on two
+whole ones.
 
 **Hairline radii are geometry, not shape.** `1px`, `2px` and `3px` appear on 3px slider tracks,
 16x3px line swatches and a 12px colourbar. They round a hairline; they are not container shapes
@@ -323,6 +367,21 @@ in Chivo, sentence case; **values are values** and stay mono, tabular, untracked
 keep mono where a unit needs it but lose the uppercase tracking. The wordmark is the one place
 letterspaced caps are still the point.
 
+**That rule was written after fixing the left panel and was never carried out of it.** Counted
+across `styles.css`, **seventeen** places outside `Controls.tsx` were still setting a *sentence*
+in the value face - "Show me around" and "Set up a cyclone question" and "Show only this body of
+water" as mono buttons, `WHY THIS COMPARISON` and `10-DAY ANALYSIS` and `DEPTH AXIS IS STRETCHED`
+as uppercase tracked mono captions, the Anomaly panel's closing note as centred mono at 0.06em,
+and both Explore kickers and both `CAVEAT` marks. All seventeen are Chivo, sentence case now, and
+what stays mono is what a reader reads as a figure: `.readout`, `.state-date`, `.timeline-date`,
+`.tick`, `.axis-label`, `.stat-value`, `.slider-value`, `.colourbar-scale`, `.ruler-label`, the
+timeline ticks, and the wordmark. Two `Controls.tsx` cases are **deliberately left**: the
+segmented control, whose mono is written into the component table below, and the Field tab strip
+beside it, which shares its shape.
+
+**A count is a value; it is not a wordmark.** `.tour-count` keeps mono and tabular figures and
+loses the uppercase and the 0.16em, which is the micro-label rule rather than an exception to it.
+
 The scale is fixed in the console (product register: users are at consistent DPI, and a fluid
 heading inside a 344 px panel looks worse, not better) and fluid on the landing page.
 
@@ -359,6 +418,44 @@ A semantic stacking order is in use rather than arbitrary numbers: canvas 0, cue
 4, panels and timeline 5, top bar and map key 6. Transparent WebGL geometry has its own explicit
 `ORDER` table in `OceanScene.ts`, because Three.js sorts by centroid and that is meaningless for
 world-spanning geometry (ADR 0006).
+
+## Motion
+
+**Motion reports a state change or it does not exist.** That is `PRODUCT.md`'s "nothing is
+animated that is not reporting a state change", and the landing page was the surface breaking it.
+
+**What was removed.** A custom cursor - a dot plus a ring on a permanent `requestAnimationFrame`
+loop - and a magnetic pull that leaned every pill button toward the pointer. Both were pure
+decoration on a brand whose first adjective is *unshowy*, and both **ignored
+`prefers-reduced-motion` completely**: the blanket `animation-duration: 0.01ms !important` cannot
+touch a JS transform, so measured under `reducedMotion: reduce` the ring was still tracking the
+pointer. Three `spin` animations on the hero's orbit rings went too - rotating a circle about its
+own centre produces no visible change at all, so they were three infinite animations rendering
+nothing.
+
+**What replaced it, all of it a state.** A figure settling in at the moment the bake answers, once
+per figure, so the page's only real event is also visible. The nav link for the section you are
+actually in, its rule drawn with `scaleX` rather than `width`. The feature rail's position as a
+range - "1-4 of 14" - beside arrows that could only ever say a direction. The five stat cells
+arriving on their own beats rather than as one block. The globe's iris and its crossfade from the
+CSS fallback to the live WebGL sphere, which were already there and are a real handover.
+
+**A reveal enhances a page that is already visible.** `.reveal { opacity: 0 }` was unconditional,
+so **26 of the page's blocks shipped invisible** and came back only if an IntersectionObserver
+fired - one script error, a print, a headless render, and most of the page is blank with nothing
+admitting it. The rule is scoped to `html.js`, set by an inline head script, so JS may only take
+visibility away once it has proved it can give it back; under reduced motion it never takes it
+away at all. Measured: 45 reveal blocks, **0 invisible with JS off** and **0 under reduced
+motion**. The observer no longer `unobserve`s on first hit either, because an instant jump is a
+scroll position it never samples.
+
+**No layout properties.** `transition: padding` on the nav dock and `transition: right` on the
+ghost-link rule are gone; the dock snaps at its threshold and the rules use `scaleX`.
+
+**And the console's last piece of decoration went with them.** The "Reporting" pill's dot carried
+`animation: breathe 2.4s infinite` - a status that does not change while you look at it, pulsing
+forever. The dot, the accent and the word carry the state; the pulse carried nothing. The
+`@keyframes breathe` block went too, because nothing else used it.
 
 ## Components
 
@@ -422,8 +519,15 @@ real `<button>`.
   mark, and the two caveats kept their amber and gained the literal word "Caveat", which survives
   being read across an exhibition room in a way a 2px edge does not. `.disclosure` and
   `.mapkey-fold` are CSS triangles, not stripes.
-- **An eyebrow above every section.** The landing page had one above seven of seven; all seven are
-  gone and the hero's stays, because it is problem-statement metadata rather than a kicker.
+- **An eyebrow above every section.** The landing page had one above seven of seven; all seven were
+  deleted and the hero's stays, because it is problem-statement metadata rather than a kicker.
+  **They came back.** The globe-hero merge brought `.section-label` with it, on **eight of eight**
+  sections, and this file went on saying they were gone - which is the failure mode of writing a
+  Don't down: a merge does not read it. Gone again. The sections carry `border-top` already and
+  their headings are 30-46 px display type; nothing needed announcing. A ninth was found in the
+  console: `Explore`'s full-screen surface opened with the word **"Explore"** set above its
+  heading, for a reader who had arrived by pressing a button marked Explore. The dialog's
+  `aria-label` already names it for the one reader who needed telling.
 - **Uppercase tracked mono as a default.** It is a wordmark treatment and a unit treatment. It is
   not how a group is named, a legend is titled, a chart is captioned or a status is reported.
 - **Decorative blur.** There is none left in the chrome. A new one needs an argument that opacity
@@ -432,7 +536,11 @@ real `<button>`.
 - **Hiding a control instead of resetting it.** `selectField()` is the only place that may turn
   something off. Hiding a checkbox while its state stays on leaves a reader with a layer they
   cannot remove.
-- **A palette chooser.** A palette belongs to a Field. ADR 0010 deleted the last one.
+- **A palette chooser that names a quantity.** ADR 0010 deleted a dropdown of nine because seven
+  of them named ocean variables this platform does not carry. The **amendment of 2026-09-07**
+  brings the choice back and keeps that half whole: alternates are labelled by the colours they
+  contain, a diverging Field is only offered diverging ones, a banded palette is offered none, and
+  one selector answers "which colourbar is on screen" for all seven call sites.
 - **Em dashes.** Plain hyphens, everywhere, including in code comments.
 - **Backticks inside a GLSL template literal.** They end the string and the error points two
   lines away.

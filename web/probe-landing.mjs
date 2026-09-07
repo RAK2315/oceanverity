@@ -308,7 +308,20 @@ const heroContrast = async (theme, width) => {
   const boxes = await p.evaluate((targets) => targets.map(([label, selector]) => {
     const el = document.querySelector(selector);
     const box = el.getBoundingClientRect();
-    return { label, colour: getComputedStyle(el).color, x: box.x, y: box.y, w: box.width, h: box.height };
+    // The element's own `opacity` and every ancestor's, folded in beside the colour's own alpha.
+    // Without this the check read `color` alone and threw the alpha away, so after the ink ramp
+    // moved from `opacity` onto `rgba()` tokens it reported **the same ratio for all six roles**
+    // in both themes - six different inks cannot be one number, and that is what gave it away.
+    let alpha = 1;
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      alpha *= parseFloat(getComputedStyle(n).opacity);
+    }
+    return {
+      label,
+      colour: getComputedStyle(el).color,
+      alpha,
+      x: box.x, y: box.y, w: box.width, h: box.height,
+    };
   }), TYPE);
   const sphere = await p.evaluate(() => {
     const r = document.getElementById("sphereWrap")?.getBoundingClientRect();
@@ -328,18 +341,27 @@ const heroContrast = async (theme, width) => {
   const png = decodePng(await p.screenshot({ clip: { x: 0, y: 0, width, height: 1400 } }));
   const out = {};
   for (const box of boxes) {
-    let sum = 0;
+    // The mean ground as a colour, not as a luminance: translucent ink has to be composited over
+    // it before its luminance means anything, and you cannot composite onto a single number.
+    let red = 0;
+    let green = 0;
+    let blue = 0;
     let n = 0;
     for (let y = Math.max(0, Math.round(box.y)); y < Math.min(png.height, box.y + box.h); y++) {
       for (let x = Math.max(0, Math.round(box.x)); x < Math.min(png.width, box.x + box.w); x++) {
         const i = (y * png.width + x) * png.channels;
-        sum += lum(png.data[i], png.data[i + 1], png.data[i + 2]);
+        red += png.data[i];
+        green += png.data[i + 1];
+        blue += png.data[i + 2];
         n += 1;
       }
     }
     if (n === 0) { fail(`${box.label} has no pixels to measure at ${width} px`); continue; }
-    const [r, g, b] = box.colour.match(/[\d.]+/g).slice(0, 3).map(Number);
-    out[box.label] = contrast(lum(r, g, b), sum / n);
+    const ground = [red / n, green / n, blue / n];
+    const parts = box.colour.match(/[\d.]+/g).map(Number);
+    const alpha = (parts.length > 3 ? parts[3] : 1) * box.alpha;
+    const ink = parts.slice(0, 3).map((v, i) => v * alpha + ground[i] * (1 - alpha));
+    out[box.label] = contrast(lum(ink[0], ink[1], ink[2]), lum(ground[0], ground[1], ground[2]));
   }
   await ctx.close();
   return out;

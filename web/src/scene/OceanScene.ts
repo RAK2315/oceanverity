@@ -64,6 +64,12 @@ import { volumeFragmentShader, volumeVertexShader } from "./volumeShader";
  * residuals is a composite of every analysis in the bake and not a picture of the Timestep on
  * screen. Carrying the position with the number is what stops the scene drawing the two apart.
  */
+/** A camera position and what it is looking at, so a caller can put both back. */
+export interface CameraPose {
+  position: [number, number, number];
+  target: [number, number, number];
+}
+
 export interface BiasMark {
   /** Signed, as a fraction of the Field's own encoded range. */
   bias: number;
@@ -2083,6 +2089,28 @@ export class OceanScene {
   focusOn(lon: number, lat: number, distance = 18): void {
     this.controls.target.set(lon, -3, -lat);
     this.camera.position.set(lon + distance * 0.15, distance * 0.75, -lat + distance * 0.8);
+    this.controls.update();
+  }
+
+  /**
+   * The camera as six numbers, and putting it back.
+   *
+   * For the exhibition screen. `focusOn` hard-sets the position, so the one question that calls
+   * it left every later question framed at its 18-unit radius - `panTo` preserves whatever
+   * distance it finds, so once one question had zoomed in, all of them were zoomed in. An
+   * operator who set the screen up on a wide view of the basin got that view for the first four
+   * questions and a close-up of one float for the rest of the day.
+   */
+  cameraPose(): CameraPose {
+    return {
+      position: this.camera.position.toArray() as [number, number, number],
+      target: this.controls.target.toArray() as [number, number, number],
+    };
+  }
+
+  setCameraPose(pose: CameraPose): void {
+    this.camera.position.fromArray(pose.position);
+    this.controls.target.fromArray(pose.target);
     this.controls.update();
   }
 

@@ -24,7 +24,7 @@
 import { biasPosition } from "./agreement";
 import type { Theme } from "./store";
 import { smoothSurface } from "./surface";
-import { transfer, type Scale } from "./transfer";
+import { isBandedPalette, isDiverging, transfer, type Scale } from "./transfer";
 import type { FieldSpec, SurfaceField } from "./types";
 
 const LIFT_DARK = 0.62;
@@ -179,4 +179,76 @@ export function surfacePixels(
     pixels[i * 4 + 3] = Math.round(255 * Math.min(Math.max(smooth.coverage[i] ?? 0, 0), 1));
   }
   return { pixels, width: smooth.width, height: smooth.height };
+}
+
+/* ------------------------------------------------------------------ choosing a colourbar */
+
+/**
+ * The alternates a reader may switch the colourbar to, and why there are two lists.
+ *
+ * ADR 0010 deleted a dropdown of nine palettes, and the reason is worth restating rather than
+ * paraphrasing: seven of them **named quantities this platform does not carry**. Picking `algae`
+ * recoloured temperature in the colours of a chlorophyll measurement nobody had taken, under a
+ * line admitting the colours meant nothing. A presentation control was reading as a data control.
+ *
+ * That was a palette naming a quantity, not a reader having a choice. So the choice is back and
+ * the lesson is kept whole: an alternate is offered as a **look**, is labelled by the colours it
+ * actually contains rather than by an ocean variable, and changes nothing about what is drawn,
+ * what the numbers say, or where the colourbar's ends sit.
+ *
+ * The split is load-bearing. A diverging Field is one whose range crosses zero - `isDiverging`
+ * decides that from the range, never from the palette - and its midpoint is a real value: the
+ * ray marcher draws two isosurface skins about it and the panel prints a `±`. A sequential ramp
+ * has no midpoint, so handing one to a diverging Field would put the pale part of the scale at
+ * an arbitrary value and quietly break the reading. A diverging Field is therefore only ever
+ * offered diverging alternates, and the same the other way.
+ *
+ * A **banded** palette is offered nothing, and that is not an oversight. Observation Coverage is
+ * four flat bands whose edges sit at whole cast counts, with a key beside it that names them; a
+ * gradient in its place repaints every cell holding 1, 2 or 3 casts as "4 or more casts". This
+ * project has already shipped that exact bug once, through the log scale.
+ */
+const SEQUENTIAL_ALTERNATES = ["thermal", "haline", "deep", "ice", "gray"];
+const DIVERGING_ALTERNATES = ["balance", "delta", "curl", "diff"];
+
+/**
+ * What each palette looks like, in the colours it contains.
+ *
+ * Read off the shipped tables at positions 0, 128 and 255 rather than written from memory, and
+ * deliberately **not** named for a quantity: "Navy to yellow", never "Temperature". A label
+ * naming an ocean variable is the whole of what ADR 0010 threw out.
+ */
+export const PALETTE_LOOKS: Record<string, string> = {
+  thermal: "Navy to yellow",
+  haline: "Indigo to pale yellow",
+  dense: "Pale to plum",
+  deep: "Cream to near-black",
+  amp: "White to dark red",
+  speed: "Cream to dark green",
+  tempo: "White to navy",
+  matter: "Pale yellow to purple",
+  ice: "Black to pale blue",
+  gray: "Black to white",
+  balance: "Navy, white, red",
+  delta: "Navy, pale yellow, green",
+  curl: "Navy, white, purple",
+  diff: "Navy, white, olive",
+  coverage: "Four flat bands",
+};
+
+/**
+ * The palettes this Field may be drawn with, its own first.
+ *
+ * Empty for a banded palette, which means "no chooser" rather than "no palette". Anything a
+ * bake did not ship is dropped rather than offered as a button that would draw nothing - a bake
+ * predating the alternates is a bake that still has to work.
+ */
+export function paletteChoices(
+  spec: FieldSpec | null | undefined,
+  available: Record<string, number[][]> = {},
+): string[] {
+  if (!spec || isBandedPalette(spec.palette)) return [];
+  const alternates = isDiverging(spec) ? DIVERGING_ALTERNATES : SEQUENTIAL_ALTERNATES;
+  const ordered = [spec.palette, ...alternates.filter((name) => name !== spec.palette)];
+  return ordered.filter((name) => Array.isArray(available[name]) && available[name].length > 0);
 }

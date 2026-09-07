@@ -13,7 +13,7 @@ Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / 
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
 
 ![Tests](https://img.shields.io/badge/tests-377%20passing-2ea043)
-![Probes](https://img.shields.io/badge/browser%20probes-13%20green-2ea043)
+![Probes](https://img.shields.io/badge/browser%20probes-15%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -122,37 +122,83 @@ hand.
 **It is a fork, not a pipeline.** That is the one thing worth understanding, and it exists to
 enforce the rule above.
 
+**Eight providers → one adapter seam → one Grid → four ways out.**
+
+### 1 · Providers, all public, each tested and dated
+
+| Provider | What it gives us |
+| --- | --- |
+| **INCOIS ERDDAP** `incois_argo_10d_VAM` | The 10-day gridded analysis - temperature and salinity |
+| **INCOIS ERDDAP** 10-day McCreary | The second analysis, for the spread between them |
+| **Argo GDAC** · Ifremer | Float profiles, with per-channel QC flags |
+| **Argo BGC** · Ifremer | Chlorophyll, on 52 of the floats |
+| **NOAA OSMC** | Moored buoys over GTS - **the instruments INCOIS do not assimilate** |
+| **Copernicus Marine** | Current vectors `uo`, `vo` at 1/12° |
+| **EGO glider GDAC** · `ftp.ifremer.fr` | The glider archive PS 26067 names |
+| **World Ocean Atlas 2023** · NOAA NCEI | The 1991-2020 climatological normal |
+| **Your own NetCDF file**, dropped on the page | The ninth adapter, `POST /api/netcdf` |
+
+### 2 · The adapter seam · Python
+
 ```
-  8 public providers            ┌──────────────────────────────────────────┐
-  + a NetCDF file a visitor     │  THE GRID                                │
-    drops on the page           │  float64, provider's own axes            │
-        │                       │  land is NaN, never zero                 │
-        │                       │  ── the scientific truth ──              │
-        ▼                       └──────────────────────────────────────────┘
-  ┌──────────────┐                    │                    │
-  │ SOURCE       │  Grid /            │ numbers,           │ quantise +
-  │ ADAPTER SEAM │  Profile           │ unchanged          │ depth-warp
-  │  9 classes   │ ─────────►         │                    ▼
-  └──────────────┘                    │           ┌─────────────────┐
-   one class per provider,            │           │  THE VOLUME     │
-   subset at the server,              │           │  1 byte a value │
-   QC flags read per channel          │           │  even depth axis│
-                                      │           └─────────────────┘
-                                      ▼                    │
-                         ┌────────────────────────┐        │ pixels only,
-                         │ REST API · OPeNDAP     │        │ never a reading
-                         │ CF-1.8 NetCDF · WMS    │        ▼
-                         │ every panel, tooltip   │   ┌──────────┐
-                         │ and comparison         │   │  SCREEN  │
-                         └────────────────────────┘   └──────────┘
+   NetCDF · CSV · FTP index          subset at the SERVER, not after download
+              │
+              ▼
+   ┌──────────────────────────────────────────────────┐
+   │  GridSource / ProfileSource                      │   samudra/sources/base.py
+   │  ─────────────────────────────                   │
+   │  one class per provider                          │   9 classes - the only code
+   │  column layout is data, not code                 │   in the project that has
+   │  quality control per channel                     │   ever heard of ERDDAP
+   │  land masked, never filled                       │
+   └──────────────────────────────────────────────────┘
+              │
+              ▼   Grid and Profile objects, on the provider's own axes
 ```
 
-The left half is ordinary: nine adapters read nine formats and hand back one `Grid`. Everything
-after that has never heard of ERDDAP or NetCDF.
+### 3 · Two representations, and only one of them is the truth
 
-The right half is the point. From the `Grid`, **numbers** go straight out to the API, the open
-standards and every panel in the browser. The `Volume` is a **branch off** the `Grid`, not a
-stage in it, and its only arrow goes to the screen. **Nothing reads a number back out of it.**
+```
+   ┌════════════════════════════════════════════════════════════┐
+   ║  THE GRID                                                  ║
+   ║  float64 · land is NaN · 24 levels · 56 × 36 · 1°          ║
+   ║                                                            ║
+   ║  The scientific truth. Every collocation, tooltip,         ║
+   ║  section, API response and served byte is read from here.  ║
+   └════════════════════════════════════════════════════════════┘
+              │
+              │  the BAKE: quantise to 4 bytes a voxel, warp the depth axis
+              ▼
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+      THE VOLUME
+   │  56 × 36 × 48 · 1 byte a value                            │
+      value · coverage · gradient · spare
+   │                                                           │
+      A picture for the GPU, and a dead end for numbers:
+   │  nothing reads a value back out of it.                    │
+   └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+```
+
+### 4 · Four ways out
+
+| Out | Reads from | What it is |
+| --- | --- | --- |
+| **Static bake** | Grid **and** Volume | 71.1 MB committed · **0 network calls** |
+| **Browser** | Grid **and** Volume | Three.js · WebGL2 · GLSL ES 3.00 |
+| **REST API** | **Grid only** | FastAPI · 21 routes |
+| **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 |
+
+> ### The rule the shape is drawn to show
+>
+> **Every number a human or a machine reads comes from the Grid. The Volume's only arrow goes to
+> the screen.** This matters most at the API, because a consumer pulling NetCDF over the wire
+> cannot see that they have been handed a quantised, depth-warped approximation.
+>
+> **Two modules break the one-copy rule, and both are held to it.** The drift integrator and the
+> vertical section run in the browser as well as in Python, because the demo runs with the API off.
+> A probe runs the shipped browser module against the pipeline's and fails on disagreement.
+> Measured: drift median **0.331 km** over 101 days; section worst gap **5.07e-5 °C** over 1,102
+> values.
 
 ### Three layers, and what separates them
 
@@ -182,30 +228,73 @@ works with no server behind it at all.
 
 ---
 
+## Tech stack
+
+| Layer | What | Why this one |
+| --- | --- | --- |
+| **Science** | Python 3.10+, NumPy, xarray, netCDF4, gsw (TEOS-10) | `gsw` is the international standard for seawater density, so our derived Field is the one an oceanographer would compute. |
+| **Colour** | cmocean | Perceptually uniform, and each scale is designed for a specific ocean quantity. A rainbow palette invents fronts that are not in the data. |
+| **Data access** | ERDDAP / OPeNDAP over `requests`, `pydap` | INCOIS and Argo both publish ERDDAP, so no scraping and no private endpoint. |
+| **API** | FastAPI + `uvicorn` | Serves the queries a static bundle cannot precompute, and the three open standards below. |
+| **Standards out** | OPeNDAP (DAP2), CF-1.8 NetCDF, OGC WMS 1.3.0 | So the analysis is readable by a Python client, a file, or a GIS - not only by this page. |
+| **Rendering** | Three.js on WebGL2, GLSL ray marching | The volume is a single ray-marched block, not a stack of images. Nothing else gets you inside the water. |
+| **Frontend** | React 18, TypeScript 5, Zustand, Vite | Zustand because every control is one flat store the scene reads once a frame; Vite for a four-page build with no config. |
+| **Verification** | pytest, Playwright | 377 tests on the science; 15 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
+| **Fonts** | Chivo, IBM Plex Mono, Space Grotesk, Inter - all self-hosted | The demo makes zero network calls. A Google Fonts link is a build failure, not a style choice. |
+
+---
+
 ## Run it
 
+**Prerequisites:** Python **3.10+**, Node **18+**, and a browser with WebGL2 (any current one).
+No account, no API key, no database.
+
 ```bash
+git clone https://github.com/RAK2315/samudra-sih26 && cd samudra-sih26
+
 # 1. install
-python -m venv .venv && .venv/Scripts/pip install -r pipeline/requirements.txt
-cd web && npm install
+python -m venv .venv
+.venv/Scripts/pip install -r pipeline/requirements.txt      # Windows
+# .venv/bin/pip install -r pipeline/requirements.txt        # macOS / Linux
+cd web && npm install && cd ..
 
-# 2. get the data (a few minutes: INCOIS, Argo, BGC-Argo, NOAA buoys, Copernicus, NOAA WOA)
-cd pipeline && ../.venv/Scripts/python -m samudra.bake
-
-# 3. run the website
-cd web && npm run dev                                      # http://localhost:5173
-
-# 4. optional: the REST API and the open standards
-.venv/Scripts/python -m uvicorn api.main:app --port 8000
+# 2. run the website
+cd web && npm run dev                                       # http://localhost:5173
 ```
+
+**That is the whole setup.** The baked data is committed, so the platform runs offline from a
+fresh clone. The two steps below are optional.
 
 ```bash
-# tests
-cd pipeline && ../.venv/Scripts/python -m pytest -q        # 377 tests
-cd web && npm run typecheck && npx vite build
+# optional: the REST API and the three open standards
+.venv/Scripts/python -m uvicorn api.main:app --port 8000    # /docs for the OpenAPI page
+
+# optional: rebuild the data from source (a few minutes; needs one free Copernicus account
+# for the current velocities, and nothing else)
+cd pipeline && ../.venv/Scripts/python -m samudra.bake
 ```
 
-The data is committed, so **step 2 is optional** - clone and run.
+### Check the claims yourself
+
+Nothing in this README is asserted without something that can fail:
+
+```bash
+cd pipeline && ../.venv/Scripts/python -m pytest -q         # 377 tests, ~35 s
+cd web && npm run typecheck && npx vite build
+
+# the 15 browser probes measure the rendered page rather than trusting it.
+# They need a preview server; each takes a minute or two.
+cd web && npx vite preview --port 4173 &
+node probe-guide.mjs        # every control is explained, every figure came from the bake
+node probe-controls.mjs     # six rules per Field, checked rather than eyeballed
+node probe-palette.mjs      # the colourbar switcher, and that the water and legend agree
+node probe-drift.mjs        # the browser's integrator against the pipeline's, in kilometres
+node probe-landing.mjs      # no external request, and the hero's contrast in both themes
+node probe-chrome.mjs       # every text role in the console, in both themes
+```
+
+`probe-section.mjs` and `probe-upload.mjs` additionally need the API on port 8000; the rest do
+not.
 
 ---
 

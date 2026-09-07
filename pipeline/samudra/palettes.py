@@ -36,6 +36,8 @@ import numpy as np
 # INCOIS's cast count and `matter` carries their error estimate. None of them is offered to a
 # user to pick.
 AVAILABLE = {
+    # One per Field. Each of these is the palette some FieldSpec names, and none of them was
+    # chosen by a user.
     "thermal": "Temperature - cold and dark to warm and bright",
     "haline": "Salinity - fresh to saline",
     "dense": "Density",
@@ -45,7 +47,37 @@ AVAILABLE = {
     "speed": "Current speed - still to fast",
     "tempo": "A count of observations",
     "matter": "An error estimate - small to large",
+    # Alternates, added 2026-09-07 for the colourbar switcher. See ALTERNATES below: these are
+    # offered as a *rendering* of the Field already on screen, never as a different quantity,
+    # which is the distinction ADR 0010 was written about.
+    "ice": "Sequential alternate - near-black to pale blue",
+    "gray": "Sequential alternate - black to white, and the one that survives being printed",
+    "delta": "Diverging alternate - blue through pale yellow to green",
+    "curl": "Diverging alternate - teal through white to crimson",
+    "diff": "Diverging alternate - blue through white to brown",
 }
+
+# What a reader may switch the colourbar to, and why the two lists are separate.
+#
+# ADR 0010 deleted a dropdown of nine because seven of them named quantities this platform does
+# not carry - picking `algae` recoloured temperature in the colours of a chlorophyll measurement
+# nobody had taken. That failure was **a palette naming a quantity**, not a reader having a
+# choice, and the fix here keeps the first half of it: an alternate is offered as a look, is
+# labelled by the colours it actually contains, and never changes what is being drawn or what
+# the numbers say.
+#
+# The split is load-bearing rather than tidy. A diverging Field is one whose range crosses zero
+# (`isDiverging` in `web/src/transfer.ts` decides it from the range, not from the palette), and
+# its midpoint is a real value: the isosurface draws two skins about it and the panel prints a
+# `+/-`. Handing it a sequential ramp would put the pale end of the scale somewhere arbitrary
+# and quietly destroy that. So a diverging Field is only ever offered diverging alternates.
+#
+# `coverage` is offered nothing at all, and that is not an oversight. Its four flat bands have
+# edges at whole cast counts and the key beside it names them; a gradient in its place repaints
+# every cell holding 1, 2 or 3 casts as "4 or more casts", which is a measured bug this project
+# has already shipped once through the log scale.
+SEQUENTIAL_ALTERNATES = ("thermal", "haline", "deep", "ice", "gray")
+DIVERGING_ALTERNATES = ("balance", "delta", "curl", "diff")
 
 RESOLUTION = 256
 

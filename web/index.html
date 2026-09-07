@@ -13,6 +13,9 @@
   // dark; light is the parchment the redesign is built around, offered the moment it is stored
   // or preferred.
   (function () {
+    // Before paint, so the reveal never flashes: scripted visibility is opt-in, and this class
+    // is the only thing that grants it. No JS, no class, and every block stays visible.
+    document.documentElement.className += " js";
     try {
       if (localStorage.getItem("samudra.theme") === "light") {
         document.documentElement.dataset.theme = "light";
@@ -51,6 +54,18 @@
     --color-paper: #16191c;
     --color-ash: #33383b;
     --color-stone: #202426;
+
+    /*
+     * Secondary and tertiary ink, as tokens rather than as `opacity` on the element.
+     *
+     * Opacity is not theme-aware and cannot be: one alpha over two grounds is two contrast
+     * ratios. Measured, `opacity: 0.55` on 11px caption text is 5.44:1 on the dark ground and
+     * 3.54:1 on the light one - ten captions across the page failed WCAG AA on light and passed
+     * on dark, from the same declaration. The alpha now belongs to the theme, so both sides
+     * clear 4.5:1 and stay within half a point of each other.
+     */
+    --ink-2: rgba(var(--color-ink-rgb), 0.80);
+    --ink-3: rgba(var(--color-ink-rgb), 0.60);
     --gradient-sphere: linear-gradient(255deg, #e3f3fc 0%, #86c1ea 28%, #2f6fa8 62%, #0a2540 100%);
 
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -80,6 +95,10 @@
     --color-paper: #ffffff;
     --color-ash: #bfbebe;
     --color-stone: #cdcdc9;
+    /* Dark ink on a pale ground needs more of itself to reach the same ratio than pale ink on
+       a dark one does. Measured on this parchment: 0.70 is 5.53:1, 0.55 was 3.54:1. */
+    --ink-2: rgba(var(--color-ink-rgb), 0.82);
+    --ink-3: rgba(var(--color-ink-rgb), 0.70);
     color-scheme: light;
   }
 
@@ -118,22 +137,39 @@
   /* Sections anchor underneath the fixed nav, so a heading is never hidden behind it. */
   section[id], #top { scroll-margin-top: 104px; }
 
-  /* ---------------------------------------------------------- reveal-on-scroll */
-  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(.16,1,.3,1), transform 0.9s cubic-bezier(.16,1,.3,1); }
-  .reveal.in-view { opacity: 1; transform: translateY(0); }
+  /*
+   * Reveal-on-scroll, as an enhancement over an already-visible page.
+   *
+   * `.reveal { opacity: 0 }` unconditionally is content gated on a transition: 26 of the page's
+   * blocks shipped invisible and came back only when an IntersectionObserver fired. A headless
+   * render, a print, a background tab or one script error and most of the page is blank, with
+   * nothing on screen admitting it. The rule is scoped to `html.js` instead, set by an inline
+   * script in the head, so the page's resting state is visible and JS only takes visibility away
+   * once it has proved it can give it back. Under reduced motion it never takes it away at all.
+   */
+  html.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(.16,1,.3,1), transform 0.9s cubic-bezier(.16,1,.3,1); }
+  html.js .reveal.in-view { opacity: 1; transform: translateY(0); }
   .reveal-1 { transition-delay: 0.06s; }
   .reveal-2 { transition-delay: 0.14s; }
   .reveal-3 { transition-delay: 0.22s; }
-
-  /* ---------------------------------------------------------- section label */
-  .section-label {
-    font-family: var(--font-display);
-    font-size: var(--text-caption); font-weight: 400; text-transform: uppercase;
-    letter-spacing: var(--ls-caption); color: var(--color-ink);
-    display: flex; align-items: center; gap: var(--sp-15);
-    margin-bottom: var(--sp-30);
+  @media (prefers-reduced-motion: reduce) {
+    html.js .reveal { opacity: 1; transform: none; }
   }
-  .section-label::after { content: ""; flex: 1; height: 1px; background: var(--color-ash); }
+
+  /*
+   * A figure arriving from the bake, which is the one thing on this page that genuinely changes
+   * state after load. Every number in the hero and the evidence grid starts as an ellipsis and
+   * is replaced when `manifest.json` and `residuals.json` resolve; until now it simply swapped,
+   * so the page's only real event was also its least visible one. The settle is 260 ms and only
+   * ever runs once per figure.
+   */
+  .figure { display: inline-block; }
+  html.js .figure.landed { animation: figure-land 0.42s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes figure-land {
+    from { opacity: 0; transform: translateY(0.22em); }
+    to { opacity: 1; transform: none; }
+  }
+
 
   /* ---------------------------------------------------------- ghost link */
   .ghost-link {
@@ -145,10 +181,11 @@
   }
   .ghost-link .arrow { transition: transform 0.3s cubic-bezier(.16,1,.3,1); display: inline-block; }
   .ghost-link::after {
-    content: ""; position: absolute; left: 0; right: 100%; bottom: -1px; height: 1px;
-    background: var(--color-ink); transition: right 0.3s cubic-bezier(.16,1,.3,1);
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: var(--color-ink); transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.3s cubic-bezier(.16,1,.3,1);
   }
-  .ghost-link:hover::after { right: 0; }
+  .ghost-link:hover::after { transform: scaleX(1); }
   .ghost-link:hover .arrow { transform: translateX(4px); }
 
   /* ---------------------------------------------------------- pill button (the one state-change button) */
@@ -174,7 +211,7 @@
     background: rgba(var(--color-parchment-rgb), 0);
     border-bottom: 1px solid rgba(191,190,190,0);
     backdrop-filter: blur(0px);
-    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease, padding 0.4s ease;
+    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
   }
   nav#nav.scrolled {
     background: rgba(var(--color-parchment-rgb), 0.88);
@@ -186,8 +223,22 @@
   .brand { font-family: var(--font-display); font-size: var(--text-body-sm); font-weight: 700; letter-spacing: var(--ls-caption); text-transform: uppercase; }
   .brand i { font-style: normal; color: var(--color-ink); opacity: 0.55; }
   .nav-links { display: flex; align-items: center; gap: var(--sp-32); }
-  .nav-links a:not(.pill-btn) { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.72; transition: opacity 0.25s ease; }
-  .nav-links a:not(.pill-btn):hover { opacity: 1; }
+  /*
+   * The nav link for the section you are actually in.
+   *
+   * Five links that never change is a menu; the same five with the current one marked is a
+   * position readout, and it is the one piece of state a long scrolling page has. The rule
+   * grows from the left rather than fading, so the eye catches the handover between sections.
+   */
+  .nav-links a:not(.pill-btn) { position: relative; font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-2); transition: color 0.25s ease; }
+  .nav-links a:not(.pill-btn)::after {
+    content: ""; position: absolute; left: 0; bottom: -5px; height: 1px; width: 100%;
+    background: var(--color-ink); transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.34s cubic-bezier(.16,1,.3,1);
+  }
+  .nav-links a:not(.pill-btn):hover { color: var(--color-ink); }
+  .nav-links a[aria-current="true"] { color: var(--color-ink); }
+  .nav-links a[aria-current="true"]::after { transform: scaleX(1); }
   .nav-links .pill-btn { padding: var(--sp-8) var(--sp-19); font-size: 11px; }
   @media (max-width: 860px) { .nav-links a:not(.pill-btn) { display: none; } }
 
@@ -210,11 +261,21 @@
   /* ---------------------------------------------------------- hero */
   header.hero { position: relative; padding: 168px 0 96px; overflow: hidden; }
 
-  .rings { position: absolute; top: 50%; right: 6%; transform: translateY(-50%); width: 900px; height: 900px; pointer-events: none; z-index: 0; }
-  .rings circle { fill: none; stroke: var(--color-ink); stroke-opacity: 0.10; }
-  .rings .r1 { animation: spin 140s linear infinite; transform-origin: 450px 450px; }
-  .rings .r2 { animation: spin 110s linear infinite reverse; transform-origin: 450px 450px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /*
+   * The orbit rings, concentric with the globe because they are its sibling in its own cell.
+   *
+   * They used to be a 900px square anchored to `right: 6%` of the hero while the globe sat in a
+   * grid column, so the two only coincided at about 1920px. Measured, centre to centre: 110px
+   * apart at 1920, 156 at 1600, 242 at 1366, 276 at 1200 - and from 1600 down all three circles
+   * cut through the headline, the lede and the stat strip. Below 1180 the globe is hidden and
+   * the rings stayed, three circles orbiting nothing.
+   *
+   * Sized as a percentage of the cell rather than in pixels, so they scale with the globe and
+   * have no width at which they stop fitting. They live in the cell, so they disappear with it.
+   */
+  .globe-col { grid-column: 2; grid-row: 1; position: relative; display: grid; place-items: center; z-index: 1; }
+  .rings { position: absolute; top: 50%; left: 50%; width: 132%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+  .rings circle { fill: none; stroke: var(--color-ink); stroke-opacity: 0.14; vector-effect: non-scaling-stroke; }
 
   /*
    * The hero is a two-column grid: the type owns its own column and the globe owns its own,
@@ -234,19 +295,19 @@
   .eyebrow {
     font-family: var(--font-display);
     font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption);
-    margin-bottom: var(--sp-19); opacity: 0.7;
+    margin-bottom: var(--sp-19); color: var(--ink-2);
   }
   h1.display {
     font-size: clamp(46px, 7.2vw, 103px); font-weight: 400; line-height: var(--lh-display);
     letter-spacing: var(--ls-display); text-transform: uppercase; margin: 0;
   }
   .hero-inner .lede { margin-top: var(--sp-30); font-size: var(--text-body); line-height: var(--lh-body); max-width: 46ch; }
-  .hero-inner .sub { margin-top: var(--sp-15); font-size: var(--text-body-sm); line-height: var(--lh-body-sm); max-width: 48ch; opacity: 0.72; }
+  .hero-inner .sub { margin-top: var(--sp-15); font-size: var(--text-body-sm); line-height: var(--lh-body-sm); max-width: 48ch; color: var(--ink-2); }
   .hero-actions { display: flex; flex-wrap: wrap; gap: var(--sp-30); align-items: center; margin-top: var(--sp-46); }
 
   .hero-meta { display: flex; flex-wrap: wrap; gap: var(--sp-8) var(--sp-30); margin-top: var(--sp-46); }
-  .hero-meta span { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; }
-  .hero-meta b { font-weight: 400; opacity: 1; }
+  .hero-meta span { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
+  .hero-meta b { font-weight: 400; color: var(--color-ink); }
 
 /*
    * The globe, in its own column. `.sphere` is a real CSS fallback - a radial gradient, half
@@ -260,7 +321,6 @@
    */
   .sphere-wrap {
     position: relative; z-index: 1;
-    grid-column: 2; grid-row: 1;
     justify-self: center; align-self: center;
     width: 100%; max-width: 560px;
     aspect-ratio: 1;
@@ -296,7 +356,7 @@
   #globeCanvas.dragging { cursor: grabbing; }
 
   @media (max-width: 1180px) {
-    .sphere-wrap { display: none; }
+    .globe-col { display: none; }
     .hero .wrap { grid-template-columns: minmax(0, 1fr); }
   }
 
@@ -309,8 +369,13 @@
   }
   .stat-strip .cell { padding: var(--sp-30) var(--sp-19) var(--sp-19); border-left: 1px solid var(--color-ash); }
   .stat-strip .cell:first-child { border-left: none; }
+  html.js .stat-strip .cell.reveal { transform: translateY(16px); }
+  .stat-strip .cell:nth-child(2) { transition-delay: 0.07s; }
+  .stat-strip .cell:nth-child(3) { transition-delay: 0.14s; }
+  .stat-strip .cell:nth-child(4) { transition-delay: 0.21s; }
+  .stat-strip .cell:nth-child(5) { transition-delay: 0.28s; }
   .stat-strip b { display: block; font-size: var(--text-heading-sm); font-weight: 400; line-height: 1; font-variant-numeric: tabular-nums; }
-  .stat-strip span { font-family: var(--font-display); display: block; margin-top: var(--sp-8); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.6; }
+  .stat-strip span { font-family: var(--font-display); display: block; margin-top: var(--sp-8); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
   @media (max-width: 900px) { .stat-strip { grid-template-columns: repeat(2, 1fr); } .stat-strip .cell:nth-child(2n+1) { border-left: none; } }
 
   .scroll-cue {
@@ -323,26 +388,13 @@
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
   .scroll-cue.hidden { opacity: 0; }
 
-  /* ---------------------------------------------------------- custom cursor */
-  .cursor-ring, .cursor-dot {
-    position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
-    border-radius: 50%;
-    /* hidden until the first real mousemove arms them (see the script at the foot)
-       and skipped entirely on coarse/touch pointers */
-    opacity: 0;
-    transition: opacity 0.4s ease, transform 0.15s linear;
-  }
-  .cursor-dot { width: 6px; height: 6px; background: var(--color-ink); }
-  .cursor-ring { width: 40px; height: 40px; border: 1px solid var(--color-ink); transition: opacity 0.4s ease, width 0.25s ease, height 0.25s ease, background 0.25s ease, transform 0.15s linear; }
-  .cursor-ring.hovering { width: 58px; height: 58px; background: rgba(var(--color-ink-rgb), 0.08); }
-
   /* ---------------------------------------------------------- sections */
   section { padding: var(--sp-119) 0; border-top: 1px solid var(--color-ash); position: relative; }
   h2.heading {
     font-size: clamp(30px, 4vw, 46px); font-weight: 400; line-height: 1.04;
     letter-spacing: var(--ls-heading-sm); max-width: 18ch;
   }
-  .section-lede { margin-top: var(--sp-19); font-size: var(--text-body); line-height: var(--lh-body); max-width: 62ch; opacity: 0.78; }
+  .section-lede { margin-top: var(--sp-19); font-size: var(--text-body); line-height: var(--lh-body); max-width: 62ch; color: var(--ink-2); }
 
   /* grid-paper card */
   .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1px; margin-top: var(--sp-46); background: var(--color-ash); border: 1px solid var(--color-ash); }
@@ -351,30 +403,33 @@
     background-image: radial-gradient(var(--color-ash) 1px, transparent 1px);
     background-size: 16px 16px; background-position: -8px -8px;
   }
-  .card .tag { font-family: var(--font-display); display: inline-block; margin-bottom: var(--sp-19); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; }
+  .card .tag { font-family: var(--font-display); display: inline-block; margin-bottom: var(--sp-19); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
   .card h3 { font-size: var(--text-subheading); font-weight: 400; line-height: 1.08; margin-bottom: var(--sp-15); }
-  .card p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); opacity: 0.78; }
+  .card p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); color: var(--ink-2); }
 
   /* steps */
   .steps { margin-top: var(--sp-46); }
   .step { display: grid; grid-template-columns: 140px 1fr; gap: var(--sp-30); padding: var(--sp-30) 0; border-top: 1px solid var(--color-ash); }
   .step:last-child { border-bottom: 1px solid var(--color-ash); }
-  .step .n { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; padding-top: 4px; }
+  .step .n { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); padding-top: 4px; }
   .step h3 { font-size: var(--text-heading-sm); font-weight: 400; margin-bottom: var(--sp-8); }
-  .step p { font-size: var(--text-body); line-height: var(--lh-body); max-width: 62ch; opacity: 0.78; }
+  .step p { font-size: var(--text-body); line-height: var(--lh-body); max-width: 62ch; color: var(--ink-2); }
   @media (max-width: 720px) { .step { grid-template-columns: 1fr; gap: var(--sp-8); } }
 
   /* featured work card */
   figure.shot { margin: 0; background: var(--color-paper); border: 1px solid var(--color-ash); }
   figure.shot img { display: block; width: 100%; height: auto; }
-  figure.shot figcaption { font-family: var(--font-display); padding: var(--sp-19); border-top: 1px solid var(--color-ash); font-size: var(--text-caption); line-height: 1.6; letter-spacing: var(--ls-caption); opacity: 0.65; }
-  figure.shot figcaption b { font-weight: 700; opacity: 1; }
+  figure.shot figcaption { font-family: var(--font-display); padding: var(--sp-19); border-top: 1px solid var(--color-ash); font-size: var(--text-caption); line-height: 1.6; letter-spacing: var(--ls-caption); color: var(--ink-3); }
+  figure.shot figcaption b { font-weight: 700; color: var(--color-ink); }
 
   .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: var(--sp-19); margin-top: var(--sp-46); }
 
   /* ---------------------------------------------------------- the fourteen things, as a rail */
   .rail-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-32); flex-wrap: wrap; }
-  .rail-nav { display: flex; gap: var(--sp-15); }
+  .rail-nav { display: flex; align-items: center; gap: var(--sp-15); }
+  .rail-count { display: flex; align-items: baseline; gap: 5px; margin-right: var(--sp-8); font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); }
+  .rail-count b { font-weight: 400; font-size: var(--text-body-sm); font-variant-numeric: tabular-nums; color: var(--color-ink); }
+  .rail-count span { color: var(--ink-3); }
   .rail-nav button {
     width: 44px; height: 44px; border: 1px solid var(--color-ink); border-radius: 50%;
     background: transparent; color: var(--color-ink); font-size: 18px; line-height: 1;
@@ -400,9 +455,9 @@
   .rail .feature:hover { border-color: var(--color-ink); transform: translateY(-3px); }
   .rail .feature img { width: 100%; height: auto; display: block; border-bottom: 1px solid var(--color-ash); }
   .rail .feature .feature-body { padding: var(--sp-19); }
-  .rail .feature .kind { font-family: var(--font-display); display: block; font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; margin-bottom: var(--sp-8); }
+  .rail .feature .kind { font-family: var(--font-display); display: block; font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); margin-bottom: var(--sp-8); }
   .rail .feature h3 { font-size: 24px; line-height: 1.05; font-weight: 400; margin: 0; color: var(--color-ink); }
-  .rail .feature p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); opacity: 0.78; margin: var(--sp-8) 0 0; }
+  .rail .feature p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); color: var(--ink-2); margin: var(--sp-8) 0 0; }
   .rail .feature .more { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); margin-top: var(--sp-15); }
   @media (max-width: 720px) { .rail .feature { flex-basis: 82vw; } }
 
@@ -420,8 +475,8 @@
   dialog.sheet img { display: block; width: 100%; height: auto; }
   dialog.sheet .sheet-body { padding: var(--sp-30); }
   dialog.sheet h3 { font-size: var(--text-subheading); font-weight: 400; line-height: 1.05; }
-  dialog.sheet p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); opacity: 0.82; margin: var(--sp-15) 0 0; }
-  dialog.sheet .measure { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.6; border-top: 1px solid var(--color-ash); padding-top: var(--sp-15); }
+  dialog.sheet p { font-size: var(--text-body-sm); line-height: var(--lh-body-sm); color: var(--ink-2); margin: var(--sp-15) 0 0; }
+  dialog.sheet .measure { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); border-top: 1px solid var(--color-ash); padding-top: var(--sp-15); }
   .sheet-close {
     position: absolute; top: 14px; right: 14px; z-index: 2;
     width: 36px; height: 36px; border-radius: 50%;
@@ -434,42 +489,42 @@
   .chips { display: flex; flex-wrap: wrap; gap: var(--sp-15); margin-top: var(--sp-46); }
   .chip {
     display: inline-flex; flex-direction: column; gap: 3px;
-    border: 1px solid var(--color-ash); border-radius: 10px;
+    border: 1px solid var(--color-ash); border-radius: var(--radius-inputs);
     background: var(--color-paper); color: var(--color-ink);
     padding: var(--sp-15) var(--sp-19); font-family: var(--font-display); font-size: var(--text-body-sm);
   }
-  .chip small { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; }
+  .chip small { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
 
   /* evidence */
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; margin-top: var(--sp-46); background: var(--color-ash); border: 1px solid var(--color-ash); }
   .stat { background: var(--color-paper); padding: var(--sp-30); }
   .stat b { display: block; font-size: var(--text-heading); font-weight: 400; line-height: 0.9; font-variant-numeric: tabular-nums; }
-  .stat span { font-family: var(--font-display); display: block; margin-top: var(--sp-15); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.6; }
+  .stat span { font-family: var(--font-display); display: block; margin-top: var(--sp-15); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
 
   .pull { margin-top: var(--sp-46); padding-left: var(--sp-30); border-left: 1px solid var(--color-ink); max-width: 62ch; }
   .pull p { font-size: var(--text-subheading); line-height: 1.2; font-weight: 400; }
-  .pull cite { display: block; margin-top: var(--sp-19); font-size: var(--text-caption); font-style: normal; text-transform: uppercase; letter-spacing: var(--ls-caption); opacity: 0.55; }
+  .pull cite { display: block; margin-top: var(--sp-19); font-size: var(--text-caption); font-style: normal; text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
 
   /* plain list */
   ul.plain { margin: var(--sp-30) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-15); max-width: 74ch; }
-  ul.plain li { position: relative; padding-left: var(--sp-30); font-size: var(--text-body-sm); line-height: var(--lh-body-sm); opacity: 0.82; }
+  ul.plain li { position: relative; padding-left: var(--sp-30); font-size: var(--text-body-sm); line-height: var(--lh-body-sm); color: var(--ink-2); }
   ul.plain li::before { content: ""; position: absolute; left: 0; top: 11px; width: 15px; height: 1px; background: var(--color-ink); opacity: 0.5; }
-  ul.plain li strong { font-weight: 700; opacity: 1; }
+  ul.plain li strong { font-weight: 700; color: var(--color-ink); }
 
   .stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-30); margin-top: var(--sp-46); }
-  .stack h3 { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); margin-bottom: var(--sp-15); opacity: 0.6; }
+  .stack h3 { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); margin-bottom: var(--sp-15); color: var(--ink-3); }
   .stack ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-8); }
-  .stack li { font-size: var(--text-body-sm); opacity: 0.85; }
+  .stack li { font-size: var(--text-body-sm); color: var(--ink-2); }
 
   /* final */
   .final { text-align: center; padding: 140px 0; }
   .final h2 { max-width: none; margin: 0 auto; }
-  .final p { margin: var(--sp-19) auto 0; max-width: 54ch; font-size: var(--text-body); opacity: 0.78; }
+  .final p { margin: var(--sp-19) auto 0; max-width: 54ch; font-size: var(--text-body); color: var(--ink-2); }
   .final .hero-actions { justify-content: center; margin-top: var(--sp-46); }
 
   footer { border-top: 1px solid var(--color-ash); padding: var(--sp-46) 0 var(--sp-76); }
-  footer p { font-size: var(--text-caption); line-height: 1.8; opacity: 0.55; max-width: 80ch; }
-  footer a { text-decoration: underline; text-underline-offset: 3px; opacity: 0.85; }
+  footer p { font-size: var(--text-caption); line-height: 1.8; color: var(--ink-3); max-width: 80ch; }
+  footer a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink-2); }
   footer .foot-row { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-30); margin-top: var(--sp-30); flex-wrap: wrap; }
 </style>
 </head>
@@ -494,12 +549,6 @@
 </nav>
 
 <header class="hero" id="top">
-  <svg class="rings" viewBox="0 0 900 900" aria-hidden="true">
-    <circle class="r1" cx="450" cy="450" r="440"/>
-    <circle class="r1" cx="450" cy="450" r="360"/>
-    <circle class="r2" cx="450" cy="450" r="280"/>
-  </svg>
-
   <div class="wrap">
     <div class="hero-inner">
       <div class="eyebrow reveal">Smart India Hackathon 2026 &middot; PS 26067 &middot; MoES / INCOIS</div>
@@ -524,24 +573,32 @@
       </div>
     </div>
 
-    <div class="sphere-wrap" id="sphereWrap" aria-hidden="true">
-      <div class="sphere" id="sphereFallback"></div>
-      <canvas id="globeCanvas"></canvas>
+    <div class="globe-col" aria-hidden="true">
+      <svg class="rings" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="49.5"/>
+        <circle cx="50" cy="50" r="41"/>
+        <circle cx="50" cy="50" r="32"/>
+      </svg>
+      <div class="sphere-wrap" id="sphereWrap">
+        <div class="sphere" id="sphereFallback"></div>
+        <canvas id="globeCanvas"></canvas>
+      </div>
     </div>
 
-    <div class="stat-strip reveal">
-      <div class="cell"><b id="m-instruments">&hellip;</b><span>Instruments in the water</span></div>
-      <div class="cell"><b id="m-fields">&hellip;</b><span>Variables</span></div>
-      <div class="cell"><b id="m-depth2">&hellip;</b><span>Depth range</span></div>
-      <div class="cell"><b id="m-latest2">&hellip;</b><span>Analysis to</span></div>
-      <div class="cell"><b>0</b><span>Network calls to run</span></div>
+    <!-- Each cell reveals on its own beat rather than the strip arriving as one block: five
+         separate figures read as five, and the rule between them draws itself in order. -->
+    <div class="stat-strip">
+      <div class="cell reveal"><b id="m-instruments">&hellip;</b><span>Instruments in the water</span></div>
+      <div class="cell reveal"><b id="m-fields">&hellip;</b><span>Variables</span></div>
+      <div class="cell reveal"><b id="m-depth2">&hellip;</b><span>Depth range</span></div>
+      <div class="cell reveal"><b id="m-latest2">&hellip;</b><span>Analysis to</span></div>
+      <div class="cell reveal"><b>0</b><span>Network calls to run</span></div>
     </div>
   </div>
 </header>
 
 <section id="problem">
   <div class="wrap">
-    <div class="section-label reveal">The gap</div>
     <h2 class="heading reveal">The data already exists. Nobody can look at it together.</h2>
     <p class="section-lede reveal reveal-1">
       INCOIS runs ocean models and INCOIS collects real measurements from robot floats drifting
@@ -577,7 +634,6 @@
 <section id="features">
   <div class="wrap rail-head">
     <div class="reveal">
-      <div class="section-label">What it does</div>
       <h2 class="heading reveal reveal-1">Fourteen things you can do with it.</h2>
       <p class="section-lede reveal reveal-1">
         Drag the rail, or use the arrows. Open any card for the detail and the measurement
@@ -585,6 +641,9 @@
       </p>
     </div>
     <div class="rail-nav">
+      <!-- Where you are in fourteen cards. Two arrows tell you a direction and nothing about
+           how far along the rail you have got; this is the state the arrows leave unsaid. -->
+      <p class="rail-count" id="railCount" aria-live="polite"><b id="railAt">1</b><span>of 14</span></p>
       <button type="button" id="rail-prev" aria-label="Previous features">&larr;</button>
       <button type="button" id="rail-next" aria-label="More features">&rarr;</button>
     </div>
@@ -811,7 +870,7 @@
           <div class="feature-body">
             <span class="kind">Interoperability</span>
             <h3>OPeNDAP, CF and WMS</h3>
-            <p>Not a dead end. Other systems can read it back.</p>
+            <p>The same analysis, served out to a Python client, a GIS or a file.</p>
             <div class="more">Open &rarr;</div>
           </div>
         </button>
@@ -819,7 +878,7 @@
 
       <dialog class="sheet" id="sheet" aria-label="Feature detail">
         <button class="sheet-close" type="button" id="sheet-close" aria-label="Close">&#10005;</button>
-        <img id="sheet-image" src="" alt="">
+        <img id="sheet-image" alt="" hidden>
         <div class="sheet-body">
           <h3 id="sheet-title"></h3>
           <p id="sheet-text"></p>
@@ -836,7 +895,6 @@
 
 <section id="how">
   <div class="wrap">
-    <div class="section-label reveal">How it works</div>
     <h2 class="heading reveal">Three moves, one continuous scene</h2>
 
     <div class="steps">
@@ -896,7 +954,6 @@
 
 <section id="everyone">
   <div class="wrap">
-    <div class="section-label reveal reveal-1">For everyone, not just forecasters</div>
     <h2 class="heading reveal reveal-1">The problem statement asks for a science communication tool. So there are two doors.</h2>
     <p class="section-lede reveal reveal-2">
       It names school and college students, the general public at awareness campaigns, and
@@ -954,7 +1011,6 @@
 
 <section id="variables">
   <div class="wrap">
-    <div class="section-label reveal reveal-1">Fifteen variables</div>
     <h2 class="heading reveal reveal-1">INCOIS publish two of these. The rest are worked out here.</h2>
     <p class="section-lede reveal reveal-2">
       Which is the problem statement's "additional model variables with minimal code change"
@@ -984,7 +1040,6 @@
 
 <section id="evidence">
   <div class="wrap">
-    <div class="section-label reveal">The contribution</div>
     <h2 class="heading reveal">Model against observation, in the same view</h2>
     <p class="section-lede reveal reveal-1">
       This is the thing the problem statement says no existing tool does. It is also not a
@@ -1020,7 +1075,6 @@
 
 <section id="built">
   <div class="wrap">
-    <div class="section-label reveal">How it is built</div>
     <h2 class="heading reveal">Open standards in, WebGL out</h2>
 
     <div class="split reveal reveal-1">
@@ -1069,7 +1123,6 @@
 
 <section class="final">
   <div class="wrap">
-    <div class="section-label reveal" style="justify-content:center;">Ready</div>
     <h2 class="heading reveal">Open it and fly into the water.</h2>
     <p class="reveal reveal-1">No install, no account, no plugin. It runs entirely in your browser on real INCOIS data.</p>
     <div class="hero-actions reveal reveal-2">
@@ -1103,8 +1156,6 @@
   </div>
 </footer>
 
-<div class="cursor-ring" id="cursorRing"></div>
-<div class="cursor-dot" id="cursorDot"></div>
 
 <div class="scroll-cue" id="scrollCue"><span>Scroll</span><span class="down">&darr;</span></div>
 
@@ -1120,9 +1171,45 @@
 
   // scroll reveal
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
+    // Kept observed rather than unobserved on first hit: an instant jump (a #hash on load,
+    // or an anchor under reduced motion) is a scroll position the observer never samples,
+    // and an element dropped that way would stay invisible for the rest of the session.
+    entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('in-view'); });
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+  /*
+   * Which section you are in, marked in the nav.
+   *
+   * A fixed menu of five that never responds is the page's largest piece of dead chrome, and
+   * position is the one thing a 7,000 px scroll actually has to report. The bottom margin keeps
+   * the handover at the point the heading reaches the upper third of the glass, rather than at
+   * whichever section happens to own the most pixels.
+   */
+  (function () {
+    var links = {};
+    document.querySelectorAll('.nav-links a[href^="#"]').forEach(function (a) {
+      links[a.getAttribute('href').slice(1)] = a;
+    });
+    var ids = Object.keys(links);
+    if (!ids.length) return;
+    var current = '';
+    var mark = function (id) {
+      if (id === current) return;
+      current = id;
+      ids.forEach(function (key) {
+        if (key === id) links[key].setAttribute('aria-current', 'true');
+        else links[key].removeAttribute('aria-current');
+      });
+    };
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) mark(e.target.id); });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) seen.observe(el);
+    });
+  })();
 
   // theme toggle: light is recorded as data-theme=light against a dark default, one shared key.
   // The toggle swaps tokens on <html>; it could not swap the *screenshots*, because an `<img src>`
@@ -1157,55 +1244,6 @@
   });
   paintThemeImages();
 
-  // custom cursor: a trailing dot + ring that leads the pointer, in keeping with the
-  // "no default chrome" editorial feel. Hidden until the first real movement, so a headless
-  // browser or a touch screen never sees it sitting mid-page; skipped on coarse pointers.
-  var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (hasFinePointer) {
-    var dot = document.getElementById('cursorDot');
-    var ring = document.getElementById('cursorRing');
-    var armed = false;
-    var mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
-    window.addEventListener('mousemove', function (e) {
-      if (!armed) {
-        armed = true;
-        dot.style.opacity = '1';
-        ring.style.opacity = '0.5';
-      }
-      mouseX = e.clientX; mouseY = e.clientY;
-      dot.style.transform = 'translate(' + mouseX + 'px, ' + mouseY + 'px) translate(-50%,-50%)';
-    });
-    dot.style.opacity = '0';
-    ring.style.opacity = '0';
-    function ringLoop() {
-      ringX += (mouseX - ringX) * 0.18;
-      ringY += (mouseY - ringY) * 0.18;
-      ring.style.transform = 'translate(' + ringX + 'px, ' + ringY + 'px) translate(-50%,-50%)';
-      requestAnimationFrame(ringLoop);
-    }
-    ringLoop();
-
-    document.querySelectorAll('a, button').forEach(function (el) {
-      el.addEventListener('mouseenter', function () { ring.classList.add('hovering'); });
-      el.addEventListener('mouseleave', function () { ring.classList.remove('hovering'); });
-    });
-
-    // magnetic pull: the pill button leans toward the cursor within range, springs back on exit.
-    document.querySelectorAll('.pill-btn').forEach(function (btn) {
-      var label = btn.querySelector('.btn-label');
-      btn.addEventListener('mousemove', function (e) {
-        var r = btn.getBoundingClientRect();
-        var relX = e.clientX - (r.left + r.width / 2);
-        var relY = e.clientY - (r.top + r.height / 2);
-        btn.style.transform = 'translate(' + (relX * 0.28) + 'px, ' + (relY * 0.5) + 'px)';
-        if (label) label.style.transform = 'translate(' + (relX * 0.12) + 'px, ' + (relY * 0.22) + 'px)';
-      });
-      btn.addEventListener('mouseleave', function () {
-        btn.style.transform = 'translate(0,0)';
-        if (label) label.style.transform = 'translate(0,0)';
-      });
-    });
-  }
 </script>
 
 <script>
@@ -1219,9 +1257,15 @@
    */
   (function () {
     var DATA = "./data/";
+    // A figure landing is a state change - the bake answered - so it is allowed to move.
+    // Once per element, and never when the reader has asked for less motion.
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function set(id, text) {
       var node = document.getElementById(id);
-      if (node && text) node.textContent = text;
+      if (!node || !text || node.textContent === text) return;
+      node.textContent = text;
+      if (still || node.classList.contains("landed")) return;
+      node.classList.add("figure", "landed");
     }
     function fixed(value, places) {
       return typeof value === "number" && isFinite(value) ? value.toFixed(places) : null;
@@ -1293,10 +1337,25 @@
     var card = rail.querySelector('.feature');
     return card ? card.getBoundingClientRect().width + 19 : 349;
   };
+  var at = document.getElementById('railAt');
+  var count = document.getElementById('railCount');
+  var cards = rail.querySelectorAll('.feature').length;
+  if (count && cards) count.querySelector('span').textContent = 'of ' + cards;
   var paint = function () {
     var max = rail.scrollWidth - rail.clientWidth - 4;
     prev.disabled = rail.scrollLeft <= 2;
     next.disabled = rail.scrollLeft >= max;
+    // Which card is at the left edge. Clamped rather than rounded past the end, so scrolling
+    // to the last pixel reads "14 of 14" and not "15 of 14".
+    // The range on screen, not one index: four cards are visible at a desk width, so "11 of 14"
+    // beside a disabled forward arrow reads as having stopped three short of the end.
+    if (at && cards) {
+      var width = step();
+      var first = Math.min(cards, Math.max(1, Math.round(rail.scrollLeft / width) + 1));
+      var last = Math.min(cards, first + Math.max(1, Math.round(rail.clientWidth / width)) - 1);
+      var text = first === last ? String(first) : first + '-' + last;
+      if (at.textContent !== text) at.textContent = text;
+    }
   };
   prev.addEventListener('click', function () { rail.scrollBy({ left: -step(), behavior: 'smooth' }); });
   next.addEventListener('click', function () { rail.scrollBy({ left: step(), behavior: 'smooth' }); });
@@ -1330,6 +1389,7 @@
       else image.removeAttribute('data-light');
       image.src = card.dataset.image || '';
       image.alt = '';
+      image.hidden = !card.dataset.image;
       if (window.__paintThemeImages) window.__paintThemeImages();
       link.href = card.dataset.link || './app.html';
       sheet.showModal();

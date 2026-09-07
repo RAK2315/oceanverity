@@ -94,6 +94,9 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 # tests - run before claiming anything works
 cd pipeline && ../.venv/Scripts/python -m pytest -q
 
+# refresh the manifest's palette tables from samudra/palettes.py, without a full bake
+cd pipeline && ../.venv/Scripts/python scripts/refresh_palettes.py
+
 # what the provenance page says about the tests. Run it after adding or removing any.
 cd pipeline && ../.venv/Scripts/python scripts/collect_tests.py
 
@@ -120,6 +123,8 @@ cd web && node probe-drift.mjs          # the browser's drift integrator against
 cd web && node probe-particles.mjs      # the moving flow: it is the drift model, it draws, no dot on land
 cd web && node probe-tour.mjs           # "Show me around" visits every control, and survives
 cd web && node probe-outreach.mjs       # every Explore question keeps its promise; kiosk; the copied link
+cd web && node probe-palette.mjs        # the colourbar switcher: right alternates, water and legend agree
+cd web && node probe-chrome.mjs         # every text role in the console chrome, both themes
 cd web && node probe-landing.mjs        # the landing page: no missing picture, an honest count, a readable hero
 cd web && node probe-requirements.mjs   # every figure filled, every deep link lands on what it promised
 cd web && node probe-section.mjs        # the browser's section against /api/section   (needs the API)
@@ -212,6 +217,17 @@ acts in; on screen the surface went from **23.20%** of the frame to **22.86%**, 
 floor of 0.97 only reaches 22.60% - so the whole borrowed-value fringe is about 0.6 points of the
 frame. **Small in area, conspicuous in position**, which is why area was the wrong thing to
 optimise and the coastline was the right thing to look at.
+
+**The exhibition screen restores the operator's camera before every question, and never zooms.**
+`focusOn` hard-sets the camera to a fixed radius and `panTo` preserves whatever distance it finds,
+so the one question that zoomed to a float left **every later question** framed at float distance,
+for the rest of the day. Measured: `focusOn` took the camera from **79.9 units to 22.1**, and the
+next `panTo` inherited 22.1. Two halves to the fix - kiosk remembers the pose it opened on and
+puts it back before each question, and the loop is handed a `focusOn` that pans - so a question
+can neither take the framing away nor leak a distance forward. Measured after: 79.9 held across
+all six questions, worst change **0.0 units**. Restoring between questions is safe because the
+loop is already paused while anybody is touching the screen. Explore keeps the zoom, because there
+a reader pressed the question and the comparison panel is on screen to read.
 
 **Kiosk mode is not a CSS state, so nothing may borrow it for a screenshot.** `capture.mjs` hid
 the panels for its hero shot by turning kiosk on, which also mounts the component that plays the
@@ -409,6 +425,14 @@ responses and anything a user reads as a measurement come from the `Grid`. This 
 (`depthAxisMetres`) and the frontend inverts it via `geography.ts`. A second copy of the formula
 drifts silently. This has already been fixed once.
 
+**The bias map is a composite, and the timeline says so where the confusion happens.** Every
+instrument is drawn at the cast its comparison was taken from, across all twelve analyses - a
+residual measured at one position on one date is a number on the wrong water anywhere else. So
+pressing play animates the field and moves **no marker**, which reads as a broken animation. The
+map key said this already and the map key **folds, and is remembered folded**. The time axis now
+says it too, in `--secondary`, whenever the mode is on: a caveat belongs on the band whose button
+was just pressed, not two panels away behind a disclosure someone shut last week.
+
 **A frame pair must differ by exactly one thing, and a store change is never that thing.**
 `updateArrows` and `updateSheet` set their mesh's `visible` back to true on every `push(state)`,
 so a probe that changes the store between the "geometry on" frame and the "geometry off" frame
@@ -546,10 +570,23 @@ drop shadow to explain why it floats. Each band measures its own height and publ
 (`--topbar-height`, `--timeline-height`, `--attribution-height`), and the bays are `calc(100%)`
 minus the three, so no band has to guess at another's size.
 
-At 1366x768 the left bay has **615 px**. Measured as `scrollHeight`: all groups closed **347**,
-Variable alone **446**, **Variable and Colourbar 615, which is exactly the height available**,
-and every group open **2,403**. Bug 47 is closed at that viewport and still open at two others -
-`Colourbar + Rendering` is 106 px over, and 1280x720 is 48 px over on the Variable pair.
+At 1366x768 the left bay has **636 px** - it was 615 until the source credits were folded, which
+gave it 20 back. Re-measured 2026-09-07 as `scrollHeight`, after the colourbar switcher:
+
+| Panel state | Content | Against a 636 px bay |
+| --- | --- | --- |
+| all groups closed | 377 px | fits |
+| Variable alone | 477 px | fits |
+| Variable + Colourbar | **780 px** | over by 144 |
+| Colourbar + Rendering | **806 px** | over by 170 |
+| bias | 918 px | over by 282 |
+| everything open | 2,115 px | over by 1,479 |
+
+**The colourbar switcher cost the Colourbar group 139 px** and is the reason the Variable pair
+went from 5 px over to 144. Five or six palette buttons in a vertical list, each with a 46 px
+swatch, is the most expensive thing added to that bay in three rounds. It buys a control the user
+asked for twice; it has not been paid for. A two-column grid or a fold would get most of it back
+and neither has been tried.
 
 **Every one of those numbers moved three times during one session**, twice because a fix
 elsewhere took height away: lifting the timeline off the credits cost the panel 50 px, and
@@ -621,10 +658,19 @@ rather than the fourth of five tabs, and `selectField` sets `hazardMode` from th
 group so the two cannot disagree however the Field was chosen - a tab, a deep link, the tour or
 the preset itself.
 
-**A palette belongs to a Field, never to a chooser.** There used to be a dropdown of nine, seven
-of which named quantities the platform does not carry. The derivable ones became Fields and the
-rest were deleted. If a new palette is needed, it arrives attached to a `FieldSpec` and to
-nothing else. ADR 0010.
+**A palette belongs to a Field. The *look* of it is the reader's.** There used to be a dropdown of
+nine, seven of which named quantities the platform does not carry - picking `algae` drew
+temperature in the colours of a chlorophyll measurement nobody had taken. That failure was **a
+palette naming a quantity**, not a reader having a choice, and only the first half was worth
+keeping. The Colourbar group offers three or four alternates now, and four things hold the line:
+each is labelled by the colours it contains ("Navy to yellow", "Black to white") and never by an
+ocean variable; a **diverging** Field is only offered diverging alternates, because its midpoint
+is a real value the isosurface and the `±` readout both depend on; a **banded** palette is offered
+nothing, because a gradient over Observation Coverage repaints 1, 2 and 3 casts as "4 or more";
+and `store.activePalette()` is the **one** lookup all seven call sites go through, because a
+second copy disagreeing with the first is what got the log scale cut. `selectField` resets it,
+like `emphasis` and `isoEnabled`. `probe-palette.mjs` checks all four, and was made to fail on
+purpose first. ADR 0010, amended.
 
 **Never ship a derived Field that is plausible and wrong.** Geostrophic current speed was
 prototyped and rejected: it reported 0.16 m/s for the Somali Current in peak monsoon against a

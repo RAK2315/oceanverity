@@ -4,7 +4,13 @@ import { timelineMoves, uploadNetcdf, type UploadProblem } from "../data/upload"
 import { describePath, type DriftPath } from "../drift";
 import { haversineKm } from "../section";
 import { GUIDE, ISOSURFACES, PALETTES, RANGE_NOTE } from "../guide";
-import { biasColour, liftedPalette, paletteGradient } from "../palette";
+import {
+  PALETTE_LOOKS,
+  biasColour,
+  liftedPalette,
+  paletteChoices,
+  paletteGradient,
+} from "../palette";
 import { axisToDepth } from "../scene/geography";
 import { useStore } from "../store";
 import { inverseTransfer, isDiverging, supportsLog } from "../transfer";
@@ -110,11 +116,15 @@ function Group({
  * nothing left to warn about.
  */
 function Colourbar() {
-  const { manifest, windowMin, windowMax, toValue, set, field, theme, scale } = useStore();
+  const store = useStore();
+  const { manifest, windowMin, windowMax, toValue, set, field, theme, scale } = store;
   const spec = field();
   if (!manifest || !spec) return null;
 
-  const stops = paletteGradient(manifest.palettes[spec.palette] ?? [], theme, scale);
+  // The colourbar on screen, which is the Field's own unless the reader chose an alternate.
+  const palette = store.activePalette();
+  const choices = paletteChoices(spec, manifest.palettes);
+  const stops = paletteGradient(manifest.palettes[palette] ?? [], theme, scale);
   // The value sitting at the visual middle of the bar. On a linear scale it is the arithmetic
   // midpoint and says nothing; on a log scale it is the number that proves the bar is bent, and
   // it is read back through the same curve the water is drawn with.
@@ -126,7 +136,7 @@ function Colourbar() {
   const explain = () => set("touched", "palette");
 
   return (
-    <Group id="palette" title="Colourbar" readout={spec.palette} readoutMuted>
+    <Group id="palette" title="Colourbar" readout={PALETTE_LOOKS[palette] ?? palette} readoutMuted>
       {/*
         * A banded Field gets no gradient bar.
         *
@@ -178,6 +188,53 @@ function Colourbar() {
             {scale === "log" ? `${middle.toFixed(1)} ${spec.units}` : spec.units}
           </span>
           <span>{toValue(windowMax).toFixed(1)}</span>
+        </div>
+      )}
+
+      {/*
+        * Which colourbar, offered as a look rather than as a quantity.
+        *
+        * ADR 0010 deleted a chooser of nine and was right to: seven of them named quantities this
+        * platform does not carry, so picking one recoloured temperature in the colours of a
+        * chlorophyll measurement nobody had taken. The lesson was **a palette must not name a
+        * quantity**, not **a reader must not choose**. So these are labelled by the colours they
+        * actually contain, `paletteChoices` offers a diverging Field only diverging alternates so
+        * the midpoint that means "no departure" cannot move, and a banded Field is offered
+        * nothing - a gradient over Observation Coverage repaints 1, 2 and 3 casts as "4 or more".
+        *
+        * Nothing about the data moves. The ends of the scale, the numbers under the cursor and
+        * the window are all unchanged; only the ramp between them is.
+        */}
+      {choices.length > 1 && (
+        <div className="palette-choice" role="group" aria-label="Colourbar">
+          {choices.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className={name === palette ? "on" : ""}
+              aria-pressed={name === palette}
+              title={PALETTE_LOOKS[name] ?? name}
+              onClick={() => {
+                set("touched", "palette");
+                // The Field's own is `null`, not its name: an override that happens to match is
+                // still an override, and it would survive a Field switch as a stale choice.
+                set("paletteOverride", name === spec.palette ? null : name);
+              }}
+            >
+              <span
+                className="palette-chip"
+                style={{
+                  background: `linear-gradient(90deg, ${paletteGradient(
+                    manifest.palettes[name] ?? [],
+                    theme,
+                    "linear",
+                  )})`,
+                }}
+                aria-hidden="true"
+              />
+              {PALETTE_LOOKS[name] ?? name}
+            </button>
+          ))}
         </div>
       )}
 

@@ -228,6 +228,21 @@ interface State {
    * "no departure".
    */
   scale: Scale;
+
+  /**
+   * A colourbar chosen over the Field's own, or null for the Field's own.
+   *
+   * ADR 0010 deleted the last palette chooser and the reason it gave still stands: seven of the
+   * nine it offered named quantities this platform does not carry, so picking one recoloured
+   * temperature in the colours of a measurement nobody had taken. That is a palette naming a
+   * quantity, and it is not what this is. `paletteChoices` in `palette.ts` offers only
+   * alternates of the Field's own kind, labels each by the colours it contains rather than by an
+   * ocean variable, and offers a banded palette nothing at all. Nothing about the data, the
+   * numbers or the ends of the scale moves; only the ramp between them does.
+   *
+   * `selectField` resets it, for the same reason it resets `emphasis` and `isoEnabled`.
+   */
+  paletteOverride: string | null;
   opacity: number;
 
   /**
@@ -415,6 +430,8 @@ interface State {
    */
   selectField: (key: string) => void;
   field: () => FieldSpec | undefined;
+  /** The palette actually drawn: the reader's choice, or the Field's own. One lookup, one place. */
+  activePalette: () => string;
   /** The Anomaly Features of the Timestep on screen. */
   features: () => AnomalyFeature[];
   /**
@@ -481,6 +498,7 @@ export const useStore = create<State>((setState, getState) => ({
   windowMin: 0,
   windowMax: 1,
   scale: "linear",
+  paletteOverride: null,
   opacity: DEFAULT_OPACITY,
   currentStyle: "particles",
 
@@ -589,6 +607,13 @@ export const useStore = create<State>((setState, getState) => ({
       // switch would silently mean a different span of a different quantity.
       windowMin: 0,
       windowMax: 1,
+      // Back to the Field's own colourbar. Same rule as the render hints and the isosurface
+      // below: a chosen palette that survives a Field switch is a hint leaking forwards, and a
+      // diverging alternate carried onto a sequential Field would put the pale part of the
+      // scale at an arbitrary value. `paletteChoices` is keyed on the Field's kind and there is
+      // no overlap between the two lists, so the override is only ever valid for the Field it
+      // was chosen on.
+      paletteOverride: null,
       // A Field may ask to be drawn differently. Coverage does, because gradient-weighted
       // opacity would fade out exactly the flat regions it exists to show; the anomaly asks for
       // part of it, to clear the flat abyss without losing a uniform warm patch.
@@ -754,6 +779,26 @@ export const useStore = create<State>((setState, getState) => ({
   },
 
   field: () => getState().manifest?.fields.find((f) => f.key === getState().fieldKey),
+
+  /*
+   * The one place that answers "which colourbar is on screen".
+   *
+   * Seven call sites read a palette - the GPU texture, the ViewState the scene is pushed, the
+   * colourbar swatch, the section figure and the guide panel among them - and `styles.css`'s own
+   * standing rule is that the water and the legend may never disagree about a colour. That is
+   * exactly the disagreement a second copy of this lookup would produce, and it is what got the
+   * log scale cut the first time round. So there is one, and everything goes through it.
+   *
+   * Falls back to the Field's own whenever the override names something this bake did not ship,
+   * so a manifest baked before the alternates existed still draws.
+   */
+  activePalette: () => {
+    const { paletteOverride, manifest } = getState();
+    const own = getState().field()?.palette ?? "";
+    if (!paletteOverride) return own;
+    const table = manifest?.palettes[paletteOverride];
+    return Array.isArray(table) && table.length > 0 ? paletteOverride : own;
+  },
 
   features: () => getState().anomalies[getState().timestepIndex] ?? [],
 

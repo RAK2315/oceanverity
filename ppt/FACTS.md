@@ -1,6 +1,6 @@
 # Every figure the deck may use, read off the build
 
-**Generated 2026-09-04 by `pipeline/scripts/collect_facts.py`. Do not edit by
+**Generated 2026-09-07 by `pipeline/scripts/collect_facts.py`. Do not edit by
 hand.** Re-run it after a bake and diff this file: a figure that moved shows up as a line.
 
 `ppt/DECK.md` is written by a person and quotes these numbers. This file is the source it quotes
@@ -25,7 +25,7 @@ not a point - see `CLAUDE.md`.
 | Static bake | **71.1 MB**, committed, **0** network calls to run | `du web/public/data` |
 | HTTP routes on the API | **21** | `api/*.py` |
 | Tests | **377** | `web/public/data/tests.json` |
-| Browser probes | **13** | the allowlist in `.gitignore` |
+| Browser probes | **15** | the allowlist in `.gitignore` |
 
 ## Instruments
 

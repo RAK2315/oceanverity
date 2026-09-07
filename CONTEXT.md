@@ -285,7 +285,7 @@ Everything above the line is being built. Everything below it is deliberately, k
   India's glider programme, not the adapter.
 - A REST API over the pipeline, plus **OPeNDAP, CF-1.8 NetCDF and OGC WMS** served from the
   native Grids and never the Volume. ADR 0012.
-- A **guided tour** of 21 steps in 6 chapters, covering every one of the 43 explained
+- A **guided tour** of 21 steps in 6 chapters, covering every one of the 44 explained
   controls, because the guide panel explains what you touched and a
   first-time visitor does not know what to touch, plus a one-click **Hazard preset** that sets
   the whole scene up for a cyclone question.

@@ -84,7 +84,7 @@ settings**.
 | school and college students | **Explore**, eight questions each of which sets the whole scene up, and *what does one robot float actually do* as a narrated journey through a real track. The tour went from 5 steps to **21 in 6 chapters** and now visits all **43** explained controls, which is what a teacher or a presenting teammate needs |
 | the general public | The same eight questions, plus **true scale** - the block collapsing from 1800x to 1x in nine seconds, which is the one fact about the ocean nobody feels from a sentence - and depth landmarks on the ruler |
 | policymakers | Every question carries the caveat its simplification costs, on the card, beside the answer. A one-page printable brief is still not built; see D3 |
-| outreach events, **exhibitions** | **`?kiosk=1`**: panels hidden, type scaled, the questions on a loop, and a reset 60 seconds after the last visitor walks away. Escape leaves. Measured by `probe-outreach.mjs`, which stands there for 22 seconds doing nothing and checks the screen moved on by itself |
+| outreach events, **exhibitions** | **`?kiosk=1`**: panels hidden, type scaled, the questions on a loop, and a reset 30 seconds after the last visitor walks away. Escape leaves. Measured by `probe-outreach.mjs`, which stands there for 7 seconds doing nothing and checks the screen moved on by itself |
 | **e-learning** | **Copy this view** - the inverse of `applyDeepLink`, which had read eleven parameters since the requirements page was built and had nothing to write one. A worksheet is six links |
 
 **Still open on this row:** the printable one-page brief (D3), Hindi on the tour and the landing

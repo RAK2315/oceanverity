@@ -1,214 +1,257 @@
 # SIH 2026 prototype video - script
 
-**Target 4:30 to 5:30.** Read at a normal speaking pace, not fast.
+**How to read this page.**
 
-**Normal text is narration.** <span style="color:#888">*Grey italic is the screen action - what
-to click, what appears, what the viewer should notice.*</span>
+Plain text is what you say out loud. Read it as written.
 
-Every number spoken here is in [`FACTS.md`](FACTS.md), which is generated from the build. If a
-figure has moved, re-run `collect_facts.py` and fix the sentence before recording.
+> **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
+> control, so you never have to guess what to click.
 
-**Before you record:** open the landing page, let the globe finish loading, then open the
-platform in a second tab and let it settle on the globe. Full screen. Rehearse the dive twice -
-it is the moment that lands.
+**Length: 801 spoken words**, counted from this file. That is **5:00 at a brisk 160 words a
+minute** or **5:20 at a comfortable 150**, plus the marked silences. Expect **about 5:30 on the
+recording**, which leaves room to slow down on the numbers.
+
+**The audience is not technical.** A judge watching this may never have opened an ocean model.
+Nothing here needs a science background to follow, and no sentence uses a term the picture on
+screen has not already shown.
+
+**Every number spoken here is in [`FACTS.md`](FACTS.md)**, generated from the running build. If a
+figure has moved, re-run `collect_facts.py` and correct the sentence before you record.
+
+---
+
+## Before you press record
+
+1. Open **https://rak2315.github.io/samudra-sih26/app.html** and let it finish loading. It settles
+   on the spinning globe with India facing you.
+2. Press **F11** for full screen, so no browser chrome is in the recording.
+3. In the left panel, close every group except **Variable**.
+4. Record at **1920 x 1080**.
+5. Rehearse the dive twice. It is the most important moment in the video.
+
+**Two words to say carefully.** **Thermocline** is "THERM-oh-cline". **Argo** is "AR-go" - it is
+the name of the international float programme, not an acronym.
 
 ---
 
 ## 0:00 - 0:20 · The hook
 
-<span style="color:#888">*Open on the platform, already dived in, slowly rotating the block of
-water. No panels visible yet. Let it move for two full seconds before the first word.*</span>
+> **On screen ·** Open already dived into the water, on the full three-dimensional block, rotating
+> slowly. No panels. Let it turn for two seconds in silence before the first word.
 
-> India spends crores running an ocean model.
->
-> India also has two hundred and twenty-eight robot floats drifting in that exact same water,
-> taking real measurements, right now.
->
-> And until this project, **nobody could look at the two together.**
+India runs a computer model of the ocean around it. It feeds cyclone warnings, search and rescue,
+and the advisories that tell fishermen where to go.
 
-<span style="color:#888">*Hold on the rotating water for a beat after "together".*</span>
+India also has two hundred and twenty-eight robot floats drifting in that same water, taking real
+measurements, right now.
 
----
+Until this project, there was no way to look at the two of them together.
 
-## 0:20 - 1:00 · The problem, and why it matters
-
-<span style="color:#888">*Cut to a plain flat map - use the globe view of the platform, before
-the dive. Then scrub the timeline one step so it visibly redraws.*</span>
-
-> Here is what an ocean forecaster actually has today. The model output opens in one desktop
-> program. The float measurements open in another. Both of them draw the ocean the same way -
-> **a flat map, one depth at a time.**
->
-> So the question a forecaster really has has no tool behind it. Not *"what does the model say"*.
-> The real question is: **"is the model right - here, at this depth, today?"**
-
-<span style="color:#888">*Slowly zoom the flat map. Let it look as limited as it is.*</span>
-
-> That matters more than it sounds. This model feeds cyclone forecasts, search and rescue, and
-> fishing advisories for the entire Indian coastline. If it is drifting away from reality in the
-> Bay of Bengal, **you want to know before the cyclone, not after.**
+> **On screen ·** Hold one more beat on the rotating water before cutting away.
 
 ---
 
-## 1:00 - 1:30 · The core idea, and the USP
+## 0:20 - 0:55 · The problem
 
-> So we built Samudra 3D. And the important thing is what we decided **not** to build.
->
-> The problem statement asks for a 3D visualisation. We read it differently. **A picture is not
-> the deliverable. The comparison is.**
->
-> Anyone can render the ocean and make it look impressive. Our platform does something almost
-> nobody does: **it scores the model against reality, and it prints the answer even when the
-> answer is unflattering.**
+> **On screen ·** Cut to the opening globe view. Reload `app.html` and do **not** press "Dive into
+> the water". You will see the sphere with the Indian Ocean region coloured on it.
 
-<span style="color:#888">*Cut back to the platform on the globe, panels visible now.*</span>
+This is roughly what a forecaster has today. A flat map of the sea surface. One variable, one day.
 
----
+> **On screen ·** Press play at the left of the timeline along the bottom. Let the twelve analyses
+> run so the colours visibly change. Leave it playing through the next lines.
 
-## 1:30 - 2:45 · The prototype, part one: the dive and the comparison
+The model's output opens in one desktop program. The float measurements open in another. Both draw
+the ocean the same way - flat, and one depth at a time.
 
-**This is the money shot. Do not rush it.**
+So the question that actually matters has no tool behind it. Not "what does the model say", because
+it always says something. The question is: **is the model right - here, at this depth, today?**
 
-<span style="color:#888">*Platform on the globe view, India centred, the study region glowing.
-Press "Dive into the water". Let the full camera transition play - do not cut it short.*</span>
+> **On screen ·** Press play again to pause. Let the map sit still.
 
-> This is INCOIS's own analysis. Let me fly into it.
-
-<span style="color:#888">*The globe opens into the ray-marched block. Rotate slowly once.*</span>
-
-> That is the Indian Ocean as a solid body of water - **five metres down to two kilometres**, all
-> of it at once. Not a stack of slices you page through. Warm at the top, cold at the bottom, and
-> that sharp colour change in the middle is the thermocline - the layer a cyclone actually feeds
-> on.
->
-> The white markers are the real instruments, drawn where they actually were on this date.
-
-<span style="color:#888">*Click one Argo float marker. The comparison panel opens on the right.
-Pause on it. Let the viewer read the chart.*</span>
-
-> Now - click one.
->
-> **Solid line is what the instrument measured. Dashed line is what the model predicted.** Same
-> water, same day, same depths. And the band between them is the disagreement.
->
-> Fifty-four depths compared. Average gap: **zero point zero eight degrees.**
-
-<span style="color:#888">*Point at the verdict line with the cursor.*</span>
-
-> That is the whole product in one click. Not a prettier picture of the model - **a number on how
-> far the model sits from the truth.**
+If that model has drifted from reality in the Bay of Bengal, **you want to know before the cyclone,
+not after.**
 
 ---
 
-## 2:45 - 3:30 · The prototype, part two: the honesty
+## 0:55 - 1:55 · The dive, and the comparison
 
-<span style="color:#888">*Open "Model vs instruments" in the left panel. Turn on "Colour
-instruments by disagreement". The markers recolour across the basin.*</span>
+**The heart of the video. Do not rush it.**
 
-> And we do that for every instrument at once.
->
-> Across **two hundred and thirty instruments**, the typical gap is **zero point one nine
-> degrees.** Which sounds excellent.
->
-> But here is the part I am proud of. INCOIS *feed* the Argo floats into their model. So a float
-> agreeing with the model is largely the model agreeing with itself. The honest test is the **nine
-> moored buoys they do not feed in** - and against those, the gap is **zero point seven five
-> degrees. Four times worse.**
->
-> We print both numbers, separately, on screen. **We could have shown you one flattering average.
-> We show you the one that makes us look worse, because that is the number a forecaster actually
-> needs.**
+> **On screen ·** Click "Dive into the water", top right. Let the whole camera move play out. Do
+> not cut it short.
 
-<span style="color:#888">*Switch the variable to "Observation coverage". The map shows the gaps
-where nobody measured.*</span>
+Let me fly into it.
 
-> Same principle here. This variable does nothing except show you **where nobody has measured
-> anything.** Nine point nine percent of this ocean has no observation behind it at all. Most
-> tools quietly colour that in. We draw the gap **as a gap.**
+> **On screen ·** Drag slowly across the water once, so the viewer sees it is genuinely
+> three-dimensional.
 
----
+That is the Indian Ocean as one solid body of water. **Five metres down to two kilometres, all at
+once.**
 
-## 3:30 - 4:00 · Built for the people who need it
+That sharp band across the middle is the thermocline - the boundary between the warm surface layer
+and the cold deep. It is the layer a cyclone feeds on.
 
-<span style="color:#888">*Press "Set up a cyclone question". The whole console reconfigures in one
-step.*</span>
+> **On screen ·** In the Variable group, under "Ocean state", click "Salinity", then "Density",
+> then back to "Temperature". Pause about a second on each so the water re-colours.
 
-> One press, and the platform becomes a cyclone tool - heat potential, the depth of the
-> twenty-six degree layer, how far the wind has stirred. **The fuel a storm runs on.**
+Saltiness through the same water. Density. **Fifteen variables in total**, and most of them are
+worked out here rather than simply passed through.
 
-<span style="color:#888">*Open Explore. Show the eight question cards. Click one and let it run.*</span>
+> **On screen ·** Click one of the white float markers in the top of the water. The comparison
+> panel opens on the right. Stop moving the mouse and let the viewer read the chart for two full
+> seconds.
 
-> And because the problem statement names students and the public too, there is a second door.
-> **Fifteen variables is right for a forecaster and wrong for a school group** - so the same
-> platform becomes eight plain questions, each carrying the caveat that its simplification costs.
-> There is a kiosk mode for exhibition screens too.
+But this is the moment that matters. Those white markers are real instruments, drawn where they
+actually were on this date. Click one.
+
+**The solid line is what the instrument measured. The dashed line is what the model predicted.**
+Same water, same day, all the way down. The band between them is the disagreement.
+
+> **On screen ·** Read the two figures off the panel as they appear - the depths compared and the
+> average gap. They move with every re-bake, so say what is on screen rather than a memorised
+> number. On the current build a typical float comes out near fifty depths and a gap of a tenth of
+> a degree.
+
+Every depth compared, and the gap between them measured.
 
 ---
 
-## 4:00 - 4:45 · How it actually works, and why it is real
+## 1:55 - 2:35 · Why it had to be three-dimensional
 
-<span style="color:#888">*Open provenance.html. Scroll it slowly. Then open requirements.html and
-click one clause link, showing it open the platform on that control.*</span>
+> **On screen ·** Click "Set up a cyclone question" at the top of the left panel. The console
+> reconfigures in one step and opens on Cyclone Heat Potential.
 
-> Underneath: **nine source adapters** pulling from INCOIS's ERDDAP, Argo, Copernicus, NOAA - all
-> public, all live, all listed here with the date we tested each one.
->
-> Python does the science, and **all of it is tested - three hundred and seventy-seven tests**,
-> because a wrong constant in an ocean formula gives you a number that is smooth, plausible, and
-> completely false.
->
-> The browser does the rendering, in WebGL, with no plugin and no install.
+One press, and the console becomes a cyclone tool. This is the fuel a storm runs on - not surface
+warmth, but heat stored down the whole column.
 
-<span style="color:#888">*Point at the architecture. Then back to the platform, disconnect wifi
-visibly if you can, and keep clicking.*</span>
+> **On screen ·** Click "Depth of 26 °C". A curved surface appears inside the block.
 
-> And one rule shapes everything. **The rendered picture is compressed for the graphics card, so
-> we never read a number off it.** Every figure a user sees comes from the full-precision grid
-> instead. The picture is for your eyes. The numbers come from the data.
->
-> One more thing - **this makes zero network calls to run.** Watch.
+And this is the one that needs three dimensions.
 
-<span style="color:#888">*Turn wifi off. Keep clicking floats. Everything still works.*</span>
+That surface is the depth where the ocean drops below twenty-six degrees - the floor a cyclone
+needs to form at all. **Where it bulges downwards, the warm water runs deep**, so a passing storm
+cannot churn up cold water to weaken itself.
 
-> The whole dataset ships inside the build. **A dead venue network cannot kill this demo.**
+Look at the central Bay of Bengal. **That is the deepest fuel in the region.**
+
+> **On screen ·** Rotate slowly west, towards Somalia and Oman, where the same sheet rises almost
+> to the surface.
+
+Off Somalia the same surface comes almost to the top, because cold water is being pulled up from
+below. **That is a thin lid, not fuel.**
+
+On a flat map, that difference is a number in a table. Here it is a shape you see at a glance.
 
 ---
 
-## 4:45 - 5:20 · Impact, scale, and the close
+## 2:35 - 3:20 · The currents, and the part we are proudest of
 
-<span style="color:#888">*Back out to the full block of water. Slow rotation. Let it be the last
-thing on screen.*</span>
+> **On screen ·** Press "Leave cyclone mode". Open the Variable group, click the "Circulation"
+> tab, select "Current Speed". Thousands of dots begin flowing. Let them run for three seconds.
 
-> Where this goes. It runs in any browser on any laptop, so INCOIS could put it in front of
-> forecasters tomorrow with no procurement and no installs. It already serves its data back out
-> through **OPeNDAP, CF NetCDF and OGC WMS** - the three standards ocean institutions already
-> speak - so it plugs into what they have rather than replacing it. And you can **drop your own
-> NetCDF file onto the page** and it renders in the same viewer, which means the next dataset
-> does not need us.
->
-> Adding a new data source is one Python class. Adding a new variable is one function. That is
-> not a promise - **that is the architecture we already built.**
+Switch to circulation and the ocean starts moving. Those are the real analysed currents.
 
-<span style="color:#888">*Hold on the water. Two seconds of silence before the last line.*</span>
+> **On screen ·** Open "Model vs instruments" and tick "Colour instruments by disagreement". Every
+> marker recolours.
 
-> We did not set out to make the ocean look beautiful.
->
-> We set out to make it **answerable.**
->
-> Samudra 3D. Team Sigmoid.
+Now the honest part.
+
+Across **two hundred and thirty instruments**, the typical gap between the model and reality is
+**about two tenths of a degree**. Which sounds excellent.
+
+But the model is *built* partly from those Argo floats. So a float agreeing with it is largely the
+model agreeing with itself.
+
+The real test is the **nine moored buoys the model does not use** - and there the gap is
+**three quarters of a degree. Four and a half times worse.**
+
+**We could have shown one flattering average. We show the number that makes us look worse, because
+that is the one a forecaster actually needs.**
+
+---
+
+## 3:20 - 4:00 · Why you can believe it
+
+> **On screen ·** Select "Observation Coverage" from the "Evidence" tab. Flat bands show where
+> there is no observational data at all.
+
+Same principle here. This view does nothing except show **where nobody has measured anything** -
+almost ten percent of this ocean. Most tools quietly colour that in. **We draw the gap as a gap.**
+
+> **On screen ·** Back to the platform. Turn the wifi off on camera if you can, then keep clicking
+> float markers. Everything continues to work.
+
+Every figure on this screen can be traced to the public dataset it came from, with the date we
+tested it. Nothing is typed in by hand.
+
+And **this makes no network calls at all.** Watch. The whole dataset ships inside the page. **A
+dead venue network cannot kill this demo.**
+
+---
+
+## 4:00 - 4:45 · Who it is for
+
+> **On screen ·** Click "Explore" in the top bar. The eight plain-language question cards appear.
+> Click one and let it drive the platform.
+
+The problem statement names students and the public too. Fifteen variables is right for a scientist
+and wrong for everyone else - so the same platform becomes **eight plain questions**, each carrying
+the caveat that simplifying it costs.
+
+> **On screen ·** Return to the platform, back out to the full block of water, and let it rotate
+> slowly. This is the last thing on screen.
+
+It runs in any browser, on any laptop, so INCOIS could put it in front of forecasters tomorrow.
+**No installation, no licences, nothing to procure.**
+
+It hands its data back out in the standard formats ocean institutes already use, so it fits beside
+what they have instead of replacing it. And you can **drag your own data file onto the page** and
+see it in the same viewer.
+
+Adding a new data source is one small piece of code. **That is not a promise. That is the
+architecture we already built.**
+
+---
+
+## 4:45 - 5:05 · The close
+
+> **On screen ·** Stay on the slowly rotating block of water. Two full seconds of silence before
+> the final three lines.
+
+We did not set out to make the ocean look beautiful.
+
+We set out to make it **answerable.**
+
+Samudra 3D. Team Sigmoid.
 
 ---
 
 ## Notes for recording
 
-- **Do not read this like a list of features.** Every feature shown is there to prove one claim:
-  the comparison is the product.
-- **The three moments that must land:** the dive at 1:30, the two residual numbers at 3:00, and
-  the wifi going off at 4:30. Everything else supports those.
-- **Slow down on numbers.** Say "zero point seven five degrees", not "point seven five".
-- **The two-second silences are deliberate.** Before the first word, and before the last line.
-- **Screen recording at 1920x1080**, platform full screen, browser chrome hidden.
-- **Do not add a music bed under the narration.** If you want music, fade it under the opening
-  rotation and out before the first word.
-- If you overrun, cut from **3:30 - 4:00** (cyclone mode and Explore) first. It is the only
-  section that is breadth rather than argument.
+**The four moments that have to land.** Everything else supports them.
+
+1. **The dive**, around 1:00. Let the transition play in full.
+2. **The float comparison**, around 1:40. Stop moving the mouse and let people read the chart.
+3. **The twenty-six degree surface bulging downwards**, around 2:10. This is the clearest argument
+   in the video for why three dimensions were necessary.
+4. **The two disagreement numbers**, around 3:05, and **the wifi coming off**, around 3:50.
+
+Never cut those four. They are the video.
+
+**Pacing.** Say numbers slowly and in full. "Three quarters of a degree", not "point seven five".
+"Two hundred and thirty instruments", not "two-thirty".
+
+**Silences.** The two seconds before the first word and before the last three lines are deliberate.
+Do not fill them.
+
+**Music.** If you use any, fade it under the opening rotation and out before the first word. No
+music bed under the narration.
+
+**If you overrun**, the two places to lose time without losing an argument are the salinity and
+density switch at 1:30 - keep the action, drop the sentence - and the last paragraph of "Who it is
+for". Together that is about forty words.
+
+**If a live demo makes you nervous**, record the screen actions and the narration separately and
+lay the audio over the footage. The actions above are written in order, so they can be captured as
+one continuous take.

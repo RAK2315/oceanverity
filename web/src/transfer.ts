@@ -79,9 +79,9 @@ export function isDiverging(field: FieldSpec | null | undefined): boolean {
  * the usual fix cannot close, because `Controls.tsx` deliberately draws no gradient swatch for a
  * banded Field. The only fix is not to offer the control.
  */
-const BANDED_PALETTES = new Set(["coverage"]);
+export const BANDED_PALETTES = new Set(["coverage"]);
 
-function isBandedPalette(name: string | undefined): boolean {
+export function isBandedPalette(name: string | undefined): boolean {
   return !!name && BANDED_PALETTES.has(name);
 }
 

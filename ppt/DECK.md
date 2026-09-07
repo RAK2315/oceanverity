@@ -92,8 +92,10 @@ least 6 in of width.**
 
 ### Block A - the five gaps PS 26067 names, answered
 
-Type this as five rows. A coloured left edge on each, and the answer in a different weight from
-the quote, is enough design.
+Type this as five rows. The quote in a lighter weight and the answer in a heavier one is enough
+design. **Do not put a coloured bar down the left of each row** - `DESIGN.md` bans the side
+stripe throughout this project and all eight of them were removed from the product; putting one
+back on the deck would make the deck the only surface still doing it.
 
 | The problem statement's own words | What is built |
 | --- | --- |
@@ -101,7 +103,7 @@ the quote, is enough design.
 | "No unified display of instrument profile data alongside model fields." | **237** instruments drawn inside the water. Click one and the model is scored against it: **100,905** depth points compared. |
 | "Absence of interactive controls for variable selection, depth-slice navigation, time-step animation, customizable colorbars." | All four, live. **15** variables in five groups, two depth handles, **12** analyses animated, both colourbar handles and a log or linear scale. |
 | "Inability to ingest new data streams or model variables without significant re-engineering." | One adapter class per provider. **8** sources read through the same seam, plus a ninth that reads a **NetCDF file a visitor drops on the page**. |
-| "Lack of tools to support intuitive, rapid understanding of complex 3D ocean phenomena." | Every control explains itself in plain language. A **21-step** guided tour over all **43** controls, eight plain-word questions, and **121** unusual bodies of water found for you. |
+| "Lack of tools to support intuitive, rapid understanding of complex 3D ocean phenomena." | Every control explains itself in plain language. A **21-step** guided tour over all **44** controls, eight plain-word questions, and **121** unusual bodies of water found for you. |
 
 ### Block B - innovation and uniqueness
 
@@ -204,7 +206,7 @@ in each title is the point: it names what that consumer reads.
 | --- | --- |
 | Static bake ← both | `71.1 MB committed · 0 network calls` |
 | Browser ← both | `Three.js · WebGL2 · GLSL ES 3.00` |
-| REST API ← Grid | `FastAPI · 15 routes` |
+| REST API ← Grid | `FastAPI · 21 routes` |
 | Open standards ← Grid | `OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0` |
 
 **The five arrows, and what each one carries.** A bare arrow says two boxes are connected; a
@@ -229,8 +231,8 @@ notice it reaches only the screen.
 | Amber (sources) `#B26A0C` &middot; Steel blue (arrows, seam) `#8FBACD` &middot; Deep teal (delivery) `#0B6E7F` | Green (the truth) `#12704A` on `#EEF7F2` &middot; Cyan (the picture) `#1291A6` on `#EAF5F8` |
 | Card fill `#F3F8FB` &middot; seam fill `#E8F1F6` &middot; border `#CBDCE6` | Ink `#0E1B26` &middot; body `#33505F` &middot; mono grey `#6E8898` |
 
-**The strip under the diagram, full width, pale green with a 3 px green left edge.** This is also
-the line to say out loud:
+**The strip under the diagram, full width, pale green ground with a full green hairline border**
+- not a 3 px left edge, for the reason given on Slide 2. This is also the line to say out loud:
 
 > **Every number a human or a machine reads comes from the Grid. The Volume's only arrow goes to
 > the screen.** This matters most at the API, because a consumer pulling NetCDF over the wire
@@ -295,7 +297,7 @@ rather than filled in."*
 
 | **It already runs** *(technical)* |
 | --- |
-| **Built, deployed and public today.** Open it on a phone during the pitch. |
+| **Built, deployed and public today.** Open it on the evaluator's own laptop during the pitch. |
 | **Ordinary hardware is enough.** Built and tested on integrated graphics with 2 GB of shared memory. |
 | **377 automated tests** cover the science, and **13 browser probes** measure what reaches the screen. CI runs both on every push. |
 
@@ -519,6 +521,8 @@ Each was considered and rejected for a reason.
 | Claim the platform predicts a drift track | It integrates the analysed currents and nothing else - no wind, no Stokes drift, no leeway. What makes it worth showing is that it is **scored**: median 38.5 km out over one Argo cycle. |
 | Add a stock photo of the ocean | Every picture in this deck is the real software. That is itself the argument. |
 | Add a seventh slide | The portal caps it at six. |
+| Say the platform runs on a phone | The **landing page** does, down to 320 px, and that is worth saying. The **console** is floored at 980 px and pans sideways below it, because the top bar alone is about 800 px. Say "any laptop", and hand the evaluator a laptop. |
+| Put a coloured bar down the left of a row or a callout | The side stripe is banned throughout this project and all eight were removed from the product. A deck that reintroduces it is the only surface still doing it. Full borders or a background tint instead. |
 
 ---
 

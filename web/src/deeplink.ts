@@ -76,6 +76,8 @@ export function currentViewUrl(): string {
   }
   if (state.hazardMode) query.set("preset", "hazard");
   if (state.scale !== DEFAULTS.scale) query.set("scale", state.scale);
+  // Only a chosen colourbar. The Field's own is `null` and travels with the Field itself.
+  if (state.paletteOverride) query.set("palette", state.paletteOverride);
   if (state.currentStyle !== DEFAULTS.currentStyle) query.set("flow", state.currentStyle);
   if (state.isoEnabled !== DEFAULTS.isoEnabled) query.set("iso", state.isoEnabled ? "1" : "0");
   if (state.biasMode !== DEFAULTS.biasMode) query.set("bias", state.biasMode ? "1" : "0");

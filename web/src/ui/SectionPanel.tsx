@@ -29,6 +29,9 @@ export function SectionPanel() {
   const store = useStore();
   const canvas = useRef<HTMLCanvasElement>(null);
   const { manifest, sectionFrom, sectionTo, fieldKey, timestepIndex, theme } = store;
+  // The colourbar on screen, not the Field's own: the section is cut from the same Grid the
+  // water is drawn from and may not disagree with it about a colour.
+  const palette = store.activePalette();
 
   const grid = manifest?.gridFiles?.[fieldKey]
     ? store.nativeGrids[`${fieldKey}|${timestepIndex}`]
@@ -87,7 +90,7 @@ export function SectionPanel() {
     const plotHeight = height - bottom - 8;
     const totalKm = cut.distancesKm[cut.distancesKm.length - 1] ?? 1;
     const deepest = cut.levels[cut.levels.length - 1] ?? 2000;
-    const lifted = liftedPalette(manifest.palettes[spec.palette] ?? [], theme);
+    const lifted = liftedPalette(manifest.palettes[palette] ?? [], theme);
 
     // One filled rectangle per (Level, sample). Rectangles rather than an ImageData blit
     // because the Levels are unevenly spaced - 5 m to 2000 m in 24 steps - so a row's height on
@@ -165,7 +168,7 @@ export function SectionPanel() {
         height - 7,
       );
     }
-  }, [cut, casts, spec, manifest, store.windowMin, store.windowMax, store.scale, theme]);
+  }, [cut, casts, spec, manifest, store.windowMin, store.windowMax, store.scale, theme, palette]);
 
   if (!sectionFrom || !sectionTo || !spec) return null;
 

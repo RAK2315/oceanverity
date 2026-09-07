@@ -1070,6 +1070,68 @@ export const RANGE_NOTE: Record<string, string> = {
 };
 
 export const PALETTES: Record<string, PaletteNote> = {
+  /*
+   * The five below are alternates rather than a Field's own, and their notes are written to a
+   * different rule: they describe the colours and nothing else.
+   *
+   * `designedFor` on the nine house palettes names the quantity cmocean built the scale for, and
+   * that sentence is only true while the palette is on the Field it belongs to. An alternate is
+   * on some other Field by definition, so it says what it looks like - which is also the only
+   * honest thing to say about a choice a reader made for looking rather than for meaning.
+   */
+  ice: {
+    title: "ice",
+    designedFor: "a look, not a quantity",
+    form: "sequential",
+    suits: [],
+    note: [
+      "Near-black through blue to almost white, so the top of the range is the brightest thing" +
+        " on screen.",
+      "An alternate: it changes the colours and nothing about the numbers.",
+    ],
+  },
+  gray: {
+    title: "gray",
+    designedFor: "a look, not a quantity",
+    form: "sequential",
+    suits: [],
+    note: [
+      "Black to white, with no hue at all.",
+      "The one that survives being photocopied, projected badly, or read by someone who cannot" +
+        " separate two of the other ramps.",
+    ],
+  },
+  delta: {
+    title: "delta",
+    designedFor: "a look, not a quantity",
+    form: "diverging",
+    suits: [],
+    note: [
+      "Navy through pale yellow to green, with the pale band still sitting on zero.",
+      "An alternate for a Field that runs either side of zero. The midpoint does not move.",
+    ],
+  },
+  curl: {
+    title: "curl",
+    designedFor: "a look, not a quantity",
+    form: "diverging",
+    suits: [],
+    note: [
+      "Navy through white to purple, with white on zero.",
+      "An alternate for a Field that runs either side of zero. The midpoint does not move.",
+    ],
+  },
+  diff: {
+    title: "diff",
+    designedFor: "a look, not a quantity",
+    form: "diverging",
+    suits: [],
+    note: [
+      "Navy through white to olive, with white on zero.",
+      "An alternate for a Field that runs either side of zero. The midpoint does not move.",
+    ],
+  },
+
   thermal: {
     title: "thermal",
     designedFor: "Temperature",
@@ -1345,16 +1407,28 @@ export function describePalette(
     };
   }
 
+  // An alternate is on a Field it was not built for, by definition. Saying it was "designed for
+  // Temperature" while it draws salinity is exactly the sentence ADR 0010 deleted a chooser over.
+  const own = palette.suits.length > 0;
+
   return {
     title: `Colourbar: ${palette.title}`,
     kind: "rendering",
-    does:
-      `Draws ${fieldLabel.toLowerCase()} using cmocean's ${palette.title} palette, a` +
-      ` ${palette.form} scale designed for ${palette.designedFor.toLowerCase()}.`,
+    does: own
+      ? `Draws ${fieldLabel.toLowerCase()} using cmocean's ${palette.title} palette, a` +
+        ` ${palette.form} scale designed for ${palette.designedFor.toLowerCase()}.`
+      : `Draws ${fieldLabel.toLowerCase()} using cmocean's ${palette.title} palette, a` +
+        ` ${palette.form} scale chosen here for its colours rather than for what it usually` +
+        ` carries.`,
     means: palette.note,
-    look: [
-      "The palette belongs to the variable, so the colours always mean what the label says.",
-      "Only the range below is yours, and the figures at the ends of the bar follow it.",
-    ],
+    look: own
+      ? [
+          "Switching the bar changes the colours and nothing else - same numbers, same ends.",
+          "Only the range below is yours, and the figures at the ends of the bar follow it.",
+        ]
+      : [
+          "This is not this variable's usual scale, so read the colours off the bar.",
+          "Switching it changes the colours and nothing else - same numbers, same ends.",
+        ],
   };
 }

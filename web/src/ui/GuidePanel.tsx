@@ -54,7 +54,7 @@ export function GuidePanel() {
   // a number from a bake that is no longer on disk.
   const written =
     touched === "palette"
-      ? describePalette(spec.palette, spec.label, spec.group === UPLOAD_GROUP)
+      ? describePalette(store.activePalette(), spec.label, spec.group === UPLOAD_GROUP)
       : touched === "isosurface"
         ? describeIsosurface(spec.key, spec.units)
         : touched

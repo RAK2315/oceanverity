@@ -15,6 +15,7 @@ import {
 import { positionAt, useCoverageWindow } from "./floatTime";
 import { axisToDepth } from "./scene/geography";
 import { OceanScene, type BiasMark } from "./scene/OceanScene";
+import { paletteChoices } from "./palette";
 import { useStore } from "./store";
 import { integrateDrift, type LoadedCurrents } from "./drift";
 import type { FieldResiduals, Manifest } from "./types";
@@ -125,6 +126,16 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
     }));
   }
   if (query.get("scale") === "log") useStore.setState({ scale: "log" });
+  // A chosen colourbar, validated against what this Field may actually be offered rather than
+  // trusted. A link carrying a diverging ramp for a sequential Field would move the pale part of
+  // the scale to an arbitrary value, and a link is the one input here that a stranger writes.
+  const palette = query.get("palette");
+  if (palette) {
+    const spec = useStore.getState().field();
+    if (paletteChoices(spec, manifest.palettes).includes(palette)) {
+      useStore.setState({ paletteOverride: palette === spec?.palette ? null : palette });
+    }
+  }
   if (query.get("tour") === "1") useStore.setState({ tourStep: 0 });
   if (query.get("float")) useStore.setState({ selectedFloatId: query.get("float") });
   if (query.get("flow") === "arrows") useStore.setState({ currentStyle: "arrows" });
@@ -396,13 +407,14 @@ export default function App() {
   // ---- palette -------------------------------------------------------------
   useEffect(() => {
     const scene = sceneRef.current;
-    // The palette a Field is drawn with is the Field's own, named in its FieldSpec. There used
-    // to be a chooser beside the variable selector; see samudra/palettes.py for why there is not.
-    const colours = store.manifest?.palettes[store.field()?.palette ?? ""];
+    // The Field's own palette, or the alternate the reader chose over it. `activePalette` is
+    // the only lookup - the water and the colourbar reading two different tables is exactly the
+    // failure that got the log scale cut once. See `palettes.py` for what the choice may be.
+    const colours = store.manifest?.palettes[store.activePalette()];
     if (!scene || !colours) return;
     // The scene takes ownership and releases the palette it replaces.
     scene.setPalette(paletteTexture(colours, store.theme));
-  }, [ready, store.manifest, store.fieldKey, store.theme]);
+  }, [ready, store.manifest, store.fieldKey, store.theme, store.paletteOverride]);
 
   // A Feature is found within one Timestep, so the panel cannot survive the timeline moving:
   // index 3 of the next step is a different body of water in a different place.
@@ -515,7 +527,7 @@ export default function App() {
       selectedFloatId: store.selectedFloatId,
       fieldKey: store.fieldKey,
       field: store.field() ?? null,
-      paletteColours: store.manifest?.palettes[store.field()?.palette ?? ""] ?? [],
+      paletteColours: store.manifest?.palettes[store.activePalette()] ?? [],
       scale: store.scale,
       surface: store.surfaces[`${store.fieldKey}|${store.timestepIndex}`] ?? null,
       vectors: store.vectors[store.timestepIndex] ?? null,
@@ -767,6 +779,8 @@ export default function App() {
             helpers={{
               focusOn: (lon, lat) => sceneRef.current?.focusOn(lon, lat),
               panTo: (lon, lat) => sceneRef.current?.panTo(lon, lat),
+              cameraPose: () => sceneRef.current?.cameraPose(),
+              setCameraPose: (pose) => sceneRef.current?.setCameraPose(pose),
             }}
           />
         </>

@@ -314,7 +314,6 @@ async function mountGlobe() {
           float lon = atan(dir.x, dir.z) * 180.0 / PI;
           float inset = min(min(lon - uRegion.x, uRegion.y - lon), min(lat - uRegion.z, uRegion.w - lat));
           float regionMask = smoothstep(0.0, 1.6, inset);
-          col = mix(col, uRegionTint, regionMask * uRegionStrength);
 
           // the built-in field fill: the sea-surface temperature at the same [lat, lon] the
           // region box spans, sampled from the per-theme colour texture. The revealed band is a
@@ -332,6 +331,12 @@ async function mountGlobe() {
           // the ocean. The fill still stops exactly where the analysis stops; only the last
           // few pixels of it are a gradient.
           float reveal = fieldSample.a * smoothstep(0.0, 3.0, inset);
+          // The region tint says "the product works here" when there is no analysis to draw.
+          // With the fill loaded it is redundant, and the only places it still showed were the
+          // ones the fill does not cover - so India, Sri Lanka and Arabia wore a coral-grey
+          // rectangle inside their own coastlines. uRegionStrength goes to zero once a field
+          // texture binds, which leaves land inside the box looking like land outside it.
+          col = mix(col, uRegionTint, regionMask * uRegionStrength);
           col = mix(col, fieldCol, reveal * uFieldStrength);
 
           gl_FragColor = vec4(col, 1.0);
@@ -453,10 +458,12 @@ async function mountGlobe() {
       oceanUniforms.uFresnel.value.copy(keys.fresnel);
       oceanUniforms.uRim.value.copy(keys.rim);
       oceanUniforms.uRimStrength.value = keys.rimStrength;
-      oceanUniforms.uRegionStrength.value = keys.regionStrength;
       oceanUniforms.uRegionTint.value.copy(keys.region);
       oceanUniforms.uFieldStrength.value = keys.fieldStrength;
-      oceanUniforms.uFieldTex.value = ensureFieldTexture(isLightTheme() ? "light" : "dark") ?? (null as unknown as ThreeTypes.DataTexture);
+      const tex = ensureFieldTexture(isLightTheme() ? "light" : "dark");
+      oceanUniforms.uFieldTex.value = tex ?? (null as unknown as ThreeTypes.DataTexture);
+      // Zero once the analysis is on the sphere: see the shader. The tint is the no-data state.
+      oceanUniforms.uRegionStrength.value = tex ? 0 : keys.regionStrength;
       coastUniforms.uColour.value.copy(keys.coast);
       coastUniforms.uOpacity.value = keys.coastOpacity;
       canvas!.dataset.globeTheme = isLightTheme() ? "light" : "dark";
@@ -474,9 +481,11 @@ async function mountGlobe() {
         fieldRange = fr;
         fieldThermal = thermal;
         buildCoastlines(lines);
-        // bind the fill now - `applyGlobeTheme` ran before the Grid arrived, so a texture that
-        // was null at mount needs its uniform refreshed here, not on some later theme swap
-        oceanUniforms.uFieldTex.value = ensureFieldTexture(isLightTheme() ? "light" : "dark") ?? (null as unknown as ThreeTypes.DataTexture);
+        // Re-run the whole theme apply rather than binding the one uniform by hand.
+        // `applyGlobeTheme` ran before the Grid arrived, and it now decides two things from
+        // whether the texture exists - the fill and whether the region tint is drawn at all.
+        // Setting only the texture here left the tint on over India and Arabia.
+        applyGlobeTheme();
         // the probe waits on this before it measures rotation: a globe without its
         // continents has not yet taken over from the half-empty fallback
         canvas!.dataset.globeContinents = "1";
