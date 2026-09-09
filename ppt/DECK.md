@@ -100,10 +100,10 @@ back on the deck would make the deck the only surface still doing it.
 | The problem statement's own words | What is built |
 | --- | --- |
 | "No web-based, platform-independent 3D rendering with depth-resolved volumetric views." | A GPU ray-marched water column, **5 m to 2000 m**, in any WebGL2 browser. Public and live today. |
-| "No unified display of instrument profile data alongside model fields." | **237** instruments drawn inside the water. Click one and the model is scored against it: **100,905** depth points compared. |
-| "Absence of interactive controls for variable selection, depth-slice navigation, time-step animation, customizable colorbars." | All four, live. **15** variables in five groups, two depth handles, **12** analyses animated, both colourbar handles and a log or linear scale. |
+| "No unified display of instrument profile data alongside model fields." | **276** instruments drawn inside the water. Click one and the model is scored against it: **351,960** depth points compared. |
+| "Absence of interactive controls for variable selection, depth-slice navigation, time-step animation, customizable colorbars." | All four, live. **15** variables in five groups, two depth handles, **36** analyses animated, both colourbar handles and a log or linear scale. |
 | "Inability to ingest new data streams or model variables without significant re-engineering." | One adapter class per provider. **8** sources read through the same seam, plus a ninth that reads a **NetCDF file a visitor drops on the page**. |
-| "Lack of tools to support intuitive, rapid understanding of complex 3D ocean phenomena." | Every control explains itself in plain language. A **21-step** guided tour over all **44** controls, eight plain-word questions, and **121** unusual bodies of water found for you. |
+| "Lack of tools to support intuitive, rapid understanding of complex 3D ocean phenomena." | Every control explains itself in plain language. A **21-step** guided tour over all **44** controls, eight plain-word questions, and **404** unusual bodies of water found for you. |
 
 ### Block B - innovation and uniqueness
 
@@ -111,12 +111,12 @@ Section label, mono caps: `INNOVATION AND UNIQUENESS`. Four points, no more.
 
 - **Agreement is a number, and so is disagreement.** The float in the picture is **0.08 °C** off
   over **54** depths, RMS **0.71 °C**, and the panel calls that *moderate disagreement* in as many
-  words rather than only reporting the wins. Turn the bias map on and all **230** instruments are
+  words rather than only reporting the wins. Turn the bias map on and all **266** instruments are
   ranked on that same figure - the worst is a moored buoy the analysis never ingested, at
-  **1.66 °C**.
+  **3.22 °C**.
 - **It shows where there is no evidence.** Observation Coverage is a variable in its own right:
-  **9.9%** of the block has no Argo cast behind it, and the picture says exactly where.
-- **It finds the odd water for you.** **121** unusual bodies across 12 analyses, each with a
+  **10.2%** of the block has no Argo cast behind it, and the picture says exactly where.
+- **It finds the odd water for you.** **404** unusual bodies across 36 analyses, each with a
   z-score, a depth band and a footprint in km². Isolate one and the rest of the block clips away.
 - **The picture and the truth are kept apart.** The GPU gets a quantised byte texture. Every
   number a person reads, and every byte served over OPeNDAP, WMS or NetCDF, comes from the native
@@ -126,7 +126,7 @@ Section label, mono caps: `INNOVATION AND UNIQUENESS`. Four points, no more.
 
 > **And it refuses to invent.** Geostrophic current speed was built, measured at 0.16 m/s for the
 > Somali Current in peak monsoon against a real 1.5 to 2.5 m/s, and deleted. There is no
-> machine-learning gap-filler painting over the 9.9% nobody measured.
+> machine-learning gap-filler painting over the 10.2% nobody measured.
 
 ---
 
@@ -214,7 +214,7 @@ in each title is the point: it names what that consumer reads.
 
 | Card title | Mono sub-label |
 | --- | --- |
-| Static bake ← both | `71.1 MB committed · 0 network calls` |
+| Static bake ← both | `192 MB committed · 0 network calls` |
 | Browser ← both | `Three.js · WebGL2 · GLSL ES 3.00` |
 | REST API ← Grid | `FastAPI · 21 routes` |
 | Open standards ← Grid | `OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0` |
@@ -260,7 +260,7 @@ notice it reaches only the screen.
 | Backend | FastAPI &middot; uvicorn &middot; pydap &middot; xpublish &middot; xpublish-wms |
 | Frontend | TypeScript &middot; React 19 &middot; Vite &middot; Zustand &middot; Three.js &middot; WebGL2 &middot; GLSL ES 3.00 |
 | Standards spoken | ERDDAP griddap and tabledap *(read)* &middot; OPeNDAP DAP2 *(read and served)* &middot; CF-1.8 NetCDF *(served)* &middot; OGC WMS 1.3.0 *(served)* |
-| Quality and delivery | pytest, **377** tests &middot; Playwright, **13** browser probes &middot; GitHub Actions, build and deploy on every push |
+| Quality and delivery | pytest, **377** tests &middot; Playwright, **15** browser probes &middot; GitHub Actions, build and deploy on every push |
 
 > No paid service and no GPU cluster. **No account to view or use it; one free Copernicus account
 > to rebuild the data**, and that credential never leaves the machine that bakes. Built and tested
@@ -277,8 +277,8 @@ will look for them. Keep them.*
 | --- | --- |
 | **01 Fetch** | Subset each source at the server, over one region and one window. Every endpoint tested and dated before it was trusted. |
 | **02 Check** | Quality flags read per channel, so a float with a dead salinity sensor still gives its good temperature. Land masked, never back-filled into the sea. |
-| **03 Derive** | Density from TEOS-10, the five cyclone-hazard fields INCOIS stopped publishing in 2019, a temperature anomaly, two observation counts, and 121 unusual bodies of water located automatically. |
-| **04 Bake** | Native grids for the API and the standards; byte volumes for the GPU; depth sheets and drapes left unquantised. **71.1 MB, committed**, so the demo needs no network. |
+| **03 Derive** | Density from TEOS-10, the five cyclone-hazard fields INCOIS stopped publishing in 2019, a temperature anomaly, two observation counts, and 404 unusual bodies of water located automatically. |
+| **04 Bake** | Native grids for the API and the standards; byte volumes for the GPU; depth sheets and drapes left unquantised. **192 MB, committed**, so the demo needs no network. |
 | **05 Render and compare** | Ray-march the block in the browser, draw every instrument where it truly was, score the model against each cast, and **publish the score**. |
 
 ### Block D - the status strip. Do not shrink this.
@@ -300,7 +300,7 @@ face value**, because most submissions at this stage describe something that doe
 *Template heading: **FEASIBILITY AND VIABILITY***
 
 **Optional image:** `images/S4-coverage.jpg`, small, with the caption *"Observation Coverage. The
-tool's own account of where there is no float data behind the analysis - 9.9% of the block, shown
+tool's own account of where there is no float data behind the analysis - 10.2% of the block, shown
 rather than filled in."*
 
 ### Block A - feasibility, three boxes
@@ -309,12 +309,12 @@ rather than filled in."*
 | --- |
 | **Built, deployed and public today.** Open it on the evaluator's own laptop during the pitch. |
 | **Ordinary hardware is enough.** Built and tested on integrated graphics with 2 GB of shared memory. |
-| **377 automated tests** cover the science, and **13 browser probes** measure what reaches the screen. CI runs both on every push. |
+| **377 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
 
 | **It costs nothing to keep** *(viability)* |
 | --- |
 | **No licence, no GPU cluster, no new data collection.** No account to view or use it; one free Copernicus account to rebuild the data. |
-| **71.1 MB of static files** plus one small Python service is the entire deployment. |
+| **192 MB of static files** plus one small Python service is the entire deployment. |
 | **It makes data INCOIS already pays for do more work.** |
 
 | **INCOIS can host it** *(deployment)* |
@@ -358,7 +358,7 @@ for, does more work."*
 | | |
 | --- | --- |
 | **01 Cyclone and hazard forecasters** | A storm's fuel is the heat *below* the surface. Cyclone heat potential is measured down to the depth of an isotherm, and this draws that isotherm as a solid surface you can fly around and watch dome over four months. |
-| **02 Search and rescue** | See the real water structure inside the actual search box in seconds, with the nearest instruments and what they measured. Drop a pin and the currents carry it forward - **scored on 195 real Argo floats, a median 38.5 km out over one cycle.** |
+| **02 Search and rescue** | See the real water structure inside the actual search box in seconds, with the nearest instruments and what they measured. Drop a pin and the currents carry it forward - **scored on 219 real Argo floats, a median 40.9 km out over one cycle.** |
 | **03 Fisheries advisories** | INCOIS already sends potential fishing zone advisories to lakhs of fishermen. Those depend on fronts and mixed-layer depth, and both become objects you can point at. |
 | **04 Climate and ocean-state monitoring** | A departure from a real **1991-2020** normal, with unusual bodies of water found automatically, and beside it an honest map of where no observation stands behind the analysis. |
 | **05 Students, the public, and policy** | A browser, no install, no login, no cost, a guided walk through every control, and an exhibition mode that resets itself. The same tool a forecaster uses is the one a school class flies into the Bay of Bengal with. |
@@ -368,8 +368,8 @@ for, does more work."*
 | | |
 | --- | --- |
 | **Social** | Opens in **any browser, with no install, no login and no cost**, so the same tool serves a forecaster's console and a school classroom. Every control explains in plain language what it does and whether it changed the science or only the picture. Directly answers the outreach, exhibition and e-learning mandate the problem statement asks for. |
-| **Economic** | **No licence, no GPU cluster, and no new data collection.** 71.1 MB of static files plus one small Python service is the entire deployment. It cuts a three-program comparison down to one browser tab, and adding a new sensor costs one class, not a rebuilt tool. |
-| **Environmental** | Chlorophyll from **52 biogeochemical floats** sits beside the physics. **121 unusual bodies of water** are found automatically, each with a z-score, a depth band and a footprint in km², which is how anomalous warm water gets noticed early. And **9.9%** of the block is marked as having no evidence behind it rather than quietly filled in. |
+| **Economic** | **No licence, no GPU cluster, and no new data collection.** 192 MB of static files plus one small Python service is the entire deployment. It cuts a three-program comparison down to one browser tab, and adding a new sensor costs one class, not a rebuilt tool. |
+| **Environmental** | Chlorophyll from **57 biogeochemical floats** sits beside the physics. **404 unusual bodies of water** are found automatically, each with a z-score, a depth band and a footprint in km², which is how anomalous warm water gets noticed early. And **10.2%** of the block is marked as having no evidence behind it rather than quietly filled in. |
 
 **The closing line:**
 
@@ -391,13 +391,13 @@ Two columns of small native text, 10-11 pt. A reference, not a read. No image.
 Analysis Methodology). Temperature and salinity, 24 levels, 5-2000 m. *This is the model field.*
 `erddap.incois.gov.in/erddap/griddap/incois_argo_10d_VAM.html`
 
-**2. Argo GDAC, Coriolis / Ifremer** - `ArgoFloats`. 228 floats, with per-value quality flags.
+**2. Argo GDAC, Coriolis / Ifremer** - `ArgoFloats`. 259 floats, with per-value quality flags.
 *These are the observations.* `erddap.ifremer.fr/erddap/tabledap/ArgoFloats.html`
 
-**3. Argo synthetic BGC, Ifremer** - `ArgoFloats-synthetic-BGC`. Chlorophyll from 52 floats.
+**3. Argo synthetic BGC, Ifremer** - `ArgoFloats-synthetic-BGC`. Chlorophyll from 57 floats.
 `erddap.ifremer.fr/erddap/tabledap/ArgoFloats-synthetic-BGC.html`
 
-**4. NOAA OSMC real-time (GTS)** - `OSMC_RealTime`. 9 moored buoys, including India's own OMNI
+**4. NOAA OSMC real-time (GTS)** - `OSMC_RealTime`. 17 moored buoys, including India's own OMNI
 network run by NIOT with INCOIS as data centre, and the MoES-NOAA RAMA array. Public domain.
 `erddap.aoml.noaa.gov/gdp/erddap/tabledap/OSMC_RealTime.html`
 
@@ -460,7 +460,7 @@ the exact request you can run yourself:
   `github.com/RAK2315/samudra-sih26` &rarr; `docs/adr/`
 - **Every unmet clause of PS 26067**, researched with dates and row counts, with the decision
   taken on each. `docs/plan/03-requirement-gaps.md`
-- **377 automated tests** on the science and on what we serve, plus **13 browser probes**. Both
+- **377 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
   run in CI on every push.
 
 > **Before you export, click every link on this slide.** All four DOIs were checked on
@@ -524,11 +524,11 @@ Each was considered and rejected for a reason.
 | **Paste a picture of text** | It cannot be searched, copied, fixed on the day or read at a size other than the one it was made at. If it is words, type the words. Only screenshots go in as images. |
 | Say "no other tool does this" | Argovis, Copernicus MyOcean and the EU Digital Twin Ocean have not all been checked. Say "co-visualisation in a browser, in 3D, with the comparison quantified" - the narrow claim is defensible, the absolute one is not. |
 | Claim gliders, CTD sections, HF-radar or ADCP | None are in the build, and each was refused with a measurement. The last glider left this basin on 14 Oct 2022. Saying so is a stronger answer than a vague promise. |
-| Claim machine learning anywhere | There is none, deliberately. Twelve timesteps is not a training set, and a neural gap-filler would paint over the 9.9% that is the most honest thing in the tool. |
-| Say "237 Argo floats" | It is 228 Argo floats **and** 9 moored buoys, and the number drawn at any one timestep is between 192 and 220 floats and 5 to 9 buoys. Say "instruments" unless you mean floats. |
+| Claim machine learning anywhere | There is none, deliberately. Thirty-six timesteps is not a training set, and a neural gap-filler would paint over the 10.2% that is the most honest thing in the tool. |
+| Say "276 Argo floats" | It is 259 Argo floats **and** 17 moored buoys, and the number drawn at any one timestep is between 192 and 221 floats and 5 to 14 buoys. Say "instruments" unless you mean floats. |
 | Say the currents are a picture | They **were**, and are not any more. ADR 0013 superseded 0011: they are Copernicus's own `uo` and `vo` at 1/12 degree, with a real speed under the cursor. The old caveat is now the opposite of the truth. |
 | Call the moving current dots a simulation | They are 2,400 dots carried by the analysed field on one depth, running the drift model's own step rule - measured 0.002 km from a drift pin after 724 km. Not three-dimensional, and refused as such: neither provider publishes a vertical velocity. ADR 0017. |
-| Claim the platform predicts a drift track | It integrates the analysed currents and nothing else - no wind, no Stokes drift, no leeway. What makes it worth showing is that it is **scored**: median 38.5 km out over one Argo cycle. |
+| Claim the platform predicts a drift track | It integrates the analysed currents and nothing else - no wind, no Stokes drift, no leeway. What makes it worth showing is that it is **scored**: median 40.9 km out over one Argo cycle. |
 | Add a stock photo of the ocean | Every picture in this deck is the real software. That is itself the argument. |
 | Add a seventh slide | The portal caps it at six. |
 | Say the platform runs on a phone | The **landing page** does, down to 320 px, and that is worth saying. The **console** is floored at 980 px and pans sideways below it, because the top bar alone is about 800 px. Say "any laptop", and hand the evaluator a laptop. |

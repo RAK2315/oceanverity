@@ -80,6 +80,23 @@ export function guideFigures(source: {
   figures.fieldCount = String(manifest.fields.length);
   figures.groupCount = String(manifest.fieldGroups?.length ?? 0);
 
+  // How many analyses are loaded, and the months they span, read off the bake rather than
+  // written into the sentence. Three entries said "twelve" and "April to July 2026" as literals,
+  // which is the stale-figure trap this mechanism exists to close: `--timesteps 36` would have
+  // left them all wrong with nothing able to notice.
+  const steps = manifest.timesteps ?? [];
+  if (steps.length > 0) {
+    figures.stepCount = String(steps.length);
+    const first = new Date(steps[0] ?? "");
+    const last = new Date(steps[steps.length - 1] ?? "");
+    const month = (d: Date) => d.toLocaleString("en-GB", { month: "long", timeZone: "UTC" });
+    const year = (d: Date) => d.getUTCFullYear();
+    figures.stepRange =
+      year(first) === year(last)
+        ? `${month(first)} to ${month(last)} ${year(last)}`
+        : `${month(first)} ${year(first)} to ${month(last)} ${year(last)}`;
+  }
+
   const coverage = manifest.coverage;
   if (coverage?.emptyFraction != null) {
     figures.coverageEmptyPct = `${(coverage.emptyFraction * 100).toFixed(1)}%`;
@@ -248,9 +265,9 @@ export const GUIDE: Record<string, GuideEntry> = {
   temperature_anomaly: {
     title: "Temperature Anomaly",
     kind: "science",
-    does: "How far each point is from its own average across the twelve analyses loaded.",
+    does: "How far each point is from its own average across every analysis loaded.",
     means: [
-      "The baseline is those twelve steps and nothing else: roughly April to July 2026.",
+      "The baseline is those {stepCount} steps and nothing else: {stepRange}.",
       "So it is a seasonal swing. Temperature vs Normal beside it is the climate one.",
       "Using each cell's own average removes geography: a warm Arabian Sea is not news.",
     ],
@@ -734,7 +751,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Each frame is a separate analysis INCOIS published. Not an interpolation.",
       "The colour scale is held fixed across all frames, so a change you see is real.",
     ],
-    look: ["Playing April through July shows the monsoon arriving."],
+    look: ["Playing {stepRange} shows both monsoons and the reversal between them."],
     tryThis: "Press play and watch the surface layer change through the season.",
   },
 
@@ -837,7 +854,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Click one and move the timeline. It never drifts, so you watch one patch all season.",
       "An Argo float cannot. By the next analysis it is somewhere else.",
     ],
-    tryThis: "Open the buoy in the Bay of Bengal and play the timeline from April to July.",
+    tryThis: "Open the buoy in the Bay of Bengal and play the timeline right through.",
   },
 
   chlorophyll: {
@@ -885,7 +902,7 @@ const PROVENANCE: Record<string, string> = {
     "worked out here with TEOS-10 from INCOIS's temperature and salinity analyses for %d," +
     " at each cell's own pressure",
   temperature_anomaly:
-    "worked out here as each cell's departure from its own average across the twelve analyses" +
+    "worked out here as each cell's departure from its own average across every analysis" +
     " in this bake, shown for %d",
   temperature_normal_anomaly:
     "worked out here as INCOIS's analysis for %d minus NOAA's World Ocean Atlas 2023 mean for" +

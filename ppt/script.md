@@ -13,10 +13,10 @@ or **5:40 at a comfortable 150**, plus the marked silences. Expect **about 5:50 
 which leaves room to slow down on the numbers.
 
 **Numbers are written the way they are said**, because this page is read aloud: "twenty-six
-degrees", not "26 degrees". The one figure that resists it is the Argo floats' 0.17 degC, which
-cannot be spelled out without either a decimal or a rounding that makes the sentence false - two
-tenths is the all-instrument figure and gives 3.9x, not 4.5 - so that sentence names the floats
-instead of restating the number.
+degrees", not "26 degrees". The one figure that resists it is the Argo floats' 0.18 degC, which
+cannot be spelled out without either a decimal or a rounding that makes the sentence false - a
+quarter of a degree is the all-instrument figure and gives 4.2x, not 5.5 - so that sentence names
+the floats instead of restating the number.
 
 **The audience is not technical.** A judge watching this may never have opened an ocean model.
 Nothing here needs a science background to follow, and no sentence uses a term the picture on
@@ -49,7 +49,7 @@ the name of the international float programme, not an acronym.
 India runs a computer model of the ocean around it. It feeds cyclone warnings, search and rescue,
 and the advisories that tell fishermen where to go.
 
-There are also two hundred and twenty-eight Argo floats represented here, collecting real
+There are also two hundred and fifty-nine Argo floats represented here, collecting real
 measurements from that same water.
 
 The gap was not a lack of data. It was the lack of one interactive, depth-resolved view that put
@@ -67,7 +67,7 @@ the model and measurements together.
 This is closer to the traditional workflow: a map of the ocean, often viewed one variable and one
 depth at a time.
 
-> **On screen ·** Press play at the left of the timeline along the bottom. Let the twelve analyses
+> **On screen ·** Press play at the left of the timeline along the bottom. Let the thirty-six analyses
 > run so the colours visibly change. Leave it playing through the next lines.
 
 The model output and float measurements are often handled through separate tools or workflows.
@@ -169,14 +169,14 @@ Switch to circulation and the ocean starts moving. Those are the real analysed c
 
 Now the honest part.
 
-Across **two hundred and thirty instruments**, the typical gap is **about two tenths of a
+Across **two hundred and sixty-six instruments**, the typical gap is **about a quarter of a
 degree**.
 
 But the model assimilates Argo observations, so agreement with those floats is not a fully
 independent test.
 
-Against the **nine moored buoys it did not use**, the gap is **three quarters of a degree** - about
-**four and a half times** what the Argo floats show.
+Against the **seventeen moored buoys it did not use**, the gap is **just over a degree** - about
+**five and a half times** what the Argo floats show.
 
 **We could have shown one flattering average. We show the number that makes us look worse, because
 that is the one a forecaster actually needs.**

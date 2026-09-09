@@ -65,10 +65,10 @@ venue network cannot kill it.
 scores the model against every instrument in the water and prints the result, including where it
 looks bad.
 
-> Across **230 instruments** the typical gap is **0.19 °C**. But INCOIS *assimilate* Argo, so a
-> float's agreement is largely the model agreeing with itself. Against the **9 moored buoys it
-> did not ingest, the gap is 0.75 °C** - four times worse. We print both, separately, because
-> pooling them would flatter the model.
+> Across **266 instruments** the typical gap is **0.24 °C**. But INCOIS *assimilate* Argo, so a
+> float's agreement is largely the model agreeing with itself. Against the **17 moored buoys it
+> did not ingest, the gap is 1.01 °C** - five and a half times worse. We print both, separately,
+> because pooling them would flatter the model.
 
 **2. Never answer a scientific question from the picture.** The rendered block is quantised to a
 byte per value and warped for the GPU. Every number a user reads - tooltips, comparisons, API
@@ -76,7 +76,7 @@ responses - comes from the full-precision grid instead. This one rule shapes the
 architecture.
 
 **3. A gap is drawn as a gap.** Where nobody measured, we say so rather than colouring it in.
-**9.9%** of the block has no observation behind it, and there is a variable whose only job is to
+**10.2%** of the block has no observation behind it, and there is a variable whose only job is to
 show you where.
 
 **4. It has a second door.** Fifteen variables is right for a forecaster and wrong for a school
@@ -93,14 +93,14 @@ hand.
 
 | | |
 | --- | --- |
-| Instruments in the water | **237** - 228 Argo floats + 9 moored buoys |
+| Instruments in the water | **276** - 259 Argo floats + 17 moored buoys |
 | Variables | **15**, in 5 groups; 13 computed or fetched here |
-| Analyses | **12** timesteps, 10 Apr to 30 Jul 2026, over 45-100 °E and 10 °S-25 °N |
+| Analyses | **36** timesteps, 10 Aug 2025 to 30 Jul 2026, over 45-100 °E and 10 °S-25 °N |
 | Depth | **5 m to 2000 m** across 24 uneven levels |
-| Data shipped in the build | **71.1 MB**, committed, **0** network calls to run |
+| Data shipped in the build | **192 MB**, committed, **0** network calls to run |
 | Source adapters | **9** - 8 providers, plus one for a file a visitor drops on the page |
 | Tests / browser probes | **377** / **13** |
-| Drift model, scored | median **38.5 km** out over one Argo cycle, across 1,908 cycles on 195 floats |
+| Drift model, scored | median **40.9 km** out over one Argo cycle, across 6,246 cycles on 219 floats |
 
 ## What it looks like
 
@@ -166,7 +166,7 @@ nothing joins them back up.
   ┌─ 4 · FOUR WAYS OUT ───────────────────────────────────────────────────┐
   │ REST API         Grid only   FastAPI · 15 routes                      │
   │ Open standards   Grid only   OPeNDAP · CF-1.8 · WMS 1.3.0             │
-  │ Static bake      both        71.1 MB committed · 0 network calls      │
+  │ Static bake      both        192 MB committed · 0 network calls       │
   │ Browser          both        reads the bake, never the API            │
   └───────────────────────────────────────────────────────────────────────┘
 ```
@@ -181,7 +181,7 @@ Each one public, each tested and dated in
 | **INCOIS ERDDAP** `incois_argo_10d_VAM` | The 10-day gridded analysis - temperature and salinity |
 | **INCOIS ERDDAP** 10-day McCreary | The second analysis, for the spread between them |
 | **Argo GDAC** · Ifremer | Float profiles, with per-channel QC flags |
-| **Argo BGC** · Ifremer | Chlorophyll, on 52 of the floats |
+| **Argo BGC** · Ifremer | Chlorophyll, on 57 of the floats |
 | **NOAA OSMC** | Moored buoys over GTS - **the instruments INCOIS do not assimilate** |
 | **Copernicus Marine** | Current vectors `uo`, `vo` at 1/12° |
 | **EGO glider GDAC** · `ftp.ifremer.fr` | The glider archive PS 26067 names |
@@ -215,7 +215,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Out | Reads from | What it is |
 | --- | --- | --- |
-| **Static bake** | Grid **and** Volume | 71.1 MB committed · **0 network calls** |
+| **Static bake** | Grid **and** Volume | 192 MB committed · **0 network calls** |
 | **Browser** | Grid **and** Volume | Three.js · WebGL2 · GLSL ES 3.00 |
 | **REST API** | **Grid only** | FastAPI · 15 routes |
 | **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 · 5 endpoints |
@@ -256,7 +256,7 @@ works with no server behind it at all.
 4. **Derived variables** - density, cyclone heat potential, mixed layer depth and ten more,
    each computed here and each held to a hand-computable test.
 5. **Bake** - the `Volume` for the GPU, plus float32 grids, float positions, collocations,
-   residuals and the drift check. 71.1 MB, committed.
+   residuals and the drift check. 192 MB, committed.
 6. **Browser** - reads those files. No network.
 
 ---

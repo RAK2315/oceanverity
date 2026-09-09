@@ -37,8 +37,8 @@ _STANDARD_NAMES = {
     "temperature": "sea_water_temperature",
     "salinity": "sea_water_practical_salinity",
     "density": "sea_water_sigma_theta",
-    # A departure from a four-month mean of this bake is not an anomaly in the CF sense, which
-    # means a departure from a climatology. There is no standard name for what this actually is.
+    # A departure from the mean of this bake's own steps is not an anomaly in the CF sense,
+    # which means a departure from a climatology. There is no standard name for what this is.
     "temperature_anomaly": None,
     "coverage": None,
 }
@@ -47,9 +47,12 @@ _LONG_NAMES = {
     "temperature": "Sea water temperature",
     "salinity": "Sea water practical salinity",
     "density": "Sea water potential density anomaly (sigma-theta)",
+    # No count and no dates: this is a module constant and cannot see the bake window, so a
+    # figure here goes stale the first time `--timesteps` moves and nothing can notice. The
+    # steps themselves are on the time axis of every dataset this serves.
     "temperature_anomaly": (
-        "Sea water temperature departure from the mean of the twelve analysis steps in this "
-        "build (approximately April to July 2026). Not a climatological anomaly."
+        "Sea water temperature departure from the mean of the analysis steps in this build. "
+        "Not a climatological anomaly."
     ),
     "coverage": (
         "Count of Argo profile casts within 334 km whose dive passed through this depth, in "

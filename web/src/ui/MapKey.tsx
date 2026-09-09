@@ -330,7 +330,7 @@ export function MapKey() {
       {showTracks && (
         <span className="mapkey-item">
           <span className="swatch track" aria-hidden="true" />
-          A float&apos;s drift since April
+          A float&apos;s drift across this build&apos;s window
         </span>
       )}
 

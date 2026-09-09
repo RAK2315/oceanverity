@@ -1,8 +1,8 @@
 # A real climatological baseline, and why this is not the oxygen decision again
 
 PS 26067 names **climate monitoring** among the four operational mandates it says a missing 3D
-platform impedes. The platform's Temperature Anomaly is a departure from the mean of the twelve
-baked Timesteps - roughly April to July 2026 - which is a **seasonal swing**. The guide entry
+platform impedes. The platform's Temperature Anomaly is a departure from the mean of the baked
+Timesteps - a year, August 2025 to July 2026 - which is a **seasonal swing**. The guide entry
 beside it has always said so, which was honest and was not the same as answering the clause.
 
 ## What was built
@@ -11,7 +11,7 @@ A second Field, `temperature_normal_anomaly`, labelled **Temperature vs Normal**
 analysis minus NOAA's **World Ocean Atlas 2023 1991-2020 mean** for that Timestep's own calendar
 month. One degree, monthly, to 1500 m.
 
-Measured on the bake of 2026-09-02, across 349,692 cells:
+Measured on the 36-Timestep bake of 2026-09-09, across 1,049,076 cells:
 
 | | |
 | --- | --- |

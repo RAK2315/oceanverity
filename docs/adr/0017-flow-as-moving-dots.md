@@ -48,8 +48,8 @@ animation and the scored drift model share their arithmetic:
 - `midpointStep()` in `drift.ts` is the step rule, and it is now the **only** place that rule is
   written. `integrateDrift` was refactored onto it in the same change.
 
-So every dot on screen is running the integrator whose error is published: median **38.5 km**
-over one Argo cycle across 195 floats, 1,908 cycles, at 1000 m. No other build of this shape can
+So every dot on screen is running the integrator whose error is published: median **40.9 km**
+over one Argo cycle across 219 floats, 6,246 cycles, at 1000 m. No other build of this shape can
 say that about its animation, because none of them has the observations sitting in the same file.
 
 **Measured, `web/probe-particles.mjs`:** a particle advanced 60 frames and an `integrateDrift`
@@ -99,7 +99,7 @@ equatorial jets correctly and draw no eddies at all, and the guide entry says so
 resolution rather than as an apology.
 
 Baking a finer current field purely for the animation was considered and refused. Estimated at
-1/12 degree over the region it is about 2.2 MB a Timestep and 27 MB for twelve, which is
+1/12 degree over the region it is about 2.2 MB a Timestep and 79 MB for thirty-six, which is
 affordable - and it would make the picture finer than **every number the platform reports**, in
 the one place a viewer would never think to check. That is ADR 0011's mistake with a different
 subject, and ADR 0013 is the record of walking it back.

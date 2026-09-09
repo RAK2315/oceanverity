@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { GUIDE } from "../guide";
+import { GUIDE, guideFigures } from "../guide";
 import { useStore } from "../store";
 
 /**
@@ -91,6 +91,13 @@ function calm(): void {
 export function buildTour(dive: (into: boolean) => void): TourStep[] {
   const inVolume = () => store.getState().morph > 0.5;
   const steps = () => store.getState().manifest?.timesteps.length ?? 1;
+  // The window this build actually loaded, formatted by `guideFigures` rather than by a second
+  // copy of the same date logic. Two captions below said "twelve" and "April to July 2026" as
+  // literals, which a re-bake makes wrong with nothing able to notice - the same trap `guide.ts`
+  // closed with `{token}`s.
+  const figures = guideFigures({ manifest: store.getState().manifest });
+  const analyses = figures.stepCount ?? String(steps());
+  const span = figures.stepRange;
 
   return [
     // ---- 1. The ocean, from above ------------------------------------------------------
@@ -116,7 +123,7 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       body:
         "Dots are robot floats that were in this water on the date shown. Squares are buoys" +
         " anchored to the sea floor. The lines behind them are where each float has drifted" +
-        " since April - measured positions, not a model.",
+        " across this build's window - measured positions, not a model.",
       covers: ["instruments", "floats", "moorings", "tracks", "chlorophyll"],
       enter: () => {
         calm();
@@ -131,11 +138,11 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
     },
     {
       chapter: "The ocean, from above",
-      title: "Four months, ten days at a time",
+      title: `${analyses} analyses, ten days at a time`,
       body:
-        "Twelve analyses run from April to July 2026. Press play and the water, the floats and" +
-        " everything derived from them move together. Nothing on screen is ever a blend of two" +
-        " dates.",
+        (span ? `${analyses} analyses run from ${span}. ` : `${analyses} analyses, ten days apart. `) +
+        "Press play and the water, the floats and everything derived from them move together." +
+        " Nothing on screen is ever a blend of two dates.",
       covers: ["timestep"],
       enter: () => {
         calm();

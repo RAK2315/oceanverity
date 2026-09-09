@@ -504,7 +504,7 @@
       <q>Interactive controls: variable selection, depth-slice navigation, time-step animation, customisable colourbars</q>
       <span class="verdict">Met</span>
     </div>
-    <p>All four. The variable selector is grouped the way a forecaster thinks rather than the way the data arrived; two sliders cut the block to any depth range; twelve analyses play as an animation; and the colourbar carries both range handles and a log/linear scale that bends the water and the legend together.</p>
+    <p>All four. The variable selector is grouped the way a forecaster thinks rather than the way the data arrived; two sliders cut the block to any depth range; thirty-six analyses play as an animation; and the colourbar carries both range handles and a log/linear scale that bends the water and the legend together.</p>
     <p class="measure" id="m-fields">measuring&hellip;</p>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;preset=hazard">Open the hazard group</a>
@@ -586,7 +586,7 @@
       <q>The absence of such a system impedes timely ... climate monitoring</q>
       <span class="verdict">Met</span>
     </div>
-    <p>Two variables answer this and the difference between them is the point. The <b>Temperature Anomaly</b> is a departure from the mean of the twelve analyses in this build - roughly April to July 2026 - which is a seasonal swing, and the panel beside it has always said so. <b>Temperature vs Normal</b> is a departure from NOAA's World Ocean Atlas 2023 <b>1991-2020</b> mean for that analysis's own calendar month, which is what a forecaster means by "warmer than usual". It is read anonymously over OPeNDAP at bake time, needs no account at any point, and sits on exactly the node centres INCOIS use - which is why no regridding happens and why the platform refuses outright rather than regridding if that ever stops being true. Below 1500 m the atlas has no normal, so the field is blank there rather than zero.</p>
+    <p>Two variables answer this and the difference between them is the point. The <b>Temperature Anomaly</b> is a departure from the mean of the thirty-six analyses in this build - a year, August 2025 to July 2026 - which is a seasonal swing, and the panel beside it has always said so. <b>Temperature vs Normal</b> is a departure from NOAA's World Ocean Atlas 2023 <b>1991-2020</b> mean for that analysis's own calendar month, which is what a forecaster means by "warmer than usual". It is read anonymously over OPeNDAP at bake time, needs no account at any point, and sits on exactly the node centres INCOIS use - which is why no regridding happens and why the platform refuses outright rather than regridding if that ever stops being true. Below 1500 m the atlas has no normal, so the field is blank there rather than zero.</p>
     <p class="measure" id="m-normal">measuring&hellip;</p>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature_normal_anomaly">Open the climatological anomaly</a>
@@ -677,7 +677,7 @@
       <q>Extensible design for CTDs, moorings, HF-radar, ADCP and machine-learning derived products</q>
       <span class="verdict partly">Moorings met, the rest answered</span>
     </div>
-    <p>Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format, with depth rather than pressure, one row per level and no quality flags, absorbed behind the same Protocol. HF-radar and ADCP stay unmet because India's are behind a login that does not resolve, which is a data-policy fact rather than an architecture gap. Machine-learning products are refused on purpose: twelve analyses is not a training set, and a gap-filler would paint smooth believable temperature over the part of the block nobody measured, which is the most honest thing in the tool.</p>
+    <p>Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format, with depth rather than pressure, one row per level and no quality flags, absorbed behind the same Protocol. HF-radar and ADCP stay unmet because India's are behind a login that does not resolve, which is a data-policy fact rather than an architecture gap. Machine-learning products are refused on purpose: thirty-six analyses is not a training set, and a gap-filler would paint smooth believable temperature over the part of the block nobody measured, which is the most honest thing in the tool.</p>
     <p class="measure" id="m-coverage">measuring&hellip;</p>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=coverage">Show where nothing was measured</a>
@@ -713,7 +713,7 @@
           set. A gap-filler would paint over the part of the block nobody measured, which is the
           most honest thing here.</td></tr>
         <tr><td class="mono">Ship CTD sections</td><td>Newest GO-SHIP section in this box is
-          April 2025, a full year before the window opens.</td></tr>
+          April 2025, four months before the window opens.</td></tr>
         <tr><td class="mono">HF-radar and ADCP</td><td>India's are behind a login at
           <code>services.incois.gov.in</code>, which does not resolve. A data-policy fact.</td></tr>
         <tr><td class="mono">INCOIS LAS as a data source</td><td>The catalogue reads fine; the

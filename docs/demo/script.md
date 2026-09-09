@@ -287,7 +287,7 @@ there is a deep pool of warm water, which is fuel for a storm. That spike is an 
 **3.**
 > _Re-tick **Show volume**, untick the isosurface. Press **play** on the timeline._
 
-"Twelve analyses over four months, April to July. You are watching the monsoon arrive. And watch
+"Thirty-six analyses over a year, August 2025 to July 2026. You are watching both monsoons. And watch
 the floats: they drift with the current, so their tracks are themselves a measurement."
 
 ---
@@ -304,7 +304,7 @@ questions afterwards, one per question. Reach for the one the question actually 
 > disagreement**._
 
 "Every dot is now coloured by how far the analysis sat from what that instrument measured. Across
-230 instruments it reads 0.02 degrees off on average, and the typical gap is 0.19 degrees. The
+266 instruments it reads 0.01 degrees off on average, and the typical gap is 0.24 degrees. The
 list underneath is worst-first - click one and its comparison opens. And one box is in the worst
 three on all three variables: 15 to 20 north, 85 to 90 east, the northern Bay of Bengal, where
 the Ganges and Brahmaputra come out. It is the worst box on salinity, second on density and
@@ -322,9 +322,9 @@ wind, wave drift and the object's own leeway, and this has none of them. That is
 SARAT. What this shows is the drift the ocean analysis alone implies.
 
 What makes it worth having is that we can score it. An Argo float's track **is** measured drift at
-its parking depth, so we ran the same maths from 195 floats' own positions. Over one Argo cycle the
-current field alone lands a median 38.5 kilometres from where the float actually went, 87.3 at
-the ninetieth percentile across 1,908 cycles. By thirty days the gap is the same size as the distance travelled. No other
+its parking depth, so we ran the same maths from 219 floats' own positions. Over one Argo cycle the
+current field alone lands a median 40.9 kilometres from where the float actually went, 92.7 at
+the ninetieth percentile across 6,246 cycles. By thirty days the gap is the same size as the distance travelled. No other
 drift demo will tell you that number, because none of them has the observations in the same file."
 
 ### "Can it read our data?"
@@ -431,10 +431,10 @@ more than not having it.
 | --- | --- |
 | Venue wifi dies | Nothing happens. Every byte is baked into the page - including the typefaces, the hazard fields and the current vectors - and the demo makes zero network calls. Verified: zero external requests on load. |
 | Rendering is sluggish | Drop **Ray steps** to 64. Still readable, changes nothing scientific. |
-| Cannot find a float to click | Almost any marker works: 227 of the 230 instruments carry a comparison. Squares are moored buoys, and those follow the timeline. |
+| Cannot find a float to click | Almost any marker works: 266 of the 276 instruments carry a comparison. Squares are moored buoys, and those follow the timeline. |
 | Lost in 3D | Press **Return to globe**, then dive again. |
 | The page misbehaves | Refresh. It reloads in seconds from cache. |
-| Asked something you do not know | "That is in our decision records, we wrote up why." `docs/adr/` genuinely has twelve. |
+| Asked something you do not know | "That is in our decision records, we wrote up why." `docs/adr/` genuinely has seventeen. |
 
 ---
 

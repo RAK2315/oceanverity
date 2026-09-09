@@ -147,9 +147,9 @@ ANOMALY_FIELD = FieldSpec(
     opacity=0.05,
     group="change",
     description=(
-        "Departure of each cell from its own average across the twelve Timesteps in this bake, "
-        "roughly April to July 2026. A seasonal swing, not a climatological normal: there is no "
-        "thirty-year reference series in this build."
+        "Departure of each cell from its own average across the Timesteps in this bake. A "
+        "seasonal swing, not a climatological normal: there is no thirty-year reference series "
+        "in this build."
     ),
 )
 
@@ -176,7 +176,7 @@ NORMAL_ANOMALY_FIELD = FieldSpec(
     description=(
         "Departure from the World Ocean Atlas 2023 mean for the same calendar month, averaged "
         "over 1991-2020. This is a climatological normal: the Temperature Anomaly beside it is "
-        "a departure from this bake's own four months. Below 1500 m the atlas has no normal."
+        "a departure from this bake's own window. Below 1500 m the atlas has no normal."
     ),
 )
 
@@ -1236,7 +1236,7 @@ def _observed_density(profile):
 def _build_normal_anomaly(climatology, grids, timesteps) -> tuple[list, dict | None]:
     """The analysis minus the 1991-2020 normal for each Timestep's own calendar month.
 
-    One fetch per **month**, not per Timestep: April to July is four files rather than twelve,
+    One fetch per **month**, not per Timestep: a year is twelve files rather than thirty-six,
     and three ten-day steps inside a month share one baseline - which is a limitation of the
     atlas rather than a shortcut, and the panel says so.
 
@@ -1374,8 +1374,9 @@ def _build_drift(floats, vectors, timesteps) -> dict | None:
 def _cycle_separations(series, fixes) -> list[float]:
     """One Argo cycle at a time: restart at each Fix, integrate to the next, measure the gap.
 
-    The cumulative figures above answer "if this had been let go four months ago"; this answers
-    the question a search actually asks, which is "it was here ten days ago, where is it now".
+    The cumulative figures above answer "if this had been let go at the start of the window";
+    this answers the question a search actually asks, which is "it was here ten days ago, where
+    is it now".
     They are different numbers and the second one is the fairer test of the current field,
     because it never carries an error forward.
     """
@@ -1683,8 +1684,8 @@ def _build_anomaly_features(anomalies, grids, timesteps, coverage_counts, warp):
 def _collocate_cast(cast, grids, index, fields):
     """One cast against one analysis step, as the `fields` dict the frontend reads.
 
-    Pulled out of `_build_observations` because a mooring needs it twelve times - once per
-    Timestep - and a Float needs it once. Returns {} when nothing compared, which the caller
+    Pulled out of `_build_observations` because a mooring needs it once per Timestep - thirty-six
+    times in this bake - and a Float needs it once. Returns {} when nothing compared, which the caller
     treats as "no entry" rather than writing an empty chart.
     """
     observed_for = dict(cast.values)
@@ -1753,8 +1754,8 @@ def _build_observations(profiles, grids, timesteps, fields, extra=(), moorings=(
     A mooring is different in the one way that matters: it does not move. So it gets a
     Collocation at **every** Timestep rather than one at the step nearest its cast, and the panel
     can follow the timeline. An Argo float cannot do that - by the next analysis it is somewhere
-    else, and comparing its April cast against the July grid would be comparing two different
-    pieces of water.
+    else, and comparing its cast against an analysis months later would be comparing two
+    different pieces of water.
     """
     by_float: dict[str, list] = {}
     for profile in profiles:
@@ -1929,10 +1930,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Bake INCOIS + Argo data into static assets.")
     parser.add_argument("--output", type=Path, default=Path("../web/public/data"))
     parser.add_argument("--timesteps", type=int, default=12, help="most recent N (10-day) steps")
-    # Matched to the Timestep span on purpose. Floats are drawn at where they actually were at
-    # the moment on screen, so a shorter profile window leaves the early frames with no
-    # instruments at all - which reads as "the tool is broken" rather than "no data".
-    parser.add_argument("--profile-days", type=int, default=130)
+    # Derived from the Timestep span rather than defaulted, because the two are one decision.
+    # Floats are drawn where they actually were at the moment on screen, so a profile window
+    # shorter than the analyses it has to cover leaves the early frames with no instruments at
+    # all - which reads as "the tool is broken" rather than "no data". It was a fixed 130 against
+    # a fixed twelve steps, and the pairing held only while nobody moved either: --timesteps 36
+    # would have asked for 360 days of analyses and fetched 130 days of floats, leaving two
+    # thirds of the run empty with nothing raising a word about it.
+    parser.add_argument(
+        "--profile-days",
+        type=int,
+        default=None,
+        help="days of float profiles; defaults to the Timestep span plus a 10-day margin",
+    )
     parser.add_argument(
         "--grids",
         type=Path,
@@ -1940,7 +1950,15 @@ def main() -> None:
         help="where to keep native Grids for the API to answer with",
     )
     args = parser.parse_args()
-    bake(args.output.resolve(), args.timesteps, args.profile_days, args.grids.resolve())
+    # Ten days a Timestep, plus a margin so the first analysis has floats on both sides of it.
+    profile_days = args.profile_days if args.profile_days is not None else args.timesteps * 10 + 10
+    if profile_days < args.timesteps * 10:
+        print(
+            f"[bake] WARNING: --profile-days {profile_days} is shorter than the "
+            f"{args.timesteps * 10} days of analyses requested. Early Timesteps will draw no "
+            f"instruments."
+        )
+    bake(args.output.resolve(), args.timesteps, profile_days, args.grids.resolve())
 
 
 if __name__ == "__main__":

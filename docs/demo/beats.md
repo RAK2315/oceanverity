@@ -77,7 +77,7 @@ Do these fast - three actions, about fifteen seconds each.
    a single water mass."
 2. **Turn on the isosurface.** "That is the 20 °C isotherm - the standard thermocline proxy. You
    can see it doming, and that spike is an eddy."
-3. **Press play.** "Twelve analyses over four months. April to July - you are watching the
+3. **Press play.** "Thirty-six analyses over a year. August 2025 to July 2026 - you are watching the
    monsoon arrive."
 
 ## 3:15 - Extensibility and honesty

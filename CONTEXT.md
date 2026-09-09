@@ -140,7 +140,7 @@ _Avoid_: error map, validation, skill score, AI
 
 **Anomaly**:
 Departure of a cell from its own average across the baked Timesteps. Not a climatological
-normal - the baseline is the twelve steps loaded and nothing more, and everything on screen
+normal - the baseline is the thirty-six steps loaded and nothing more, and everything on screen
 that mentions it says so. The Field beside it, **Temperature vs Normal**, is the climatological
 one and is what a forecaster means by "warmer than usual".
 _Avoid_: normal, climatology, deviation
@@ -256,7 +256,7 @@ Everything above the line is being built. Everything below it is deliberately, k
   mean for the same calendar month, which is the climatological baseline the anomaly is not.
   ADR 0016.
 - **Drift**: a pin dropped in the water, integrated forward through the analysed currents, with
-  the honest limit stated first and a score attached - 195 Argo floats, median 38 km out over
+  the honest limit stated first and a score attached - 219 Argo floats, median 41 km out over
   one cycle. ADR 0015.
 - **Anomaly Feature isolation**: clear the rest of the Volume away and leave only the body of
   water one Feature describes, which is the box every number on its panel is measured over.

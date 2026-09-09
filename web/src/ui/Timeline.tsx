@@ -71,15 +71,21 @@ export function Timeline() {
           * Buttons, not spans. These were clickable and unreachable by keyboard, which made the
           * tick strip a mouse-only duplicate of a control the slider already offers.
           *
-          * Every step stays clickable, but only every other one carries its date. Twelve
-          * five-character labels need more width than the track has on a 1366 px screen, and
-          * they ran into each other - "04-1004-2004-30" - which reads as a broken axis. The
-          * unlabelled steps keep their accessible name, so nothing is lost to a screen reader.
+          * Every step stays clickable, but only some carry a date. Twelve five-character labels
+          * need more width than the track has on a 1366 px screen, and they ran into each other
+          * - "04-1004-2004-30" - which reads as a broken axis. The unlabelled steps keep their
+          * accessible name, so nothing is lost to a screen reader.
+          *
+          * The stride is derived rather than fixed at every second tick, so the axis survives a
+          * longer bake: `--timesteps 36` under the old rule drew eighteen labels in the same
+          * track and collided exactly as twelve had. Six labels is what the track fits, and at
+          * twelve steps this is still every second one - unchanged today, correct later.
           */}
         <div className="timeline-ticks">
           {steps.map((stamp, index) => {
             const date = new Date(stamp).toISOString().slice(0, 10);
-            const labelled = index % 2 === 0 || index === steps.length - 1;
+            const stride = Math.max(1, Math.ceil(steps.length / 6));
+            const labelled = index % stride === 0 || index === steps.length - 1;
             return (
               <button
                 type="button"

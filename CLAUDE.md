@@ -59,7 +59,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 
 ### Generated data - do not hand-edit
 
-- `web/public/data/` - manifest, volumes (`.bin`), `surfaces/*.bin` (the hazard Fields, float32 on the Grid), `currents/vectors_*.bin` (float32 u and v on the Grid), **`grids/*.bin`** (the native float32 Grid for the three collocated Fields, which is what the vertical section is cut from), `floats.json`, `collocations.json`, **`residuals.json`** (the bias map), **`drift.json`** (the drift check), `anomalies.json`, **`tests.json`** (what the provenance page says about the test suite, written by `pipeline/scripts/collect_tests.py` rather than by the bake) and coastlines. Written by `bake.py`. 71.1 MB.
+- `web/public/data/` - manifest, volumes (`.bin`), `surfaces/*.bin` (the hazard Fields, float32 on the Grid), `currents/vectors_*.bin` (float32 u and v on the Grid), **`grids/*.bin`** (the native float32 Grid for the three collocated Fields, which is what the vertical section is cut from), `floats.json`, `collocations.json`, **`residuals.json`** (the bias map), **`drift.json`** (the drift check), `anomalies.json`, **`tests.json`** (what the provenance page says about the test suite, written by `pipeline/scripts/collect_tests.py` rather than by the bake) and coastlines. Written by `bake.py`. 192 MB across 36 Timesteps.
 - `web/public/fonts/` and `web/public/fonts.css` - the two typefaces, served from the build. Written by `scripts/fetch_fonts.py`. Do not replace with a Google Fonts link; that is the zero-network-calls rule.
 - `data/grids/` - native Grids as `.npz` for the API. Server-side only.
 - `data/glider/glider_prof_index_region.txt` - the 2,876 rows of the 248 MB EGO glider index that fall inside the region, cut from the real thing on 2026-09-01 with its own header kept. Committed so the glider finding is reproducible in every bake without the download. Server-side only.
@@ -277,7 +277,7 @@ argument that would have given it its own advection code. It runs `midpointStep`
 refactored onto the same step in the same change so there is one copy and not two. Measured by
 `probe-particles.mjs`: a particle and a drift pin from the same start point over the same elapsed
 ocean time end **0.002 km apart after 724 km of travel**. That equivalence is the entire claim -
-an animation whose error is published, median 38.5 km over an Argo cycle - and an unchecked claim
+an animation whose error is published, median 40.9 km over an Argo cycle - and an unchecked claim
 is decoration. ADR 0017.
 
 **A dot on a Level is not a streamline through the block, and the difference is `w`.**
@@ -378,21 +378,23 @@ an unfilled token reaching the screen, and on a control with no entry at all: it
 which is the rule two paragraphs down being broken silently for a round.
 
 **INCOIS assimilate Argo, so a float's residual is largely the model agreeing with itself.**
-The nine moored buoys are the only instruments in this bake their analysis did not ingest, and
-measured they disagree 4.5x more on temperature - 0.748 degC against 0.167 - 4.9x on salinity and
-6.4x on density. Pooled into one basin-wide number the nine of them vanish into 221 floats and
-the headline becomes a statement about self-consistency. `residuals.field_bias` takes a `kind`
-and the panel prints both. Any new sentence about "how far the model sits from the observations"
+The seventeen moored buoys are the only instruments in this bake their analysis did not ingest,
+and measured they disagree 5.5x more on temperature - 1.010 degC against 0.184 - 7.6x on salinity
+and 5.4x on density. Pooled into one basin-wide number the seventeen of them vanish into 249
+floats and the headline becomes a statement about self-consistency. At twelve Timesteps it was
+nine buoys at 4.5x; a full year roughly doubled the evidence and the ratio went **up**, not down.
+`residuals.field_bias` takes a `kind` and the panel prints both. Any new sentence about "how far the model sits from the observations"
 has to say which observations.
 
 **A score may only be measured on the days the data covers.** `CurrentSeries._bracket_time`
 holds the first analysis rather than extrapolating before it, which is right for drawing a line
-and silent inside a number. Measured: the earliest Fix was 2026-03-22 against a first analysis of
-2026-04-10, and 199 of 202 baked drift comparisons started inside that 19-day hole.
-`CurrentSeries.covers` refuses them - the same refusal `choose_cast` and the Float markers
+and silent inside a number. Measured at twelve Timesteps: the earliest Fix was 2026-03-22 against
+a first analysis of 2026-04-10, and 199 of 202 baked drift comparisons started inside that 19-day
+hole. `CurrentSeries.covers` refuses them - the same refusal `choose_cast` and the Float markers
 already make - and the score moved from 39 km to 38 km over one cycle, on 195 floats rather than
-202. **Anything drawn is separate from anything scored**, and the browser's integrator is
-unchanged: a dropped pin always starts inside the window.
+202. The window is a year now and the score is 41 km over 6,246 cycles on 219 floats.
+**Anything drawn is separate from anything scored**, and the browser's integrator is unchanged:
+a dropped pin always starts inside the window.
 
 **A cast drawn on a figure is an observation of the water in that figure, or it is a lie.**
 The vertical section took every fix of every float in the corridor with no time filter at all:
@@ -426,7 +428,7 @@ responses and anything a user reads as a measurement come from the `Grid`. This 
 drifts silently. This has already been fixed once.
 
 **The bias map is a composite, and the timeline says so where the confusion happens.** Every
-instrument is drawn at the cast its comparison was taken from, across all twelve analyses - a
+instrument is drawn at the cast its comparison was taken from, across all thirty-six analyses - a
 residual measured at one position on one date is a number on the wrong water anywhere else. So
 pressing play animates the field and moves **no marker**, which reads as a broken animation. The
 map key said this already and the map key **folds, and is remembered folded**. The time axis now
@@ -635,11 +637,11 @@ declare `isosurface: false`, which correctly hides the checkbox and did nothing 
 `FieldSpec` can forbid must be reset by `selectField` when it forbids it, not merely hidden by
 the panel. `pipeline/tests/test_field_specs.py` holds which Fields may offer one and why.
 
-**An instrument is not always an Argo float, and a number about them is not always 221.**
+**An instrument is not always an Argo float, and a number about them is not always 249.**
 There are Floats and there are moorings, `reportingByKind()` splits them, and the count on
-screen is the count *drawn at the Timestep on screen* - measured across the twelve steps, 192 to
-220 Floats and 5 to 9 buoys, against a bake of 228 and 9. Anything that says "Argo floats" and
-means "instruments" is wrong twice.
+screen is the count *drawn at the Timestep on screen* - measured across the thirty-six steps, 192
+to 221 Floats and 5 to 14 buoys, against a bake of 259 and 17. Anything that says "Argo floats"
+and means "instruments" is wrong twice.
 
 **Not every Field is a Volume, and drawing one as a Volume is drawing the wrong thing.**
 ADR 0014. `FieldSpec.render` says which of four kinds a Field is. Three of the hazard Fields *are
@@ -738,6 +740,18 @@ fixture the outliers are before believing the assertion.
 Simple, boring code; the obvious solution over the clever one. No abstraction until something is
 needed twice. Comments explain *why*, especially where the obvious approach was rejected for a
 real reason. **No em dashes** anywhere - plain hyphens only.
+
+**A download held twice is invisible until the window grows.** `ArgoErddapSource.fetch_profiles`
+did `requests.get(...)` then handed `response.text` to the parser, so `requests` kept the body as
+bytes while Python kept a decoded copy beside it. Measured against the live endpoint: **175.0 MB
+of CSV at twelve Timesteps against 498.4 MB at thirty-six**, so the pair went from 350 MB to
+1 GB before a single Profile object existed. The 36-step bake was killed for memory **twice, at
+the identical point 19 minutes in** - sampling caught it stepping from 958 MB to over 3.6 GB
+inside one 15-second window, immediately after "wrote 360 native grids". `parse_profiles` never
+needed the string: `csv.reader` reads line by line either way, so it now takes a string **or an
+iterable of lines** and the fetch streams `iter_lines` straight into it. Nothing else changed and
+the third run finished in 36 minutes. **A buffer that is fine at one window size is not a
+measurement that it is fine.**
 
 ## Known upstream quirks
 

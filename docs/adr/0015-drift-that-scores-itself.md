@@ -29,13 +29,13 @@ plausible and wrong**. The difference is that a current field alone is not wrong
 
 ### 2. Publish the score, and let it be unflattering
 
-This platform holds 228 Argo float tracks, and an Argo track **is** measured drift at the
+This platform holds 259 Argo float tracks, and an Argo track **is** measured drift at the
 parking depth. So the same integrator was run from every drifting float's own first Fix and the
-answer written into the bake. Re-measured on 2026-09-03, across **195 floats**:
+answer written into the bake. Re-measured on 2026-09-09 over a 36-Timestep year, across **219 floats**:
 
 | Question | Answer |
 | --- | --- |
-| From a position known one Argo cycle ago, how far out is the current field alone? | median **38 km**, ninetieth percentile **87 km**, over **1,908** cycles |
+| From a position known one Argo cycle ago, how far out is the current field alone? | median **41 km**, ninetieth percentile **93 km**, over **6,246** cycles |
 | Let go and left for ~10 days | median separation **44 km**, against **46 km** the float itself travelled |
 | ~30 days | **99 km** against **103 km** travelled |
 | ~60 days | **143 km** against **150 km** travelled |

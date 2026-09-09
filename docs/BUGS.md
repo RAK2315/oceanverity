@@ -44,7 +44,7 @@ The ranking is the one this file has always used:
       the Argo animation is not happening, they pause at the position they are at".
 
       **The markers are right and must not move.** Every instrument on the bias map is drawn at
-      the cast its own comparison was taken from, across all twelve analyses, because a residual
+      the cast its own comparison was taken from, across all thirty-six analyses, because a residual
       measured at one position on one date is a number on the wrong water anywhere else. Measured:
       marker 0 sits at 62.447 E, 17.748 N at step 2 and at exactly the same place at step 11.
 
@@ -232,7 +232,7 @@ The ranking is the one this file has always used:
   `pipeline/samudra/coverage.py:80-84` says *"over 695,088 ocean voxels the median is 2 casts and
   the **maximum is 10**"*, and that the 1/2/4 bands split the block 19/23/36/22.
   `manifest.fields[coverage].range` is now `[0, 14]`, so the maximum has moved. **What could not
-  be checked**: the split, which needs the twelve coverage Volumes decoded and de-quantised, and
+  be checked**: the split, which needs all 36 coverage Volumes decoded and de-quantised, and
   there is no native coverage Grid in `data/grids/` to do it from honestly. The argument the
   comment supports - that thresholds of 1/3/10 would leave the top band empty - survives either
   way, which is why this is not in the list above.
