@@ -106,3 +106,29 @@ def test_pressure_to_depth_accounts_for_latitude():
 
 def test_pressure_to_depth_is_zero_at_the_surface():
     assert pressure_to_depth(0.0, 12.0) == pytest.approx(0.0)
+
+
+def test_a_stream_of_lines_parses_identically_to_one_string():
+    """The download is read line by line, so the whole CSV is never held twice.
+
+    `fetch_profiles` used to hand `response.text` to this function, which means `requests` holds
+    the body as bytes and Python holds a decoded copy beside it. Measured against the real
+    endpoint, the 36-Timestep window asks for **498.4 MB** of CSV against 175.0 MB at twelve, so
+    that pair alone is a gigabyte before a single Profile exists - and the bake was killed twice
+    at exactly this call. Line iteration is what removes it, and this is the check that the two
+    routes cannot disagree.
+    """
+    at_once = parse_profiles(CSV)
+    line_by_line = parse_profiles(iter(CSV.splitlines()))
+
+    assert len(line_by_line) == len(at_once)
+    for streamed, whole in zip(line_by_line, at_once):
+        assert streamed.platform_id == whole.platform_id
+        assert streamed.time == whole.time
+        assert streamed.latitude == whole.latitude
+        assert streamed.longitude == whole.longitude
+        assert np.array_equal(streamed.depths, whole.depths)
+
+
+def test_an_empty_stream_yields_nothing():
+    assert parse_profiles(iter([])) == []

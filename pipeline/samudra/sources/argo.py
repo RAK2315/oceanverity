@@ -39,7 +39,7 @@ import io
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Sequence
+from typing import Iterable, Sequence
 
 import numpy as np
 import requests
@@ -218,11 +218,25 @@ class ArgoErddapSource:
             f"&latitude>={bbox.south}&latitude<={bbox.north}"
             f"&longitude>={bbox.west}&longitude<={bbox.east}"
         )
-        response = requests.get(
-            f"{self.endpoint}?{selector}", timeout=_TIMEOUT, verify=self.certificates()
-        )
-        response.raise_for_status()
-        return parse_profiles(response.text, self.columns)
+        # Streamed, and parsed line by line as it arrives.
+        #
+        # `response.text` decodes the whole body into a str while `requests` is still holding the
+        # bytes, so the peak is twice the download before a single Profile exists. At twelve
+        # Timesteps that was 2 x 175 MB and nobody noticed; at thirty-six it is 2 x 498 MB, and
+        # the bake was killed for memory twice at exactly this call - measured, a step from
+        # 958 MB to over 3.6 GB inside one 15-second sample.
+        with requests.get(
+            f"{self.endpoint}?{selector}",
+            timeout=_TIMEOUT,
+            verify=self.certificates(),
+            stream=True,
+        ) as response:
+            response.raise_for_status()
+            # ERDDAP does not always name the charset, and without one `iter_lines` would hand
+            # back bytes rather than the str `csv.reader` needs.
+            if not response.encoding:
+                response.encoding = "utf-8"
+            return parse_profiles(response.iter_lines(decode_unicode=True), self.columns)
 
 
 class BgcArgoSource(ArgoErddapSource):
@@ -276,14 +290,21 @@ class IncoisArgoSource(ArgoErddapSource):
         return ca_bundle()  # INCOIS omits an intermediate certificate; see tls.py
 
 
-def parse_profiles(csv_text: str, columns: ProfileColumns = GDAC_COLUMNS) -> list[Profile]:
+def parse_profiles(
+    csv_text: str | Iterable[str], columns: ProfileColumns = GDAC_COLUMNS
+) -> list[Profile]:
     """Turn one provider's flat CSV into Profiles.
 
     ERDDAP returns one row per measurement, with the cast identified only by the repetition of
     platform number and time - there is no profile id column. Grouping on that pair is what
     reconstitutes the casts.
+
+    Takes a whole string or an iterable of lines. `csv.reader` never needed the string: it reads
+    line by line either way, and accepting the iterable is what lets `fetch_profiles` avoid
+    holding the download twice. Measured against the live endpoint, the 36-Timestep window asks
+    for 498.4 MB of CSV against 175.0 MB at twelve.
     """
-    reader = csv.reader(io.StringIO(csv_text))
+    reader = csv.reader(io.StringIO(csv_text) if isinstance(csv_text, str) else csv_text)
     header = next(reader, None)
     if header is None:
         return []
