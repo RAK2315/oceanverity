@@ -464,14 +464,44 @@ body {
   gap: 8px;
 }
 
-/* The two doors read as a pair: one rule between them and the settings, and the tighter gap
-   inside the pair than around it. */
+/*
+ * The two doors as one object rather than two ghosts beside a rule.
+ *
+ * They are the same offer - a way in for a reader who does not yet know what to press - and a
+ * gap plus a rule made them two peers that happened to sit together. One rounded container, a
+ * hairline between the halves, and the edge that used to separate them from the settings is now
+ * the container's own. Measured: 34 px tall, the height every other control on this bar is.
+ */
 .topbar-doors {
   display: flex;
+  align-items: stretch;
+  height: 34px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* `height: 100%`, not the bar's 34 px: `.topbar .ghost` sets that height for a button standing
+   on its own, and inside a bordered container 34 px of child in a 34 px box overflows by the
+   two borders - measured, the button sat 1 px low and its bottom edge was clipped away. The
+   selector carries `.topbar` because `.topbar .ghost` is the same specificity and comes later. */
+.topbar .topbar-doors .ghost {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding-left: 20px;
-  border-left: 1px solid var(--frame-rule);
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* The seam, not a second frame: the container already carries the outline. */
+.topbar-doors .ghost + .ghost {
+  border-left: 1px solid var(--outline-variant);
+}
+
+/* `.ghost:hover` colours a border this button no longer has, so the hover state is the ground. */
+.topbar-doors .ghost:hover {
+  background: var(--surface-low);
+  color: var(--on-surface);
 }
 
 /*
@@ -1231,6 +1261,19 @@ select:hover {
   cursor: pointer;
   transition: background 0.16s var(--ease), color 0.16s var(--ease),
     border-color 0.16s var(--ease);
+}
+
+/*
+ * A pill, and the only one in the panel.
+ *
+ * The three other `.mode-switch`es - drop a pin, draw a line, clear an upload - sit *inside* a
+ * group and are square-cornered like everything else in it. This one sits above the groups and
+ * changes four things at once, so it is shaped differently from the controls it governs rather
+ * than being a slightly brighter one of them.
+ */
+.mode-switch.mode-cyclone {
+  border-radius: 999px;
+  padding: 8px 15px;
 }
 
 .mode-switch-mark {
@@ -2160,8 +2203,8 @@ input[type="range"]::-moz-range-thumb {
  */
 .profile-head {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
   gap: 6px 10px;
   padding: 11px 14px 10px;
   border-bottom: 1px solid var(--outline-variant);
@@ -2169,12 +2212,20 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 0;
 }
 
+/*
+ * It wraps rather than truncating. `text-overflow` does not apply to a flex container anyway, so
+ * `nowrap` here was a hard clip - measured, "Moored buoy 2300009" wanted 197 px in a 164 px
+ * column and lost the end of its own id, which is a readout and may not be approximated. Wrapped,
+ * the long moorings take two lines and every Argo id takes one.
+ */
 .profile-id {
+  grid-column: 1;
+  grid-row: 1;
   margin: 0;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: 0 8px;
   min-width: 0;
   font-size: 17px;
   font-weight: 700;
@@ -2191,7 +2242,16 @@ input[type="range"]::-moz-range-thumb {
   flex: none;
 }
 
-/* Second row, full width, under the name rather than competing with it for one line. */
+/* The status, on the name's own line. The other badges qualify the instrument rather than
+   report on it, and they are on the row below. */
+.profile-head > .pill {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+/* Second row, full width, and drawn only when there is a badge for it. */
 .profile-actions {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -2202,9 +2262,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .profile-close {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
-  align-self: start;
 }
 
 /* A status, in words. The markup already says "Not reporting"; the stylesheet was shouting it. */
@@ -2933,8 +2992,9 @@ input[type="range"]::-moz-range-thumb {
   stroke: var(--chlorophyll);
 }
 
+/* Down a row with the other badges. It carried a `margin-left` while it sat inside the name;
+   the row it is in now owns the gap. */
 .profile-operator {
-  margin-left: 8px;
   font-family: var(--sans);
   font-size: 11.5px;
   color: var(--on-surface-faint);

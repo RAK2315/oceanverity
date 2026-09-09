@@ -1131,7 +1131,7 @@ export function Controls({
       {store.fieldsInGroup("hazard").length > 0 && (
         <button
           type="button"
-          className={`mode-switch${store.hazardMode ? " on" : ""}`}
+          className={`mode-switch mode-cyclone${store.hazardMode ? " on" : ""}`}
           aria-pressed={store.hazardMode}
           onClick={() => store.setHazardMode(!store.hazardMode)}
         >

@@ -109,10 +109,15 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
             having wired them up. */}
         <p className="profile-id">
           {anchored ? "Moored buoy" : "Argo"} {chosen.id}
-          {anchored && chosen.country && chosen.country !== "UNKNOWN" && (
-            <span className="profile-operator">{titleCase(chosen.country)}</span>
-          )}
         </p>
+        {/* The status belongs on the name's own line: it is what the name is doing right now,
+            and it is the one badge that is always there. Measured at 1366x768 with the longest
+            name this bake can draw, "Moored buoy 2300009", the row does not wrap. The operator
+            and the chlorophyll badge are qualifications and went to the row below - keeping them
+            up here is what wrapped the name to 1.88 lines before. */}
+        <span className={`pill ${reporting ? "live" : "stale"}`}>
+          {reporting ? "Reporting" : "Not reporting"}
+        </span>
         {/* Out of the badge row and into the header's own corner: closing the panel is an action
             on the panel, not a fact about the instrument, and it has to stay reachable at the top
             right whatever the badges below it do. */}
@@ -123,18 +128,23 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
         >
           ✕
         </button>
-        <div className="profile-actions">
-          {/* Say it at the top. The chlorophyll chart is the last thing in a long panel, and
-              nothing above it hinted that there was anything below to scroll to. */}
-          {collocation?.observedOnly?.chlorophyll && (
-            <span className="pill chl" title="This float carries a fluorometer">
-              + chlorophyll
-            </span>
-          )}
-          <span className={`pill ${reporting ? "live" : "stale"}`}>
-            {reporting ? "Reporting" : "Not reporting"}
-          </span>
-        </div>
+        {/* Only rendered when there is something to qualify the name with, because an empty row
+            still costs the header its gap and the panel its height. */}
+        {(collocation?.observedOnly?.chlorophyll ||
+          (anchored && chosen.country && chosen.country !== "UNKNOWN")) && (
+          <div className="profile-actions">
+            {anchored && chosen.country && chosen.country !== "UNKNOWN" && (
+              <span className="profile-operator">{titleCase(chosen.country)}</span>
+            )}
+            {/* Say it at the top. The chlorophyll chart is the last thing in a long panel, and
+                nothing above it hinted that there was anything below to scroll to. */}
+            {collocation?.observedOnly?.chlorophyll && (
+              <span className="pill chl" title="This float carries a fluorometer">
+                + chlorophyll
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/*
