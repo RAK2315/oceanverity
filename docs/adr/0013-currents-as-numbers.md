@@ -36,7 +36,7 @@ readout in the running app: 2.69 m/s at 9.33 N, 51.59 E, heading 45 degrees.
 ## Which product, and why not the one the problem statement names
 
 The PS names `GLOBAL_MULTIYEAR_PHY_001_030`, the reanalysis. It **ends 2026-06-23** and would
-leave four of this bake's twelve Timesteps with no currents at all. The near-real-time analysis
+left four of the twelve Timesteps this bake then had with no currents at all. The near-real-time analysis
 and forecast product covers the whole window, and it is the same product family that was already
 behind the baked picture - so nothing becomes inconsistent by switching. The reanalysis stays the
 right choice for historical work, 1993 to 2026.

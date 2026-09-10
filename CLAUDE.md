@@ -722,9 +722,9 @@ five hazard ones, each of which is held to a hand-computable case because a wron
 produces a number that is finite, smooth and completely believable. Not to glue, UI or shaders. It also
 applies to anything we *serve* - the DAP2 and WMS endpoints are science leaving the building,
 and `test_dap.py` checks them by opening them with a real `pydap` client rather than by
-asserting on our own bytes. 377 tests currently, and `pipeline/scripts/collect_tests.py`
+asserting on our own bytes. 379 tests currently, and `pipeline/scripts/collect_tests.py`
 writes what `provenance.html` says about them - so the public page cannot claim a suite that no
-longer exists, which it did for a month: 11 modules, 123 tests, "67 passed", against 377 in 25.
+longer exists, which it did for a month: 11 modules, 123 tests, "67 passed", against 379 in 25.
 
 When a test and the code disagree, work out which is wrong before changing either. Three times
 the *test's* expectation was the wrong one: gravity-corrected depth, a fixture too small for the

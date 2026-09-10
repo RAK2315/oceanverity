@@ -10,7 +10,7 @@ The same page, with the whole of that session's work around it, is on the branch
     git checkout backup/rak-landing-redesign -- web/index.html
 
 What it was: a 1320 px shell, a full-bleed hero on a chrome-free water render, the hero built
-around the 0.19 / 0.75 residual comparison rather than a metric strip, a snapping rail of 14
+around the 0.19 / 1.01 residual comparison rather than a metric strip, a snapping rail of 14
 feature cards each opening one shared dialog, and no section eyebrows.
 
 Nothing in this folder is part of the build. `vite.config.ts` names its four entries explicitly.

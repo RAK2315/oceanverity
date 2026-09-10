@@ -312,13 +312,13 @@ The full command list is `CLAUDE.md`'s own Commands block. The short version, wi
 server on 4173 and the API on 8000:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q     # 377 tests
+cd pipeline && ../.venv/Scripts/python -m pytest -q     # 379 tests
 cd web && npm run typecheck && npx vite build
 cd web && for p in landing guide tour controls hazard bias particles isolate                    outreach requirements drift section upload; do node probe-$p.mjs; done
 ```
 
 `probe-section` and `probe-upload` need the API; the other thirteen do not. **All fifteen were
-green on 2026-09-07**, along with 377 tests, the typecheck and the build.
+green on 2026-09-07**, along with 379 tests, the typecheck and the build.
 
 **Run the API-needing two separately, and stop the API afterwards.** `probe-outreach` failed on
 `page.goto("app.html?kiosk=1")` with a 60 s navigation timeout, twice in a row, while `uvicorn`

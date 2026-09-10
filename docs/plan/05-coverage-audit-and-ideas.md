@@ -2,7 +2,7 @@
 
 Written 2026-09-02 against the bake of that morning, and revised the same evening after the
 round that built A1, A2, A3, C1 and the bias map. Current figures: **15 Fields, 8 Source
-Adapters** plus a ninth for a file a visitor supplies, 237 instruments, 12 Timesteps, **71.1 MB**
+Adapters** plus a ninth for a file a visitor supplies, 276 instruments, 36 Timesteps, **192 MB**
 baked - up from 58.8 MB, which is the vertical section's native float32 Grids (7.0 MB), the
 climatological anomaly's twelve Volumes, the drift check (0.58 MB) and the bias map (0.15 MB).
 
@@ -52,9 +52,9 @@ support**, **fishery advisories**, **climate monitoring**".
 | Mandate | What the platform does today |
 | --- | --- |
 | Hazard assessment | **Five Fields built for it.** The strongest part of the build |
-| **Search and rescue** | **Built, and scored.** Drop a pin, integrate the analysed current forward, draw the trajectory. What makes it worth having is the second half: an Argo track *is* measured drift at the parking depth, so the same integrator was run from 195 drifting floats' own positions, over the days the current field actually covers, and the answer published - median **38 km** out over one Argo cycle, 87 km at the ninetieth percentile, across 1,908 cycles. The caveat ships in the first sentence on the panel |
-| **Fishery advisories** | Chlorophyll on 52 float profiles. No product shaped like an advisory |
-| Climate monitoring | **Answered.** A second Field, Temperature vs Normal, differences the 2026 analysis against NOAA's World Ocean Atlas 2023 **1991-2020** mean for each Timestep's own calendar month. Measured across 349,692 cells: mean departure -0.014 degC, 95th percentile of the magnitude 2.104 degC. The Temperature Anomaly stays beside it and still says it is a seasonal swing, which is now a pointer rather than an apology. ADR 0016 |
+| **Search and rescue** | **Built, and scored.** Drop a pin, integrate the analysed current forward, draw the trajectory. What makes it worth having is the second half: an Argo track *is* measured drift at the parking depth, so the same integrator was run from 219 drifting floats' own positions, over the days the current field actually covers, and the answer published - median **41 km** out over one Argo cycle, 93 km at the ninetieth percentile, across 6,246 cycles. The caveat ships in the first sentence on the panel |
+| **Fishery advisories** | Chlorophyll on 57 float profiles. No product shaped like an advisory |
+| Climate monitoring | **Answered.** A second Field, Temperature vs Normal, differences the 2026 analysis against NOAA's World Ocean Atlas 2023 **1991-2020** mean for each Timestep's own calendar month. Measured across 1,049,076 cells: mean departure +0.074 degC, 95th percentile of the magnitude 2.050 degC. The Temperature Anomaly stays beside it and still says it is a seasonal swing, which is now a pointer rather than an apology. ADR 0016 |
 
 **One of the four named mandates is still unanswered**, and it is fishery advisories. Hazard
 assessment has five Fields, climate monitoring has a thirty-year baseline, and search and rescue
@@ -298,7 +298,7 @@ within the corridor on the same axes. The second, C2 below, is not.
 
 #### C2. Depth against time at one point
 
-**What it is.** Click a column. Get depth on one axis, the twelve Timesteps on the other, and the
+**What it is.** Click a column. Get depth on one axis, the Timesteps on the other, and the
 Field's value as colour: the thermocline breathing across four months at one place.
 
 **Why.** The second standard figure, and it is the clearest possible picture of what the animation
@@ -325,7 +325,7 @@ disk today; nothing needs computing.
 
 **What it is.** The Anomaly Feature panel reports how many Argo casts stand behind a feature.
 Clicking that number should open the nearest one's Collocation. Where the count is zero - **ten of
-the 121 features in this bake** - it should say plainly that nothing checked this water.
+the 404 features in this bake** - it should say plainly that nothing checked this water.
 
 **Why.** Both ends are built and the wire between them is missing. It is the shortest path from
 "the model departed" to "and here is whether anyone was there to see it".
@@ -408,7 +408,7 @@ measurement behind it:
 
 - **No palette chooser** - ADR 0010, and it is a clause of the PS declined on purpose.
 - **No machine-learning products** - twelve analyses is not a training set, and a gap-filler
-  would paint over the 9.9% of the block that is the most honest thing in the tool.
+  would paint over the 10.2% of the block that is the most honest thing in the tool.
 - **No geostrophic current derivation** - measured at 0.16 m/s against a real 1.5 to 2.5 m/s.
 
 **Why.** A refusal with a number behind it reads as judgement. The same refusal left blank reads
@@ -562,7 +562,7 @@ Measured on disk, 2026-09-04:
 | One current vector file | 0.387 MB |
 | One hazard surface file | 0.008 MB |
 | **Everything, per Timestep** | **about 4.88 MB** |
-| Today, 12 steps | 58.6 MB of the 71.1 MB total |
+| Today, 36 steps | 156 MB of the 192 MB total |
 | A year (36 steps), everything | **176 MB** |
 | Three years, everything | **527 MB** |
 | The whole VAM archive, everything | **about 4 GB** |

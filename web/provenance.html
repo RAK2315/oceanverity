@@ -85,6 +85,26 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 
+  /*
+   * Motion here reports a state change or it does not exist - `DESIGN.md`, and the reason the
+   * landing page's cursor ring and magnetic buttons were deleted. This page has exactly one real
+   * event: every figure on it is an ellipsis until `manifest.json` and the rest resolve. So the
+   * figure settles as it lands, on the landing page's own curve and duration, once per figure,
+   * and the fact cells arrive on their own beats instead of as one block. Both are `animation`,
+   * so the reduced-motion rule above actually stops them - a JS transform would not have.
+   */
+  .figure { display: inline-block; }
+  .fact-in .figure { animation: figure-land 0.42s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes figure-land {
+    from { opacity: 0; transform: translateY(0.22em); }
+    to { opacity: 1; transform: none; }
+  }
+  .fact-in { animation: fact-land 0.5s cubic-bezier(.16,1,.3,1) both; animation-delay: var(--beat, 0ms); }
+  @keyframes fact-land {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+
   body, nav, .pill-btn, .ghost-link {
     transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
   }
@@ -201,7 +221,14 @@
      and the container is parchment. A grid container backed by `var(--color-ash)` showed as a
      solid grey slab wherever its cells did not cover it - a full-width, unpopulated grid reads
      as parchment now, never as a block of ash. The outer border is the grid's own. */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 1px; margin-top: var(--sp-30); padding: 1px; background: var(--color-parchment); border: 1px solid var(--color-ash); }
+  /*
+   * Wrapping flex, not `auto-fit` columns. There are eleven facts and the grid drew four
+   * a row, so the last row was one card and three holes - and a hole in a seamed grid
+   * reads as a missing fact rather than as spare room. Flex lets the final row share the
+   * width out between whatever is on it, so the block always ends square.
+   */
+  .grid { display: flex; flex-wrap: wrap; gap: 1px; margin-top: var(--sp-30); padding: 1px; background: var(--color-ash); border: 1px solid var(--color-ash); }
+  .fact { flex: 1 1 215px; min-width: 215px; }
   .fact { background: var(--color-paper); box-shadow: 0 0 0 1px var(--color-ash); padding: var(--sp-19); }
   .fact dt { font-family: var(--font-display); font-size: var(--text-caption); letter-spacing: var(--ls-caption); text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--sp-8); }
   .fact dd { margin: 0; font-size: var(--text-subheading); font-weight: 400; color: var(--color-ink); line-height: 1.2; word-break: break-word; }
@@ -250,16 +277,6 @@
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
   .scroll-cue.hidden { opacity: 0; }
 
-  /* ---------------------------------------------------------- custom cursor */
-  .cursor-ring, .cursor-dot {
-    position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
-    border-radius: 50%;
-    opacity: 0;
-    transition: opacity 0.4s ease, transform 0.15s linear;
-  }
-  .cursor-dot { width: 6px; height: 6px; background: var(--color-ink); }
-  .cursor-ring { width: 40px; height: 40px; border: 1px solid var(--color-ink); transition: opacity 0.4s ease, width 0.25s ease, height 0.25s ease, background 0.25s ease, transform 0.15s linear; }
-  .cursor-ring.hovering { width: 58px; height: 58px; background: rgba(var(--color-ink-rgb), 0.08); }
 </style>
 </head>
 <body>
@@ -463,8 +480,6 @@ python -m samudra.bake</pre>
 
 </div>
 
-<div class="cursor-ring" id="cursorRing"></div>
-<div class="cursor-dot" id="cursorDot"></div>
 
 <div class="scroll-cue" id="scrollCue"><span>Scroll</span><span class="down">&darr;</span></div>
 
@@ -483,38 +498,6 @@ python -m samudra.bake</pre>
     entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
-
-  // custom cursor: a trailing dot + ring that leads the pointer.
-  var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (hasFinePointer) {
-    var dot = document.getElementById('cursorDot');
-    var ring = document.getElementById('cursorRing');
-    var armed = false;
-    var mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
-    window.addEventListener('mousemove', function (e) {
-      if (!armed) {
-        armed = true;
-        dot.style.opacity = '1';
-        ring.style.opacity = '0.5';
-      }
-      mouseX = e.clientX; mouseY = e.clientY;
-      dot.style.transform = 'translate(' + mouseX + 'px, ' + mouseY + 'px) translate(-50%,-50%)';
-    });
-    dot.style.opacity = '0';
-    ring.style.opacity = '0';
-    function ringLoop() {
-      ringX += (mouseX - ringX) * 0.18;
-      ringY += (mouseY - ringY) * 0.18;
-      ring.style.transform = 'translate(' + ringX + 'px, ' + ringY + 'px) translate(-50%,-50%)';
-      requestAnimationFrame(ringLoop);
-    }
-    ringLoop();
-
-    document.querySelectorAll('a, button').forEach(function (el) {
-      el.addEventListener('mouseenter', function () { ring.classList.add('hovering'); });
-      el.addEventListener('mouseleave', function () { ring.classList.remove('hovering'); });
-    });
-  }
 
   // theme toggle: light is recorded as data-theme=light against a dark default, one shared key.
   var themeBtn = document.getElementById('themeToggle');
@@ -535,13 +518,23 @@ python -m samudra.bake</pre>
   function el(id) { return document.getElementById(id); }
   function text(value) { return document.createTextNode(String(value)); }
 
+  var factBeat = 0;
+  var stillPage = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function fact(term, value, note) {
     var wrapper = document.createElement("div");
     wrapper.className = "fact";
+    if (!stillPage) {
+      wrapper.classList.add("fact-in");
+      // 45 ms apart, capped: eleven cells at a longer beat is a queue rather than an arrival.
+      wrapper.style.setProperty("--beat", Math.min(factBeat++ * 45, 420) + "ms");
+    }
     var dt = document.createElement("dt");
     dt.appendChild(text(term));
     var dd = document.createElement("dd");
-    dd.appendChild(text(value));
+    var figure = document.createElement("span");
+    figure.className = "figure";
+    figure.appendChild(text(value));
+    dd.appendChild(figure);
     if (note) {
       var small = document.createElement("small");
       small.appendChild(text(note));

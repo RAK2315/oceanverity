@@ -17,7 +17,7 @@ sentence: *"Rather than describe it, let me show you."*
 > **Every figure spoken below is in [`ppt/FACTS.md`](../../ppt/FACTS.md), which is generated from
 > the build.** If one of them has moved, re-run `collect_facts.py` and change the sentence here
 > before you say it out loud. This part of the script was wrong for a round - it said fifty-four
-> tests against a real 377, and named a float that had not been in the deck for two rounds.
+> tests against a real 379, and named a float that had not been in the deck for two rounds.
 
 ## A0:00 - Slide 1, title (15 seconds)
 
@@ -463,4 +463,4 @@ more than not having it.
 | "Has nobody built this before?" | Say it narrowly: **depth-resolved volumetric rendering in a browser, with the in-situ observations in the same water and the model scored against them.** Do not say "nobody has done this". Checked 2026-09-04: Copernicus **MyOcean Pro** is the reference and is a 2D map with a depth slider, no 3D at all; earth.nullschool is a 2D globe with surface currents; NOAA's Science on a Sphere is a physical globe; and browser volume rendering of ocean scalars exists as research (a WebGPU framework published March 2025, i4Ocean before it) but as prototypes, and none of them carries the observations. `docs/plan/05` Part 3. |
 | "Those moving lines - are they a forecast?" | No, and say so before they ask twice. Every dot is the flow at **one** analysis, frozen; the drift pin is the one that runs time forward. They share the same integrator, which is the point: the animation runs the maths whose error we published at a median 38 km over an Argo cycle. Measured, a particle and a drift pin from the same start land **2 metres apart after 724 km**. |
 | "Why are there no eddies, when the Copernicus viewer is full of them?" | Because we draw INCOIS's grid rather than upsampling it. Theirs is 1/12 degree, about 9 km; the analysis this platform reports every number from is 1 degree, about 110 km, so every swirl on their screen is smaller than one of our cells. We could bake a finer field just for the animation for about 27 MB and we refused: the picture would then be more detailed than every number on the platform, in the one place nobody would check. ADR 0017. |
-| "How long did this take?" | Built for this hackathon. 230 automated tests on the scientific logic, twelve architecture decision records, and a defects file that lists what was wrong and what the numbers were. |
+| "How long did this take?" | Built for this hackathon. 379 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |

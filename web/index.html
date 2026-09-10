@@ -364,17 +364,21 @@
     position: relative; z-index: 2;
     grid-column: 1 / -1; grid-row: 2;
     margin-top: var(--sp-119);
-    display: grid; grid-template-columns: repeat(5, 1fr);
+    /* Sized to the figures, not five equal fifths. Equal columns made "5-2000 m" and
+       "30 Jul 2026" wrap while "15" and "0" sat in a third of a column of air, so the five
+       labels landed on three different baselines. `auto` lets each cell take what its number
+       needs and the row keeps one baseline. */
+    display: grid; grid-template-columns: repeat(5, auto); justify-content: start;
     border-top: 1px solid var(--color-ash); border-bottom: 1px solid var(--color-ash);
   }
-  .stat-strip .cell { padding: var(--sp-30) var(--sp-19) var(--sp-19); border-left: 1px solid var(--color-ash); }
+  .stat-strip .cell { padding: var(--sp-30) var(--sp-32) var(--sp-19); border-left: 1px solid var(--color-ash); }
   .stat-strip .cell:first-child { border-left: none; }
   html.js .stat-strip .cell.reveal { transform: translateY(16px); }
   .stat-strip .cell:nth-child(2) { transition-delay: 0.07s; }
   .stat-strip .cell:nth-child(3) { transition-delay: 0.14s; }
   .stat-strip .cell:nth-child(4) { transition-delay: 0.21s; }
   .stat-strip .cell:nth-child(5) { transition-delay: 0.28s; }
-  .stat-strip b { display: block; font-size: var(--text-heading-sm); font-weight: 400; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat-strip b { display: block; font-size: var(--text-heading-sm); font-weight: 400; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .stat-strip span { font-family: var(--font-display); display: block; margin-top: var(--sp-8); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
   @media (max-width: 900px) { .stat-strip { grid-template-columns: repeat(2, 1fr); } .stat-strip .cell:nth-child(2n+1) { border-left: none; } }
 
@@ -486,7 +490,10 @@
   .sheet-foot { display: flex; flex-wrap: wrap; gap: var(--sp-19); align-items: center; margin-top: var(--sp-30); }
 
   /* ---------------------------------------------------------- the chips (fifteen variables) */
-  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-15); margin-top: var(--sp-46); }
+  /* An even grid, not a wrapping flex. Fifteen chips of fifteen different widths left three
+     ragged rows that read as a paragraph of boxes; equal columns make it a table of variables,
+     which is what it is. */
+  .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-15); margin-top: var(--sp-46); }
   .chip {
     display: inline-flex; flex-direction: column; gap: 3px;
     border: 1px solid var(--color-ash); border-radius: var(--radius-inputs);
@@ -496,8 +503,15 @@
   .chip small { font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
 
   /* evidence */
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; margin-top: var(--sp-46); background: var(--color-ash); border: 1px solid var(--color-ash); }
-  .stat { background: var(--color-paper); padding: var(--sp-30); }
+  /*
+   * Wrapping flex at a 300 px basis, not 180 px columns. Seven cells across at 180 gave each
+   * figure 126 px of content and `--text-heading` needs 202 for "-0.01", so the readout was
+   * being *clipped*: it rendered as "-0.0", and 266 lost a digit too. A number on this page is
+   * a measurement and may not be trimmed to fit its box. Flex also lets the last row share out
+   * the width, so seven cells never leave a hole the way four columns did.
+   */
+  .stats-grid { display: flex; flex-wrap: wrap; gap: 1px; margin-top: var(--sp-46); background: var(--color-ash); border: 1px solid var(--color-ash); }
+  .stat { flex: 1 1 300px; min-width: 0; background: var(--color-paper); padding: var(--sp-30); }
   .stat b { display: block; font-size: var(--text-heading); font-weight: 400; line-height: 0.9; font-variant-numeric: tabular-nums; }
   .stat span { font-family: var(--font-display); display: block; margin-top: var(--sp-15); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); color: var(--ink-3); }
 
@@ -511,7 +525,16 @@
   ul.plain li::before { content: ""; position: absolute; left: 0; top: 11px; width: 15px; height: 1px; background: var(--color-ink); opacity: 0.5; }
   ul.plain li strong { font-weight: 700; color: var(--color-ink); }
 
+  /* Four columns, and the claims underneath run the full width in two of them rather than
+     stacking down the left and leaving the right-hand half of the block empty. */
   .stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-30); margin-top: var(--sp-46); }
+  /* `display: block` and no cap, because `ul.plain` is a flex column at `max-width: 74ch` and a
+     flex container ignores `columns` outright - the rule was inert and the claims sat in the
+     leftmost 60% under four columns of stack that used the whole width. The reading measure is
+     kept by the column width instead of by the list. */
+  ul.plain.stack-claims { display: block; max-width: none; columns: 2; column-gap: var(--sp-46); margin-top: var(--sp-46); }
+  ul.plain.stack-claims li { break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom: var(--sp-15); }
+  @media (max-width: 860px) { .stack-claims { columns: 1; } }
   .stack h3 { font-family: var(--font-display); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--ls-caption); margin-bottom: var(--sp-15); color: var(--ink-3); }
   .stack ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-8); }
   .stack li { font-size: var(--text-body-sm); color: var(--ink-2); }
@@ -636,7 +659,7 @@
     <div class="reveal">
       <h2 class="heading reveal reveal-1">Fourteen things you can do with it.</h2>
       <p class="section-lede reveal reveal-1">
-        Drag the rail, or use the arrows. Open any card for the detail and the measurement
+        Scroll over the rail, drag it, or use the arrows. Open any card for the detail and the measurement
         behind it.
       </p>
     </div>
@@ -799,11 +822,11 @@
 
         <button class="feature" type="button"
           data-title="Set up a cyclone question in one press"
-          data-image="./images/kiosk.jpg"
+          data-image="./images/hazard.jpg"
           data-body="A cyclone runs on the heat stored down the whole water column, not on a warm skin at the surface. One press swaps the variable list for the five things a cyclone forecaster asks for and arranges the scene for them: heat potential, the depth of the 26 degC line, the mixed layer, the isothermal layer and the barrier layer between them."
           data-measure="Above 60 kJ/cm2 is the usual threshold for rapid intensification"
           data-link="./app.html?dive=1&amp;preset=hazard">
-          <img src="./images/kiosk.jpg" alt="Cyclone heat potential drawn over the Indian Ocean.">
+          <img src="./images/hazard.jpg" alt="Cyclone heat potential drawn over the Indian Ocean.">
           <div class="feature-body">
             <span class="kind">Disaster management</span>
             <h3>Cyclone mode</h3>
@@ -1105,12 +1128,12 @@
       <div><h3>Data and science</h3><ul><li>Python 3.10</li><li>xarray + netCDF4</li><li>NumPy / SciPy</li><li>cmocean</li></ul></div>
       <div><h3>Backend</h3><ul><li>FastAPI</li><li>Uvicorn</li><li>ERDDAP / OPeNDAP</li><li>CF-1.6 conventions</li></ul></div>
       <div><h3>Frontend</h3><ul><li>TypeScript</li><li>React 19 + Vite</li><li>Three.js / WebGL2</li><li>GLSL ES 3.00</li></ul></div>
-      <div><h3>Quality</h3><ul><li>377 automated tests</li><li>17 decision records</li><li>0 network calls at demo time</li></ul></div>
+      <div><h3>Quality</h3><ul><li>379 automated tests</li><li>17 decision records</li><li>0 network calls at demo time</li></ul></div>
     </div>
 
-    <ul class="plain reveal">
+    <ul class="plain stack-claims reveal">
       <li><strong>Runs on INCOIS's own server.</strong> Their gridded Argo analysis across 24
-        depth levels and 12 timesteps, current to 30 July 2026.</li>
+        depth levels and 36 timesteps, current to 30 July 2026.</li>
       <li><strong>Deployable anywhere.</strong> A static site plus a lightweight API, with no
         client-side dependency, no plugin and no access token.</li>
       <li><strong>Honest by construction.</strong> The stretched depth axis is labelled on
@@ -1362,6 +1385,26 @@
   rail.addEventListener('scroll', paint, { passive: true });
   window.addEventListener('resize', paint);
   paint();
+
+  /*
+   * The wheel drives the rail while the pointer is over it.
+   *
+   * Arrows are a control you have to notice and then aim at; a wheel is the thing a reader is
+   * already doing. The two rules that keep it from being a trap: a trackpad's sideways swipe
+   * already sends deltaX and is left alone, and at either end the event is *not* consumed, so
+   * the page takes its scroll back and the rail is a step on the way down rather than a well
+   * you fall into.
+   */
+  rail.addEventListener('wheel', function (event) {
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    var max = rail.scrollWidth - rail.clientWidth;
+    if (max <= 0) return;
+    var atStart = rail.scrollLeft <= 0;
+    var atEnd = rail.scrollLeft >= max - 1;
+    if ((event.deltaY < 0 && atStart) || (event.deltaY > 0 && atEnd)) return;
+    event.preventDefault();
+    rail.scrollLeft += event.deltaY;
+  }, { passive: false });
 
   rail.addEventListener('keydown', function (event) {
     if (event.key === 'ArrowRight') { rail.scrollBy({ left: step(), behavior: 'smooth' }); event.preventDefault(); }

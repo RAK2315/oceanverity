@@ -260,7 +260,7 @@ Unchanged from `02-next-features.md`, and reinforced. **We have already built th
 be used for, and built it better.** The Anomaly Feature detector finds unusual water, reports a
 z-score against a stated threshold, and says how many observations stand behind it. Relabelling
 that as machine learning replaces a defensible number with an indefensible one, and the first
-question - trained on what? - has no answer, because twelve Timesteps is not a training set.
+question - trained on what? - has no answer, because thirty-six Timesteps is not a training set.
 
 The second trap is that ML is exactly how a plausible-and-wrong Field gets made. ADR 0010 tells
 that story once already with geostrophic currents: finite, physical-looking, and wrong by a
@@ -297,6 +297,6 @@ own file in fifteen seconds.
 
 **Climate monitoring** is answered. `samudra/climatology.py` and `samudra/sources/woa.py` read
 NOAA's World Ocean Atlas 2023 1991-2020 monthly normal over OPeNDAP, anonymously, and the
-Temperature vs Normal Field is the analysis minus that baseline. Measured across 349,692 cells:
-mean departure -0.01 degC, and 2.10 degC at the 95th percentile of the magnitude. ADR 0016
+Temperature vs Normal Field is the analysis minus that baseline. Measured across 1,049,076 cells:
+mean departure +0.07 degC, and 2.05 degC at the 95th percentile of the magnitude. ADR 0016
 records why a thirty-year normal is a different decision from ADR 0010's refusal of oxygen.

@@ -250,7 +250,7 @@
 
 <div class="board" id="arch">
   <h3 class="bt">Architecture</h3>
-  <p class="bs">Eight providers &rarr; one adapter seam &rarr; one Grid &rarr; four ways out</p>
+  <p class="bs">Nine providers &rarr; one adapter per source &rarr; one Grid &rarr; four ways out</p>
 
   <div class="az">
 
@@ -277,13 +277,13 @@
 
     <!-- ---------------------------------------------------------------- zone 2 -->
     <div class="zone">
-      <div class="zh"><span>2</span> &nbsp;Adapter seam &middot; Python</div>
+      <div class="zh"><span>2</span> &nbsp;One adapter per source</div>
       <div class="nodes">
-        <div class="node core"><b>GridSource / ProfileSource</b><span>samudra/sources/base.py</span></div>
-        <div class="node core"><b>One class per provider</b><span>9 &middot; the only code that knows ERDDAP</span></div>
-        <div class="node core"><b>Column layout is data</b><span>3 layouts, 1 parser</span></div>
-        <div class="node core"><b>Quality control, per channel</b><span>Argo flags + regional floor</span></div>
-        <div class="node core"><b>Land masked, never filled</b><span>absence stays absence</span></div>
+        <div class="node core"><b>A new provider is one new class</b><span>no renderer, no endpoint, no UI file</span></div>
+        <div class="node core"><b>Only this layer knows a provider's format</b><span>samudra/sources/base.py</span></div>
+        <div class="node core"><b>Column layout is data, not code</b><span>3 layouts, 1 parser</span></div>
+        <div class="node core"><b>Argo's own flags decide what we keep</b><span>3, 4 and 9 refused value by value</span></div>
+        <div class="node core"><b>Land stays empty</b><span>a gap is never filled in</span></div>
       </div>
     </div>
 
@@ -294,23 +294,21 @@
 
     <!-- ---------------------------------------------------------------- zone 3 -->
     <div class="zone">
-      <div class="zh"><span>3</span> &nbsp;Two representations</div>
+      <div class="zh"><span>3</span> &nbsp;Two forms of the same field</div>
 
       <div class="truth">
         <b>GRID</b>
-        <span>float64 &middot; land is NaN<br>24 levels &middot; 56 x 36 &middot; 1&deg;</span>
-        <em>The scientific truth. Every collocation, tooltip, section, API response and served
-        byte is read from here.</em>
+        <span>float64 &middot; 1&deg; &middot; 24 depth levels<br>56 x 36 &middot; land is empty</span>
+        <em>Every number anyone reads comes from here.</em>
       </div>
 
       <div class="drop">
         <div class="down">&darr;</div>
-        <div class="why">bake: quantise to 4 bytes,<br>warp the depth axis</div>
+        <div class="why">one byte a value,<br>depth axis stretched</div>
         <div class="pic">
           <b>VOLUME</b>
-          <span>56 x 36 x 48 &middot; 1 byte a value<br>value &middot; coverage &middot; gradient</span>
-          <em>A picture for the GPU, and a dead end for numbers: nothing reads a value back out
-          of it.</em>
+          <span>56 x 36 x 48 &middot; for the graphics card<br>value &middot; coverage &middot; gradient</span>
+          <em>Drawn, never read. No number comes back out.</em>
         </div>
       </div>
     </div>
@@ -319,11 +317,11 @@
     <div class="fork">
       <div class="flow">
         <div class="head">&rarr;</div>
-        <div class="what">numbers, unchanged<i>float64 and float32</i></div>
+        <div class="what">numbers<i>float64 and float32</i></div>
       </div>
       <div class="flow">
         <div class="head">&rarr;</div>
-        <div class="what">pixels only<i>never a reading</i></div>
+        <div class="what">pixels<i>to the screen and nowhere else</i></div>
       </div>
     </div>
 
@@ -331,9 +329,9 @@
     <div class="zone">
       <div class="zh"><span>4</span> &nbsp;Four ways out</div>
       <div class="nodes">
-        <div class="node out"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>71.1 MB committed &middot; 0 network calls</span></div>
+        <div class="node out"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>192 MB committed &middot; 0 network calls</span></div>
         <div class="node out"><b>Browser &nbsp;&larr;&nbsp; both</b><span>Three.js &middot; WebGL2 &middot; GLSL ES 3.00</span></div>
-        <div class="node out"><b>REST API &nbsp;&larr;&nbsp; Grid</b><span>FastAPI &middot; 15 routes</span></div>
+        <div class="node out"><b>REST API &nbsp;&larr;&nbsp; Grid</b><span>FastAPI &middot; 21 routes</span></div>
         <div class="node out"><b>Open standards &nbsp;&larr;&nbsp; Grid</b><span>OPeNDAP DAP2 &middot; CF-1.8 &middot; WMS 1.3.0</span></div>
       </div>
     </div>
@@ -341,10 +339,10 @@
   </div>
 
   <div class="lawn">
-    <b>The rule the shape is drawn to show.</b> Every number a human or a machine reads comes from
-    the Grid; the Volume's only arrow goes to the screen. This matters most at the API, because a
-    consumer pulling NetCDF over the wire cannot see they have been handed a quantised,
-    depth-warped approximation. <b>Two modules break the one-copy rule and both are held to it:</b>
+    <b>Why the rule is drawn and not just stated.</b> The Volume has exactly one arrow out of it
+    and it points at the screen. That matters most at the API: somebody pulling NetCDF over the
+    wire has no way to tell by looking whether they were handed the measurement or a picture of
+    it. <b>Two modules break the one-copy rule and both are held to it:</b>
     the drift integrator and the vertical section run in the browser as well as in Python, because
     the demo runs with the API off - and a probe runs the shipped browser module against the
     pipeline's and fails on disagreement. Measured: drift median <span class="num">0.331 km</span>
@@ -391,13 +389,13 @@
         </div>
 
         <div class="zone">
-          <div class="zh2"><span>2</span> &nbsp;Bake &middot; Python, once, offline</div>
+          <div class="zh2"><span>2</span> &nbsp;One adapter per source</div>
           <div class="sn">
-            <div class="node"><b>One adapter per provider</b><span>sources/base.py &middot; the only code that knows ERDDAP</span></div>
-            <div class="node"><b>Quality control, per channel</b><span>Argo flags 3/4/9 refused + a regional salinity floor</span></div>
-            <div class="node"><b>Land masked, never filled</b><span>absence stays absence</span></div>
-            <div class="node"><b>Derived here, not downloaded</b><span>5 hazard fields &middot; collocation &middot; bias &middot; drift</span></div>
-            <div class="node"><b>Density from TEOS-10</b><span>gsw &middot; the standard, not an approximation</span></div>
+            <div class="node"><b>A new provider is one new class</b><span>no renderer, no endpoint, no UI file &middot; four were added in September</span></div>
+            <div class="node"><b>Only this layer knows a provider's format</b><span>samudra/sources/base.py</span></div>
+            <div class="node"><b>Argo's own flags decide what we keep</b><span>3, 4 and 9 refused value by value, plus a regional salinity floor</span></div>
+            <div class="node"><b>Land stays empty</b><span>a gap is never filled in to look nicer</span></div>
+            <div class="node"><b>The five hazard fields are computed here</b><span>INCOIS stopped publishing them in 2019</span></div>
           </div>
         </div>
 
@@ -407,21 +405,19 @@
         </div>
 
         <div class="zone">
-          <div class="zh2"><span>3</span> &nbsp;Two representations &middot; one truth</div>
+          <div class="zh2"><span>3</span> &nbsp;Two forms of the same field</div>
           <div class="struth">
             <b>GRID</b>
-            <span>float64 &middot; land is NaN<br>24 levels &middot; 56 x 36 &middot; 1&deg;</span>
-            <em>Every collocation, tooltip, section, API response and served byte is read from
-            here.</em>
+            <span>float64 &middot; 1&deg; &middot; 24 depth levels<br>56 x 36 &middot; land is empty</span>
+            <em>Every number anyone reads comes from here.</em>
           </div>
           <div class="sdrop">
             <div class="down">&darr;</div>
-            <div class="why">quantise to bytes,<br>warp the depth axis</div>
+            <div class="why">one byte a value,<br>depth axis stretched</div>
             <div class="spic">
               <b>VOLUME</b>
-              <span>56 x 36 x 48 &middot; 1 byte a value</span>
-              <em>A picture for the GPU, and a dead end for numbers: nothing reads a value back
-              out of it.</em>
+              <span>56 x 36 x 48 &middot; for the graphics card</span>
+              <em>Drawn, never read. No number comes back out.</em>
             </div>
           </div>
         </div>
@@ -429,12 +425,12 @@
 
       <div class="forkdown">
         <div class="num">
-          <div class="l">numbers, unchanged</div>
+          <div class="l">numbers</div>
           <div class="stem"></div>
           <div class="a">&darr;</div>
         </div>
         <div class="pix">
-          <div class="l">pixels only, never a reading</div>
+          <div class="l">pixels</div>
           <div class="stem"></div>
           <div class="a">&darr;</div>
         </div>
@@ -442,10 +438,10 @@
 
       <div class="zh2"><span>4</span> &nbsp;Four ways out</div>
       <div class="outrow">
-        <div class="node"><b>Static bake</b><span>71.1 MB in the build</span><em>Both forms, committed. Zero network calls at demo time.</em></div>
-        <div class="node pixels"><b>Browser</b><span>the bake, not the API</span><em>The deployed site runs with no server behind it at all.</em></div>
-        <div class="node"><b>REST API</b><span>FastAPI &middot; 15 routes</span><em>Grid only. Answers what a static bundle cannot precompute.</em></div>
-        <div class="node"><b>Open standards</b><span>OPeNDAP &middot; CF-1.8 &middot; WMS</span><em>Grid only. Read it in xarray, QGIS or Panoply.</em></div>
+        <div class="node"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>192 MB in the build &middot; 0 network calls</span><em>What the demo actually runs on.</em></div>
+        <div class="node pixels"><b>Browser &nbsp;&larr;&nbsp; the bake</b><span>Three.js &middot; WebGL2</span><em>The deployed site has no server behind it.</em></div>
+        <div class="node"><b>REST API &nbsp;&larr;&nbsp; Grid</b><span>FastAPI &middot; 21 routes</span><em>Answers what a static bundle cannot precompute.</em></div>
+        <div class="node"><b>Open standards &nbsp;&larr;&nbsp; Grid</b><span>OPeNDAP &middot; CF-1.8 &middot; WMS 1.3.0</span><em>Opens in xarray, QGIS or Panoply.</em></div>
       </div>
     </div>
 
@@ -456,9 +452,9 @@
         <div class="row"><div class="k">3D</div><div class="v">Three.js + WebGL2<br><i>ray marching in GLSL ES 3.00</i></div></div>
         <div class="row"><div class="k">Pipeline</div><div class="v">Python + NumPy + xarray<br><i>SciPy &middot; netCDF4</i></div></div>
         <div class="row"><div class="k">Oceanography</div><div class="v">TEOS-10 via gsw<br><i>cmocean palettes</i></div></div>
-        <div class="row"><div class="k">API</div><div class="v">FastAPI + Uvicorn<br><i>15 REST routes</i></div></div>
+        <div class="row"><div class="k">API</div><div class="v">FastAPI + Uvicorn<br><i>21 REST routes</i></div></div>
         <div class="row"><div class="k">Standards</div><div class="v">OPeNDAP DAP2 &middot; CF-1.8<br>OGC WMS 1.3.0 <i>&middot; 5 endpoints</i></div></div>
-        <div class="row"><div class="k">Verified by</div><div class="v">377 pytest + 15 browser probes<br><i>each probe made to fail on purpose first</i></div></div>
+        <div class="row"><div class="k">Verified by</div><div class="v">379 pytest + 15 browser probes<br><i>each probe made to fail on purpose first</i></div></div>
       </div>
       <div class="nomap">
         <b>No map library, on purpose.</b> The globe, the coastlines and the EEZ are drawn in the
@@ -469,11 +465,10 @@
   </div>
 
   <div class="sfoot">
-    <b>The shape is the argument.</b> Adding a provider means adding an adapter and touching no
-    renderer, no endpoint and no UI file - the September round added four and proved it. And every
-    number a human or a machine reads comes from the Grid, never the Volume: that matters most at
-    the API, where a consumer pulling NetCDF over the wire cannot see they were handed a
-    quantised, depth-warped approximation.
+    <b>Why the rule is drawn and not just stated.</b> The Volume has exactly one arrow out of it
+    and it points at the screen. That matters most at the API: somebody pulling NetCDF over the
+    wire has no way to tell by looking whether they were handed the measurement or a picture of
+    it. Here it is always the measurement.
   </div>
 </div>
 

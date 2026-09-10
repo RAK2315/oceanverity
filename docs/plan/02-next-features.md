@@ -13,7 +13,7 @@ Both halves of the automatic scan now exist.
 
 | Question | Status |
 | --- | --- |
-| Where did the *field* depart from its own average? | **Done.** `find_anomaly_features()`, 121 features across the twelve Timesteps |
+| Where did the *field* depart from its own average? | **Done.** `find_anomaly_features()`, 404 features across the thirty-six Timesteps |
 | Where does the *model* most disagree with the *floats*? | **Done.** `pipeline/samudra/residuals.py` ranks and bins them; the "Model vs instruments" group in the left panel is the map and the list |
 | Fronts and sharp gradients | Not built. Already computed as the gradient channel in every Volume, so it is free. Idea A6 in [`05-coverage-audit-and-ideas.md`](05-coverage-audit-and-ideas.md) |
 | Unusual currents | Superseded. Currents are real numbers now - ADR 0013 - so this is reopenable, but nothing is built |
@@ -34,19 +34,19 @@ Field. Every ranked row now prints the depths behind it.
 
 | Field | Instruments | Mean bias | Typical gap | 5 degree boxes with 3+ instruments |
 | --- | --- | --- | --- | --- |
-| Temperature | 230 | +0.021 degC | 0.190 degC | 35 |
-| Salinity | 221 | -0.006 PSU | 0.034 PSU | 34 |
-| Density | 221 | -0.007 kg/m3 | 0.049 kg/m3 | 34 |
+| Temperature | 266 | -0.006 degC | 0.236 degC | 38 |
+| Salinity | 251 | -0.016 PSU | 0.043 PSU | 36 |
+| Density | 251 | -0.005 kg/m3 | 0.053 kg/m3 | 36 |
 
 **The pooled figure is largely the model agreeing with itself.** INCOIS assimilate Argo, so a
-float's residual measures the analysis against an observation it was fed. The nine moored buoys
+float's residual measures the analysis against an observation it was fed. The seventeen moored buoys
 are not assimilated, and split out they disagree several times as much:
 
-| Field | 9 moorings | Floats | ratio |
+| Field | 17 moorings | Floats | ratio |
 | --- | --- | --- | --- |
-| Temperature | **0.748 degC** | 0.167 degC (221) | 4.5x |
-| Salinity | **0.144 PSU** | 0.029 PSU (212) | 4.9x |
-| Density | **0.257 kg/m3** | 0.040 kg/m3 (212) | 6.4x |
+| Temperature | **1.010 degC** | 0.183 degC (249) | 5.5x |
+| Salinity | **0.238 PSU** | 0.031 PSU (236) | 7.7x |
+| Density | **0.227 kg/m3** | 0.042 kg/m3 (236) | 5.4x |
 
 The panel prints both, and the second is the number a forecaster wants: how far the analysis
 sits from water nobody told it about.
@@ -102,7 +102,7 @@ hallucinate a place that is not in the gazetteer.
 ### The honesty constraint that must not be lost
 
 **"Show me the last 3 days" cannot be answered truthfully.** The analysis is a **10-day** product
-and the demo holds 12 steps spanning April to July 2026. There is no daily resolution anywhere in
+and the demo holds 36 steps spanning August 2025 to July 2026. There is no daily resolution anywhere in
 the system. The parser must snap time phrases onto 10-day steps and say on screen which step it
 chose, or the feature invents precision the data does not have.
 

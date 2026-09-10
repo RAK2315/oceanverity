@@ -185,27 +185,35 @@ stripe**. Two columns, reading across; the last spans both.
 | World Ocean Atlas 23 | `NOAA NCEI · OPeNDAP` |
 | **Your own NetCDF file, dropped on the page** *(full width)* | `the ninth adapter · POST /api/netcdf` |
 
-**Zone 2 - `2  ADAPTER SEAM · PYTHON`.** Five cards, **full steel-blue border and a deeper fill**,
+**Zone 2 - `2  ONE ADAPTER PER SOURCE`.** Five cards, **full steel-blue border and a deeper fill**,
 no stripe. These read as one block on purpose: it is one seam, not five features.
+
+The heading carries the claim, so no card repeats it. The first card is the strongest line on the
+slide and used to be in the footer in small print.
 
 | Card title | Mono sub-label |
 | --- | --- |
-| GridSource / ProfileSource | `samudra/sources/base.py` |
-| One class per provider | `9 · the only code that knows ERDDAP` |
-| Column layout is data | `3 layouts, 1 parser` |
-| Quality control, per channel | `Argo flags + regional floor` |
-| Land masked, never filled | `absence stays absence` |
+| **A new provider is one new class** | `no renderer, no endpoint, no UI file · four were added in September` |
+| Only this layer knows a provider's format | `samudra/sources/base.py` |
+| Argo's own flags decide what we keep | `3, 4 and 9 refused value by value` |
+| Land stays empty | `a gap is never filled in to look nicer` |
+| The five hazard fields are computed here | `INCOIS stopped publishing them in 2019` |
 
-**Zone 3 - `3  TWO REPRESENTATIONS`.** Two boxes, and they must not look alike. This is the only
-place in the picture where green and cyan appear, because those two are the opposites.
+**Zone 3 - `3  TWO FORMS OF THE SAME FIELD`.** Two boxes, and they must not look alike. This is
+the only place in the picture where green and cyan appear, because those two are the opposites.
+
+The two sentences under them are the whole argument and they are **eight words each, in parallel**.
+Do not expand them. An earlier draft said the same thing in the banner, in both boxes, on both
+arrows and again on all four output cards - six times - which is what made the slide read as
+machine-written.
 
 | | GRID | VOLUME |
 | --- | --- | --- |
 | Border | **2 px solid green** | **2 px dashed cyan** |
 | Fill | pale green | pale cyan |
 | Title | `GRID`, heavy, green | `VOLUME`, heavy, cyan |
-| Mono lines | `float64 · land is NaN` / `24 levels · 56 x 36 · 1°` | `56 x 36 x 48 · 1 byte a value` / `value · coverage · gradient` |
-| One line under it | The scientific truth. Every collocation, tooltip, section, API response and served byte is read from here. | A picture for the GPU, and a dead end for numbers: nothing reads a value back out of it. |
+| Mono lines | `float64 · 1° · 24 depth levels` / `56 x 36 · land is empty` | `56 x 36 x 48 · for the graphics card` |
+| One line under it | **Every number anyone reads comes from here.** | **Drawn, never read. No number comes back out.** |
 
 The VOLUME box sits **directly below** GRID, in the same column, joined by a short down arrow.
 
@@ -225,10 +233,15 @@ labelled arrow says what travels. Label in mono caps, the second line smaller an
 | # | From → to | Label | Second line | Colour |
 | --- | --- | --- | --- | --- |
 | 1 | Zone 1 → Zone 2 | `NETCDF · CSV · FTP INDEX` | subset at the server | steel blue |
-| 2 | Zone 2 → Zone 3 | `GRID & PROFILE OBJECTS` | the provider's own axes | steel blue |
-| 3 | GRID ↓ VOLUME | `BAKE: QUANTISE TO 4 BYTES, WARP THE DEPTH AXIS` | - | **amber** |
-| 4 | GRID → Zone 4 | `NUMBERS, UNCHANGED` | float64 and float32 | steel blue |
-| 5 | VOLUME → Zone 4 | `PIXELS ONLY` | never a reading | **cyan** |
+| 2 | Zone 2 → Zone 3 | `GRID OBJECTS` | on the provider's axes | steel blue |
+| 3 | GRID ↓ VOLUME | `ONE BYTE A VALUE, DEPTH AXIS STRETCHED` | - | **amber** |
+| 4 | GRID → Zone 4 | `NUMBERS` | float64 and float32 | steel blue |
+| 5 | VOLUME → Zone 4 | `PIXELS` | to the screen and nowhere else | **cyan** |
+
+Arrows 4 and 5 are **one word each on purpose**. The two boxes above them already say what the
+cargo is; repeating "never a reading" on the arrow is the third time the reader is told, and the
+word "bake" was removed from arrow 3 because zone 4 has a card called *Static bake* meaning
+something different.
 
 Arrows 4 and 5 start at their own box's centre line, so the fork is visible without either arrow
 crossing the other. Arrow 5 is cyan because it leaves the cyan box: the eye should follow it and
@@ -260,7 +273,7 @@ notice it reaches only the screen.
 | Backend | FastAPI &middot; uvicorn &middot; pydap &middot; xpublish &middot; xpublish-wms |
 | Frontend | TypeScript &middot; React 19 &middot; Vite &middot; Zustand &middot; Three.js &middot; WebGL2 &middot; GLSL ES 3.00 |
 | Standards spoken | ERDDAP griddap and tabledap *(read)* &middot; OPeNDAP DAP2 *(read and served)* &middot; CF-1.8 NetCDF *(served)* &middot; OGC WMS 1.3.0 *(served)* |
-| Quality and delivery | pytest, **377** tests &middot; Playwright, **15** browser probes &middot; GitHub Actions, build and deploy on every push |
+| Quality and delivery | pytest, **379** tests &middot; Playwright, **15** browser probes &middot; GitHub Actions, build and deploy on every push |
 
 > No paid service and no GPU cluster. **No account to view or use it; one free Copernicus account
 > to rebuild the data**, and that credential never leaves the machine that bakes. Built and tested
@@ -290,7 +303,7 @@ face value**, because most submissions at this stage describe something that doe
 | --- | --- |
 | **Product status** | **Working prototype, on live INCOIS data** *(green)* |
 | Public URL | `rak2315.github.io/samudra-sih26` |
-| Automated tests | **377** passing, in CI on every push |
+| Automated tests | **379** passing, in CI on every push |
 | Network calls at demo time | **0**, enforced by a CI check |
 
 ---
@@ -309,7 +322,7 @@ rather than filled in."*
 | --- |
 | **Built, deployed and public today.** Open it on the evaluator's own laptop during the pitch. |
 | **Ordinary hardware is enough.** Built and tested on integrated graphics with 2 GB of shared memory. |
-| **377 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
+| **379 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
 
 | **It costs nothing to keep** *(viability)* |
 | --- |
@@ -460,7 +473,7 @@ the exact request you can run yourself:
   `github.com/RAK2315/samudra-sih26` &rarr; `docs/adr/`
 - **Every unmet clause of PS 26067**, researched with dates and row counts, with the decision
   taken on each. `docs/plan/03-requirement-gaps.md`
-- **377 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
+- **379 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
   run in CI on every push.
 
 > **Before you export, click every link on this slide.** All four DOIs were checked on
@@ -544,7 +557,7 @@ than in an appendix.
 | Link | Where it goes | Why it earns its space |
 | --- | --- | --- |
 | **The live prototype** | https://rak2315.github.io/samudra-sih26/ | Nothing else on six slides proves execution as fast as a working link. It needs no install and no account, so a judge can open it while you are still talking. |
-| **The repository** | https://github.com/RAK2315/samudra-sih26 | 377 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
+| **The repository** | https://github.com/RAK2315/samudra-sih26 | 379 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
 | **The video** | the recording of [`script.md`](script.md) | The prototype walkthrough, guaranteed to run. A live demo can fail on the venue's network; this cannot. |
 
 Slide 1 carries the prototype link. Slide 6 carries all three, with the repository and the video

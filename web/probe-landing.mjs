@@ -219,6 +219,10 @@ if (fclaim === undefined) {
 /** Pictures that are the same in both themes on purpose, and why. */
 const FIXED = {
   "kiosk.jpg": "an exhibition screen is a dark screen in any theme; a light copy would be the wrong picture",
+  // The only hazard frame committed today is the light one, shipped deliberately so the cyclone
+  // card stops borrowing the kiosk picture under alt text promising heat potential. It gains a
+  // dark twin the day one is captured, and this line comes out with it.
+  "hazard.jpg": "the one committed hazard frame is light; it ships untwinned until a dark one is captured",
 };
 
 const swap = await page.evaluate(async () => {

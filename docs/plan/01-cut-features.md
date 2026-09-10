@@ -15,7 +15,7 @@ Last reconciled against the tree: 2026-09-02.
 | --- | --- | --- | --- | --- |
 | 1 | **Thermal fronts - the horizontal gradient of temperature at the chosen Level** | Time. **Every Volume already carries a gradient channel** - it is what Feature emphasis weights - so the quantity is computed and shipped and simply has no button | 3-5 h | The last cheap answer to a named operational mandate: fronts are one of the two inputs INCOIS's own Potential Fishing Zone advisory is built from. It must never be captioned as a PFZ advisory - see idea A6 in `05-coverage-audit-and-ideas.md` |
 | 2 | **Depth against time at one point** | Time | 6-9 h | The second standard figure of physical oceanography, after the vertical section which is now built. `/api/section` proves the pattern and the native Grids are already in the browser |
-| 3 | **Close the loop from an Anomaly Feature to the cast that checked it** | Time. Both ends exist and the wire between them does not | 3-4 h | The shortest path from "the model departed" to "and here is whether anyone was there to see it". Ten of the 121 features have no cast at all and should say so |
+| 3 | **Close the loop from an Anomaly Feature to the cast that checked it** | Time. Both ends exist and the wire between them does not | 3-4 h | The shortest path from "the model departed" to "and here is whether anyone was there to see it". Twenty-six of the 404 features have no cast at all and should say so |
 | 4 | **Frontend reads the live API instead of the static files, with fallback** | Deliberate: a dead venue network must not be able to kill the demo | 1-2 h | Lets you show live data being pulled during the demo, with the static bundle as the safety net |
 
 **Moorings, chlorophyll, OPeNDAP, CF NetCDF, WMS and the guided tour have since been built**,
@@ -74,5 +74,5 @@ trade-offs rather than mistakes.
   slightly rectangular at its southern edge.
 - Software-rendered WebGL - a machine with no GPU driver - runs the ray march at a few frames per
   second. On real hardware, including the Intel UHD target, it is fine.
-- 60 of the 121 Anomaly Features span a single Level, so they are sheets rather than bodies. That
+- 162 of the 404 Anomaly Features span a single Level, so they are sheets rather than bodies. That
   is a consequence of the Grid's uneven Levels, not of the detector.

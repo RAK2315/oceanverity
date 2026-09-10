@@ -124,6 +124,12 @@ const PUBLISH_MAP = [
   ["flow", "docs/images/flow.jpg"],
   ["arrows", "docs/images/arrows.jpg"],
   ["drift", "docs/images/drift.jpg"],
+  // The site needs this one too, and for a round it was not on the list - which is why the
+  // landing page's cyclone card was pointing at kiosk.jpg under alt text promising cyclone heat
+  // potential. `light` is an explicit per-entry override against the site's dark default: the
+  // only hazard frame committed is the light one, and the user chose to ship it rather than wait
+  // for a dark capture. Swap this to "dark" the day a dark hazard frame is ingested.
+  ["hazard", "web/public/images/hazard.jpg", "light"],
   ["hazard", "docs/images/hazard.jpg"],
   ["d26", "docs/images/d26.jpg"],
   ["section", "docs/images/section.jpg"],
