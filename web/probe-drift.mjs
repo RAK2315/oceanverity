@@ -39,6 +39,33 @@ const SERVER = process.env.PREVIEW_URL ?? "http://localhost:4173";
  */
 const TOLERANCE_KM = 2.0;
 
+/**
+ * How far along a baked trajectory the two integrators are held to that tolerance.
+ *
+ * They are compared at a *bounded* horizon because past about 180 days this stops measuring
+ * whether two pieces of code agree and starts measuring chaotic advection. Measured on the
+ * 36-Timestep bake, integrating to the exact time of a baked vertex so none of the gap is a
+ * time mismatch:
+ *
+ *   float 1902288   30d 0.16 km   130d 0.91   180d 0.69   230d 9.04   280d 53.85   330d 104.56
+ *   float 1902194   30d 0.20 km   130d 0.45   180d 0.30   230d 1.44   281d 5.43    332d 74.87
+ *
+ * Sub-kilometre for six months and then doubling every three or four weeks, which is what a
+ * positive Lyapunov exponent looks like: the baked path is written to three decimals of a
+ * degree, and 111 m of that, seeded into the equatorial Indian Ocean where the Wyrtki jets
+ * reverse, is 100 km by month eleven. Both of those floats start within 2 degrees of the
+ * equator. A sign error, a missing cosine or a swapped axis is visible at day 30 and still
+ * fails this - which is the whole point of keeping the horizon short and the tolerance at 2 km
+ * rather than loosening the tolerance to cover a year.
+ *
+ * 90 days, not 150, because the e-folding time is not the same everywhere. Float 1902756 starts
+ * at 14 N in the Somali Current - the fastest water in this basin, measured at 2.94 m/s - and is
+ * already 3.28 km out by day 118 where the equatorial pair are still under a kilometre at 180.
+ * 90 days puts every float in the sample back in the regime the 2 km was measured against, which
+ * is the same hundred-day window this tolerance was written for before the bake grew to a year.
+ */
+const HORIZON_DAYS = 90;
+
 /** How many baked trajectories to re-run. All 202 would be right and would take minutes. */
 const SAMPLE = 40;
 
@@ -67,7 +94,7 @@ await page.waitForFunction(() => !!window.__store.getState().bakedDrift, null, {
 // The browser module is imported straight out of the built bundle through the app's own scope:
 // `window.__drift` is exported by App for exactly this, so the probe measures the code that
 // ships rather than a copy of it.
-const agreement = await page.evaluate(async (sample) => {
+const agreement = await page.evaluate(async ({ sample, horizon }) => {
   const store = window.__store.getState();
   const manifest = store.manifest;
   const baked = store.bakedDrift;
@@ -104,7 +131,14 @@ const agreement = await page.evaluate(async (sample) => {
     // start point instead would compare two different trajectories and call them a
     // disagreement - measured, up to 860 km of one.
     const start = { lon: entry.observed[0][0], lat: entry.observed[0][1], time: entry.startTime };
-    const days = entry.days[entry.days.length - 1];
+    // The baked vertex nearest the horizon, and its *exact* time. A baked path keeps about 34
+    // vertices over a year, so comparing at a requested day rather than at a stored one puts up
+    // to five days of travel - tens of kilometres - into the gap as pure artefact.
+    let at = entry.days.length - 1;
+    for (let i = 0; i < entry.days.length; i++) {
+      if (Math.abs(entry.days[i] - horizon) < Math.abs(entry.days[at] - horizon)) at = i;
+    }
+    const days = entry.days[at];
     const path = drift.integrateDrift(
       currents,
       start.lon,
@@ -115,22 +149,25 @@ const agreement = await page.evaluate(async (sample) => {
       baked.stepHours,
     );
     const mine = path.steps[path.steps.length - 1];
-    const theirs = entry.predicted[entry.predicted.length - 1];
+    const theirs = entry.predicted[at];
     rows.push({
       id,
       days,
+      full: entry.days[entry.days.length - 1],
       km: drift.separationKm(mine, { timeMs: 0, lon: theirs[0], lat: theirs[1] }),
       ended: path.ended,
       bakedEnded: entry.ended,
     });
   }
   return rows;
-}, SAMPLE);
+}, { sample: SAMPLE, horizon: HORIZON_DAYS });
 
 const gaps = agreement.map((r) => r.km).sort((a, b) => a - b);
 const worst = agreement.reduce((a, b) => (b.km > a.km ? b : a), agreement[0]);
+const longest = agreement.reduce((a, b) => (b.full > a ? b.full : a), 0);
 console.log(
-  `browser against pipeline: ${agreement.length} trajectories, median ` +
+  `browser against pipeline: ${agreement.length} trajectories compared at the baked vertex ` +
+    `nearest ${HORIZON_DAYS} days (baked paths run to ${longest.toFixed(0)}), median ` +
     `${(gaps[Math.floor(gaps.length / 2)] ?? 0).toFixed(3)} km, worst ` +
     `${worst.km.toFixed(3)} km on float ${worst.id} after ${worst.days.toFixed(0)} days`,
 );
