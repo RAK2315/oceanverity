@@ -197,11 +197,15 @@ def parse_constraint(expression: str | None, dataset) -> list[tuple[str, tuple[s
             raise ConstraintError(f"no variable named {name!r}")
 
         slices = []
-        for start, stop, step in _SLICE.findall(clause):
-            if step:  # [start:stride:stop]
-                slices.append(slice(int(start), int(step) + 1, int(stop)))
-            elif stop:  # [start:stop], stop inclusive
-                slices.append(slice(int(start), int(stop) + 1, 1))
+        # Named by position, not by meaning, because the meaning depends on how many parts
+        # there are: the second part is the stride in [start:stride:stop] and the stop in
+        # [start:stop]. Naming them stop and step read correctly for one form and backwards for
+        # the other, and only the comment beside the arithmetic kept it right.
+        for start, second, third in _SLICE.findall(clause):
+            if third:  # [start:stride:stop]
+                slices.append(slice(int(start), int(third) + 1, int(second)))
+            elif second:  # [start:stop], stop inclusive
+                slices.append(slice(int(start), int(second) + 1, 1))
             else:  # [index]
                 slices.append(slice(int(start), int(start) + 1, 1))
         out.append((name, tuple(slices)))
@@ -238,14 +242,10 @@ def dods(dataset, expression: str | None = None, name: str = DATASET_NAME) -> by
 
     subset = {}
     order: list[str] = []
+    # A data variable and a coordinate are cut the same way; `_describe` is what tells them apart.
     for key, slices in selected:
-        if key in dataset.data_vars:
-            array = _apply(dataset[key], slices)
-            subset[key] = array
-            order.append(key)
-        else:
-            subset[key] = _apply(dataset[key], slices)
-            order.append(key)
+        subset[key] = _apply(dataset[key], slices)
+        order.append(key)
 
     trimmed = _describe(dataset, subset, order, name)
 

@@ -12,7 +12,7 @@ and what the instruments in the water actually measured.**
 Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / INCOIS
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
 
-![Tests](https://img.shields.io/badge/tests-379%20passing-2ea043)
+![Tests](https://img.shields.io/badge/tests-409%20passing-2ea043)
 ![Probes](https://img.shields.io/badge/browser%20probes-15%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
@@ -94,12 +94,12 @@ hand.
 | | |
 | --- | --- |
 | Instruments in the water | **276** - 259 Argo floats + 17 moored buoys |
-| Variables | **15**, in 5 groups; 13 computed or fetched here |
+| Variables | **15**, in 5 groups; 4 published by INCOIS, 11 computed here |
 | Analyses | **36** timesteps, 10 Aug 2025 to 30 Jul 2026, over 45-100 °E and 10 °S-25 °N |
 | Depth | **5 m to 2000 m** across 24 uneven levels |
 | Data shipped in the build | **192 MB**, committed, **0** network calls to run |
 | Source adapters | **9** - 8 providers, plus one for a file a visitor drops on the page |
-| Tests / browser probes | **379** / **15** |
+| Tests / browser probes | **409** / **15** |
 | Drift model, scored | median **40.9 km** out over one Argo cycle, across 6,246 cycles on 219 floats |
 
 ## What it looks like
@@ -164,7 +164,7 @@ nothing joins them back up.
                 │                              │  never a reading
                 ▼                              ▼
   ┌─ 4 · FOUR WAYS OUT ───────────────────────────────────────────────────┐
-  │ REST API         Grid only   FastAPI · 15 routes                      │
+  │ REST API         Grid only   FastAPI · 21 routes                      │
   │ Open standards   Grid only   OPeNDAP · CF-1.8 · WMS 1.3.0             │
   │ Static bake      both        192 MB committed · 0 network calls       │
   │ Browser          both        reads the bake, never the API            │
@@ -217,7 +217,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 | --- | --- | --- |
 | **Static bake** | Grid **and** Volume | 192 MB committed · **0 network calls** |
 | **Browser** | Grid **and** Volume | Three.js · WebGL2 · GLSL ES 3.00 |
-| **REST API** | **Grid only** | FastAPI · 15 routes |
+| **REST API** | **Grid only** | FastAPI · 21 routes |
 | **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 · 5 endpoints |
 
 > ### The rule the shape is drawn to show
@@ -236,7 +236,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Layer | Responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 379 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
+| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 409 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
 | **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the `Grid`. None can reach a `Volume`.** |
 | **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints** - the only exception is a file the user drops. |
 
@@ -272,7 +272,7 @@ works with no server behind it at all.
 | **Standards out** | OPeNDAP (DAP2), CF-1.8 NetCDF, OGC WMS 1.3.0 | So the analysis is readable by a Python client, a file, or a GIS - not only by this page. |
 | **Rendering** | Three.js on WebGL2, GLSL ray marching | The volume is a single ray-marched block, not a stack of images. Nothing else gets you inside the water. |
 | **Frontend** | React 18, TypeScript 5, Zustand, Vite | Zustand because every control is one flat store the scene reads once a frame; Vite for a four-page build with no config. |
-| **Verification** | pytest, Playwright | 379 tests on the science; 15 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
+| **Verification** | pytest, Playwright | 409 tests on the science; 15 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
 | **Fonts** | Chivo, IBM Plex Mono, Space Grotesk, Inter - all self-hosted | The demo makes zero network calls. A Google Fonts link is a build failure, not a style choice. |
 
 ---
@@ -312,7 +312,7 @@ cd pipeline && ../.venv/Scripts/python -m samudra.bake
 Nothing in this README is asserted without something that can fail:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q         # 379 tests, ~35 s
+cd pipeline && ../.venv/Scripts/python -m pytest -q         # 409 tests, ~35 s
 cd web && npm run typecheck && npx vite build
 
 # the 15 browser probes measure the rendered page rather than trusting it.

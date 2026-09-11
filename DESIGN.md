@@ -229,20 +229,17 @@ touching **any** band, not only the panel.
 
 The foot bought the bay 20 px back. The source credits laid nine full attribution strings out
 flat, wrapped to two lines and measured **48 px** - a third of the chrome, on a licence obligation
-that nobody reads twice. Folded behind a control they are **28 px**, and the bay went from
-**616 px to 636**. Measured there, before and after, on the same harness:
-
-| Panel state | Content | Over a 616 px bay | Over a 636 px bay |
-| --- | --- | --- | --- |
-| all groups closed | 377 px | fits | fits |
-| Variable | 476 px | fits | fits |
-| Variable + Colourbar | 641 px | 25 | **5** |
-| Colourbar + Rendering | 668 px | 52 | **32** |
-| bias | 918 px | 302 | **282** |
-| everything open | 1,976 px | 1,360 | 1,340 |
+that nobody reads twice. Folded behind a control they are **28 px**, and the bay is **635 px**,
+measured as the panel's own `clientHeight` at its cap. The current fold table - every panel state
+against that bay, in both themes - is in `CLAUDE.md` under "The chrome is a frame", and it is the
+only copy. This section carried an older one for a round, against a "636 px" bay that was 615
+plus 20 done as arithmetic and never read off the panel, with figures from before the colourbar
+alternates folded; two tables for one panel a hundred lines apart is how a fold figure goes stale
+without anything failing.
 
 The type pass that ran at the same time cost the panel **nothing**: content is identical to the
-pixel in all six states, which is the point of checking a claim rather than asserting it.
+pixel in all six panel states it was measured in, which is the point of checking a claim rather
+than asserting it.
 
 ## Colors
 
@@ -424,7 +421,7 @@ the headings to the weight the table wants and check it moves.
 
 Prose is capped at 65-75ch. The guide panel is held tighter still by `probe-guide.mjs`: one
 sentence of definition plus bullets, **max 4 bullets, max 2 lines each**, median 113 words
-measured across all 43 entries.
+measured across all 44 entries.
 
 ## Elevation
 

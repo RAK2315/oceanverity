@@ -12,7 +12,8 @@ the thermocline sitting deeper or shallower there than it usually does. That is 
 number behind it rather than an interpretation, which is the only kind this platform ships.
 
 It is also the first half of TCHP, the heat integrated down to the 26 degC isotherm, which is
-the quantity that governs cyclone rapid intensification and is the next Field worth adding.
+the quantity that governs cyclone rapid intensification. It is a Field now - `hazard.heat_potential`,
+ADR 0014 - and this paragraph called it "the next Field worth adding" for a round after it was.
 """
 
 from __future__ import annotations

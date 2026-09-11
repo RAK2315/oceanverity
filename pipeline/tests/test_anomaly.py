@@ -11,6 +11,7 @@ from samudra.anomaly import (
     DEGREES_THRESHOLD,
     anomaly_series,
     find_anomaly_features,
+    spread_by_level,
     symmetric_encoding_range,
 )
 from samudra.grid import Grid
@@ -302,3 +303,63 @@ def test_the_footprint_counts_a_column_once_however_deep_it_goes():
     b = features_of(deep)[5][0]
     assert b.cell_count > a.cell_count
     assert a.footprint_km2 == pytest.approx(b.footprint_km2)
+
+
+# ------------------------------------------------------------------ spread by Level
+
+# The figure the guide panel and this module's own docstring both quote, and which until now
+# existed only as a number typed into prose - twice, forty lines apart, with two different
+# values for the same quantity. A number nothing computes cannot be checked by anything.
+
+
+def series_with_level_spread(spreads, steps=4):
+    """A series whose per-cell standard deviation is exactly `spreads[level]`, by construction.
+
+    Two steps at +s and two at -s about a mean of 20 gives a population standard deviation of
+    exactly s at every cell of that Level, so the expected answer is hand-computable and does
+    not depend on the estimator's degrees of freedom being guessed right.
+    """
+    offsets = [+1.0, -1.0] * (steps // 2)
+    out = []
+    for offset in offsets:
+        values = np.zeros((len(spreads), len(LATITUDES), len(LONGITUDES)))
+        for index, spread in enumerate(spreads):
+            values[index, :, :] = 20.0 + offset * spread
+        out.append(
+            Grid(levels=np.array([5.0, 100.0]), latitudes=LATITUDES, longitudes=LONGITUDES,
+                 values=values)
+        )
+    return out
+
+
+def test_the_spread_at_each_level_is_the_standard_deviation_across_time():
+    grids = series_with_level_spread([0.25, 1.5])
+    spread = spread_by_level(grids)
+    assert [round(m, 6) for m in spread.metres] == [5.0, 100.0]
+    assert spread.degrees == pytest.approx([0.25, 1.5])
+
+
+def test_the_peak_is_the_level_that_moved_most_not_the_surface():
+    """The whole point of the bullet this feeds: the signal is in the thermocline."""
+    spread = spread_by_level(series_with_level_spread([0.25, 1.5]))
+    assert spread.peak_metres == 100.0
+    assert spread.peak_degrees == pytest.approx(1.5)
+
+
+def test_water_that_never_changes_has_no_spread():
+    spread = spread_by_level(series_with_level_spread([0.0, 0.0]))
+    assert spread.degrees == pytest.approx([0.0, 0.0])
+
+
+def test_land_does_not_get_counted_as_calm_water():
+    """A Masked cell is absence of ocean, so it must not pull the median towards zero."""
+    grids = series_with_level_spread([0.25, 1.5])
+    for grid in grids:
+        grid.values[:, 0, :] = np.nan
+    spread = spread_by_level(grids)
+    assert spread.degrees == pytest.approx([0.25, 1.5])
+
+
+def test_a_single_timestep_has_no_spread_to_measure():
+    with pytest.raises(ValueError):
+        spread_by_level(series_with_level_spread([0.25, 1.5], steps=2)[:1])

@@ -10,7 +10,7 @@ adapter next door. Measured over `DEMO_REGION` for a single ten-day window, 20-3
 100,405 rows, of which 94,653 carry subsurface temperature, from 169 profiling floats, 13 generic
 moored buoys, 2 tropical moored buoys, 122 ships and 14 drifters.
 
-Five of those moorings report a real water column:
+On that sampling, five of those moorings reported a real water column:
 
     23459    India    14.0 N 87.0 E   Bay of Bengal    10 levels, 0-500 m
     23451    India    14.9 N 69.1 E   Arabian Sea       9 levels, 0-500 m
@@ -19,8 +19,10 @@ Five of those moorings report a real water column:
     2300019  RAMA      3.9 S 65.0 E                     9 levels, 0-500 m
 
 The 23xxx buoys are India's OMNI network, run by NIOT with INCOIS as the data centre. The
-2300xxx pair are RAMA, the joint MoES-NOAA array. Across the bake's whole window there are
-consistently six or seven of them with subsurface profiles.
+2300xxx pair are RAMA, the joint MoES-NOAA array. That table is the four-month sampling this
+adapter was written against. The 36-step bake carries **17** moorings - 5 India, 10 United
+States, 2 unknown by operator - and draws between 5 and 14 at any one Timestep; `floats.json`
+is the list, and `collect_facts.py` counts it.
 
 Why this is a real test of the seam rather than a second Argo
 

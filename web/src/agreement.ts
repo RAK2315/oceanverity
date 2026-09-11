@@ -2,7 +2,7 @@
  * How close is close: the one place that decides whether the model agreed with an instrument.
  *
  * The Collocation panel's verdict and the bias map are the same judgement seen twice - one float
- * at a time, and all 233 at once - so they read the same constants. Two copies would let the
+ * at a time, and all 266 at once - so they read the same constants. Two copies would let the
  * list call a float the worst in the basin while its own panel said "Close agreement", which is
  * exactly the class of contradiction ADR 0007 and `transfer.ts` exist to prevent.
  *
@@ -59,10 +59,12 @@ export const AGREEMENT_LABEL: Record<Agreement, string> = {
  * getting it wrong is how a correct map becomes an unreadable one.
  *
  * It was `LARGE_FRACTION` - the "large disagreement" threshold, 1.5 degC on temperature - which
- * is the right *verdict* boundary and the wrong *colour* boundary. Measured on this bake: the
- * median instrument is off by 0.02 degC and the ninetieth percentile by 0.39 degC, so 90% of
- * the 233 markers landed within a quarter-step of the pale midpoint and **the whole map read as
- * white**. The colours were exactly what `palette.ts` computes; the scale was useless.
+ * is the right *verdict* boundary and the wrong *colour* boundary. Measured on the twelve-step
+ * bake: the median instrument was off by 0.02 degC and the ninetieth percentile by 0.39 degC, so
+ * 90% of the 233 markers landed within a quarter-step of the pale midpoint and **the whole map
+ * read as white**. On the 36-step bake the median is 0.114 degC and the ninetieth percentile
+ * 0.492 across 266 - the tenth-worst instrument still a third of the 1.5 degC boundary - so the
+ * argument holds and only its figures moved. The colours were exactly what `palette.ts` computes; the scale was useless.
  *
  * So the caller passes the Field's own ninetieth percentile, which the bake measures and ships
  * in `residuals.json`. Nine markers in ten then use the full palette and the worst tenth clamp,

@@ -156,9 +156,9 @@ console.log(
 if (distinct < 40) {
   problems.push(`only ${distinct} distinct marker colours - the scale is too wide to read`);
 }
-// The spread, not only the count. Promoted from `probe-fixups.mjs`, which was gitignored and
-// would have rotted: "the map reads as white" is a real failure that has happened once, and
-// forty distinct colours clustered around the pale midpoint would pass the check above.
+// The spread, not only the count. Promoted from a scratch probe, since deleted, which was
+// gitignored and would have rotted: "the map reads as white" is a real failure that has happened
+// once, and forty distinct colours clustered around the pale midpoint would pass the check above.
 const reds = check.rows.map((r) => r.rgb[0]);
 const redSpan = (Math.max(...reds) - Math.min(...reds)) / 255;
 console.log(`red channel spans ${redSpan.toFixed(2)} of its range across the markers`);
@@ -173,13 +173,19 @@ if (wrong > 0) problems.push(`${wrong} marker colours do not match palette.ts`);
 //
 // The scene carried a comment saying the bias map drew every instrument where its *compared
 // cast* was, and the line under it called `positionAt(item, timeMs)` - so it drew a residual
-// wherever the float had drifted to by the Timestep on screen. Small today only by luck: 94% of
-// the comparisons sit on the last two steps.
+// wherever the float had drifted to by the Timestep on screen. Small today only by luck: 80% of
+// the comparisons sit on the last two steps (213 of 266 on the 36-step bake).
+//
+// The steps walked come from the manifest, not from a list. They were `[0, 5, 11]` - the first,
+// middle and last of a twelve-step bake - and on a bake of 36 those are three dates in the first
+// third of the run, holding 5, 3 and 0 comparisons, and nothing past step 11 was ever visited.
 //
 // And a marker gated on `freshness` disappears at a Timestep no cast of its own is near, so at
 // the step the app opens on 196 of 233 were drawn under a headline counting 233, and a row in
 // the ranked list could point at a marker that was not there.
-for (const step of [0, 5, 11]) {
+const stepCount = await page.evaluate(() => window.__store.getState().manifest.timesteps.length);
+const lastStep = stepCount - 1;
+for (const step of [...new Set([0, Math.floor(lastStep / 2), lastStep])]) {
   await page.evaluate((index) => {
     window.__store.getState().selectField("temperature");
     window.__store.setState({ biasMode: true, timestepIndex: index });
@@ -224,7 +230,7 @@ for (const step of [0, 5, 11]) {
     );
   }
 }
-await page.evaluate(() => window.__store.setState({ timestepIndex: 11 }));
+await page.evaluate((index) => window.__store.setState({ timestepIndex: index }), lastStep);
 await page.waitForTimeout(600);
 
 // ---- 5. a Field with no comparison keeps no colours ------------------------------------

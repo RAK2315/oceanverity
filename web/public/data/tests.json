@@ -1,6 +1,11 @@
 {
- "total": 379,
+ "total": 409,
  "modules": [
+  {
+   "module": "test_anomaly.py",
+   "tests": 29,
+   "defends": "The anomaly Field is arithmetic, so the tests are mostly about what it must refuse to do: invent a baseline it does not have, survive a single Timestep, or let land acquire a departure."
+  },
   {
    "module": "test_netcdf_source.py",
    "tests": 27,
@@ -17,13 +22,8 @@
    "defends": "Drift: where the analysis says a thing in the water would go, and where a float actually went."
   },
   {
-   "module": "test_anomaly.py",
-   "tests": 24,
-   "defends": "The anomaly Field is arithmetic, so the tests are mostly about what it must refuse to do: invent a baseline it does not have, survive a single Timestep, or let land acquire a departure."
-  },
-  {
    "module": "test_palettes.py",
-   "tests": 22,
+   "tests": 24,
    "defends": "The banded palette has to survive the trip through the byte encoder."
   },
   {
@@ -44,7 +44,7 @@
   {
    "module": "test_collocation.py",
    "tests": 17,
-   "defends": "Covered by this module."
+   "defends": "The Collocation: one observed cast held against the model at that cast's own position."
   },
   {
    "module": "test_section.py",
@@ -59,7 +59,7 @@
   {
    "module": "test_coverage.py",
    "tests": 16,
-   "defends": "Covered by this module."
+   "defends": "Observation Coverage: how many Argo casts dived through each slab of water nearby."
   },
   {
    "module": "test_hazard.py",
@@ -69,12 +69,12 @@
   {
    "module": "test_argo.py",
    "tests": 14,
-   "defends": "Covered by this module."
+   "defends": "The Argo profile parser, fed rows shaped exactly like the Ifremer ERDDAP CSV."
   },
   {
    "module": "test_volume.py",
    "tests": 13,
-   "defends": "Covered by this module."
+   "defends": "The Volume encoder: a Grid packed into bytes for the GPU, and nothing the science reads."
   },
   {
    "module": "test_thermocline.py",
@@ -87,6 +87,11 @@
    "defends": "Density is the first Field that is computed rather than fetched, so the tests have to do two jobs: pin the TEOS-10 chain against an independent evaluation of it, and check the physics comes out the right way up."
   },
   {
+   "module": "test_glider.py",
+   "tests": 11,
+   "defends": "The glider Source Adapter, and the finding it produces."
+  },
+  {
    "module": "test_climatology.py",
    "tests": 10,
    "defends": "Departure from a real climatological normal, rather than from four months of its own."
@@ -97,6 +102,11 @@
    "defends": "Moorings, from the real-time GTS feed."
   },
   {
+   "module": "test_standards.py",
+   "tests": 9,
+   "defends": "Every Field is described before it leaves the building, and the tables that describe it are checked against the whole set rather than against whichever Field is being edited."
+  },
+  {
    "module": "test_bgc.py",
    "tests": 8,
    "defends": "BGC-Argo: the same programme, the same server, one more quantity."
@@ -104,22 +114,27 @@
   {
    "module": "test_depth_warp.py",
    "tests": 8,
-   "defends": "Covered by this module."
-  },
-  {
-   "module": "test_glider.py",
-   "tests": 8,
-   "defends": "The glider Source Adapter, and the finding it produces."
+   "defends": "The Depth Warp: INCOIS's 24 uneven Levels mapped onto an even axis a GPU texture can use."
   },
   {
    "module": "test_grid.py",
    "tests": 7,
-   "defends": "Covered by this module."
+   "defends": "`Grid.column_at`: the bilinear interpolation every Collocation, tooltip and API answer reads."
+  },
+  {
+   "module": "test_plausibility.py",
+   "tests": 6,
+   "defends": "A provider's value that no sea has ever held is masked, counted, and never silently kept."
   },
   {
    "module": "test_profile_columns.py",
    "tests": 6,
    "defends": "The Source Adapter seam, tested where it actually bends."
+  },
+  {
+   "module": "test_copernicus.py",
+   "tests": 5,
+   "defends": "The Copernicus adapter honours the seam's own contract: ask it for a Field it declares."
   },
   {
    "module": "test_field_specs.py",

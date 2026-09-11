@@ -210,10 +210,19 @@ def health() -> dict:
 # The registry. Adding a provider means adding a class that satisfies the protocol in
 # `samudra/sources/base.py` and putting it in one of these lists. Nothing else in the system -
 # renderer, API, UI - has ever heard of ERDDAP.
-# Seven Source Adapters now, three of them added in the September 2026 round. Registering them
-# here rather than only in the bake is what keeps `/api/sources` an honest answer to "can this
-# ingest a new stream": every one of these satisfies the same Protocol, and the endpoint below
-# reads them rather than restating them.
+# Eight registered here - three grid and five profile - and `/api/sources` answers with exactly
+# these, because the endpoint below reads the lists rather than restating them. Registering them
+# here rather than only in the bake is what keeps it an honest answer to "can this ingest a new
+# stream": every one satisfies the same Protocol.
+#
+# This is not the same eight `CONTEXT.md` counts, and the difference is deliberate on one side
+# and not on the other. `IncoisArgoSource` is here and not in the bake: INCOIS's own archive ends
+# 2025-04-23 (ADR 0009), so it is registered to prove the seam and read by nothing. The World
+# Ocean Atlas adapter is in the bake and not here, because it is not a `GridSource` - its
+# `fetch_grid` takes a calendar month rather than an instant and it has no timesteps, which is
+# what makes it a baseline rather than a value (ADR 0016). Forcing it into this list would make
+# `/api/sources` claim it can be asked for a date. The uploaded-file adapter is the ninth and
+# lives behind `api/upload.py`. This comment said "seven" over eight for a round.
 GRID_SOURCES = [IncoisErddapSource(), IncoisMcCrearySource(), CopernicusCurrentsSource()]
 PROFILE_SOURCES = [
     ArgoErddapSource(),
@@ -249,11 +258,12 @@ def sources() -> dict:
                 "name": source.name,
                 "attribution": source.attribution,
                 "kind": "in-situ",
-                # Four providers now, and the fourth does not have a ProfileColumns at all:
-                # the GTS feed reports depth rather than pressure, one row per level, the
-                # surface reading in a different column from every other level, and no quality
-                # flags. It is absorbed by its own parser behind the same protocol, which is a
-                # stronger demonstration of the seam than a second provider with the same shape.
+                # Five providers, and two of them have no ProfileColumns at all. The GTS feed
+                # reports depth rather than pressure, one row per level, the surface reading in a
+                # different column from every other level, and no quality flags; the glider
+                # archive is a directory index plus one NetCDF file per cast. Each is absorbed by
+                # its own parser behind the same protocol, which is a stronger demonstration of
+                # the seam than a second provider with the same shape.
                 "columnStyle": (
                     {
                         "platform": source.columns.platform,
@@ -510,8 +520,9 @@ def _section_profiles() -> list:
     boundary keeps the science module free of this API's storage shape, which is the same
     division `sources/base.py` draws everywhere else.
 
-    Cached for the same reason `native_grid` is: this built 3,077 `Profile` objects on every
-    single `/api/section` request, and the answer only changes when the bake does.
+    Cached for the same reason `native_grid` is: this built every baked cast as a `Profile` on
+    every single `/api/section` request - 3,077 when the comment was written, 8,460 from 259
+    platforms on the 36-step bake - and the answer only changes when the bake does.
     `_drop_caches_if_rebaked` clears it along with the rest.
     """
     from samudra.sources.base import Profile

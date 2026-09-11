@@ -1,3 +1,12 @@
+"""The Volume encoder: a Grid packed into bytes for the GPU, and nothing the science reads.
+
+The Volume is a rendering artefact, so what these defend is that the rendering is faithful:
+values span the full byte range and are clamped rather than wrapped, decoding recovers a value to
+within one quantisation step, land is marked in the coverage channel and back-filled from a real
+neighbour rather than a sentinel the texture filter would smear into the coast, and the gradient
+channel is zero where there is no water to have a gradient.
+"""
+
 import numpy as np
 import pytest
 

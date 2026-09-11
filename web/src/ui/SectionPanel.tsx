@@ -43,8 +43,8 @@ export function SectionPanel() {
 
   // Memoised, and the dependency arrays below depend on it.
   //
-  // Both of these ran in the component body: 121 points x 24 Levels, and 237 instruments x up
-  // to 12 fixes, on every React render - and because each returned a new object every time, the
+  // Both of these ran in the component body: 121 points x 24 Levels, and every instrument x its
+  // fixes, on every React render - and because each returned a new object every time, the
   // `useEffect` underneath repainted the whole canvas on every render too. Dragging the
   // corridor slider did all three per frame.
   const cut: SectionCut | null = useMemo(

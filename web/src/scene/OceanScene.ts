@@ -106,6 +106,15 @@ export interface ViewState {
    */
   field: FieldSpec | null;
   paletteColours: number[][];
+  /**
+   * Which table `paletteColours` is, by name. The Sheet, the Drape and the arrows are coloured
+   * on the CPU and rebuilt only when their cache key changes, and the key used to be Field,
+   * step, window, scale and theme - not the palette. So choosing an alternate colourbar on any
+   * of the five hazard Fields was accepted by the store, repainted the legend, and redrew
+   * nothing: measured, 0.1% of the frame changed against 39.3% on Temperature, whose Volume
+   * recolours through a texture and never had a key to miss. The name is in every key now.
+   */
+  paletteName: string;
   /** Linear or logarithmic Transfer Function. One curve, shared with the colourbar. */
   scale: Scale;
   /** This Timestep's hazard Field, when one is selected. Not a Volume; float32 on the Grid. */
@@ -987,10 +996,10 @@ export class OceanScene {
       // the same mistake `positions_from` exists to prevent on the pipeline side. The comment
       // said this for a round while the line below still called `positionAt`.
       //
-      // The map is therefore a **composite of all twelve analyses** and does not thin out with
+      // The map is therefore a **composite of every analysis** and does not thin out with
       // the timeline. That is the second half of the same fix: a marker gated on
-      // `freshness(fix.ageDays)` left 196 of 233 on screen at the step the app opens on, under
-      // a headline counting 233, and a row in the ranked list could point at nothing at all.
+      // `freshness(fix.ageDays)` left 196 of 233 on screen at the step the app opened on in the
+      // twelve-step bake, under a headline counting 233, and a row in the ranked list could point at nothing at all.
       // The panel says the map is a composite; nothing else here may quietly disagree with it.
       const biases = state.biasMode ? state.biasByInstrument : null;
 
@@ -1485,6 +1494,7 @@ export class OceanScene {
       state.windowMax.toFixed(3),
       state.scale,
       state.theme,
+      state.paletteName,
     ].join("|");
     if (key === this.lastDrapeKey) return;
     this.lastDrapeKey = key;
@@ -1542,6 +1552,7 @@ export class OceanScene {
       state.windowMax.toFixed(3),
       state.scale,
       state.theme,
+      state.paletteName,
       frame.boxHeight.toFixed(2),
     ].join("|");
     if (key === this.lastSheetKey) return;
@@ -1645,6 +1656,7 @@ export class OceanScene {
       state.windowMax.toFixed(3),
       state.scale,
       state.theme,
+      state.paletteName,
       frame.boxHeight.toFixed(2),
     ].join("|");
     if (key === this.lastArrowKey) return;

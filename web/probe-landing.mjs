@@ -223,6 +223,10 @@ const FIXED = {
   // card stops borrowing the kiosk picture under alt text promising heat potential. It gains a
   // dark twin the day one is captured, and this line comes out with it.
   "hazard.jpg": "the one committed hazard frame is light; it ships untwinned until a dark one is captured",
+  // Same shape as hazard, and it arrived here the same way: the bias card had been showing
+  // `collocation.jpg` under alt text describing the bias map, which every check in this probe
+  // passes - the file exists, it decodes, it has a light twin. Only the words were wrong.
+  "bias.jpg": "the one committed bias frame is light; it ships untwinned until a dark one is captured",
 };
 
 const swap = await page.evaluate(async () => {

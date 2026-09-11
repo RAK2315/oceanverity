@@ -211,6 +211,39 @@ if (share < 5) {
   problems.push(`switching the colourbar changed only ${share.toFixed(1)}% of the water`);
 }
 
+// ---- 2b. and so do the Fields that are not a Volume -----------------------------------------
+//
+// The check above only ever switched Temperature, whose Volume recolours through a texture.
+// The Sheet (three depth Fields) and the Drape (two column totals) are coloured on the CPU and
+// rebuilt only when their cache key changes, and the palette was not in the key - so on all
+// five hazard Fields the store took the choice, the legend repainted, and the water did not.
+// Measured on that build: 0.1% of the band against 39.3% on Temperature. After the palette name
+// went into the keys: 9.7% on Depth of 26 degC and 5.8% on Cyclone Heat Potential, which is why
+// the floor here is 2 rather than the 5 the Volume gets - a sheet covers less of the band.
+for (const key of ["d26", "heat_potential"]) {
+  await page.evaluate((k) => {
+    const store = window.__store.getState();
+    store.selectField(k);
+    store.set("paletteOverride", null);
+  }, key);
+  await page.waitForTimeout(2500);
+  const plain = await frame();
+  await page.evaluate(() => window.__store.getState().set("paletteOverride", "gray"));
+  await page.waitForTimeout(2500);
+  const changed = differingShare(plain, await frame(), water);
+  console.log(`  ${key} repainted: ${changed.toFixed(1)}% of the block band`);
+  if (changed < 2) {
+    problems.push(`${key}: switching the colourbar changed only ${changed.toFixed(1)}% of the water`);
+  }
+}
+// Back to exactly where the checks below expect to find the page.
+await page.evaluate(() => {
+  const store = window.__store.getState();
+  store.selectField("temperature");
+  store.set("paletteOverride", "gray");
+});
+await page.waitForTimeout(2500);
+
 // Not a share of changed pixels, which only says the bar moved, and not a screenshot pixel
 // either: the bar is 12 px tall over a dark panel and sampling its centre read the panel more
 // often than the bar, so the check sat at a channel spread of 6 whatever the bar was drawing.

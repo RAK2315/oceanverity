@@ -128,7 +128,7 @@ export const QUESTIONS: Question[] = [
     run: () => {
       calm();
       store.getState().selectField("temperature");
-      store.setState({ biasMode: true, timestepIndex: lastStep() });
+      store.getState().setBiasMode(true);
     },
   },
   {
@@ -171,8 +171,16 @@ export const QUESTIONS: Question[] = [
     id: "twoseas",
     question: "Why are India's two seas so different?",
     why:
-      "The Bay of Bengal is 0.8 °C warmer than the Arabian Sea and still 3.0 kg/m³ lighter," +
-      " because the Ganges and Brahmaputra make it 3.6 PSU fresher. No temperature map shows it.",
+      // Measured at 5 m over the 36-step bake, northern Bay 15-20 N 85-92 E against northern
+      // Arabian Sea 15-20 N 60-70 E, averaged across all 36 analyses: 3.03 kg/m3 lighter and
+      // 3.68 PSU fresher, and both hold at every single step (1.35 to 4.49 lighter, 1.76 to 5.63
+      // fresher). The temperature contrast does not: it averages +0.82 degC and runs from -0.97
+      // to +3.04 across the year, so it changes sign. This said "0.8 degC warmer" as a fact
+      // beside a view of one Timestep, and at the last one it measures +0.42. The boxes were not
+      // written down, which is why that could not be checked; they are now.
+      "Across the year the Bay of Bengal is 3.0 kg/m³ lighter than the Arabian Sea, because the" +
+      " Ganges and Brahmaputra make it 3.7 PSU fresher. Temperature cannot explain it: the Bay" +
+      " swings from cooler to warmer by season. No temperature map shows it.",
     needsVolume: true,
     run: ({ panTo }) => {
       calm();

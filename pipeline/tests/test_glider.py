@@ -161,3 +161,64 @@ def test_the_seam_carries_it():
     from samudra.sources.base import ProfileSource
 
     assert isinstance(GliderSource(index_lines=index(ARABIAN)), ProfileSource)
+
+
+# ------------------------------------------------------------------ reading one cast
+
+# `_read` had no test at all, which is how a pressure axis got into a depth axis in a module the
+# science rules govern. It is unreachable today - no cast falls in the window - so this is the
+# only thing that can catch it before the day a glider is deployed and it starts to matter.
+
+
+def one_cast_file(pressures, latitude=15.0) -> bytes:
+    """A minimal EGO-shaped profile file, in memory."""
+    import numpy as np
+    import xarray as xr
+
+    ds = xr.Dataset(
+        {
+            "PRES": ("N_LEVELS", np.asarray(pressures, dtype=float)),
+            "TEMP": ("N_LEVELS", np.linspace(28.0, 6.0, len(pressures))),
+            "PSAL": ("N_LEVELS", np.full(len(pressures), 35.0)),
+        }
+    )
+    return ds.to_netcdf(None)
+
+
+def entry_at(latitude: float):
+    from samudra.sources.glider import IndexEntry
+
+    return IndexEntry(
+        path="sea057/sea057_20220707/profiles/x.nc",
+        wmo="6801573",
+        time=datetime(2022, 10, 14, tzinfo=timezone.utc),
+        latitude=latitude,
+        longitude=88.0,
+        pressure_max=1000.0,
+        levels=3,
+        parameters=("PRES", "TEMP", "PSAL"),
+    )
+
+
+def test_a_cast_is_placed_at_its_depth_not_at_its_pressure():
+    """1000 dbar at 15 N is about 993 m. Assigning decibars straight to metres puts it 7 m deep."""
+    from samudra.sources.argo import pressure_to_depth
+
+    profile = GliderSource._parse(entry_at(15.0), one_cast_file([10.0, 500.0, 1000.0]))
+    expected = pressure_to_depth([10.0, 500.0, 1000.0], 15.0)
+    assert profile.depths == pytest.approx(expected)
+    assert profile.depths[-1] < 999.0
+
+
+def test_the_conversion_uses_the_cast_s_own_latitude():
+    """Gravity varies with latitude, which is the whole reason the conversion takes one."""
+    near_equator = GliderSource._parse(entry_at(0.0), one_cast_file([1000.0]))
+    further_north = GliderSource._parse(entry_at(25.0), one_cast_file([1000.0]))
+    assert near_equator.depths[0] != pytest.approx(further_north.depths[0], abs=1e-6)
+
+
+def test_a_cast_keeps_its_channels():
+    profile = GliderSource._parse(entry_at(15.0), one_cast_file([10.0, 500.0, 1000.0]))
+    assert profile.kind == "glider"
+    assert set(profile.values) == {"temperature", "salinity"}
+    assert len(profile.values["temperature"]) == len(profile.depths)

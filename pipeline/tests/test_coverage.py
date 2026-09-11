@@ -1,3 +1,13 @@
+"""Observation Coverage: how many Argo casts dived through each slab of water nearby.
+
+A count is only honest if a cast is counted once, where it actually was, as deep as it actually
+went. So these hold that one cast never counts twice in a slab, that how finely it reported does
+not change what it constrains, that a cast which turned around early does not claim the abyss,
+that the neighbourhood is a true circle of the stated radius rather than a square in degrees, and
+that land is missing rather than zero - because a field of zeros over land reads as "nobody
+measured here", which is a different and false sentence.
+"""
+
 from datetime import datetime, timezone
 
 import numpy as np

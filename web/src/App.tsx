@@ -155,11 +155,11 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
  * The position travels with the number and is not optional. A residual was measured at one
  * cast on one date; the scene used to draw it wherever the float had drifted to by the Timestep
  * on screen, which is a number painted on the wrong water and is exactly what `positions_from`
- * exists to prevent on the pipeline side. Small today only by luck - 94% of the comparisons sit
+ * exists to prevent on the pipeline side. Small today only by luck - 80% of the comparisons sit
  * on the last two steps - and one re-bake from mattering.
  *
- * A Map rather than a lookup through the array on every marker: 233 instruments times 60 frames
- * a second is 14,000 linear scans a second for a number that changes only when the Field does.
+ * A Map rather than a lookup through the array on every marker: 276 instruments times 60 frames
+ * a second is 16,560 linear scans a second for a number that changes only when the Field does.
  */
 function biasMap(residuals: FieldResiduals | null): Map<string, BiasMark> | null {
   if (!residuals) return null;
@@ -174,7 +174,7 @@ function biasMap(residuals: FieldResiduals | null): Map<string, BiasMark> | null
  * The Timesteps a drift integration from `index` over `days` actually needs.
  *
  * The analyses are ten days apart, so a ten-day trajectory spans two of them and a thirty-day
- * one spans four. Fetching all twelve would be 4.6 MB for a question that touches two files.
+ * one spans four. Fetching all 36 would be 13.9 MB for a question that touches two files.
  */
 function stepsForDrift(index: number, days: number, count: number): number[] {
   const span = Math.ceil(days / 10) + 1;
@@ -183,6 +183,20 @@ function stepsForDrift(index: number, days: number, count: number): number[] {
   // A trajectory started at the last analysis has nothing after it to interpolate towards, and
   // `velocityAt` holds the end rather than extrapolating - so one file is a legitimate answer.
   return out.length ? out : [Math.min(index, count - 1)];
+}
+
+/** What is on the water at this Timestep, for a reader who cannot see it.
+ *
+ * Split by kind rather than pooled, because pooling is what made this sentence wrong: an
+ * anchored buoy is not an Argo float, and the two counts move independently across the run.
+ * The moorings clause is dropped when none is drawn rather than printed as "and 0 moored
+ * buoys", which is a sentence about an absence nobody asked about.
+ */
+function announceReporting({ floats, moorings }: { floats: number; moorings: number }): string {
+  const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+  const parts = [plural(floats, "Argo float")];
+  if (moorings > 0) parts.push(plural(moorings, "moored buoy"));
+  return `${parts.join(" and ")} reporting on this date.`;
 }
 
 export default function App() {
@@ -231,8 +245,8 @@ export default function App() {
         // below, because it needs the scene to exist first.
         deepLink.current = applyDeepLink(manifest);
 
-        // The bias map's numbers, also in the background but far ahead of the charts: 151 KB
-        // against 10.5 MB. A bake made before this file existed simply has no bias map, and the
+        // The bias map's numbers, also in the background but far ahead of the charts: 171 KB
+        // against 12.6 MB. A bake made before this file existed simply has no bias map, and the
         // panel says so rather than the app refusing to start.
         loadResiduals()
           .then((residuals) => {
@@ -528,6 +542,7 @@ export default function App() {
       fieldKey: store.fieldKey,
       field: store.field() ?? null,
       paletteColours: store.manifest?.palettes[store.activePalette()] ?? [],
+      paletteName: store.activePalette(),
       scale: store.scale,
       surface: store.surfaces[`${store.fieldKey}|${store.timestepIndex}`] ?? null,
       vectors: store.vectors[store.timestepIndex] ?? null,
@@ -733,17 +748,29 @@ export default function App() {
           role="application"
           aria-label={
             "Three-dimensional ocean view. Use the left and right arrow keys to move between" +
-            " the Argo floats reporting on this date, and Escape to close a comparison."
+            " the instruments reporting on this date, and Escape to close a comparison."
           }
           onClick={onCanvasClick}
           onMouseMove={onCanvasMove}
           onKeyDown={onCanvasKey}
         />
-        {/* What the canvas cannot say for itself. */}
+        {/* What the canvas cannot say for itself.
+
+            Both sentences said "Argo float" over a set that is Floats *and* moorings - the
+            arrow keys walk `reportingFloats()`, which is every instrument. Measured across the
+            36 Timesteps, 192 to 221 Floats and 5 to 14 buoys are drawn, so the count was over
+            by up to 14 and the noun was wrong for as many of the things it counted. Nothing
+            could catch it: it is the one part of the console only a screen reader hears.
+            `reportingByKind()` is what any sentence counting instruments has to use, and
+            `ProfilePanel` names the selected one the same way. */}
         <p className="sr-only" role="status" aria-live="polite">
           {store.selectedFloatId
-            ? `Argo float ${store.selectedFloatId} selected.`
-            : `${store.reportingCount()} Argo floats reporting on this date.`}
+            ? `${
+                store.floats.find((f) => f.id === store.selectedFloatId)?.kind === "mooring"
+                  ? "Moored buoy"
+                  : "Argo float"
+              } ${store.selectedFloatId} selected.`
+            : announceReporting(store.reportingByKind())}
         </p>
         {!store.manifest && <LoadingScreen />}
         {store.notice && (

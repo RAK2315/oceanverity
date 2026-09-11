@@ -65,7 +65,9 @@ export function isDiverging(field: FieldSpec | null | undefined): boolean {
  * Observation Coverage is drawn in four flat bands whose edges sit at whole cast counts, and the
  * key beside it names them: "No casts", "1 cast", "2 to 3 casts", "4 or more casts". The curve
  * moves the position along the palette, so it moves every band edge, and a band key cannot bend
- * with it. Measured on the current bake, range 0..14, edges at 0.5 / 1.5 / 3.5 casts:
+ * with it. Measured on the twelve-step bake, range 0..14, edges at 0.5 / 1.5 / 3.5 casts (the
+ * range is 0..19 on the 36-step bake and every count still reads back into its own band, which
+ * `test_palettes.py` checks against the shipped manifest):
  *
  *   casts   linear reads as   log reads as
  *   0       No casts          No casts
@@ -107,12 +109,12 @@ const ANCHOR_TOLERANCE = 0.05;
  * let the control onto seven Fields where it says nothing. The curve is applied to the *window
  * fraction*, not to the value, so on Temperature - 2.60 to 30.00 degC - a "log scale" gives half
  * the palette to the coldest water in the block and means nothing at all, because t = 0 is
- * 2.60 degC rather than zero. A logarithm needs a real zero to run away from. Measured against
- * the current bake, with the tolerance at 5% of the span:
+ * 2.61 degC rather than zero. A logarithm needs a real zero to run away from. Measured against
+ * the 36-step bake, with the tolerance at 5% of the span:
  *
- *   offered   Cyclone Heat Potential 0.00-136.45 · Current Speed 0.01-0.91 · INCOIS Error 0.00-3.60
- *   hidden    Temperature 2.60 · Salinity 32.94 · Density 20.48 · D26 7.92 · MLD 10.23 ·
- *             ILD 10.62 · INCOIS Cast Count 1.00 - none of them starts near its own zero
+ *   offered   Cyclone Heat Potential 0.00-144.90 · Current Speed 0.006-0.93 · INCOIS Error 0.00-3.64
+ *   hidden    Temperature 2.61 · Salinity 32.83 · Density 20.53 · D26 7.09 · MLD 10.24 ·
+ *             ILD 10.72 · INCOIS Cast Count 1.00 - none of them starts near its own zero
  *
  * Three Fields, and all three are genuinely piled up against zero, which is what a log scale is
  * for. The guide entry for the scale says so in the reader's words.

@@ -2,7 +2,7 @@
 
 PS 26067 names **climate monitoring** among the four operational mandates it says a missing 3D
 platform impedes. The platform's existing Temperature Anomaly is a departure from the mean of
-the twelve baked Timesteps - a seasonal swing, and it says so - so "warmer than usual" did not
+the baked Timesteps - a seasonal swing, and it says so - so "warmer than usual" did not
 yet mean what a forecaster means by it. This is the reference that fixes that.
 
 **Why this fits and dissolved oxygen did not.** ADR 0010 refused oxygen because the only field
@@ -133,8 +133,12 @@ class WoaClimatologySource:
         )
 
     def months_for(self, timesteps) -> set[int]:
-        """The calendar months a set of Timesteps needs, so a bake fetches four files and not
-        twelve. April to July is four; the whole year would be three times the download."""
+        """The calendar months a set of Timesteps needs, and no more.
+
+        Three ten-day steps inside one month share one normal, so a bake fetches one file per
+        month it touches rather than one per step. A four-month bake fetches four; the 36-step
+        bake spans a year and fetches all twelve, which is still a third of one file per step.
+        """
         return {when.month for when in timesteps}
 
 

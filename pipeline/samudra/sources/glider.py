@@ -27,8 +27,9 @@ Against `DEMO_REGION`:
 | `sea057/sea057_20220707` | 2022-07-05 | **2022-10-14** | 1,424 | 819 dbar |
 | `sea057/sea057_20220128` | 2021-11-20 | 2022-03-26 | 1,452 | 818 dbar |
 
-**The newest glider cast in India's waters is 2022-10-14**, three years and ten months before
-this bake's window opens. So `fetch_profiles` over the demo window returns nothing, and it
+**The newest glider cast in India's waters is 2022-10-14**, two years and ten months before the
+36-step bake's window opens on 2025-08-10. The exact gap moves with the window, and the
+manifest's `gliders` block carries the newest cast so nothing has to be worked out by hand. So `fetch_profiles` over the demo window returns nothing, and it
 returns a *finding* alongside the nothing - the count it scanned, the newest cast it found, and
 the deployments it found them in. An adapter that answers an impossible question with a silent
 empty list is how a dead data source gets mistaken for a working one, and this project has a
@@ -59,6 +60,7 @@ from urllib.request import urlopen
 
 import numpy as np
 
+from .argo import pressure_to_depth
 from .base import BoundingBox, Profile
 
 FTP_ROOT = "ftp://ftp.ifremer.fr/ifremer/glider/v2"
@@ -245,20 +247,28 @@ class GliderSource:
 
     @staticmethod
     def _read(entry: IndexEntry) -> Profile:
-        """One EGO profile file as a Profile.
+        """Fetch one EGO profile file and parse it. The fetch is the only part that needs a network."""
+        with urlopen(entry.url, timeout=_TIMEOUT) as response:  # noqa: S310 - ftp:// by design
+            payload = response.read()
+        return GliderSource._parse(entry, payload)
 
-        EGO files carry PRES in decibars, which is what Argo does, so the same
-        one-decibar-is-one-metre convention this project already uses applies unchanged: the
-        error is under 1% over the top 1000 m and is smaller than the horizontal mismatch of
-        comparing a drifting instrument against a 1 degree analysis.
+    @staticmethod
+    def _parse(entry: IndexEntry, payload: bytes) -> Profile:
+        """One EGO profile file, already in memory, as a Profile.
+
+        EGO files carry PRES in decibars, as Argo does, and it is converted to metres with the
+        same gravity-corrected Saunders and Fofonoff formula `argo.py` uses, at the cast's own
+        latitude. This docstring used to justify assigning decibars straight to the depth axis
+        with "the one-decibar-is-one-metre convention this project already uses", and the
+        project uses no such convention: `argo.py` rejects it in as many words, and
+        `netcdf.py` converts an uploaded file's decibars for the same reason. At the deepest
+        cast in the index, 819 dbar, the difference is about 8 m - the size of the error that
+        makes a Collocation line up the wrong water.
         """
         import xarray as xr
 
-        with urlopen(entry.url, timeout=_TIMEOUT) as response:  # noqa: S310 - ftp:// by design
-            payload = response.read()
-
         with xr.open_dataset(io.BytesIO(payload)) as ds:
-            depths = np.asarray(ds["PRES"].values, dtype=float).ravel()
+            pressure = np.asarray(ds["PRES"].values, dtype=float).ravel()
             values = {}
             for channel, key in (("TEMP", "temperature"), ("PSAL", "salinity"), ("CHLA", "chlorophyll")):
                 if channel in ds:
@@ -269,7 +279,7 @@ class GliderSource:
             latitude=entry.latitude,
             longitude=entry.longitude,
             time=entry.time,
-            depths=depths,
+            depths=pressure_to_depth(pressure, entry.latitude),
             values=values,
             kind="glider",
         )

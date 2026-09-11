@@ -80,7 +80,7 @@ drawing a picture of the wrong thing.
 | **A vector** | currents | **arrows on the chosen depth** |
 
 Build the sheet once and three Fields have it. It is also the best thing in the plan visually:
-you watch the 26 degC isotherm dome up and collapse across four months, from inside the water,
+you watch the 26 degC isotherm dome up and collapse across the year, from inside the water,
 with the Floats sitting on it. No flat map can do that.
 
 `FieldSpec.render` carries which one, so the frontend has no per-field special cases - the same

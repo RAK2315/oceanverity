@@ -11,7 +11,7 @@ import { useStore } from "../store";
  * policymakers, e-learning. A first-time visitor does not know what to touch.
  *
  * It used to be five steps. Five is a demo, not a tour: it showed the thesis and left 38 of the
- * 43 explained controls undiscovered, including the ones a teammate presenting this has to be
+ * 44 explained controls undiscovered, including the ones a teammate presenting this has to be
  * able to find. So it is now **chapters** - six of them - and every step does three things at
  * once:
  *
@@ -395,7 +395,8 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       covers: ["bias"],
       enter: () => {
         calm();
-        store.setState({ biasMode: true, touched: "bias" });
+        store.getState().setBiasMode(true);
+        store.setState({ touched: "bias" });
         open("bias");
       },
     },

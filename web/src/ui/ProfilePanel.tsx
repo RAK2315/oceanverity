@@ -79,8 +79,8 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
   const reporting = here !== null;
   const shown = here ?? chosen.latest;
 
-  // Seven of the current 237 instruments have their newest fix just past an edge of the loaded
-  // Grid. "No usable data" would be misleading about those: the observations are fine, the
+  // Seven of the twelve-step bake's 237 instruments had their newest fix just past an edge of the
+  // loaded Grid. "No usable data" would be misleading about those: the observations are fine, the
   // model simply does not extend that far, and saying so is a different and truer sentence.
   const outsideGrid =
     volume !== undefined &&
@@ -104,9 +104,9 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
   return (
     <aside className="panel panel-right">
       <div className="profile-head">
-        {/* A moored buoy is not an Argo float and must not be labelled as one. Four of the nine
-            in this bake are India's own OMNI network and two are RAMA; saying so is the point of
-            having wired them up. */}
+        {/* A moored buoy is not an Argo float and must not be labelled as one. Of the 17 in this
+            bake, 5 are India's own OMNI network and 10 report as United States, which is where
+            RAMA's reports come from; saying so is the point of having wired them up. */}
         <p className="profile-id">
           {anchored ? "Moored buoy" : "Argo"} {chosen.id}
         </p>
@@ -174,7 +174,7 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
         <p className="empty">Loading this float&apos;s comparison&hellip;</p>
       ) : series && volume && series.matched === 0 ? (
         /*
-         * A Collocation exists and is empty. One of the 234 in the current bake is like
+         * A Collocation exists and is empty. One of the 234 in the twelve-step bake was like
          * this, so a click could land on a chart with a single line, a legend
          * promising two more that were never drawn, "0 depths compared", two dashes and no
          * verdict - with nothing on screen saying why. The `outsideGrid` branch below never

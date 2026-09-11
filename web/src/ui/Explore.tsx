@@ -104,7 +104,7 @@ const IDLE_SECONDS = 30;
  * The exhibition screen.
  *
  * Three behaviours and nothing else: play the questions in order, forever; stop playing the
- * moment somebody touches anything; and go back to the first question a minute after they stop.
+ * moment somebody touches anything; and go back to the first question `IDLE_SECONDS` after they stop.
  * A visitor can drive it, and the screen repairs itself when they walk away.
  *
  * The caption is the question and its caveat, at exhibition size. Escape leaves - a mode with no
@@ -153,7 +153,7 @@ function Kiosk({ helpers }: { helpers: ExploreHelpers }) {
         show(index + 1);
         return;
       }
-      // Somebody is, or was, driving. Leave them alone until they have been gone a full minute,
+      // Somebody is, or was, driving. Leave them alone until they have been gone `IDLE_SECONDS`,
       // then start again from the beginning rather than from wherever they left it.
       if (performance.now() - idleSince > IDLE_SECONDS * 1000) {
         touchedAt.current = null;

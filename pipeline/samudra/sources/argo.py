@@ -172,11 +172,13 @@ INCOIS_COLUMNS = ProfileColumns(
 # biogeochemical channels the core dataset does not. Same host, same tabledap protocol, same
 # lower-case adjusted-first convention - so it costs a column layout and four attributes.
 #
-# Only chlorophyll is read. Measured over the demo region across the bake's window, this dataset
+# Only chlorophyll is read. Measured over the demo region across the twelve-step bake's window,
+# this dataset
 # returns 635 casts from 59 floats; applying the QC rules already in this module, 532 casts from
 # 49 floats carry usable chlorophyll, 21 casts from 2 floats carry nitrate, and *no* cast
 # carries usable oxygen. Declaring channels nothing serves would be declaring a capability the
-# data does not have.
+# data does not have. The 36-step bake keeps 57 floats with chlorophyll after the pairing window
+# in `bake.py`; the per-channel split above has not been re-fetched for the longer window.
 BGC_COLUMNS = ProfileColumns(
     platform="platform_number",
     time="time",

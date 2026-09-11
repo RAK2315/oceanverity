@@ -806,12 +806,11 @@
 
         <button class="feature" type="button"
           data-title="Every instrument at once"
-          data-image="./images/collocation.jpg"
-          data-image-light="./images/light/collocation.jpg"
-          data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS assimilate Argo, so a float largely shows the model agreeing with itself; the nine moored buoys are the independent check, and the panel prints both rather than pooling them."
+          data-image="./images/bias.jpg"
+          data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS assimilate Argo, so a float largely shows the model agreeing with itself; the seventeen moored buoys are the independent check, and the panel prints both rather than pooling them."
           data-measure="Typical temperature gap 0.18 degC across 249 floats against 1.01 degC across 17 buoys"
           data-link="./app.html?dive=1&amp;bias=1">
-          <img src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
+          <img src="./images/bias.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
           <div class="feature-body">
             <span class="kind">The contribution</span>
             <h3>The bias map</h3>
@@ -839,7 +838,7 @@
           data-title="Has this ocean changed?"
           data-image="./images/normal.jpg"
           data-image-light="./images/light/normal.jpg"
-          data-body="Two variables answer this and the difference between them is the point. One is a departure from this build's own four months, which is a seasonal swing and says so. The other is a departure from NOAA's World Ocean Atlas 1991-2020 mean for the same calendar month, which is what a forecaster means by 'warmer than usual'."
+          data-body="Two variables answer this and the difference between them is the point. One is a departure from this build's own year of analyses, which is a seasonal swing and says so. The other is a departure from NOAA's World Ocean Atlas 1991-2020 mean for the same calendar month, which is what a forecaster means by 'warmer than usual'."
           data-measure="Across 1,049,076 cells: mean +0.07 degC, 95th percentile of the magnitude 2.05 degC"
           data-link="./app.html?dive=1&amp;field=temperature_normal_anomaly">
           <img src="./images/normal.jpg" data-light="./images/light/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones in the same block.">
@@ -870,7 +869,7 @@
         <button class="feature" type="button"
           data-title="An exhibition screen that repairs itself"
           data-image="./images/kiosk.jpg"
-          data-body="A screen at a stall has nobody standing at it. Kiosk mode hides every panel, scales the type up for reading across a room, plays the questions on a loop, and resets to the start sixty seconds after the last visitor walks away, so the next one does not arrive at a broken view. The depth ruler grows a second line there: 1000 m becomes 'a sperm whale hunting'."
+          data-body="A screen at a stall has nobody standing at it. Kiosk mode hides every panel, scales the type up for reading across a room, plays the questions on a loop, and resets to the start thirty seconds after the last visitor walks away, so the next one does not arrive at a broken view. The depth ruler grows a second line there: 1000 m becomes 'a sperm whale hunting'."
           data-measure="Tested by standing in front of it for 22 seconds and checking it moved on"
           data-link="./app.html?kiosk=1">
           <img src="./images/kiosk.jpg" alt="The exhibition screen: no panels, one large caption over the water.">
@@ -1000,7 +999,7 @@
         <h3>Kiosk mode</h3>
         <p>
           Panels hidden, type at reading-across-a-room size, the questions on a loop, and a reset
-          sixty seconds after the last visitor leaves. Press Escape and the full console comes
+          thirty seconds after the last visitor leaves. Press Escape and the full console comes
           straight back.
         </p>
       </div>
@@ -1128,7 +1127,7 @@
       <div><h3>Data and science</h3><ul><li>Python 3.10</li><li>xarray + netCDF4</li><li>NumPy / SciPy</li><li>cmocean</li></ul></div>
       <div><h3>Backend</h3><ul><li>FastAPI</li><li>Uvicorn</li><li>ERDDAP / OPeNDAP</li><li>CF-1.6 conventions</li></ul></div>
       <div><h3>Frontend</h3><ul><li>TypeScript</li><li>React 19 + Vite</li><li>Three.js / WebGL2</li><li>GLSL ES 3.00</li></ul></div>
-      <div><h3>Quality</h3><ul><li>379 automated tests</li><li>17 decision records</li><li>0 network calls at demo time</li></ul></div>
+      <div><h3>Quality</h3><ul><li>409 automated tests</li><li>17 decision records</li><li>0 network calls at demo time</li></ul></div>
     </div>
 
     <ul class="plain stack-claims reveal">

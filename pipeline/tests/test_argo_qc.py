@@ -18,7 +18,6 @@ import pytest
 
 from samudra.sources.argo import (
     GDAC_COLUMNS,
-    INCOIS_COLUMNS,
     ArgoErddapSource,
     IncoisArgoSource,
     parse_profiles,

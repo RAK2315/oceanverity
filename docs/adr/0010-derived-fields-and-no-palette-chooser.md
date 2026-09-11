@@ -15,7 +15,7 @@ Split the nine by whether the quantity behind them is real, derivable, or neithe
 | `thermal`, `haline` | Temperature, Salinity | Already Fields. Now bound to them. |
 | `coverage` | Observation Coverage | Already a Field. Removed from the chooser, where it was a duplicate of its own button. |
 | `dense` | Density | **Became a Field.** TEOS-10 sigma-theta from temperature, salinity and pressure. Exact, no download. |
-| `balance` | Anomalies about zero | **Became a Field.** Departure from the twelve-step mean. |
+| `balance` | Anomalies about zero | **Became a Field.** Departure from the mean of the baked steps. |
 | `delta` | Differences | Deleted. A second diverging scale with nothing to sit on. |
 | `algae` | Chlorophyll | Deleted. Biological and optical; needs BGC-Argo or satellite ocean colour, and either would be a 2-D surface layer rather than a Volume. |
 | `oxy` | Dissolved oxygen | Deleted. The only complete gridded field for this region is a decadal climatology with no date, which cannot share a ten-day 2026 timeline. Deriving it from T/S regressions would be inventing data. |

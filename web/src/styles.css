@@ -1836,6 +1836,49 @@ input[type="range"]::-moz-range-thumb {
 .guide-kind.navigation,
 .guide-kind.view { color: var(--on-surface-faint); }
 
+/* The description's fold. The header is the control, the way the map key's is, and it uses the
+   same disclosure triangle so the two folds read as one idea. The kind badge inside keeps its
+   own colour and dot; the button only adds the triangle and a hover. */
+.guide-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -3px -4px;
+  padding: 3px 4px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  font: inherit;
+  color: var(--on-surface-faint);
+  cursor: pointer;
+  transition: color 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.guide-view-toggle:hover,
+.guide-view-toggle:focus-visible {
+  color: var(--on-surface);
+  background: var(--surface-mid);
+}
+
+.guide-fold {
+  width: 0;
+  height: 0;
+  flex: none;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transform: rotate(90deg);
+  transition: transform 0.18s var(--ease);
+}
+
+/* Shut, the panel is its header row and nothing else, with the full radius so it does not read
+   as a box with its body missing. */
+.guide.view-shut .guide-fold { transform: rotate(0deg); }
+.guide.view-shut .guide-head {
+  border-bottom: none;
+  border-radius: var(--radius);
+}
+
 .guide-title {
   margin: 14px 14px 0;
   font-size: 17px;

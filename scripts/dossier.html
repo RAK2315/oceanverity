@@ -180,8 +180,8 @@
 
   <div class="stats">
     <div class="stat"><b>24</b><span>DEPTH LEVELS, 5-2000 m</span></div>
-    <div class="stat"><b>237</b><span>INSTRUMENTS OVERLAID</span></div>
-    <div class="stat"><b>3,718</b><span>MEASURED PROFILES</span></div>
+    <div class="stat"><b>276</b><span>INSTRUMENTS OVERLAID</span></div>
+    <div class="stat"><b>8,460</b><span>MEASURED PROFILES</span></div>
     <div class="stat"><b>0</b><span>NETWORK CALLS AT DEMO TIME</span></div>
   </div>
 
@@ -276,7 +276,7 @@
     Pressing "Dive into the water" causes the globe to unroll into a flat map while the camera
     descends, and the ocean opens into a rectangular block of water. Colour inside that block
     shows temperature at every depth simultaneously, from 5 metres down to 2000 metres. The block
-    can be rotated, sliced to any depth range, and animated through four months of analyses.
+    can be rotated, sliced to any depth range, and animated through a year of analyses.
   </p>
 
   <h3>The comparison</h3>
@@ -321,7 +321,7 @@
     <thead><tr><th>Feature</th><th>What it does and why it matters</th></tr></thead>
     <tbody>
       <tr><td>Variable selector</td><td><em>Science.</em> Fifteen variables in five groups, arranged the way a forecaster thinks rather than the way the data arrived. <strong>Ocean state</strong> is what INCOIS publish plus the density derived from it. <strong>Hazard</strong> is the five quantities a cyclone forecaster names - depth of the 26&nbsp;&deg;C isotherm, cyclone heat potential, mixed layer depth, isothermal layer depth and barrier layer thickness - all computed here, because INCOIS published them until 2019 and then stopped. <strong>Circulation</strong> is the current vectors. <strong>Evidence</strong> is how much measurement stands behind the model, including INCOIS's own observation count and their own error estimate beside ours. <strong>Change</strong> holds two: departure from this build's own period average, and departure from the World Ocean Atlas 2023 1991-2020 normal for the same calendar month.</td></tr>
-      <tr><td>Time animation</td><td><em>Navigation.</em> Twelve analyses at ten-day intervals covering April to July 2026. Each frame is a separate analysis published by INCOIS, not an interpolation. The colour scale is held fixed across all frames deliberately, so an apparent change is a real change and not the scale rescaling itself.</td></tr>
+      <tr><td>Time animation</td><td><em>Navigation.</em> Thirty-six analyses at ten-day intervals covering August 2025 to July 2026. Each frame is a separate analysis published by INCOIS, not an interpolation. The colour scale is held fixed across all frames deliberately, so an apparent change is a real change and not the scale rescaling itself.</td></tr>
       <tr><td>Sea surface level</td><td><em>Navigation.</em> On the globe, chooses which depth is painted on the map, so a pattern can be followed downward without entering the 3D view.</td></tr>
     </tbody>
   </table>
@@ -358,10 +358,10 @@
       <tr><td>Drift tracks</td><td><em>Science.</em> The path each float took between surfacings, drawn progressively as time advances. Floats drift with the current at their parking depth, so the track is itself a measurement of deep flow.</td></tr>
       <tr><td>Collocation</td><td><em>The contribution.</em> Pairs an observed profile with the model interpolated to that profile's exact position and time. Comparison happens at the observation's depths, not the model's, so fine vertical structure is not smoothed away.</td></tr>
       <tr><td>Residual statistics</td><td><em>Science.</em> Depths compared, average gap (signed, so direction is meaningful) and typical gap. A plain-language verdict interprets them.</td></tr>
-      <tr><td>Guide panel</td><td><em>Comprehension.</em> Explains whatever control was last touched, and otherwise describes the current view in plain language. 43 entries, one per control, and an automated browser check fails the build if a control is ever added without one.</td></tr>
-      <tr><td>Bias map</td><td><em>The contribution, at basin scale.</em> Every instrument recoloured by how far the analysis sat from it, with a ranked list of the worst. Split by instrument kind, because INCOIS assimilate Argo: measured, the typical temperature gap is 0.17 &deg;C across 221 floats against 0.75 &deg;C across the nine moored buoys nothing assimilated, and pooling the two hides the honest number.</td></tr>
+      <tr><td>Guide panel</td><td><em>Comprehension.</em> Explains whatever control was last touched, and otherwise describes the current view in plain language. 44 entries, one per control, and an automated browser check fails the build if a control is ever added without one.</td></tr>
+      <tr><td>Bias map</td><td><em>The contribution, at basin scale.</em> Every instrument recoloured by how far the analysis sat from it, with a ranked list of the worst. Split by instrument kind, because INCOIS assimilate Argo: measured, the typical temperature gap is 0.18 &deg;C across 249 floats against 1.01 &deg;C across the seventeen moored buoys nothing assimilated, and pooling the two hides the honest number.</td></tr>
       <tr><td>Vertical section</td><td><em>Science.</em> Draw a line and the model is cut open along it, depth down and distance across, with every cast within 150 km on the same axes. Cut from the model's own grid rather than the rendered block, and checked value by value against the API: 1,102 values, worst gap 5&times;10<sup>-5</sup> &deg;C.</td></tr>
-      <tr><td>Drift</td><td><em>Search and rescue.</em> Drop a pin and the analysed current carries it forward. The same integrator was run from 195 real floats' own positions, so it ships with a measured error rather than an assumed one: median 38.5 km over one Argo cycle, 87 km at the ninetieth percentile, across 1,908 cycles.</td></tr>
+      <tr><td>Drift</td><td><em>Search and rescue.</em> Drop a pin and the analysed current carries it forward. The same integrator was run from 219 real floats' own positions, so it ships with a measured error rather than an assumed one: median 40.9 km over one Argo cycle, 93 km at the ninetieth percentile, across 6,246 cycles.</td></tr>
     </tbody>
   </table>
 
@@ -370,7 +370,7 @@
     <thead><tr><th>Feature</th><th>What it does and why it matters</th></tr></thead>
     <tbody>
       <tr><td>Moving flow</td><td><em>Comprehension.</em> A few thousand dots carried by the current at the chosen depth, each with a fading trail. An arrow gives the direction in one cell; the dots show where the water is going across the whole basin, and a viewer who has never read a vector plot reads them anyway. They run the same integrator as the drift model, so the animation carries a published error: a dot and a drift pin from the same start point land 0.002 km apart after 724 km. The trails are inked rather than coloured by speed, because a trail tinted by speed sits on water coloured by the same speed and disappears over slow water; the legend says the water carries the number.</td></tr>
-      <tr><td>Show me around</td><td><em>Comprehension.</em> A guided walk in six chapters and 21 steps that visits every one of the 43 explained controls, opening each control's own explanation as it goes. A browser check fails if any control is ever left out, so the claim is measured rather than promised.</td></tr>
+      <tr><td>Show me around</td><td><em>Comprehension.</em> A guided walk in six chapters and 21 steps that visits every one of the 44 explained controls, opening each control's own explanation as it goes. A browser check fails if any control is ever left out, so the claim is measured rather than promised.</td></tr>
       <tr><td>Explore</td><td><em>Outreach.</em> The same platform as eight questions in plain words, each of which sets up the whole scene. Every question carries the caveat its simplification costs, beside the answer: the cyclone one states that it is a map of conditions and not a forecast.</td></tr>
       <tr><td>Kiosk mode</td><td><em>Exhibitions.</em> A URL flag hides every panel, scales the type for reading across a room, plays the questions on a loop and resets sixty seconds after the last visitor leaves, so a screen at a stall repairs itself. The depth ruler gains landmarks there: 1000 m becomes &ldquo;a sperm whale hunting&rdquo;.</td></tr>
       <tr><td>Copy this view</td><td><em>E-learning.</em> One button writes the variable, the date, the depth, the pin and the section line into a link. A teacher's worksheet is six links, which is e-learning without an e-learning platform.</td></tr>
@@ -508,7 +508,7 @@
         <li>NumPy, SciPy - resampling and gradients</li>
         <li>cmocean - oceanographic colour scales</li>
         <li>FastAPI, Uvicorn - the REST API</li>
-        <li>pytest - 377 tests on the science</li>
+        <li>pytest - 409 tests on the science</li>
       </ul>
     </div>
     <div>
@@ -842,7 +842,7 @@
   <ul>
     <li>Live prototype: <span class="mono">rak2315.github.io/samudra-sih26</span></li>
     <li>Source code: <span class="mono">github.com/RAK2315/samudra-sih26</span></li>
-    <li>Architecture decision records: <span class="mono">docs/adr/</span> - nine records</li>
+    <li>Architecture decision records: <span class="mono">docs/adr/</span> - seventeen records</li>
     <li>Domain vocabulary and scope boundaries: <span class="mono">CONTEXT.md</span></li>
   </ul>
 

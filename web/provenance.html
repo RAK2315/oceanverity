@@ -771,16 +771,26 @@ python -m samudra.bake</pre>
 
     // ---- what the pipeline produced, measured rather than described -----
     var voxels = volume.width * volume.height * volume.depth;
+    // What the bake refused to believe. Absent on a bake that predates the mask, and then the
+    // page says nothing rather than implying a check that never ran; zero is printed as zero.
+    var masked = manifest.masked && manifest.masked.cells;
+    var maskedNote = "";
+    if (masked && masked.temperature != null) {
+      var bounds = manifest.masked.bounds.temperature;
+      maskedNote = "; " + masked.temperature.toLocaleString() + " temperature cells outside " +
+        bounds[0] + " to " + bounds[1] + " °C masked, not clamped - below seawater's " +
+        "freezing point or beyond the Persian Gulf's 37.6 °C record";
+    }
     rows(el("stages"), ["Stage", "In", "Out"], [
       ["1 Fetch", "ERDDAP subset, NetCDF + CSV",
        steps.length + " steps x 2 fields, " + casts + " casts"],
       ["2 Resample and check", "24 uneven levels, 5-2000 m",
-       volume.depth + " even slabs, implausible values dropped per channel"],
+       volume.depth + " even slabs, implausible values dropped per channel" + maskedNote],
       ["3 Encode", volume.width + " x " + volume.height + " x " + volume.depth + " floats",
        voxels.toLocaleString() + " voxels x 4 bytes = " +
        (voxels * 4 / 1048576).toFixed(1) + " MB per field per step"],
       ["4 Render", "RGBA 3D texture", "Ray-marched in the browser, ~128 steps per pixel"],
-      // Not "floats": 9 of these are moored buoys, and "full" is only true of the ones that
+      // Not "floats": 17 of these are moored buoys, and "full" is only true of the ones that
       // matched on all three collocated variables. An instrument is not always an Argo float.
       ["5 Compare", casts + " casts vs the Grid",
        comparedFloats + " floats and " + comparedMoorings + " buoys; " +
@@ -793,7 +803,7 @@ python -m samudra.bake</pre>
     // Read from `tests.json`, which `pipeline/scripts/collect_tests.py` writes from pytest's own
     // collector and each module's own docstring. It was a hand-written table of 11 modules
     // claiming 123 tests between them, above a code block promising "67 passed", on a page whose
-    // entire claim is that its figures are live. The suite had 377 tests in 25 modules.
+    // entire claim is that its figures are live. tests.json is the count; this comment carries none.
     fetch(DATA + "tests.json")
       .then(function (r) { return r.json(); })
       .then(function (suite) {

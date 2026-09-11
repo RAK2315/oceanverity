@@ -60,7 +60,7 @@ comparison whichever way it comes out, and it says so when the answer is unflatt
 Turn on the bias map and all two hundred and thirty instruments are ranked by that same figure.
 The worst is a moored buoy, one point six six degrees out - and buoys matter here, because INCOIS
 assimilate Argo. A float largely shows the model agreeing with data it was already given. The
-nine buoys are the independent check, and we print the two separately rather than pooling them
+seventeen buoys are the independent check, and we print the two separately rather than pooling them
 into one flattering average."
 
 ---
@@ -95,8 +95,8 @@ cyclone products INCOIS themselves stopped publishing in 2019."
 
 > _Point at the green status strip. Slow down for this line._
 
-"Status: working prototype, on live INCOIS data. **Three hundred and seventy-seven automated
-tests** on the science, and thirteen browser probes that drive the built application and measure
+"Status: working prototype, on live INCOIS data. **Four hundred and nine automated
+tests** on the science, and fifteen browser probes that drive the built application and measure
 what actually reaches the screen. **Zero network calls at demo time** - the data is baked into
 the build, so a dead venue network cannot kill this."
 
@@ -355,7 +355,7 @@ build, so this works with the network unplugged."
 
 > _Switch **Variable** to **Temperature vs Normal**, in the **Change** tab._
 
-"The anomaly beside it is a departure from this build's own four months, which is a seasonal
+"The anomaly beside it is a departure from this build's own year of analyses, which is a seasonal
 swing, and the panel says so. This one is a departure from the World Ocean Atlas 1991 to 2020
 normal for the same calendar month - which is what a forecaster means by warmer than usual. Below
 1500 metres the atlas has no normal, so we draw nothing there rather than zero."
@@ -463,4 +463,4 @@ more than not having it.
 | "Has nobody built this before?" | Say it narrowly: **depth-resolved volumetric rendering in a browser, with the in-situ observations in the same water and the model scored against them.** Do not say "nobody has done this". Checked 2026-09-04: Copernicus **MyOcean Pro** is the reference and is a 2D map with a depth slider, no 3D at all; earth.nullschool is a 2D globe with surface currents; NOAA's Science on a Sphere is a physical globe; and browser volume rendering of ocean scalars exists as research (a WebGPU framework published March 2025, i4Ocean before it) but as prototypes, and none of them carries the observations. `docs/plan/05` Part 3. |
 | "Those moving lines - are they a forecast?" | No, and say so before they ask twice. Every dot is the flow at **one** analysis, frozen; the drift pin is the one that runs time forward. They share the same integrator, which is the point: the animation runs the maths whose error we published at a median 38 km over an Argo cycle. Measured, a particle and a drift pin from the same start land **2 metres apart after 724 km**. |
 | "Why are there no eddies, when the Copernicus viewer is full of them?" | Because we draw INCOIS's grid rather than upsampling it. Theirs is 1/12 degree, about 9 km; the analysis this platform reports every number from is 1 degree, about 110 km, so every swirl on their screen is smaller than one of our cells. We could bake a finer field just for the animation for about 27 MB and we refused: the picture would then be more detailed than every number on the platform, in the one place nobody would check. ADR 0017. |
-| "How long did this take?" | Built for this hackathon. 379 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |
+| "How long did this take?" | Built for this hackathon. 409 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |

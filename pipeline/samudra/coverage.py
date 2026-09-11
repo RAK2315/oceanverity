@@ -51,7 +51,8 @@ What the field therefore shows
   there, so it cannot be drawn - it has to be said.
 
 Coverage is counted in a *neighbourhood*, not per voxel. At the Volume's native resolution a
-region with 92 floats leaves almost every cell empty, and a field that is 99% zero is a picture
+region with 92 floats - the count when this rule was written; the 36-step bake has 259 -
+leaves almost every cell empty, and a field that is 99% zero is a picture
 of where floats happen to be, not an answer to "is there evidence near here". The radius is a
 judgement call and it is stated rather than hidden: `RADIUS_DEGREES` below.
 
@@ -78,14 +79,24 @@ METRES_PER_DEGREE = 111_320.0
 
 # Casts in a neighbourhood that separate the four bands a user reads.
 #
-# Calibrated against the distribution this bake actually produces rather than guessed: over
-# 695,088 ocean voxels the median is 2 casts and the maximum is 10, so thresholds of 1/3/10
-# would have left the top band permanently empty and the legend would have been advertising a
-# quality nothing in the data can reach. At 1/2/4 the bands split the block roughly 19/23/36/22,
-# which is what a band is for.
+# **The reason these hold is what each band counts, not how the block happens to split.** The
+# window is ten days and a float surfaces about once per window, so the four bands read as no
+# float, one float, a couple, and several - which is a sentence a reader can say out loud, and
+# which does not move when the window grows.
 #
-# A presentation choice, not a published standard, and it is tied to the ten-day window: a float
-# surfaces about once per window, so "4 casts nearby" means roughly four different floats.
+# This comment used to calibrate them against the distribution instead, and a re-bake falsified
+# every figure in it: "over 695,088 ocean voxels the median is 2 casts and the maximum is 10, so
+# 1/3/10 would have left the top band empty ... at 1/2/4 the bands split roughly 19/23/36/22".
+# That was twelve Timesteps. Measured on the 36-step bake of 2026-09-09, decoding all 36 shipped
+# coverage Volumes: 2,441,628 ocean voxels, median **3** casts, maximum **19**, and 1/2/4 splits
+# the block **10.2 / 13.7 / 28.4 / 47.6** - nearly half of it in the top band. 1/3/10 would no
+# longer leave its top band empty; it would hold 7.0%. So the distribution argument does not
+# pick these thresholds any more, and it is not what they rest on.
+#
+# Changing them is a bake, not an edit: `palettes.banded_table` puts the colour edges at these
+# counts in *that bake's* encoded range, and `refresh_palettes.py` deliberately carries the
+# shipped coverage table across rather than regenerating it. A presentation choice, not a
+# published standard.
 BANDS = (1, 2, 4)
 
 # Plain counts, not a verdict. The labels used to read "Sparse" and "Good", which turned the

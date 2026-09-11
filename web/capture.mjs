@@ -152,6 +152,13 @@ const PUBLISH_MAP = [
   ["flow", "web/public/images/flow.jpg"],
   ["drift", "web/public/images/drift.jpg"],
   ["section", "web/public/images/section.jpg"],
+  // The same hole `hazard` had, one card along, and it failed the other way round: the bias
+  // card pointed at `collocation.jpg` instead of at nothing, so the picture loaded, the probe's
+  // three checks all passed, and the alt text described a frame that was not there. A publish
+  // map with a hole in it is invisible everywhere except on the page. `light` is a per-entry
+  // override against the site's dark default, for the same reason as `hazard`: the only bias
+  // frame committed is the light one. Swap it the day a dark bias frame is ingested.
+  ["bias", "web/public/images/bias.jpg", "light"],
 
   // ---- the landing page's LIGHT twins ----------------------------------------------------
   //

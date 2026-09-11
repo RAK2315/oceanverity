@@ -97,13 +97,19 @@ cd pipeline && ../.venv/Scripts/python -m pytest -q
 # refresh the manifest's palette tables from samudra/palettes.py, without a full bake
 cd pipeline && ../.venv/Scripts/python scripts/refresh_palettes.py
 
+# refresh the manifest's Field label, units and description from the FieldSpecs in bake.py.
+# Prose only; every measured key is left to the bake that took it. Run it after editing one.
+cd pipeline && ../.venv/Scripts/python scripts/refresh_field_prose.py
+
 # what the provenance page says about the tests. Run it after adding or removing any.
 cd pipeline && ../.venv/Scripts/python scripts/collect_tests.py
 
 # typecheck and build
 cd web && npm run typecheck && npx vite build
 
-# refresh the data from INCOIS and Argo (about a minute)
+# refresh the data from INCOIS and Argo. 36 steps, about 36 minutes, and it CLEARS volumes/,
+# currents/, surfaces/, grids/ and data/grids/*.npz before writing - so a smaller --timesteps
+# replaces the committed bake rather than sitting beside it. Read the memory note further down.
 cd pipeline && ../.venv/Scripts/python -m samudra.bake
 
 # run
@@ -313,7 +319,7 @@ pixel test could never have caught the mirrored clip anyway - the camera compres
 latitude into about 3 px a degree, so the 8-degree bug moves the water 27 px. It reads the clip
 box back **in degrees** instead. **Before adding a probe, make it fail on purpose once.**
 
-**"Show me around" walks every control, and that is a measurement.** It was five steps against 43
+**"Show me around" walks every control, and that is a measurement.** It was five steps against 44
 explained controls - a demo, not a tour, and the four the user's teammates would present from were
 among the 38 it never visited. It is 21 steps in 6 chapters now, and every step declares the
 `GUIDE` keys it puts on screen. `probe-tour.mjs` fails if any entry in `GUIDE` is not named by
@@ -379,7 +385,7 @@ which is the rule two paragraphs down being broken silently for a round.
 
 **INCOIS assimilate Argo, so a float's residual is largely the model agreeing with itself.**
 The seventeen moored buoys are the only instruments in this bake their analysis did not ingest,
-and measured they disagree 5.5x more on temperature - 1.010 degC against 0.184 - 7.6x on salinity
+and measured they disagree 5.5x more on temperature - 1.010 degC against 0.183 - 7.7x on salinity
 and 5.4x on density. Pooled into one basin-wide number the seventeen of them vanish into 249
 floats and the headline becomes a statement about self-consistency. At twelve Timesteps it was
 nine buoys at 4.5x; a full year roughly doubled the evidence and the ratio went **up**, not down.
@@ -433,7 +439,13 @@ residual measured at one position on one date is a number on the wrong water any
 pressing play animates the field and moves **no marker**, which reads as a broken animation. The
 map key said this already and the map key **folds, and is remembered folded**. The time axis now
 says it too, in `--secondary`, whenever the mode is on: a caveat belongs on the band whose button
-was just pressed, not two panels away behind a disclosure someone shut last week.
+was just pressed, not two panels away behind a disclosure someone shut last week. **And
+switching the mode on moves the timeline to the newest analysis**, through `store.setBiasMode`,
+which the checkbox, the tour and Explore all call. Pressed at 30 Dec 2025 the 199 markers on screen
+moved a median 258 km and 52 more appeared, because 206 of 251 comparisons were taken at the last
+two steps - reported as a bug. At the newest analysis 92% of them do not move at all, so the press
+reads as the dots changing colour. The markers are still pinned to their casts; only the date the
+mode opens on changed.
 
 **A frame pair must differ by exactly one thing, and a store change is never that thing.**
 `updateArrows` and `updateSheet` set their mesh's `visible` back to true on every `push(state)`,
@@ -717,12 +729,12 @@ nothing saying what they were. `src/ui/MapKey.tsx` is where that lives.
 ## Testing
 
 TDD applies to the science: depth warp, volume encoding, grid interpolation, collocation, the
-Argo parser, the glider index parser, the adapter seam, and every derived Field - including the
+Argo parser, the glider index parser and cast reader, the adapter seam, and every derived Field - including the
 five hazard ones, each of which is held to a hand-computable case because a wrong constant there
 produces a number that is finite, smooth and completely believable. Not to glue, UI or shaders. It also
 applies to anything we *serve* - the DAP2 and WMS endpoints are science leaving the building,
 and `test_dap.py` checks them by opening them with a real `pydap` client rather than by
-asserting on our own bytes. 379 tests currently, and `pipeline/scripts/collect_tests.py`
+asserting on our own bytes. 409 tests currently, across 28 modules, and `pipeline/scripts/collect_tests.py`
 writes what `provenance.html` says about them - so the public page cannot claim a suite that no
 longer exists, which it did for a month: 11 modules, 123 tests, "67 passed", against 379 in 25.
 

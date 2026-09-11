@@ -1,9 +1,9 @@
 /**
  * The view on screen, written back into a URL.
  *
- * `applyDeepLink` in `App.tsx` has read eleven parameters since the requirements page was built,
- * and `probe-requirements.mjs` follows fourteen such links and checks each one arrived at the
- * control it promised. What was missing was the other direction: a reader looking at something
+ * `applyDeepLink` in `App.tsx` reads fifteen parameters, and `probe-requirements.mjs` follows all
+ * 21 of `requirements.html`'s links into the app and checks each one arrived at the control it
+ * promised (the counts were eleven and fourteen when this was written). What was missing was the other direction: a reader looking at something
  * had no way to hand it to anyone.
  *
  * That gap is the whole of the "e-learning initiatives" clause in PS 26067. A teacher writes a
@@ -16,8 +16,8 @@
  * opening depth would open tomorrow's app in yesterday's view. Everything here is compared
  * against the store's own initial state and omitted when it matches.
  *
- * Every parameter written here is one `applyDeepLink` reads. `probe-deeplink.mjs` round-trips
- * them: set a view, write the URL, open it in a fresh page, and compare. A writer that emits a
+ * Every parameter written here is one `applyDeepLink` reads. `probe-outreach.mjs` round-trips
+ * them in its copied-link step: set a view, write the URL, open it in a fresh page, and compare. A writer that emits a
  * parameter the reader ignores is a link that silently loses half of what it promised.
  */
 

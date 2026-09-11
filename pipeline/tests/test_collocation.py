@@ -1,3 +1,13 @@
+"""The Collocation: one observed cast held against the model at that cast's own position.
+
+This is the scientific core, so the tests hold the things a wrong answer here would hide: the
+model is sampled at the observation's own depths, the residual is observed minus modelled and
+keeps its sign, a depth below the model's deepest Level is kept and marked unmatched rather than
+invented, and a cast over land or outside the Grid is refused rather than clamped to the edge.
+`choose_cast` is here too, because the newest cast is sometimes a fragment and a chart with
+nothing on it is a comparison that silently failed.
+"""
+
 import numpy as np
 import pytest
 

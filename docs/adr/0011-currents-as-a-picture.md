@@ -1,5 +1,9 @@
 # Currents arrive as somebody else's picture, and say so
 
+**Superseded by ADR 0013 on 2026-09-01.** Currents are a Field with numbers in them now. This
+record is kept because it names the condition under which it should be reversed, and 0013 is
+that condition being met; the note at the foot says the same.
+
 ADR 0010 removed current speed and gave two reasons: INCOIS's own geostrophic series ends
 2019-03 and cannot share this timeline, and our own thermal-wind derivation was wrong by more
 than a factor of ten at the Somali Current. Both still hold. This does not reverse either of

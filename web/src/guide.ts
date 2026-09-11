@@ -110,11 +110,32 @@ export function guideFigures(source: {
     figures.normalP95 = `${normal.p95AbsDegC.toFixed(2)} °C`;
   }
 
+  // The spread profile, read at the two Levels the sentence names plus wherever its own peak
+  // is. The peak is the bake's, not this file's: the bullet used to assert "strongest at 75 to
+  // 125 m" beside three literals, and neither half could notice when the other moved.
+  const spread = manifest.anomalySpread;
+  if (spread && spread.medianStdDegC.length === spread.levelMetres.length) {
+    const at = (metres: number) => {
+      let best = 0;
+      for (let i = 1; i < spread.levelMetres.length; i++) {
+        const level = spread.levelMetres[i];
+        const chosen = spread.levelMetres[best];
+        if (level === undefined || chosen === undefined) continue;
+        if (Math.abs(level - metres) < Math.abs(chosen - metres)) best = i;
+      }
+      return spread.medianStdDegC[best];
+    };
+    const surface = at(5);
+    const deep = at(2000);
+    if (surface != null) figures.anomalySpreadSurface = `${surface.toFixed(2)} °C`;
+    if (deep != null) figures.anomalySpreadDeep = `${deep.toFixed(2)} °C`;
+    figures.anomalySpreadPeak = `${spread.peakDegC.toFixed(2)} °C`;
+    figures.anomalySpreadPeakDepth = `${spread.peakMetres.toFixed(0)} m`;
+  }
+
   const cycle = manifest.drift?.cycle;
   if (cycle) {
     figures.driftMedianKm = `${cycle.medianKm.toFixed(0)} km`;
-    figures.driftP90Km = `${cycle.p90Km.toFixed(0)} km`;
-    figures.driftCycles = grouped(cycle.count);
   }
   if (manifest.drift) {
     figures.driftFloats = String(manifest.drift.floats);
@@ -256,8 +277,15 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Nothing was downloaded for it. It follows from what we already held.",
     ],
     look: [
-      "The northern Bay of Bengal is 0.8 °C warmer than the northern Arabian Sea.",
-      "It is still 3.0 units lighter, because it is 3.6 PSU fresher.",
+      // Measured at 5 m over the 36-step bake, northern Bay 15-20 N 85-92 E against northern
+      // Arabian Sea 15-20 N 60-70 E, averaged across all 36 analyses: 3.03 kg/m3 lighter and
+      // 3.68 PSU fresher, and both hold at every single step (1.35 to 4.49 lighter, 1.76 to 5.63
+      // fresher). The temperature contrast does not: it averages +0.82 degC and runs from -0.97
+      // to +3.04 across the year, so it changes sign. This said "0.8 degC warmer" as a fact
+      // beside a view of one Timestep, and at the last one it measures +0.42. The boxes were not
+      // written down, which is why that could not be checked; they are now.
+      "Across the year the northern Bay of Bengal is 3.0 units lighter than the Arabian Sea.",
+      "It is 3.7 PSU fresher. Temperature cannot explain it: the Bay is cooler or warmer by season.",
     ],
     tryThis: "Look at Temperature, then Density, without moving the camera. The layers change.",
   },
@@ -272,8 +300,9 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Using each cell's own average removes geography: a warm Arabian Sea is not news.",
     ],
     look: [
-      "The signal is strongest at 75 to 125 m, not at the surface.",
-      "Measured: 0.74 °C of spread at 5 m, 1.55 °C at 100 m, 0.08 °C by 2000 m.",
+      "The signal is strongest at {anomalySpreadPeakDepth}, not at the surface.",
+      "Measured: {anomalySpreadSurface} of spread at 5 m, {anomalySpreadPeak} at " +
+        "{anomalySpreadPeakDepth}, {anomalySpreadDeep} by 2000 m.",
       "What moves over a season is the thermocline. The deep ocean barely notices.",
     ],
     tryThis: "Drag Range min past the middle. Everything cooler than its average disappears.",
@@ -367,7 +396,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "It bulges down in the central Bay of Bengal. Deepest fuel in the region.",
       "It rises almost to the surface off Somalia and Oman, where cold water is pulled up.",
     ],
-    tryThis: "Press play and watch the sheet breathe across four months, with the floats on it.",
+    tryThis: "Press play and watch the sheet breathe across the year, with the floats on it.",
   },
 
   mixed_layer_depth: {

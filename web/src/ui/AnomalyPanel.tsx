@@ -16,7 +16,7 @@ import { useStore } from "../store";
  * lines. `guide.ts` was cut from 170 words an entry to 66.5 of bullets a round earlier and this
  * panel was simply missed. The rewrite is in the five functions at the bottom of this file and
  * touches no markup: **every measured number survives and only the connective prose goes.**
- * Measured across all nine Features in this bake, in the 348 px column it renders in: **the four
+ * Measured across all nine Features of the twelve-step bake's opening step, in the 348 px column it renders in: **the four
  * blocks are a median 86 words**, longest 100, always eight bullets, longest bullet 22 words.
  * The whole panel including its notes is a median 151 against the 243 it was.
  *

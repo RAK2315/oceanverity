@@ -185,13 +185,15 @@ await page.evaluate(() => {
   window.__store.setState({
     // The Somali Current core at the surface in the last analysis - measured at 2.94 m/s at
     // 9.5 N, 51.5 E on 2026-07-30, the fastest water in the block - so the line is long enough
-    // to measure rather than a smudge.
+    // to measure rather than a smudge. The last analysis is read off the manifest: this said
+    // `timestepIndex: 11`, which was the last of twelve and on a bake of 36 is 2025-11-30, so
+    // the probe measured a November line and described it as the monsoon peak.
     driftPin: { lon: 51.5, lat: 9.5 },
     driftDays: 20,
     depthFrom: 0,
     showDriftCheck: false,
     selectedFloatId: null,
-    timestepIndex: 11,
+    timestepIndex: manifest.timesteps.length - 1,
     showTracks: false,
     showFloats: false,
     showAnomalies: false,

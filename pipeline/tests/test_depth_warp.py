@@ -1,3 +1,11 @@
+"""The Depth Warp: INCOIS's 24 uneven Levels mapped onto an even axis a GPU texture can use.
+
+It is a monotonic mapping and nothing more, so the tests hold exactly that: the endpoints land on
+0 and 1, depth round-trips through the warp and back, the upper ocean gets more of the axis than
+a linear scale would give it, and resampling a column keeps the real values at the real Levels,
+leaves a gap a gap, and never extrapolates below the deepest value the model actually has.
+"""
+
 import numpy as np
 import pytest
 

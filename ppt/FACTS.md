@@ -1,6 +1,6 @@
 # Every figure the deck may use, read off the build
 
-**Generated 2026-09-09 by `pipeline/scripts/collect_facts.py`. Do not edit by
+**Generated 2026-09-11 by `pipeline/scripts/collect_facts.py`. Do not edit by
 hand.** Re-run it after a bake and diff this file: a figure that moved shows up as a line.
 
 `ppt/DECK.md` is written by a person and quotes these numbers. This file is the source it quotes
@@ -24,7 +24,7 @@ not a point - see `CLAUDE.md`.
 | Depth range | 5 m to 2000 m over 24 uneven levels | `manifest.volume.levelMetres` |
 | Static bake | **192.0 MB**, committed, **0** network calls to run | `du web/public/data` |
 | HTTP routes on the API | **21** | `api/*.py` |
-| Tests | **379** | `web/public/data/tests.json` |
+| Tests | **409** | `web/public/data/tests.json` |
 | Browser probes | **15** | the allowlist in `.gitignore` |
 
 ## Instruments
@@ -33,7 +33,7 @@ not a point - see `CLAUDE.md`.
 | --- | --- | --- |
 | Instruments in the water | **276** = 259 Argo floats + 17 moored buoys | `manifest.instruments` |
 | Carrying chlorophyll | **57** floats | `manifest.instruments.withChlorophyll` |
-| Drawn at any one Timestep | between 192 and 220 floats and 5 to 9 buoys | `reportingByKind()`, measured across the twelve steps |
+| Drawn at any one Timestep | between **192** and **221** floats and **5** to **14** buoys | `reportingByKind()`, replayed over all 36 steps |
 
 ## How far the model sits from the instruments
 

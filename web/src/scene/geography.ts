@@ -40,8 +40,6 @@ export function makeFrame(volume: VolumeSpec, exaggeration: number): Frame {
 
 export const lonToX = (lon: number) => lon;
 export const latToZ = (lat: number) => -lat;
-export const xToLon = (x: number) => x;
-export const zToLat = (z: number) => -z;
 
 /**
  * Depth in metres -> fraction along the warped axis, by inverting the sampled axis the bake

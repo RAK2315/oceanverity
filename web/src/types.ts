@@ -20,7 +20,7 @@ export interface FieldSpec {
    *
    * - `volume` - a value at every depth. Ray-marched, as everything used to be.
    * - `depth` - the value *is* a depth, so it is drawn as a sheet inside the block sitting at
-   *   that depth. You watch the 26 °C isotherm dome up and collapse across four months with the
+   *   that depth. You watch the 26 °C isotherm dome up and collapse across the year with the
    *   Floats sitting on it; no flat map can do that.
    * - `column` - one number for the whole water column, draped on the sea surface.
    * - `vector` - a direction and a speed, drawn as arrows on the chosen depth.
@@ -102,6 +102,22 @@ export interface NormalAnomalySpec {
   p95AbsDegC: number;
 }
 
+/**
+ * How far each Level's water moves across the baked series.
+ *
+ * The measurement behind the Anomaly entry's claim that the signal lives in the thermocline
+ * rather than at the surface. `peakMetres` is written out by the bake rather than found here,
+ * so the claim and the number that supports it come from one place. Absent on an older bake,
+ * in which case the bullet that quotes it takes itself off the panel.
+ */
+export interface AnomalySpreadSpec {
+  levelMetres: number[];
+  /** Median over each Level's ocean cells of the per-cell standard deviation across time. */
+  medianStdDegC: number[];
+  peakMetres: number;
+  peakDegC: number;
+}
+
 export interface VolumeSpec {
   width: number;
   height: number;
@@ -175,7 +191,7 @@ export interface Manifest {
   region: { south: number; north: number; west: number; east: number };
   sources: SourceSpec[];
   fields: FieldSpec[];
-  /** Headings for the Variable selector. Thirteen Fields cannot be a flat list of buttons. */
+  /** Headings for the Variable selector. Fifteen Fields cannot be a flat list of buttons. */
   fieldGroups?: FieldGroup[];
   timesteps: string[];
   volume: VolumeSpec;
@@ -188,6 +204,8 @@ export interface Manifest {
   /** Absent when the bake could not reach NOAA for the World Ocean Atlas. */
   normalAnomaly?: NormalAnomalySpec;
   anomalyFeatures?: AnomalyFeatureSpec;
+  /** How much each Level moves across the series. Absent on a bake older than it. */
+  anomalySpread?: AnomalySpreadSpec;
   /** How many of each kind are on the water, so the panel and the key can name them. */
   instruments?: { floats: number; moorings: number; withChlorophyll: number };
   /** Quantities measured but not modelled, so the panel knows what to expect. */
@@ -347,7 +365,7 @@ export interface FieldResiduals {
    * INCOIS's analysis **assimilates Argo**, so a float's residual is largely the model agreeing
    * with an observation it was fed; the moored buoys are not assimilated. Measured over this
    * bake the moorings disagree several times as much, and pooled into one basin-wide figure the
-   * nine of them disappear into 224 floats. Absent on a bake made before the split existed.
+   * seventeen of them disappear into 249 floats. Absent on a bake made before the split existed.
    */
   byKind?: Record<string, KindBias>;
   /** Worst first, by mean absolute bias. */

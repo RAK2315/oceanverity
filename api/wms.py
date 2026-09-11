@@ -195,9 +195,11 @@ def capabilities(base_url: str, layers, timesteps, levels, bounds) -> str:
     <Name>WMS</Name>
     <Title>Samudra 3D</Title>
     <Abstract>Ocean model fields and derived quantities over India's exclusive economic zone.
-Temperature and salinity are INCOIS's published analysis, restated here; density, the
-temperature anomaly and observation coverage are computed by this platform and are not
-published anywhere else. Every layer is rendered from the analysis on its native one-degree
+Temperature, salinity and INCOIS's own evidence channels are their published analysis, restated
+here; density, the two temperature anomalies, the spread between INCOIS's two analyses, current
+speed and the five cyclone-hazard quantities are computed by this platform. Current speed is
+derived from E.U. Copernicus Marine's velocity analysis and is not INCOIS's. Every layer's own
+Abstract names its source. Every layer is rendered from the analysis on its native one-degree
 grid, never from the quantised volume used for 3D rendering - which is also why Observation
 Coverage, which is counted on that rendering lattice, is not offered here.</Abstract>
     <OnlineResource xlink:type="simple" xlink:href="{escape(base_url)}"/>

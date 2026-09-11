@@ -4,7 +4,6 @@ import {
   LinearFilter,
   RGBAFormat,
   ClampToEdgeWrapping,
-  Texture,
   UnsignedByteType,
 } from "three";
 import { liftedPalette } from "../palette";
@@ -35,8 +34,9 @@ export const loadFloats = () => getJson<OceanFloat[]>("floats.json");
 /**
  * Every matched depth for every collocated Float. Deliberately **not** on the critical path.
  *
- * Measured on the production build, this one file is 9.08 MB raw and 2.42 MB over the wire -
- * 73% of everything the app fetches before it can draw. Waiting on it put 17.1 s of blank
+ * Measured on the twelve-step production build, this one file was 9.08 MB raw and 2.42 MB over
+ * the wire - 73% of everything the app fetched before it could draw; it is 12.6 MB raw and
+ * 3.3 MB gzipped on the 36-step bake. Waiting on it put 17.1 s of blank
  * loading screen in front of a 1.5 Mbit venue network, and nothing needs it until somebody
  * clicks a Float. It is fetched in the background once the scene is up, so in practice it has
  * always arrived by the time anyone clicks; `collocationsReady` covers the case where it has
@@ -47,12 +47,12 @@ export const loadCollocations = () => getJson<Record<string, Collocation>>("coll
 export const loadAnomalies = () => getJson<AnomalyFeature[][]>("anomalies.json");
 
 /**
- * Where the model most disagrees with the instruments: 151 KB, against `collocations.json`'s
- * 10.5 MB.
+ * Where the model most disagrees with the instruments: 171 KB, against `collocations.json`'s
+ * 12.6 MB.
  *
  * Every number in it is derived from that larger file, and it exists separately for exactly
  * that reason - the bias map is the answer to "so where is it wrong", and waiting on ten
- * megabytes of depth arrays to draw 233 coloured dots would be paying for the charts nobody has
+ * megabytes of depth arrays to draw 266 coloured dots would be paying for the charts nobody has
  * opened yet. See `pipeline/samudra/residuals.py`.
  */
 export const loadResiduals = () => getJson<Residuals>("residuals.json");
@@ -126,31 +126,6 @@ export async function loadVolumeTexture(
   texture.wrapT = ClampToEdgeWrapping;
   texture.wrapR = ClampToEdgeWrapping;
   texture.unpackAlignment = 1;
-  texture.needsUpdate = true;
-  return texture;
-}
-
-/**
- * A baked overlay image as a texture on the sea surface.
- *
- * `flipY = false` because the shader does the flip itself: the image runs north to south down
- * its rows and latitude runs south to north, and doing it in one place means the coordinate
- * arithmetic and the crop that produced the image are written the same way round.
- *
- * `ClampToEdge` on both axes, so a sampling coordinate a hair outside the region cannot wrap an
- * arrow from Somalia onto Sumatra.
- */
-export async function loadOverlayTexture(path: string): Promise<Texture> {
-  const response = await fetch(`${DATA_ROOT}/${path}`);
-  if (!response.ok) throw new Error(`could not load overlay ${path} (HTTP ${response.status})`);
-  const bitmap = await createImageBitmap(await response.blob());
-
-  const texture = new Texture(bitmap as unknown as HTMLImageElement);
-  texture.flipY = false;
-  texture.minFilter = LinearFilter;
-  texture.magFilter = LinearFilter;
-  texture.wrapS = ClampToEdgeWrapping;
-  texture.wrapT = ClampToEdgeWrapping;
   texture.needsUpdate = true;
   return texture;
 }

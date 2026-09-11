@@ -1,3 +1,12 @@
+"""`Grid.column_at`: the bilinear interpolation every Collocation, tooltip and API answer reads.
+
+This is the scientific truth, so it is held to hand-computable cases: an exact node returns that
+node, a cell centre is the mean of its four corners, and a point on a gridline blends along one
+axis only. A masked corner poisons only the Levels where it is masked - blending across land
+would put a coastal value on open water, and refusing the whole column would blank good water
+above a shallow sea floor. A point outside the Grid is refused rather than clamped to the edge.
+"""
+
 import numpy as np
 import pytest
 

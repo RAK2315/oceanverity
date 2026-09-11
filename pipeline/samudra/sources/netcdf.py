@@ -100,7 +100,7 @@ _DIVERGING_PALETTE = "balance"
 def sniff_axes(dataset) -> Axes:
     """Work out which coordinate is which, or say which one could not be found.
 
-    Three sources of truth, most trustworthy first, because a file that says what its axes are
+    Four sources of truth, most trustworthy first, because a file that says what its axes are
     should be believed over one that merely names them conventionally:
 
     1. the CF ``axis`` attribute - ``X``, ``Y``, ``Z``, ``T``

@@ -10,7 +10,7 @@
  *
  * It is not a trajectory. Every dot moves through **one** analysis, frozen at the Timestep on
  * screen, so the picture is the flow at that instant and not where anything would end up over
- * days. `drift.ts` is the one that runs time forward, has a published error - median 38.5 km
+ * days. `drift.ts` is the one that runs time forward, has a published error - median 40.9 km
  * over one Argo cycle - and is what the drift pin uses. The guide entry says which is which,
  * because a reader who thinks they are watching a forecast is being misled by a pretty picture.
  *
@@ -293,22 +293,6 @@ export class ParticleFlow {
     this.trail[ring + head * 2 + 1] = lat;
     this.filled[index] = Math.min((this.filled[index] ?? 0) + 1, TRAIL + 1);
   }
-}
-
-/**
- * How far a dot moves in one second of screen time, in kilometres, for a given current.
- *
- * Not used by the renderer. It exists so the guide entry and the probe can both state the clock
- * rate from the same constant rather than quoting a number typed into prose - the trap that had
- * four figures on the guide panel stale since August.
- */
-export function screenKmPerSecond(metresPerSecond: number): number {
-  return (metresPerSecond * OCEAN_SECONDS_PER_SECOND) / 1000;
-}
-
-/** Ocean time per second of animation, in days. The honest way to say "sped up". */
-export function speedUpDays(): number {
-  return OCEAN_SECONDS_PER_SECOND / 86400;
 }
 
 /** The clock rate itself, so a probe can integrate the same elapsed ocean time. */

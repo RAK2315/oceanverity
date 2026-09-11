@@ -1,7 +1,15 @@
 # Known defects and open suspicions
 
-**Worked through 2026-09-03, revisited four times on 2026-09-04 and again on 2026-09-06. Three items are open; 100 are
-fixed.** The fixed ones are summarised rather than listed, which is this file's own convention: a
+**Worked through 2026-09-03, revisited four times on 2026-09-04, again on 2026-09-06, swept
+whole-repository on 2026-09-10 and fixed on 2026-09-11. Four items are open; 133 are fixed.**
+The open four are 44 and 101, which predate the sweep; 104, which the user deferred; and 134,
+which this round's measurements found. Items 104 to 133 came from a read-only audit of every
+surface on 2026-09-10 - `pipeline/`, `api/`, `web/src`, the four pages, the 15 probes, the tests,
+the Markdown and the decision records - and every one but 104 was closed the next day. **The header
+count has been wrong before**: it said "three items are open" over two, and the numbering had
+reached 103 while a handoff said 102. Count the `- [ ]` markers before trusting this line.
+
+The fixed ones are summarised rather than listed, which is this file's own convention: a
 defect whose measurement has been folded into `CLAUDE.md`, an ADR or a probe does not need a
 paragraph here, and a file that is 90% solved problems is a file nobody opens to find the two
 that are not.
@@ -224,31 +232,122 @@ The ranking is the one this file has always used:
       which it was already 25 px wrong, and then carried a 636 that was arithmetic rather than a
       reading, because a number in prose has nothing that can fail.
 
+
+- [ ] **104. OGC WMS advertises five layers the server cannot draw, and no other endpoint can
+      serve them either. Deferred by the user on 2026-09-11 - "we will come back to this".**
+      `api/standards.py`'s `servable_fields()` filters `manifest.fields` by
+      `NOT_ON_A_NATIVE_GRID = {"coverage"}` alone, so `GetCapabilities` publishes **14** layers
+      and only **9** have a native Grid on disk (`data/grids/index.json`). The five hazard Fields
+      ship as float32 surfaces (`bake.py:_write_surfaces`), not as `.npz` Grids, so a request for
+      `heat_potential`, `d26`, `mixed_layer_depth`, `isothermal_layer_depth` or `barrier_layer`
+      falls through `native_grid()` to a bare `HTTPException(404, "no grid for ...")` - on WMS
+      `GetMap` as a 404 rather than the `ServiceExceptionReport` a client can read, and on
+      `/api/netcdf/d26/0` and the OPeNDAP `.das`/`.dds`/`.dods`. **Observed over HTTP on
+      2026-09-11**: `/api/netcdf/heat_potential/0` returns a body `xarray` cannot open.
+
+      Two honest fixes, and they are different products. **Refuse them by name** the way
+      `coverage` is refused - about an hour, nothing new served. **Or serve them** - their Grids
+      can be recomputed offline from the temperature and salinity `.npz` already on disk, but
+      every one of these endpoints describes a Field with a depth axis, and a depth-of-isotherm
+      is one number per location, so it would go out with a one-Level depth axis that claims the
+      value varies with depth. The in-app feature is unaffected either way. Since 2026-09-11 the
+      five layers' `<Abstract>`s at least say correctly that they are computed here (item 105).
+
+- [ ] **134. INCOIS's own temperature analysis holds cells no sea has ever held. The mask is
+      built and tested; the shipped data keeps them until the next bake.**
+      Found by measuring the Suspected entry about Temperature vs Normal: recovering the atlas
+      value as analysis minus departure shows **the atlas is fine and the analysis is not** -
+      4.84 degC at 20 m in the Persian Gulf in July, 45.17 degC at the same node in May, 48.66
+      degC at 30 m. Every such cell is on the region's northern edge, 24.5 to 25.5 N and 52.5 to
+      61.5 E, and most sit at 20 to 30 m, beneath a surface that should be the warmest water in
+      the column. **No Collocation touched one**, checked both as a sampled value and as a
+      bilinear corner at the comparison's own Timestep, so the bias map and every residual are
+      clean. What read them is the tooltip, the section and CF, OPeNDAP and WMS.
+
+      **The user chose mask-and-count on 2026-09-11.** `samudra/plausibility.py` masks
+      temperature outside **-2.5 to 38 degC** - below seawater's freezing point, and beyond
+      37.6 degC, the verified in-situ record for the Persian Gulf - in both INCOIS analyses, at
+      the door of the bake, so density, both anomalies, the spread and the hazard Fields inherit
+      the absence. The bake writes `manifest.masked` (bounds, a count per source, the reason),
+      and `provenance.html` prints it in the pipeline table - checked in the browser both with
+      the block and without it. Six tests in `test_plausibility.py`, red first. **On the shipped
+      Grids it takes 25 cells** (23 hot, 2 cold). The first figure written here was 37, at a
+      36 degC bound this file chose before looking up the record; the hot values run
+      continuously from 35.8 to 48.7 with no gap, so 12 cells between 36 and 38 degC are kept
+      as suspicious rather than masked.
+
+      **Why it is not applied to the shipped data now.** A bake takes the newest 36 analyses and
+      re-fetches Argo, so re-baking moves the window and every measured figure in the build.
+      Patching the shipped files instead would mean re-running six stages of the bake by hand -
+      the Grids, density, both anomalies, the spread, the hazard sheets, the Volumes and their
+      ranges - which is a partial re-bake that could quietly disagree with a real one. So the
+      next real bake applies it, and this item closes when that bake's `manifest.masked` says so.
+
+**Closed 2026-09-11** - one line each; the measurement lives where the line says.
+
+- [x] **105.** WMS captioned seven layers as INCOIS's, Copernicus's current speed among them. `api/standards.py`'s `PROVENANCE` names the source of every Field, the service `<Abstract>` in `wms.py` agrees, and `test_standards.py` fails on a Field with no entry. Checked over HTTP: 14 of 14 layers correct.
+- [x] **106.** Ten Fields went out over CF dimensionless with their key as their name, and the NetCDF `institution` said INCOIS for Copernicus data. `api/cf.py` covers all 15 with UDUNITS units, short `long_name`s, a variable `comment` and a per-Field source; `test_standards.py`. `current_speed` takes `sea_water_speed`; nine Fields stay nameless on purpose and the comment says why for each.
+- [x] **107.** Screen-reader text called every instrument an Argo float. `App.tsx` announces by kind through `reportingByKind()`; the pooled `reportingCount()` is gone.
+- [x] **108.** The bias card showed `collocation.jpg`. `PUBLISH_MAP` publishes `bias.jpg` to the site with a `light` override, the card points at it, and `probe-landing.mjs` records it in `FIXED`. Publish dry-run: 60 of 61 outputs already identical, one file written.
+- [x] **109.** `requirements.html`: 43 -> 44 controls (twice), sixty -> thirty seconds, 234 -> 266 instruments, twelve -> thirty-six analyses.
+- [x] **110.** Landing page: nine -> seventeen buoys, four months -> a year, sixty -> thirty seconds (twice, the second in the Kiosk card the audit missed).
+- [x] **111.** `collect_facts.py`'s one literal row is derived by replaying `positionAt` over all 36 steps: 192 to 221 floats, 5 to 14 buoys. `FACTS.md` regenerated; no other row moved.
+- [x] **112.** `README.md`: 15 -> 21 routes, in the diagram and the table, box alignment unchanged.
+- [x] **113.** The guide's spread bullet is tokens now, filled from `manifest.anomalySpread`, which `anomaly.spread_by_level` computes and `bake.py` writes; `refresh_anomaly_spread.py` filled the shipped manifest from the Grids on disk. 0.63 / 1.56 / 0.07 degC, peak at 100 m, five tests.
+- [x] **114.** The manifest's stale "four months" description. `scripts/refresh_field_prose.py` rewrites prose from the specs; one string changed, every other key identical.
+- [x] **115.** ADR 0015's horizon rows re-read off the manifest, and the paragraph now says what they say: past a month the separation **exceeds** the travel, by 15% at 60 days and 29% at 90. The audit's 30-day row (106.0 / 109.1) did not reproduce; the manifest says 105.0 / 108.1.
+- [x] **116.** ADR 0016: +0.074 degC (the sign flipped), 2.051, ±3.547, and twelve monthly normals, not four.
+- [x] **117.** `DESIGN.md`'s retired 636 px fold table replaced by a pointer to `CLAUDE.md`'s, which is the only copy.
+- [x] **118.** 43 -> 44 in all eight documents. `probe-guide.mjs` renders `Object.keys(GUIDE)` instead of a hand list that had never rendered `performance`, and asserts the 44.
+- [x] **119.** `--timesteps` defaults to 36, and `CLAUDE.md`'s command says 36 minutes and that it clears the committed bake.
+- [x] **120.** The glider reader converts decibars with `pressure_to_depth` at the cast's own latitude. `_read` split into fetch and `_parse`; three tests, red first.
+- [x] **121.** `coverage.py`'s `BANDS` now rests on what each band counts, not on a split a re-bake falsified. Re-measured: 2,441,628 voxels, median 3, maximum 19, split 10.2 / 13.7 / 28.4 / 47.6, and 1/3/10 would hold 7.0%.
+- [x] **122.** `residuals.py`: 266, seventeen buoys, 5.5x / 7.7x / 5.4x, 249 floats, read off `byKind`.
+- [x] **123.** `probe-bias.mjs` walks the first, middle and last step of the manifest's own timeline.
+- [x] **124.** `probe-drift.mjs` drops its pin on the last analysis, read off the manifest.
+- [x] **125.** `api/main.py`: eight registered adapters and why the two lists differ from `CONTEXT.md`'s; five profile providers; 8,460 casts from 259 platforms. The latent `KeyError` became item 135, closed below.
+- [x] **126.** `anomaly.py`'s two sets of spread figures replaced by `spread_by_level`; the `Z_THRESHOLD` argument re-measured (|z| 1.62 at p90, 2.57 at p99, 4.1% of cells past 2.0) and still holds; 404 features, 11.2 a step.
+- [x] **127.** The comment sweep: every Python, TypeScript and HTML row, plus `CONTEXT.md`, the demo script, `DECK.md`, ADRs 0010, 0012 and 0014, and `scripts/dossier.html`, re-rendered to the PDF. Figures that justified a decision and cannot be re-taken offline are dated rather than replaced. **One the audit missed was on screen**: Depth of 26 degC's "Try this" said "breathe across four months".
+- [x] **128.** The five dead exports and the orphaned `Texture` import, each re-traced to a single occurrence before deletion.
+- [x] **129.** `on-globe` removed from `MapKey.tsx`.
+- [x] **130.** `deeplink.ts` points at `probe-outreach.mjs` and carries the real counts; `probe-bias.mjs`'s pointer reads as history.
+- [x] **131.** The four unused imports, the identical `dap.py` branches, and `parse_constraint`'s parts named by position; pyflakes clean over all four trees.
+- [x] **132.** Two uncalled guide figures removed; `test_palettes.py` reads the shipped range and table (and fails with a 0..14 table, measured); Explore's "a minute" comments; the defaults doc block reattached; "four sources of truth".
+- [x] **137. Switching on the bias map moved every marker, and read as a bug.** Reported by the user at 30 Dec 2025, where the 199 markers on screen moved a median 258 km (1,414 km at worst) and 52 appeared, because each marker is drawn at the cast its comparison was taken from and 206 of 251 were taken at the last two steps. The markers were right. What changed is the date the mode opens on: `store.setBiasMode(true)` moves the timeline to the newest analysis, where 92% of markers do not move at all, and the checkbox, the tour and Explore all go through it. Checked through the real checkbox: step 14 to 35.
+- [x] **136. The colourbar switcher did nothing on any hazard Field.** Reported by the user. The store took the choice and the legend repainted, but the Sheet, the Drape and the current arrows are coloured on the CPU and rebuilt only when their cache key changes, and the palette was not in the key: measured 0.1% of the band repainted on all five against 39.3% on Temperature. `paletteName` is in all three keys now; after, 5.8% to 9.7% on the four sequential hazard Fields and 10.8% to 79.4% of the barrier layer's drape texels by alternate. `probe-palette.mjs` switches a Sheet and a Drape Field as well as Temperature, and would have gone red on the old build.
+- [x] **135.** `CopernicusCurrentsSource.fetch_grid` raised `KeyError` on `current_speed`, the one key its own `fields()` declares. It serves every declared key now and refuses an unknown one by naming what it serves; `test_copernicus.py`, five tests against an in-memory dataset, red first.
+- [x] **133.** `standards.py`'s docstring no longer calls coverage servable; `shot.mjs`, `check-pdf.mjs`, eleven scratch probes and the leftover worktree and its merged branch removed.
+
 ---
 
 ## Suspected, not confirmed
 
-- **`coverage.py`'s band calibration may be measured against a bake that is gone.**
-  `pipeline/samudra/coverage.py:80-84` says *"over 695,088 ocean voxels the median is 2 casts and
-  the **maximum is 10**"*, and that the 1/2/4 bands split the block 19/23/36/22.
-  `manifest.fields[coverage].range` is now `[0, 14]`, so the maximum has moved. **What could not
-  be checked**: the split, which needs all 36 coverage Volumes decoded and de-quantised, and
-  there is no native coverage Grid in `data/grids/` to do it from honestly. The argument the
-  comment supports - that thresholds of 1/3/10 would leave the top band empty - survives either
-  way, which is why this is not in the list above.
+None open. The six that were here were measured on 2026-09-11 before anything was changed:
 
-- **6 of the 25 rows in `provenance.html`'s test table say nothing.** `test_collocation.py`,
-  `test_coverage.py`, `test_volume.py`, `test_argo.py`, `test_depth_warp.py` and `test_grid.py`
-  have no module docstring, so `collect_tests.py:55` falls back to *"Covered by this module."*
-  under a column headed *"What it defends"*. Confirmed as a fact; left here because whether a
-  deliberate fallback printing an empty answer counts as a defect is a judgement rather than a
-  measurement.
+- **The ±22 degC cells in Temperature vs Normal** - confirmed, and the atlas is not at fault: it is
+  INCOIS's own analysis. Now item 134.
+- **"0.8 degC warmer"** - the audit's boxes reproduce 0.82 degC, 3.03 kg/m3 and 3.68 PSU as the
+  **annual mean**, but the temperature contrast runs -0.97 to +3.04 across the year and changes
+  sign, while density and salinity never do. The sentence leaned on the unstable one, beside a
+  view of one Timestep where it measures +0.42. Rewritten on the stable two, with the boxes
+  written down in `explore.ts` and `guide.ts`.
+- **The log gate is marginal on Cast Count and D26** - measured margins 0.15 and 1.97, and **not a
+  defect**. Cast Count's palette is `tempo`, a gradient; the "1, 2 and 3 casts painted as 4 or
+  more" failure is Observation Coverage's, and coverage is refused by the banded check whatever
+  its range. Tipping either Field over would offer log on a continuous Field that starts near
+  zero, which is what the rule permits. `transfer.ts` carries the re-measured table.
+- **"13 of the 15 variables computed or fetched here"** - meant "INCOIS publish two, the rest are
+  ours", and INCOIS publish four. Now "4 published by INCOIS, 11 computed here", matching the
+  `PROVENANCE` table the WMS serves.
+- **ADR 0011's supersession note at its foot** - a banner at the head now points at 0013.
+- **Six test modules with no docstring** - written, from what each module's tests assert;
+  `tests.json` regenerated and no row on `provenance.html` says "Covered by this module".
 
 ---
 
 ## Fixed, in summary
 
-**100 defects across four rounds.** Every measurement that was worth keeping is now in one of
+**132 defects across five rounds.** Every measurement that was worth keeping is now in one of
 four places, which is why they are not repeated here: a rule in `CLAUDE.md`, a decision record in
 `docs/adr/`, a probe that fails if it comes back, or a test.
 
@@ -259,6 +358,7 @@ four places, which is why they are not repeated here: a rule in `CLAUDE.md`, a d
 | **2026-09-04**, second pass, 8 items | Two landing cards with alt text over an empty panel; a hero unreadable on light at 1.27:1; five hazard variables that all opened the same way; a heading claiming sixteen cards over fourteen; the deck two rounds stale | `probe-landing.mjs`, and three more rules in `CLAUDE.md` |
 | **2026-09-04**, third pass, 8 items | Four folders holding overlapping copies of the same pictures; a publish silently replacing thirteen dark images with light ones; pictures that did not follow the theme toggle; `probe-upload.mjs` unable to run from a clone; the deck's numbers with nothing to check them against | `assets/screenshots/` as the single source; `pipeline/scripts/collect_facts.py` and `ppt/FACTS.md` |
 | **2026-09-04**, fourth pass, 21 items | **The prose sweep.** `provenance.html` printing the superseded "currents are an image" line with `undefined m` in it; two requirements links labelled *Open a float comparison* that started the guided tour; the demo script reading numbers off the screen that the screen contradicts, and claiming all three variables share a worst 5-degree box; a landing tile pairing a median RMS with a mean absolute bias under a caption saying they were the same distribution; the retired 202-float drift score; 3,718 Argo casts that are 3,077; `longitude = 46` hardcoded on the page whose banner says nothing is; **four of the thirteen probes that could not go red**; `render-dossier.mjs` writing a PDF with three broken images | `CLAUDE.md`'s Commands block, the four probes' own assertions, and the rules below |
+| **2026-09-11**, 32 items, and item 134's mask built | **The audit's list, and the six suspicions.** Copernicus current speed attributed to INCOIS over WMS, and the five hazard Fields captioned as somebody else's; ten Fields served over CF as dimensionless; a guide bullet quoting a spread from a bake that is gone; ADR 0016 with the sign of its mean backwards; a `--timesteps` default that would have replaced the committed bake with a third of it; decibars in a depth axis; a probe that never rendered one of the 44 guide entries; and the comment sweep a year-long bake needed | `test_standards.py`, `spread_by_level` and its tests, the glider `_parse` tests, `test_copernicus.py`, `probe-guide.mjs`'s count, the two `refresh_*` scripts, and the one-line entries above |
 
 **Three of those are worth remembering as classes rather than as bugs**, because each came back
 in a new costume: *a figure typed into prose cannot be checked by anything*; *a picture published
@@ -273,10 +373,13 @@ Each has been queried once, and "that looks made up" is the correct first reacti
 
 - **The drift pin does not move and the line does not animate.** The line is the whole trip at
   once, and it starts at the date on screen, which is why scrubbing redraws it.
-- **Markers move when the bias map is switched on, and there are more of them.** A residual
-  belongs to the cast it was measured at, not to the date on screen. The map key says so.
-- **The worst eight rows in the bias list share two colours.** The scale saturates at the ninetieth
-  percentile (0.39 degC) and all eight are past it. The real gap is on the same row.
+- **Markers move when the bias map is on and you scrub away from the newest date, and there are
+  more of them.** A residual belongs to the cast it was measured at, not to the date on screen.
+  Switching the mode on now opens it at the newest analysis, where 92% of them stay put. The map
+  key says so.
+- **The worst rows in the bias list share colours.** The scale saturates at the ninetieth
+  percentile (0.49 degC on the 36-step bake) and everything past it clamps. The real gap is on
+  the same row.
 - **Hollow ringed markers** never measured that variable. Giving them the palette's midpoint would
   claim agreement with nothing.
 - **A blank column in the vertical section** is land or sea floor, one grid cell wide because
@@ -284,9 +387,11 @@ Each has been queried once, and "that looks made up" is the correct first reacti
 - **The deepest water in Temperature vs Normal is blank.** The atlas stops at 1500 m; the analysis
   runs to 2000 m. There is no normal to depart from.
 - **Mean bias is almost exactly zero on all three Fields.** That is what an assimilating analysis
-  does to floats it assimilated, which is why the nine unassimilated buoys are printed separately.
-- **Drift separation reaches the distance travelled by 30 days**, 99 km against 103 km. A current
-  field alone stops carrying information about a particular float quickly. Saying so is the feature.
+  does to floats it assimilated, which is why the seventeen unassimilated buoys are printed
+  separately.
+- **Drift separation reaches the distance travelled by 30 days and overtakes it after**, 105 km
+  against 108 km at 30 days and 212 against 165 at 90. A current field alone stops carrying
+  information about a particular float quickly. Saying so is the feature.
 
 ---
 
@@ -312,13 +417,14 @@ The full command list is `CLAUDE.md`'s own Commands block. The short version, wi
 server on 4173 and the API on 8000:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q     # 379 tests
+cd pipeline && ../.venv/Scripts/python -m pytest -q     # 409 tests
 cd web && npm run typecheck && npx vite build
 cd web && for p in landing guide tour controls hazard bias particles isolate                    outreach requirements drift section upload; do node probe-$p.mjs; done
 ```
 
 `probe-section` and `probe-upload` need the API; the other thirteen do not. **All fifteen were
-green on 2026-09-07**, along with 379 tests, the typecheck and the build.
+green on 2026-09-11**, along with 409 tests, pyflakes, the typecheck and the build: on a
+baseline before any change, after Groups A and B, and on the finished tree after C, D and E.
 
 **Run the API-needing two separately, and stop the API afterwards.** `probe-outreach` failed on
 `page.goto("app.html?kiosk=1")` with a 60 s navigation timeout, twice in a row, while `uvicorn`

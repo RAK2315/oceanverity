@@ -1,3 +1,13 @@
+"""The Argo profile parser, fed rows shaped exactly like the Ifremer ERDDAP CSV.
+
+Real floats fail, and a download is thousands of rows from hundreds of instruments, so what is
+defended here is that one bad row or one bad channel costs exactly that and no more: rows group
+into one Profile per platform and instant, an implausible salinity is dropped while the good
+temperature beside it survives, a malformed row never takes the download down with it, and a
+streamed download parses identically to one held as a string. Pressure becomes depth through the
+gravity-corrected formula at the cast's own latitude, never one decibar to one metre.
+"""
+
 import numpy as np
 import pytest
 

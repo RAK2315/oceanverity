@@ -9,7 +9,7 @@
  *
  * So a depth Field is drawn as a **sheet**: a surface inside the block, sitting at the depth it
  * reports, with the Floats suspended around it. You watch the 26 °C isotherm dome up and
- * collapse across four months, inside the water. That is the one picture in this project that no
+ * collapse across the year, inside the water. That is the one picture in this project that no
  * flat map can produce, and it costs one mesh that three Fields share.
  *
  * Both shaders here take their colour **per vertex, computed on the CPU** by `palette.ts`, so

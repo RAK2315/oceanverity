@@ -31,6 +31,7 @@ from .anomaly import (
     Z_THRESHOLD,
     anomaly_series,
     find_anomaly_features,
+    spread_by_level,
     symmetric_encoding_range,
 )
 from .climatology import climatological_anomaly, month_of
@@ -61,6 +62,7 @@ from .hazard import (
     mixed_layer_depth,
 )
 from .palettes import all_tables, banded_table
+from .plausibility import TEMPERATURE_BOUNDS, mask_implausible
 from .residuals import bias_grid, field_bias, positions_from, rank_residuals
 from .thermocline import isotherm_depth, swept_through
 from .sources.argo import ArgoErddapSource, BgcArgoSource
@@ -77,8 +79,9 @@ from .volume import encode_volume
 # thermocline doming that drives monsoon forecasts.
 #
 # The western edge is 45 E rather than 55 E because the Somali Current core sits at 50 to 52 E.
-# At 55 E the block showed only its eastern flank - about 1.2 m/s against the 3.00 m/s measured
-# at 9.50 N, 51.58 E on 2026-07-30 - so the most dramatic current in the Indian Ocean fell just
+# At 55 E the block showed only its eastern flank - about 1.2 m/s against the 2.94 m/s the core
+# carries on the model's own node at 9.5 N, 51.5 E on 2026-07-30 (`copernicus.py` has the
+# measurement) - so the most dramatic current in the Indian Ocean fell just
 # off the edge of the picture. INCOIS's grid runs 30.5 to 119.5 E, so 45 E is well inside the
 # source. Widening it moves every derived number in the repository; they are re-measured from a
 # bake, never adjusted by arithmetic.
@@ -318,6 +321,28 @@ HAZARD_FIELDS = (
 HAZARD_FIELD_KEYS = tuple(f.key for f in HAZARD_FIELDS)
 
 
+def all_field_specs() -> tuple[FieldSpec, ...]:
+    """Every `FieldSpec` the bake can put in the manifest, without fetching anything.
+
+    The adapters declare their Fields as data, so the whole set is knowable offline - which is
+    what lets a test assert something about *all* of them rather than about whichever one is
+    being edited, and what lets `scripts/refresh_field_prose.py` rewrite the manifest's prose
+    without a bake. Every one of these carries a group, so every one of them is a button:
+    `mccreary_temperature` is a variable the McCreary adapter fetches to be differenced against
+    the Variational analysis, not a Field, and has no spec here.
+    """
+    return (
+        *IncoisErddapSource().fields(),
+        *IncoisMcCrearySource().fields(),
+        *CopernicusCurrentsSource().fields(),
+        *DERIVED_FIELDS,
+        NORMAL_ANOMALY_FIELD,
+        SPREAD_FIELD,
+        COVERAGE_FIELD,
+        *HAZARD_FIELDS,
+    )
+
+
 # The isotherm an anomaly feature is explained against. 20 degC is the conventional proxy for
 # the bottom of the warm surface layer and is what INCOIS publishes; see samudra/thermocline.py
 # for the correlation that makes it an explanation rather than a decoration.
@@ -347,14 +372,18 @@ COVERAGE_WINDOW_DAYS = 5.0
 OBSERVED_ONLY_CHANNELS = (("chlorophyll", "Chlorophyll a", "mg/m3"),)
 
 # How far a BGC cast may be from the cast being charted and still describe the same float's
-# water. Measured across the 50 chlorophyll-carrying floats in this bake, the gap is bimodal:
+# water. Measured on the twelve-step bake, across the 50 floats whose BGC casts it fetched, the
+# gap is bimodal:
 # 22 of them have a BGC cast at the same instant, and the rest sit 9 to 10 days away - exactly
 # one Argo cycle, because the synthetic BGC product is assembled a cycle behind the core one.
 #
 # At one day, 28 floats' chlorophyll was silently thrown away. Twelve days - one cycle plus the
 # coverage window - keeps 41 of the 50 and reaches only the adjacent dive of the same float.
 # Past that a float has surfaced twice and drifted, and it is honestly a different piece of
-# water, so the remaining nine are dropped rather than stretched to fit.
+# water, so the remaining nine are dropped rather than stretched to fit. That split is from the
+# BGC fetch and is not in anything the bake writes, so it has not been re-measured on the
+# 36-step bake; what that bake does record is the result - 57 floats carrying chlorophyll after
+# this window, `manifest.instruments.withChlorophyll`.
 #
 # Nothing is being compared against the model at an instant here - chlorophyll has no model side
 # - so a neighbouring cast costs nothing as long as the panel says which cast it is, which
@@ -406,8 +435,9 @@ DRIFT_HORIZON_DAYS = (10.0, 30.0, 60.0, 90.0)
 # it cannot come from one - the first rule in `CLAUDE.md`. These three are what an instrument
 # measures and what the section offers.
 #
-# 24 levels x 36 x 56 x 4 bytes is 194 KB a file, 6.97 MB for three Fields across twelve steps,
-# against 58.8 MB of baked data already. That is the price of the section working **on the
+# 24 levels x 36 x 56 x 4 bytes is 194 KB a file, about 21 MB for three Fields across the
+# 36-step bake, against 192 MB of baked data in all (it was 6.97 MB against 58.8 at twelve
+# steps, and the share has barely moved). That is the price of the section working **on the
 # static deployment and with the network unplugged**, rather than only when somebody remembers
 # to start uvicorn - and the live site at rak2315.github.io has no API at all.
 SECTION_FIELD_KEYS = ("temperature", "salinity", "density")
@@ -457,10 +487,20 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     print(f"[bake] {len(wanted)} timesteps, {wanted[0]:%Y-%m-%d} to {wanted[-1]:%Y-%m-%d}")
 
     grids: dict[tuple[str, int], Grid] = {}
+    # Temperature no sea has ever held is masked here, before anything is derived from it, so
+    # density, both anomalies, the spread and the hazard Fields inherit the absence rather than
+    # the fault. Counted per source, and written to the manifest. See `plausibility.py`.
+    masked = {"temperature": 0, "mccreary_temperature": 0}
     for field in model.fields():
         for index, stamp in enumerate(wanted):
-            grids[(field.key, index)] = model.fetch_grid(field.key, stamp, DEMO_REGION)
+            grid = model.fetch_grid(field.key, stamp, DEMO_REGION)
+            if field.key == "temperature":
+                grid, count = mask_implausible(grid, *TEMPERATURE_BOUNDS)
+                masked["temperature"] += count
+            grids[(field.key, index)] = grid
             print(f"[bake]   {field.key} {stamp:%Y-%m-%d}")
+    if masked["temperature"]:
+        print(f"[bake] masked {masked['temperature']} temperature cells outside {TEMPERATURE_BOUNDS}")
 
     # Derived Fields, computed from the Grids just fetched. Added to the same dictionary, so
     # everything downstream - the native-grid export, the encoder, the manifest - treats them
@@ -493,7 +533,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     # difference against the first. Not fatal: if their server is down we lose three evidence
     # Fields and keep the platform.
     evidence_fields: list[FieldSpec] = []
-    if _fetch_second_analysis(second_analysis, grids, wanted):
+    if _fetch_second_analysis(second_analysis, grids, wanted, masked):
         for index in range(len(wanted)):
             first = grids[("temperature", index)]
             other = grids[("mccreary_temperature", index)]
@@ -812,7 +852,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
             else []
         ),
         # Order here is the order of the Variable selector, within each group. `group` is what
-        # splits it: thirteen Fields cannot be a flat list of buttons, and a forecaster looks for
+        # splits it: fifteen Fields cannot be a flat list of buttons, and a forecaster looks for
         # a hazard quantity under HAZARD rather than under "the fourth one along".
         "fields": [
             asdict(f) | {"range": list(ranges[f.key])}
@@ -846,6 +886,26 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
             "minCells": MIN_CELLS,
             "isothermValue": ISOTHERM_VALUE,
         },
+        # How far each Level's water moves across the series, which is the measurement behind
+        # the Anomaly entry's claim that the signal lives in the thermocline rather than at the
+        # surface. It was three numbers typed into a guide bullet and three more, different,
+        # typed into `anomaly.py`'s docstring, and both sets were from a bake that is gone.
+        # The whole profile is written rather than the three Levels the sentence quotes, so the
+        # peak is found by looking at it instead of by somebody remembering where it was.
+        # What the bake refused to believe, and on what grounds. Always written, zero included,
+        # so a reader can tell "nothing was masked" from "this bake predates masking".
+        "masked": {
+            "bounds": {"temperature": list(TEMPERATURE_BOUNDS)},
+            "cells": dict(masked),
+            "reason": (
+                "Temperature below the freezing point of seawater, or above 38 degC - beyond "
+                "37.6 degC, the verified in-situ record for the Persian Gulf, the hottest sea "
+                "measured."
+            ),
+        },
+        "anomalySpread": _spread_block(
+            spread_by_level([grids[("temperature", i)] for i in range(len(wanted))])
+        ),
         "timesteps": [t.isoformat() for t in wanted],
         "volume": {
             "width": len(sample.longitudes),
@@ -910,8 +970,8 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
             for key, label, units in OBSERVED_ONLY_CHANNELS
         ],
         # Where the model most disagrees with the instruments. A separate file because
-        # collocations.json is 10.5 MB and is deliberately fetched after first paint, and this
-        # is about 200 KB - so the bias map is on screen while the charts behind it are still
+        # collocations.json is 12.6 MB and is deliberately fetched after first paint, and this
+        # is about 170 KB - so the bias map is on screen while the charts behind it are still
         # arriving. See samudra/residuals.py.
         "residuals": {
             "file": "residuals.json",
@@ -954,7 +1014,7 @@ def _glider_index():
     return path.read_text(encoding="utf-8").splitlines()
 
 
-def _fetch_second_analysis(source, grids, timesteps) -> bool:
+def _fetch_second_analysis(source, grids, timesteps, masked: dict[str, int]) -> bool:
     """INCOIS's Kessler-McCreary analysis and its evidence channels, or nothing at all.
 
     Returns whether it landed. Not fatal: these three Fields are the credibility layer, and
@@ -964,7 +1024,13 @@ def _fetch_second_analysis(source, grids, timesteps) -> bool:
     try:
         for key in keys:
             for index, stamp in enumerate(timesteps):
-                grids[(key, index)] = source.fetch_grid(key, stamp, DEMO_REGION)
+                grid = source.fetch_grid(key, stamp, DEMO_REGION)
+                # The spread is this minus the Variational analysis, so a fault here would
+                # reach it just as surely as one in the first analysis. Same bounds, own count.
+                if key == "mccreary_temperature":
+                    grid, count = mask_implausible(grid, *TEMPERATURE_BOUNDS)
+                    masked[key] += count
+                grids[(key, index)] = grid
             print(f"[bake]   {key} x{len(timesteps)}")
     except Exception as error:  # noqa: BLE001 - one upstream, many ways to be down
         print(f"[bake] WARNING: second analysis unavailable ({error}); continuing without it")
@@ -1184,7 +1250,7 @@ def _bake_coverage(output_dir, profiles, grids, timesteps, mask_field_key, warp)
         (output_dir / name).write_bytes(encoded.data)
         paths.append(name)
 
-    # Pooled over every Timestep, not averaged over the twelve per-step figures: a step whose
+    # Pooled over every Timestep, not averaged over the per-step figures: a step whose
     # mask leaves more ocean has more voxels to be empty in, and averaging percentages would
     # weight a small step and a large one the same. This is the figure the guide panel quotes,
     # so it goes into the manifest rather than into a sentence somebody has to keep in step.
@@ -1498,8 +1564,8 @@ def _build_residuals(collocations, floats, fields, ranges) -> dict:
     """Where the model most disagrees with the instruments, ranked and binned.
 
     Every number this writes is already in `collocations.json`; nothing here fetches, models or
-    predicts anything. It exists as its own file because `collocations.json` is 10.5 MB and is
-    deliberately fetched after first paint, and because a user should not have to click 234
+    predicts anything. It exists as its own file because `collocations.json` is 12.6 MB and is
+    deliberately fetched after first paint, and because a user should not have to click 266
     instruments to find the three the analysis struggled with.
 
     See `samudra/residuals.py` for why the ranking is on a fraction of each Field's own range
@@ -1521,7 +1587,7 @@ def _build_residuals(collocations, floats, fields, ranges) -> dict:
         # Split by kind, because the two kinds are answering different questions. INCOIS
         # assimilate Argo: a float's residual is largely the analysis agreeing with an
         # observation it was fed, and the moored buoys are the only independent check in the
-        # bake. Pooled, the nine of them disappear into 224 floats and the headline becomes a
+        # bake. Pooled, the seventeen of them disappear into 249 floats and the headline becomes a
         # statement about self-consistency. See `residuals.py`.
         by_kind = {
             kind: field_bias(entries, field.key, kind=kind)
@@ -1916,6 +1982,21 @@ def _nearest_timestep(when: datetime, timesteps) -> int:
     return int(np.argmin([abs((when - t).total_seconds()) for t in timesteps]))
 
 
+def _spread_block(spread) -> dict:
+    """A `LevelSpread` as the manifest carries it: the profile, plus where its peak is.
+
+    The peak is written out rather than left for a reader to find, because the sentence it
+    supports - "the signal is strongest in the thermocline, not at the surface" - is the claim,
+    and a claim a consumer has to re-derive is a claim nothing checks.
+    """
+    return {
+        "levelMetres": _json_numbers(spread.metres),
+        "medianStdDegC": _json_numbers(spread.degrees),
+        "peakMetres": _json_number(spread.peak_metres),
+        "peakDegC": _json_number(spread.peak_degrees),
+    }
+
+
 def _json_numbers(values) -> list:
     return [_json_number(v) for v in values]
 
@@ -1929,7 +2010,12 @@ def _json_number(value):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Bake INCOIS + Argo data into static assets.")
     parser.add_argument("--output", type=Path, default=Path("../web/public/data"))
-    parser.add_argument("--timesteps", type=int, default=12, help="most recent N (10-day) steps")
+    # 36 because that is what ships. `bake()` clears volumes/, currents/, surfaces/, grids/ and
+    # data/grids/*.npz before it writes, so a default smaller than the committed bake does not
+    # produce a second bake to compare against - it replaces the committed one with a third of
+    # it and leaves nothing behind. The default was 12 against a committed 36 for a round, under
+    # a documented command with no --timesteps on it.
+    parser.add_argument("--timesteps", type=int, default=36, help="most recent N (10-day) steps")
     # Derived from the Timestep span rather than defaulted, because the two are one decision.
     # Floats are drawn where they actually were at the moment on screen, so a profile window
     # shorter than the analyses it has to cover leaves the early frames with no instruments at

@@ -433,7 +433,7 @@ type Focus = (lon: number, lat: number) => void;
  *
  * The other half of the automatic scan. The Anomaly Features answer "where did the field depart
  * from its own average"; this answers "where does the model depart from the floats", which is
- * the question the whole platform exists for and the one that took 234 clicks to answer.
+ * the question the whole platform exists for and the one that took 266 clicks to answer.
  *
  * **It is not AI and must never be captioned as one.** There is no model here and no
  * confidence: every figure is a mean or an RMS of residuals `bake.py` already wrote, and the
@@ -489,7 +489,7 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
           checked={store.biasMode}
           onChange={(e) => {
             set("touched", "bias");
-            set("biasMode", e.target.checked);
+            store.setBiasMode(e.target.checked);
           }}
         />
         <span>Colour instruments by disagreement</span>
@@ -501,9 +501,9 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
         * INCOIS's analysis **assimilates Argo**, so a float's residual is largely the model
         * agreeing with an observation it was fed. The moored buoys are not assimilated, and
         * measured over this bake they disagree several times as much. Pooled into one figure
-        * the nine of them vanish into 224 floats and the headline becomes a statement about
+        * the seventeen of them vanish into 249 floats and the headline becomes a statement about
         * self-consistency, so the independent number is printed beside it - with its own count,
-        * because nine instruments is a small sample and saying so is part of the answer.
+        * because seventeen instruments is a small sample and saying so is part of the answer.
         *
         * `null` is not zero. Rendering a missing mean as "0.00 °C cooler on average" would be
         * a missing measurement drawn as a perfect result.
@@ -1019,7 +1019,7 @@ function Upload() {
             * Does the timeline actually do anything? The panel used to answer that from the
             * *axis* - "no time axis, so the timeline does not move it" - which is only half of
             * it. A file whose instants are all in 2019 has a time axis, maps every one of the
-            * twelve steps to the same one, and animates nothing while the slider moves.
+            * bake's steps to the same one, and animates nothing while the slider moves.
             */}
           {!timelineMoves(store.uploadSteps) && (
             <p className="note">
@@ -1144,9 +1144,9 @@ export function Controls({
         {/*
           * A tab strip, not five stacked sub-headings.
           *
-          * Grouping is right - a flat list of fourteen buttons is a wall, and the headings are
+          * Grouping is right - a flat list of fifteen buttons is a wall, and the headings are
           * what let somebody find Cyclone Heat Potential without reading all of them. Showing
-          * all five groups at once is not: fourteen buttons in a two-column grid with wrapped
+          * all five groups at once is not: fourteen buttons, as there were then, in a two-column grid with wrapped
           * two-line labels came to about 640 px, so on a 1366x768 laptop four other control
           * groups were pushed off screen, and the panel's height jumped every time the reader
           * changed group.
@@ -1212,7 +1212,7 @@ export function Controls({
       {inVolume && (
         <>
           {/* A depth sheet and a sea-surface drape are not cut by a depth range, so the two
-              sliders would sit there doing nothing on five of the fourteen Fields. On the
+              sliders would sit there doing nothing on five of the fifteen Fields. On the
               currents they do something important instead - they choose the depth the arrows
               sit on - so the group stays, with a readout that says which job it is doing. */}
           {(isVolumeField || spec.render === "vector") && (

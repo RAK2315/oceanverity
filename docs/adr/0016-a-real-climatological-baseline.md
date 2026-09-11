@@ -15,10 +15,17 @@ Measured on the 36-Timestep bake of 2026-09-09, across 1,049,076 cells:
 
 | | |
 | --- | --- |
-| Monthly normals fetched | 4 - April, May, June, July |
-| Mean departure | **-0.014 degC** |
-| 95th percentile of the magnitude | **2.104 degC** |
-| Encoding range | **±3.365 degC**, symmetric, because the palette diverges |
+| Monthly normals fetched | 12 - every calendar month, because the window is a year |
+| Mean departure | **+0.074 degC** |
+| 95th percentile of the magnitude | **2.051 degC** |
+| Encoding range | **±3.547 degC**, symmetric, because the palette diverges |
+
+Read straight off `manifest.normalAnomaly` and the Field's own `range`. **The sign of the mean
+is the figure that matters**, and it flipped: this table said -0.014 degC for a round - this
+ocean very slightly cooler than its 1991-2020 normal - under a date stamp naming the bake that
+says it is warmer, while `README.md`, the landing page and the guide panel all quoted the
+manifest's +0.07. Those three read the manifest; this table was typed. The four monthly normals
+it listed were the twelve-step bake's April to July.
 
 ## Why the axes made this cheap
 

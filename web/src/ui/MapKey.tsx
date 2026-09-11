@@ -246,7 +246,7 @@ export function MapKey() {
   return (
     <div
       ref={placement.ref}
-      className={`mapkey ${morph > 0.5 ? "in-volume" : "on-globe"}${open ? "" : " shut"}`}
+      className={`mapkey${morph > 0.5 ? " in-volume" : ""}${open ? "" : " shut"}`}
       style={placement.style}
       onPointerDown={placement.onPointerDown}
     >

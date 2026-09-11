@@ -39,7 +39,6 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Sequence
 
-import numpy as np
 import requests
 import xarray as xr
 

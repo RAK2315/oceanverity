@@ -131,7 +131,7 @@ async function problemFrom(response: Response): Promise<UploadProblem> {
 /**
  * Which of the file's own instants each of the demo's Timesteps should show.
  *
- * The uploaded file has its own clock, and it is rarely the bake's twelve ten-day steps. Rather
+ * The uploaded file has its own clock, and it is rarely the bake's own ten-day steps. Rather
  * than growing a second timeline, each Timestep on screen is mapped to the instant in the file
  * **nearest it in time**, so scrubbing the existing slider walks the uploaded file in the right
  * order and stops where the file stops.
@@ -140,7 +140,7 @@ async function problemFrom(response: Response): Promise<UploadProblem> {
  * timeline that appears to animate something with no clock would be inventing a change.
  *
  * A file that *has* a clock and misses is the same problem wearing a disguise: a file whose
- * instants are all in 2019 maps every one of the twelve steps to the same index, so the slider
+ * instants are all in 2019 maps every one of the bake's steps to the same index, so the slider
  * moves and nothing on screen changes. `timelineMoves` is what lets the panel say that, and it
  * is a fact about the mapping rather than about the axis.
  */
@@ -169,7 +169,7 @@ export function timestepMapping(upload: UploadedFile, demoTimesteps: string[]): 
  * Does scrubbing the timeline actually change what is drawn?
  *
  * False for a file with no time axis, and false for one whose instants all sit far enough from
- * the bake's four months that every Timestep lands on the same one. The panel only said the
+ * the bake's own window that every Timestep lands on the same one. The panel only said the
  * first of those, so a 2019 file animated nothing while the timeline moved and nothing on
  * screen admitted it.
  */

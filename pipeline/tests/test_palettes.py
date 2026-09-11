@@ -10,6 +10,9 @@ when a re-bake moved the 99.5th percentile, which is the kind of luck a test rep
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -140,3 +143,41 @@ def test_neighbouring_bands_stay_far_enough_apart_to_be_told_apart(vision):
     # 0.04 in relative luminance is a clearly visible step at these levels, and the palette
     # currently manages 0.046 at its tightest, under protanopia.
     assert min(gaps) >= 0.04, f"{vision}: closest bands differ by only {min(gaps):.4f}"
+
+
+# ------------------------------------------------------------------ the range that ships
+
+# The two parametrised lists above are ranges somebody thought of, and the docstrings under them
+# say "whatever range this bake happens to produce". The bake produced 0..19, which is in
+# neither list. A guard made of hard-coded values is one a re-bake can walk straight out of, so
+# this reads the range - and the table - the build actually carries. Skipped rather than failed
+# on a clone with no bake, because that is a missing input and not a wrong answer.
+
+SHIPPED = Path(__file__).resolve().parents[2] / "web" / "public" / "data" / "manifest.json"
+
+
+def shipped_coverage():
+    if not SHIPPED.exists():
+        pytest.skip("no baked manifest to read the shipped coverage range from")
+    manifest = json.loads(SHIPPED.read_text(encoding="utf-8"))
+    field = next((f for f in manifest["fields"] if f["key"] == "coverage"), None)
+    table = manifest.get("palettes", {}).get("coverage")
+    if field is None or table is None:
+        pytest.skip("this bake carries no Observation Coverage")
+    return float(field["range"][0]), float(field["range"][1]), table
+
+
+def test_every_cast_count_reads_back_as_its_own_band_in_the_shipped_bake():
+    """Through the table the bake wrote, not one regenerated here - that table is what is drawn."""
+    vmin, vmax, table = shipped_coverage()
+    for count in range(int(vmin), int(vmax) + 1):
+        byte = encode_volume(np.full((1, 1, 1), float(count)), vmin=vmin, vmax=vmax).data[0]
+        colour = list(table[byte])
+        band = [i for i, c in enumerate(COVERAGE_BANDS) if list(c) == colour]
+        assert band == [band_of(count)], f"{count} casts drew as band {band} at {vmin}..{vmax}"
+
+
+def test_every_band_is_reachable_in_the_shipped_bake():
+    vmin, vmax, _ = shipped_coverage()
+    seen = {band_read_back(c, vmin, vmax) for c in range(int(vmin), int(vmax) + 1)}
+    assert seen == set(range(len(COVERAGE_BANDS)))

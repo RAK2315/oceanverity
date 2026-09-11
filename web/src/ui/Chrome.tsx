@@ -123,9 +123,9 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
 
   const spec = field();
   const stamp = manifest.timesteps[timestepIndex];
-  // Split by kind: nine of the instruments on the water are anchored buoys, not Argo floats,
-  // and calling them all floats is the same class of error as calling all 221 of them
-  // "reporting" when only 184 are.
+  // Split by kind: 5 to 14 of the instruments drawn at any step are anchored buoys, not Argo
+  // floats, and calling them all floats is the same class of error as counting every instrument
+  // in the bake as "reporting" when only the ones near this date are.
   const reporting = store.reportingByKind();
   const inVolume = morph > 0.5;
 

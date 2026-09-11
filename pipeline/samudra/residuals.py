@@ -7,7 +7,7 @@ the one the whole project is actually about: **where does the *model* most disag
 
 Every number here is already computed. `bake._collocate_cast` writes a mean and an RMS residual
 per instrument per Field into `collocations.json`, and nothing has ever sorted them. So a user
-who wanted to know where the analysis is weakest had to click 234 instruments one at a time.
+who wanted to know where the analysis is weakest had to click 266 instruments one at a time.
 
 Three things happen here, and they are separate because they answer three different questions.
 
@@ -25,12 +25,14 @@ drawn from one float, which is the same refusal `find_anomaly_features` makes wi
 **`field_bias`** - the one-line summary. What the model does on average across the whole basin,
 and **split by kind of instrument**, which is the difference between a measurement and a
 tautology. INCOIS's analysis assimilates Argo, so a float's residual is largely the model
-agreeing with an observation it was fed. The nine moored buoys are not assimilated. Measured
-over this bake the moorings disagree 4.5x more on temperature (0.748 degC against 0.167), 4.9x
-on salinity and 6.4x on density, and pooled into one basin-wide figure they vanish into 221
-floats. The number a forecaster wants - how far the analysis sits from water nobody told it
-about - is the mooring one, and it is now reported beside the pooled one rather than instead of
-it, because 9 instruments is a small sample and saying so is part of the answer.
+agreeing with an observation it was fed. The seventeen moored buoys are not assimilated.
+Measured on the 36-step bake, off `residuals.json`'s own `byKind` blocks, the moorings disagree
+5.5x more on temperature (1.010 degC against 0.183), 7.7x on salinity and 5.4x on density, and
+pooled into one basin-wide figure they vanish into 249 floats. At twelve steps it was nine buoys
+at 4.5x; a year roughly doubled the evidence and the temperature ratio went up, not down. The
+number a forecaster wants - how far the analysis sits from water nobody told it about - is the
+mooring one, and it is reported beside the pooled one rather than instead of it, because 17
+instruments is still a small sample and saying so is part of the answer.
 
 Nothing here is a model, a prediction or a confidence. It is arithmetic over measurements that
 already exist, and the words on screen have to stay that side of the line: `02-next-features.md`
@@ -130,7 +132,8 @@ def positions_from(floats: list[dict], collocations: dict[str, dict]) -> dict[st
     would put a residual measured in one place at a position hundreds of kilometres away, in a
     feature whose whole point is "the model was wrong *here*".
 
-    Measured over the shipped bake the fallback fires 0 times in 234, so this is latent - which
+    Measured on the 36-step bake the fallback fires 0 times in 270 collocated instruments, as
+    it did in 234 at twelve steps, so this is latent - which
     is the reason to write the rule down rather than the reason not to.
     """
     by_id = {item["id"]: item for item in floats}

@@ -26,6 +26,16 @@ export type Stage = "globe" | "diving" | "volume";
 export type Theme = "dark" | "light";
 
 /**
+ * The Field Group an uploaded file's variables land in.
+ *
+ * A group of their own rather than dropped among the baked Fields, because the difference
+ * matters to a reader: everything else on this platform came from a named provider through an
+ * adapter with a test behind it, and these came from a file somebody handed us five seconds
+ * ago. Same rendering, different provenance, and the tab says so.
+ */
+export const UPLOAD_GROUP = "yours";
+
+/**
  * How a Field is drawn when it does not ask for anything else.
  *
  * These are constants rather than "whatever the last Field left behind". A FieldSpec carries
@@ -42,16 +52,6 @@ export type Theme = "dark" | "light";
  * dense first slab saturates the ray and the emphasis weighting stops mattering. The water still
  * reads as a body at 0.03.
  */
-/**
- * The Field Group an uploaded file's variables land in.
- *
- * A group of their own rather than dropped among the baked Fields, because the difference
- * matters to a reader: everything else on this platform came from a named provider through an
- * adapter with a test behind it, and these came from a file somebody handed us five seconds
- * ago. Same rendering, different provenance, and the tab says so.
- */
-export const UPLOAD_GROUP = "yours";
-
 export const DEFAULT_EMPHASIS = 0.85;
 export const DEFAULT_OPACITY = 0.03;
 
@@ -315,7 +315,8 @@ interface State {
   /**
    * Which Field Group's buttons the Variable selector is showing.
    *
-   * Fourteen buttons in a two-column grid under five sub-headings is 640 px on its own, and the
+   * Fourteen buttons (there are fifteen Fields now) in a two-column grid under five sub-headings
+   * was 640 px on its own, and the
    * height changed every time the reader switched group. Five short words fit one row of tabs,
    * so the selector shows 1 to 5 buttons instead of 14 and stops changing height. It follows
    * the selected Field, so arriving by deep link or by the tour lands on the right tab.
@@ -337,6 +338,19 @@ interface State {
    */
   hazardMode: boolean;
   setHazardMode: (on: boolean) => void;
+  /**
+   * Turn the bias map on or off. **On also moves the timeline to the newest analysis.**
+   *
+   * Every marker on the bias map is drawn where its own comparison was taken, and 206 of the
+   * 251 density comparisons were taken at the last two analyses. So turning the mode on at a
+   * mid-year date moved every marker at once - measured at 30 Dec 2025, the 199 on screen moved
+   * a median 258 km and up to 1,414 km, and 52 more appeared - which read as a bug to the person
+   * who pressed it, and was reported as one. At the newest analysis 92% of them do not move at
+   * all, so the press reads as what it is: the dots changing colour. The markers themselves
+   * are unchanged and still pinned to their casts; only the date the mode opens on moved.
+   * The checkbox, the tour and Explore all come through here, so they cannot disagree.
+   */
+  setBiasMode: (on: boolean) => void;
   /** The Field to come back to when cyclone mode is switched off. */
   fieldBeforeHazard: string | null;
 
@@ -450,15 +464,23 @@ interface State {
    *
    * Not every Float in the bake. A Float is not drawn when its nearest cast is further than the
    * coverage window from the moment on screen, because drawing it would imply an observation
-   * that does not exist. Measured across the twelve steps the drawn count runs 192 to 220, so
-   * `manifest.floatCount` - 237 - overstates the opening card by up to 45.
+   * that does not exist. Measured across the 36 steps the drawn count runs 192 to 221 Floats and
+   * 5 to 14 moored buoys, so `manifest.floatCount` - 276 - overstates any one step by at least 41.
+   * `collect_facts.py` derives the range, so `ppt/FACTS.md` is where to check it.
    *
    * Ordered by longitude so that stepping through them with the keyboard walks the region
    * left to right, which is the order a viewer reads the map in.
    */
   reportingFloats: () => OceanFloat[];
-  reportingCount: () => number;
-  /** Reporting instruments split by kind, so a sentence can name what each one is. */
+  /**
+   * Reporting instruments split by kind, so a sentence can name what each one is.
+   *
+   * There was a `reportingCount()` beside this that returned the pooled length, and every
+   * sentence that used it called the total "Argo floats" - which is wrong for the 5 to 14
+   * moored buoys drawn at any Timestep. Pooling was the whole defect, so the pooled accessor
+   * went with it: a caller that wants one number adds the two and has to look at what it is
+   * adding.
+   */
   reportingByKind: () => { floats: number; moorings: number };
   /** The Fields of one group, in manifest order. Empty when nothing is in it. */
   fieldsInGroup: (group: string) => FieldSpec[];
@@ -749,6 +771,11 @@ export const useStore = create<State>((setState, getState) => ({
    * Entering runs the same preset it always did and remembers where the reader was. Leaving puts
    * them back on the Field they had, so the mode is a detour rather than a one-way door.
    */
+  setBiasMode: (on) => {
+    const steps = getState().manifest?.timesteps.length ?? 0;
+    setState(on && steps > 0 ? { biasMode: true, timestepIndex: steps - 1 } : { biasMode: on });
+  },
+
   setHazardMode: (on) => {
     const state = getState();
     if (on === state.hazardMode) return;
@@ -767,7 +794,7 @@ export const useStore = create<State>((setState, getState) => ({
   /**
    * Set the scene up for a cyclone question, in one click.
    *
-   * Thirteen Fields and eleven controls is the right toolkit for a forecaster and the wrong
+   * Fifteen Fields and a panel of controls is the right toolkit for a forecaster and the wrong
    * first minute for everyone else. This is the shape of the question the September 2026 problem
    * statement is about: how much heat is in the water, over the whole column, at the most recent
    * analysis - and it puts the Field, the depth slice and the render hints in the one
@@ -827,8 +854,6 @@ export const useStore = create<State>((setState, getState) => ({
       .sort((a, b) => a.at.lon - b.at.lon)
       .map((entry) => entry.item);
   },
-
-  reportingCount: () => getState().reportingFloats().length,
 
   reportingByKind: () => {
     const reporting = getState().reportingFloats();

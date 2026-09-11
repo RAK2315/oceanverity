@@ -28,7 +28,7 @@ the wrong place. This is the same test, passed.
 Which product, and why not the one the PS names
 -----------------------------------------------
 The PS names `GLOBAL_MULTIYEAR_PHY_001_030`, the reanalysis. It **ends 2026-06-23** and would
-leave four of this bake's twelve Timesteps with no currents at all. The near-real-time analysis
+leave the four Timesteps after it, of the 36 this bake carries, with no currents at all. The near-real-time analysis
 and forecast product covers the whole window and is the same product family already behind the
 baked current-picture overlay, so nothing becomes inconsistent. The reanalysis stays the right
 choice for any historical work, 1993 to 2026.
@@ -129,20 +129,33 @@ class CopernicusCurrentsSource:
         return _time_axis()
 
     def fetch_grid(self, field_key: str, timestep: datetime, bbox: BoundingBox) -> Grid:
-        """One velocity component on Copernicus's own axes, so the seam's contract is honoured.
+        """A Field this adapter declares, or either velocity component, on Copernicus's own axes.
 
         The bake does not use this - it wants both components on the model's axes and would pay
-        for the region twice - but a GridSource that cannot serve a Grid is not a GridSource, and
-        the API's adapter registry can hand this straight to the CF and OPeNDAP writers.
+        for the region twice - but a GridSource that cannot serve a Grid is not a GridSource.
+        It used to know only `current_u` and `current_v` while `fields()` declared only
+        `current_speed`, so the one key the adapter advertised raised `KeyError`; nothing
+        called it, which is how that survived. `tests/test_copernicus.py` asks for every
+        declared key.
         """
-        variable = {"current_u": "uo", "current_v": "vo"}[field_key]
+        components = {"current_u": "uo", "current_v": "vo"}
+        known = (*components, *(spec.key for spec in _FIELDS))
+        if field_key not in known:
+            raise KeyError(f"{field_key!r} is not served by {self.name}; it serves {', '.join(known)}")
+
         subset = _open(bbox, timestep)
-        return Grid(
-            levels=subset["depth"].values.astype(float),
-            latitudes=subset["latitude"].values.astype(float),
-            longitudes=subset["longitude"].values.astype(float),
-            values=subset[variable].values.astype(float),
-        )
+
+        def component(variable: str) -> Grid:
+            return Grid(
+                levels=subset["depth"].values.astype(float),
+                latitudes=subset["latitude"].values.astype(float),
+                longitudes=subset["longitude"].values.astype(float),
+                values=subset[variable].values.astype(float),
+            )
+
+        if field_key in components:
+            return component(components[field_key])
+        return speed(component("uo"), component("vo"))
 
     def fetch_on_axes(
         self,

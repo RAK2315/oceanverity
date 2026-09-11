@@ -71,15 +71,16 @@ export function Timeline() {
           * Buttons, not spans. These were clickable and unreachable by keyboard, which made the
           * tick strip a mouse-only duplicate of a control the slider already offers.
           *
-          * Every step stays clickable, but only some carry a date. Twelve five-character labels
+          * Every step stays clickable, but only some carry a date. Twelve five-character labels -
+          * the whole axis, when this was written -
           * need more width than the track has on a 1366 px screen, and they ran into each other
           * - "04-1004-2004-30" - which reads as a broken axis. The unlabelled steps keep their
           * accessible name, so nothing is lost to a screen reader.
           *
           * The stride is derived rather than fixed at every second tick, so the axis survives a
           * longer bake: `--timesteps 36` under the old rule drew eighteen labels in the same
-          * track and collided exactly as twelve had. Six labels is what the track fits, and at
-          * twelve steps this is still every second one - unchanged today, correct later.
+          * track and collided exactly as twelve had. Six labels is what the track fits: every
+          * second step at twelve, and every sixth on the 36-step bake that ships.
           */}
         <div className="timeline-ticks">
           {steps.map((stamp, index) => {
@@ -106,7 +107,7 @@ export function Timeline() {
       </div>
 
       {/*
-        * What the axis knows that nothing else on screen does: which of twelve, and what a step
+        * What the axis knows that nothing else on screen does: which of the run, and what a step
         * is worth.
         *
         * It used to print the date, which is the **third** copy of that date on the glass - the
@@ -122,7 +123,7 @@ export function Timeline() {
           * The bias map does not move with the timeline, and the only place that was said was
           * inside the map key - which folds, and is remembered folded.
           *
-          * Each marker is drawn where its own comparison was taken, across all twelve analyses,
+          * Each marker is drawn where its own comparison was taken, across every analysis,
           * because a residual measured at one position on one date would be a number on the
           * wrong water anywhere else. That is right and it is documented. What it looked like
           * was pressing play, watching the field animate, and watching every instrument stand

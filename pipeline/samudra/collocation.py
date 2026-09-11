@@ -74,7 +74,7 @@ def choose_cast(casts, matched_depths) -> int:
 
     Recency matters: ADR 0009 refuses observations fifteen months older than the analysis, and
     the same argument applies inside a single Float's record. But the newest cast is sometimes a
-    fragment. Measured on the shipped bake, 24 of 212 Floats had a newest cast more than 500 m
+    fragment. Measured on the twelve-step bake, 24 of 212 Floats had a newest cast more than 500 m
     shallower than their own deepest, 10 gave a chart with 20 compared depths or fewer, and 6
     gave a chart with nothing on it - float 6990611 has 13 casts and its newest reported only
     from 1300 m down, so the panel showed a single line and no verdict.

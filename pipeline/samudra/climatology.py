@@ -3,7 +3,8 @@ means by it.
 
 PS 26067 names **climate monitoring** among the four operational mandates a missing 3D platform
 impedes. The Temperature Anomaly this platform already had is a departure from the mean of the
-twelve baked Timesteps - roughly April to July 2026 - which is a **seasonal swing**, and the
+baked Timesteps - a year of them, August 2025 to July 2026, on the bake that ships - which is a
+**seasonal swing**, and the
 guide entry beside it has always said so rather than letting a reader assume otherwise. It is a
 useful field and it is not what "warmer than usual" means.
 
@@ -48,9 +49,10 @@ class AxisMismatch(ValueError):
 def month_of(when: datetime) -> int:
     """The calendar month a Timestep is differenced against.
 
-    Read off the Timestep, never off the clock. Every analysis in this bake is April to July
-    2026 and the bake runs in September; reading the clock would difference all twelve against
-    September's normal, which is smooth, plausible and wrong by a season.
+    Read off the Timestep, never off the clock. The analyses in a bake span the months before
+    it runs - a whole year, on the 36-step bake - and reading the clock would difference every
+    one of them against the month the bake happened to run in, which is smooth, plausible and
+    wrong by up to half a year.
     """
     return when.month
 

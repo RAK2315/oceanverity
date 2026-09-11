@@ -15,9 +15,12 @@ That was a fair call when each was a separate day. Two measurements changed the 
   INCOIS's own server, so this project already *consumed* OPeNDAP and only ever lacked the
   serving half. The README said otherwise and has been corrected.
 - **INCOIS's ERDDAP already publishes WMS for the dataset we read.** So re-serving their
-  temperature is re-publishing. What is worth serving is density, the temperature anomaly and
-  Observation Coverage - computed here, published nowhere else - and the capabilities document
-  says which layers are which.
+  temperature is re-publishing. What is worth serving is what this platform computed - density,
+  the two anomalies, the analysis spread, current speed and the five hazard Fields - and the
+  capabilities document says, layer by layer, which is which. `PROVENANCE` below is that
+  sentence. Observation Coverage is the one computed Field deliberately *not* served here, and
+  `NOT_ON_A_NATIVE_GRID` says why; this paragraph named it as servable for a round, forty lines
+  above the code refusing it.
 
 WCS stays unbuilt, and `docs/plan/03-requirement-gaps.md` records why: there is no maintained
 pure-Python WCS server, the coverage encodings are a day's work for a checkbox, and the numbers
@@ -44,8 +47,76 @@ import dap
 import wms
 from samudra.palettes import lookup_table
 
-# Layers this platform computed rather than restated. The capabilities document says so.
-OURS = {"density", "temperature_anomaly"}
+# Where each layer's numbers came from, in one sentence appended to its `<Abstract>`.
+#
+# This was a two-element `OURS` set against an "everything else is INCOIS's published analysis"
+# default, and the default was wrong about seven of the twelve layers it caught. It attributed
+# E.U. Copernicus Marine's current analysis to INCOIS, over a protocol a GIS reads with no human
+# in the loop, and it gave away the five hazard Fields - the whole claim of the September round -
+# by captioning them as somebody else's published work.
+#
+# So there is no default any more. A Field with no entry here gets a sentence that claims
+# nothing, and `test_standards.py` fails on it, because the alternative is a plausible sentence
+# nobody can see is wrong. Keyed by Field rather than by provider because "who published this"
+# is a property of the quantity: `current_speed` is computed here out of Copernicus's vectors,
+# and `analysis_spread` is computed here out of two of INCOIS's own analyses.
+PROVENANCE = {
+    "temperature": "INCOIS's published analysis, restated on its native grid.",
+    "salinity": "INCOIS's published analysis, restated on its native grid.",
+    "incois_casts": "INCOIS's published analysis, restated on its native grid.",
+    "incois_rmse": "INCOIS's published analysis, restated on its native grid.",
+    "density": (
+        "Computed by this platform from INCOIS's temperature and salinity, TEOS-10 "
+        "sigma-theta; published nowhere else."
+    ),
+    "temperature_anomaly": (
+        "Computed by this platform as the departure from the mean of the baked analyses; "
+        "published nowhere else."
+    ),
+    "temperature_normal_anomaly": (
+        "Computed by this platform: INCOIS's analysis differenced against NOAA's World Ocean "
+        "Atlas 2023 monthly normal for 1991-2020. Published nowhere else."
+    ),
+    "analysis_spread": (
+        "Computed by this platform as the difference between INCOIS's two independent analyses "
+        "of the same Argo profiles, Variational and Kessler-McCreary; published nowhere else."
+    ),
+    "current_speed": (
+        "Computed by this platform from E.U. Copernicus Marine's horizontal current velocity "
+        "analysis, landed on the model's own grid. Not INCOIS's."
+    ),
+    "heat_potential": (
+        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
+        "until 2019-03-30 and stopped."
+    ),
+    "d26": (
+        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
+        "until 2019-03-30 and stopped."
+    ),
+    "mixed_layer_depth": (
+        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
+        "until 2019-03-30 and stopped."
+    ),
+    "isothermal_layer_depth": (
+        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
+        "until 2019-03-30 and stopped."
+    ),
+    "barrier_layer": (
+        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
+        "until 2019-03-30 and stopped."
+    ),
+    "coverage": (
+        "Computed by this platform on the rendering lattice, and not served here. "
+        "See /api/volume/coverage/0."
+    ),
+}
+
+# The sentence a Field with no entry gets. It says only what is certainly true.
+UNATTRIBUTED = "Served by this platform; see /api/sources for who published what."
+
+# Which layers this platform computed rather than restated, for the capabilities document's own
+# summary. Derived from `PROVENANCE` so the two cannot drift apart.
+OURS = {key for key, sentence in PROVENANCE.items() if sentence.startswith("Computed")}
 
 # Observation Coverage is deliberately not served over any of these.
 #
@@ -200,11 +271,8 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                         "name": spec["key"],
                         "title": spec["label"],
                         "abstract": (spec.get("description") or spec["label"])
-                        + (
-                            "  Computed by this platform; published nowhere else."
-                            if spec["key"] in OURS
-                            else "  INCOIS's published analysis, restated on its native grid."
-                        ),
+                        + "  "
+                        + PROVENANCE.get(spec["key"], UNATTRIBUTED),
                         "units": spec["units"],
                         "ours": spec["key"] in OURS,
                     }

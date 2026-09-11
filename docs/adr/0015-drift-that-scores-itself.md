@@ -36,10 +36,10 @@ answer written into the bake. Re-measured on 2026-09-09 over a 36-Timestep year,
 | Question | Answer |
 | --- | --- |
 | From a position known one Argo cycle ago, how far out is the current field alone? | median **41 km**, ninetieth percentile **93 km**, over **6,246** cycles |
-| Let go and left for ~10 days | median separation **44 km**, against **46 km** the float itself travelled |
-| ~30 days | **99 km** against **103 km** travelled |
-| ~60 days | **143 km** against **150 km** travelled |
-| ~90 days | **208 km** against **204 km** travelled |
+| Let go and left for ~10 days | median separation **43 km**, against **45 km** the float itself travelled |
+| ~30 days | **105 km** against **108 km** travelled |
+| ~60 days | **166 km** against **144 km** travelled |
+| ~90 days | **212 km** against **165 km** travelled |
 
 **Only the days the current field covers are scored.** `CurrentSeries._bracket_time` holds the
 first analysis rather than extrapolating before it, which is the right choice for drawing a line
@@ -52,9 +52,14 @@ them - the same refusal `choose_cast` and the Float markers already make - and t
 what is left. The figures moved by 1 to 8 km and the count of scored floats by 7, so the finding
 did not change; what changed is that it is now a measurement of the analysed period.
 
-Read plainly: over one cycle the analysis is useful and imprecise, and past a month the
-separation is the same size as the distance travelled, which means the trajectory has stopped
-carrying information about *this* float. That is the honest answer and it is the one on screen.
+Read plainly: over one cycle the analysis is useful and imprecise; by a month the separation is
+the same size as the distance travelled; and past a month it is **larger** - 15% larger at 60
+days and 29% larger at 90 - which means the trajectory has stopped carrying information about
+*this* float and is now worse than guessing it stayed put. The horizon rows were left at the
+twelve-step bake's figures for a round while the cycle row above them was updated, and those
+older rows said the separation merely *reached* the travel; the year-long bake says it
+overtakes it, which is the same finding stated as strongly as the data supports. Figures are
+`manifest.drift.horizons`, rounded to the kilometre; `ppt/FACTS.md` carries them unrounded. That is the honest answer and it is the one on screen.
 It is also the argument for SARAT rather than against this: it shows exactly how much of the
 problem a current field solves on its own.
 

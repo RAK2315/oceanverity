@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   GUIDE,
   describeIsosurface,
@@ -9,6 +10,9 @@ import {
 import { axisToDepth } from "../scene/geography";
 import { UPLOAD_GROUP, useStore } from "../store";
 import { isDiverging } from "../transfer";
+
+/** Remembered per browser, like the map key's fold, so a reader who shut it once is not asked again. */
+const VIEW_OPEN_KEY = "samudra.guide.view";
 
 /**
  * The "what am I looking at" panel.
@@ -23,6 +27,31 @@ import { isDiverging } from "../transfer";
  */
 export function GuidePanel() {
   const store = useStore();
+
+  // The "What you are looking at" description folds. It is a paragraph sitting over the right
+  // side of the water, it says the same thing every time the view is the same, and a reader who
+  // has read it once wants the water back - the argument the map key's fold already made, so it
+  // is the same disclosure, remembered the same way. Only the description folds: an explanation
+  // of a control the reader just touched is the answer to a question they asked, and it keeps
+  // its close button. Before the early returns, because a hook cannot be called conditionally.
+  const [viewOpen, setViewOpen] = useState(() => {
+    try {
+      return window.localStorage.getItem(VIEW_OPEN_KEY) !== "closed";
+    } catch {
+      return true; // storage refused is not a reason to hide the description
+    }
+  });
+  const toggleView = () => {
+    setViewOpen((was) => {
+      try {
+        window.localStorage.setItem(VIEW_OPEN_KEY, was ? "closed" : "open");
+      } catch {
+        // Failing to remember must never cost the control.
+      }
+      return !was;
+    });
+  };
+
   const { manifest, touched, selectedFloatId, selectedAnomaly, morph, set } = store;
   const spec = store.field();
 
@@ -66,7 +95,7 @@ export function GuidePanel() {
   const volume = manifest.volume;
 
   return (
-    <aside className="panel panel-right guide">
+    <aside className={`panel panel-right guide${!entry && !viewOpen ? " view-shut" : ""}`}>
       {entry ? (
         <>
           <div className="guide-head">
@@ -107,31 +136,44 @@ export function GuidePanel() {
       ) : (
         <>
           <div className="guide-head">
-            <span className="guide-kind view">Current view</span>
+            <button
+              type="button"
+              className="guide-view-toggle"
+              aria-expanded={viewOpen}
+              onClick={toggleView}
+              title={viewOpen ? "Hide the description" : "Show the description"}
+            >
+              <span className="guide-fold" aria-hidden="true" />
+              <span className="guide-kind view">Current view</span>
+            </button>
           </div>
-          <h2 className="guide-title">What you are looking at</h2>
-          <p className="guide-lede">
-            {describeView({
-              fieldKey: spec.key,
-              fieldLabel: spec.label.replace("Sea Water ", ""),
-              units: spec.units,
-              date: formatDate(manifest.timesteps[store.timestepIndex]),
-              fromDepth: axisToDepth(volume, store.depthFrom),
-              toDepth: axisToDepth(volume, store.depthTo),
-              exaggeration: store.exaggeration,
-              isoEnabled: store.isoEnabled,
-              isoValue: `${Math.abs(store.toValue(store.isoValue)).toFixed(1)} ${spec.units}`,
-              diverging: isDiverging(spec),
-              floatsDrawn: store.reportingByKind().floats,
-              mooringsDrawn: store.reportingByKind().moorings,
-              render: spec.render ?? "volume",
-              arrowDepth: axisToDepth(volume, morph > 0.55 ? store.depthFrom : store.surfaceLevel),
-              currentStyle: store.currentStyle,
-            })}
-          </p>
-          <p className="guide-hint">
-            Touch any control on the left and this panel explains what it does.
-          </p>
+          {viewOpen && (
+            <>
+              <h2 className="guide-title">What you are looking at</h2>
+              <p className="guide-lede">
+                {describeView({
+                  fieldKey: spec.key,
+                  fieldLabel: spec.label.replace("Sea Water ", ""),
+                  units: spec.units,
+                  date: formatDate(manifest.timesteps[store.timestepIndex]),
+                  fromDepth: axisToDepth(volume, store.depthFrom),
+                  toDepth: axisToDepth(volume, store.depthTo),
+                  exaggeration: store.exaggeration,
+                  isoEnabled: store.isoEnabled,
+                  isoValue: `${Math.abs(store.toValue(store.isoValue)).toFixed(1)} ${spec.units}`,
+                  diverging: isDiverging(spec),
+                  floatsDrawn: store.reportingByKind().floats,
+                  mooringsDrawn: store.reportingByKind().moorings,
+                  render: spec.render ?? "volume",
+                  arrowDepth: axisToDepth(volume, morph > 0.55 ? store.depthFrom : store.surfaceLevel),
+                  currentStyle: store.currentStyle,
+                })}
+              </p>
+              <p className="guide-hint">
+                Touch any control on the left and this panel explains what it does.
+              </p>
+            </>
+          )}
         </>
       )}
     </aside>

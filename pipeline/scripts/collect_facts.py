@@ -20,7 +20,7 @@ than a digit swapped.
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 PIPELINE = Path(__file__).resolve().parent.parent
@@ -76,6 +76,43 @@ def probes() -> int:
     return len([name for name in kept if not name.endswith("probe-pixels.mjs")])
 
 
+def drawn_per_timestep(manifest: dict, floats: list) -> tuple[int, int, int, int]:
+    """How many Floats and how many moorings are on the water at a Timestep, over the whole run.
+
+    The one row in this file that was a literal, and it was wrong: "between 192 and 220 floats
+    and 5 to 9 buoys ... measured across the twelve steps", against a bake of 36. A figure typed
+    into a generated file is exactly what this whole script exists to make impossible, so it is
+    derived now.
+
+    This replays `floatTime.positionAt`'s rule rather than approximating it: an instrument is
+    drawn where its nearest Fix is within the bake's own coverage window of the analysis, which
+    is the same window that decides whether its cast was counted. Both halves come out of the
+    manifest, so a re-bake moves this row on its own.
+    """
+    window = float(manifest["coverage"]["windowDays"])
+    stamps = [datetime.fromisoformat(t) for t in manifest["timesteps"]]
+    counts = []
+    for when in stamps:
+        drawn_floats = drawn_moorings = 0
+        for item in floats:
+            gaps = [
+                abs((datetime.fromisoformat(fix["time"]) - when).total_seconds()) / 86400
+                for fix in item["track"]
+            ]
+            if gaps and min(gaps) <= window:
+                if item.get("kind") == "mooring":
+                    drawn_moorings += 1
+                else:
+                    drawn_floats += 1
+        counts.append((drawn_floats, drawn_moorings))
+    return (
+        min(c[0] for c in counts),
+        max(c[0] for c in counts),
+        min(c[1] for c in counts),
+        max(c[1] for c in counts),
+    )
+
+
 def worst_instrument(residuals: dict, field: str = "temperature") -> dict:
     rows = residuals["fields"][field]["instruments"]
     return max(rows, key=lambda r: abs(r["scaledRms"]))
@@ -97,6 +134,7 @@ def main() -> None:
     volume = manifest["volume"]
     steps = manifest["timesteps"]
     normal = manifest["normalAnomaly"]
+    low_f, high_f, low_m, high_m = drawn_per_timestep(manifest, load("floats.json"))
 
     rows = [
         ("The build", [
@@ -114,7 +152,7 @@ def main() -> None:
         ("Instruments", [
             ("Instruments in the water", f"**{manifest['floatCount']}** = {instruments['floats']} Argo floats + {instruments['moorings']} moored buoys", "`manifest.instruments`"),
             ("Carrying chlorophyll", f"**{instruments['withChlorophyll']}** floats", "`manifest.instruments.withChlorophyll`"),
-            ("Drawn at any one Timestep", "between 192 and 220 floats and 5 to 9 buoys", "`reportingByKind()`, measured across the twelve steps"),
+            ("Drawn at any one Timestep", f"between **{low_f}** and **{high_f}** floats and **{low_m}** to **{high_m}** buoys", f"`reportingByKind()`, replayed over all {len(steps)} steps"),
         ]),
         ("How far the model sits from the instruments", [
             ("Compared", f"**{temperature['summary']['count']}** instruments", "`residuals.fields.temperature.summary`"),

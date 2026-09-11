@@ -67,51 +67,14 @@ console.log(`control ids with no entry: ${missing.length}`);
 
 // ---- 2. no entry reaches the screen with an unfilled token ---------------------------------
 const rendered = [];
-const touchable = [
-  "field",
-  "hazardPreset",
-  "scale",
-  "temperature",
-  "salinity",
-  "density",
-  "temperature_anomaly",
-  "temperature_normal_anomaly",
-  "coverage",
-  "heat_potential",
-  "d26",
-  "mixed_layer_depth",
-  "isothermal_layer_depth",
-  "barrier_layer",
-  "current_speed",
-  "incois_casts",
-  "incois_rmse",
-  "analysis_spread",
-  "anomalyFeatures",
-  "isolateAnomaly",
-  "palette",
-  "rendering",
-  "currents",
-  "currentStyle",
-  "instruments",
-  "window",
-  "depthSlice",
-  "opacity",
-  "emphasis",
-  "exaggeration",
-  "quality",
-  "volumeEnabled",
-  "isosurface",
-  "surfaceLevel",
-  "timestep",
-  "bias",
-  "drift",
-  "upload",
-  "section",
-  "floats",
-  "moorings",
-  "chlorophyll",
-  "tracks",
-];
+// Every entry, read off the shipped `GUIDE` rather than listed here.
+//
+// It was a hand-written array of 43 keys against a `GUIDE` of 44, so `performance` - the
+// Quality group's own entry - had never been rendered by this probe at all, and the two
+// figures the two probes print ("entries checked: 43" and "tour covers 44") disagreed in the
+// same run without either being wrong about what it counted. A list is what goes stale; the
+// object is what the panel reads.
+const touchable = await page.evaluate(() => Object.keys(window.__guide.GUIDE));
 for (const key of touchable) {
   const text = await page.evaluate(async (k) => {
     window.__store.setState({ touched: k, selectedFloatId: null, selectedAnomaly: null });
@@ -157,6 +120,21 @@ for (const entry of shape) {
   if (entry.longestBullet > 24) {
     problems.push(`"${entry.key}" has a ${entry.longestBullet}-word bullet; two lines is about 18`);
   }
+}
+
+// ---- 4. the figure eight documents quote is the figure `GUIDE` holds -----------------------
+//
+// Nothing derived it, so it was a literal in nine places and eight of them said 43 against a
+// real 44 - including `requirements.html`, which is the page whose whole claim is that its
+// figures are live. This is the one place that can notice, because it is the one thing that
+// reads `GUIDE` and prints a count.
+const EXPLAINED_CONTROLS = 44;
+if (touchable.length !== EXPLAINED_CONTROLS) {
+  problems.push(
+    `GUIDE holds ${touchable.length} entries and the documents say ${EXPLAINED_CONTROLS}; ` +
+      "update CONTEXT.md, CLAUDE.md, web/CLAUDE.md, DESIGN.md, docs/README-full.md, " +
+      "scripts/dossier.html, web/requirements.html and web/src/ui/Tour.tsx, then this line",
+  );
 }
 
 const words = rendered.map((r) => r.words);

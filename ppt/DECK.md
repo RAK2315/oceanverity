@@ -273,7 +273,7 @@ notice it reaches only the screen.
 | Backend | FastAPI &middot; uvicorn &middot; pydap &middot; xpublish &middot; xpublish-wms |
 | Frontend | TypeScript &middot; React 19 &middot; Vite &middot; Zustand &middot; Three.js &middot; WebGL2 &middot; GLSL ES 3.00 |
 | Standards spoken | ERDDAP griddap and tabledap *(read)* &middot; OPeNDAP DAP2 *(read and served)* &middot; CF-1.8 NetCDF *(served)* &middot; OGC WMS 1.3.0 *(served)* |
-| Quality and delivery | pytest, **379** tests &middot; Playwright, **15** browser probes &middot; GitHub Actions, build and deploy on every push |
+| Quality and delivery | pytest, **409** tests &middot; Playwright, **15** browser probes &middot; GitHub Actions, build and deploy on every push |
 
 > No paid service and no GPU cluster. **No account to view or use it; one free Copernicus account
 > to rebuild the data**, and that credential never leaves the machine that bakes. Built and tested
@@ -303,7 +303,7 @@ face value**, because most submissions at this stage describe something that doe
 | --- | --- |
 | **Product status** | **Working prototype, on live INCOIS data** *(green)* |
 | Public URL | `rak2315.github.io/samudra-sih26` |
-| Automated tests | **379** passing, in CI on every push |
+| Automated tests | **409** passing, in CI on every push |
 | Network calls at demo time | **0**, enforced by a CI check |
 
 ---
@@ -322,7 +322,7 @@ rather than filled in."*
 | --- |
 | **Built, deployed and public today.** Open it on the evaluator's own laptop during the pitch. |
 | **Ordinary hardware is enough.** Built and tested on integrated graphics with 2 GB of shared memory. |
-| **379 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
+| **409 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
 
 | **It costs nothing to keep** *(viability)* |
 | --- |
@@ -370,7 +370,7 @@ for, does more work."*
 
 | | |
 | --- | --- |
-| **01 Cyclone and hazard forecasters** | A storm's fuel is the heat *below* the surface. Cyclone heat potential is measured down to the depth of an isotherm, and this draws that isotherm as a solid surface you can fly around and watch dome over four months. |
+| **01 Cyclone and hazard forecasters** | A storm's fuel is the heat *below* the surface. Cyclone heat potential is measured down to the depth of an isotherm, and this draws that isotherm as a solid surface you can fly around and watch dome over a year. |
 | **02 Search and rescue** | See the real water structure inside the actual search box in seconds, with the nearest instruments and what they measured. Drop a pin and the currents carry it forward - **scored on 219 real Argo floats, a median 40.9 km out over one cycle.** |
 | **03 Fisheries advisories** | INCOIS already sends potential fishing zone advisories to lakhs of fishermen. Those depend on fronts and mixed-layer depth, and both become objects you can point at. |
 | **04 Climate and ocean-state monitoring** | A departure from a real **1991-2020** normal, with unusual bodies of water found automatically, and beside it an honest map of where no observation stands behind the analysis. |
@@ -473,7 +473,7 @@ the exact request you can run yourself:
   `github.com/RAK2315/samudra-sih26` &rarr; `docs/adr/`
 - **Every unmet clause of PS 26067**, researched with dates and row counts, with the decision
   taken on each. `docs/plan/03-requirement-gaps.md`
-- **379 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
+- **409 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
   run in CI on every push.
 
 > **Before you export, click every link on this slide.** All four DOIs were checked on
@@ -557,7 +557,7 @@ than in an appendix.
 | Link | Where it goes | Why it earns its space |
 | --- | --- | --- |
 | **The live prototype** | https://rak2315.github.io/samudra-sih26/ | Nothing else on six slides proves execution as fast as a working link. It needs no install and no account, so a judge can open it while you are still talking. |
-| **The repository** | https://github.com/RAK2315/samudra-sih26 | 379 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
+| **The repository** | https://github.com/RAK2315/samudra-sih26 | 409 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
 | **The video** | the recording of [`script.md`](script.md) | The prototype walkthrough, guaranteed to run. A live demo can fail on the venue's network; this cannot. |
 
 Slide 1 carries the prototype link. Slide 6 carries all three, with the repository and the video

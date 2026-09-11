@@ -31,7 +31,7 @@ _Avoid_: type, mode, style
 
 **Sheet**:
 A Field whose value is a depth, drawn as a surface inside the Volume View sitting at that depth,
-with the Floats around it. The 26 degC isotherm doming up and collapsing across four months is a
+with the Floats around it. The 26 degC isotherm doming up and collapsing across a year is a
 Sheet. Built from float32 on the Grid's own axes and never from a Volume, because a reader reads
 metres off it.
 _Avoid_: isosurface, layer, plane

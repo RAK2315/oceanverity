@@ -8,21 +8,26 @@ forecaster is actually asking.
 
 What the baseline is, and what it is not
 
-**It is the mean of the Timesteps in this bake and nothing else.** Twelve ten-day steps, April
-to July 2026. That is roughly four months of one year.
+**It is the mean of the Timesteps in this bake and nothing else.** However many ten-day steps
+the bake fetched - the manifest's `timesteps` says how many and which - and no figure about the
+window is written here, because this docstring said "twelve steps, April to July 2026" for a
+round after the bake became a year.
 
 It is **not** a climatology. "Warmer than normal" in the sense an operational centre means it -
 warmer than the 1991-2020 average for this week of the year - would need a thirty-year
-reference series that this platform does not hold and would have to download and validate
-separately. The two readings look identical on screen and mean completely different things, so
-the guide panel says which one this is, in those words. Shipping a four-month mean while
-implying a thirty-year one would be the same class of error as calling a z-score a confidence.
+reference series and is not this Field. `climatology.py` and Temperature vs Normal are that
+one, against the World Ocean Atlas; the two look identical on screen and mean completely
+different things, so the guide panel says which one this is, in those words. Presenting the
+mean of one bake as a thirty-year normal would be the same class of error as calling a z-score a
+confidence.
 
-What it does show honestly is the seasonal swing: this window spans the pre-monsoon into the
-southwest monsoon, and the departure is largest at 75-125 m rather than at the surface, because
-what moves is the thermocline. In this bake the standard deviation runs 0.74 degC at 5 m, peaks
-at 1.55 degC at 100 m, and falls to 0.08 degC by 2000 m. The deep ocean does not do much in four
-months, and the field says so.
+What it does show honestly is the seasonal swing, and the departure is largest in the
+thermocline rather than at the surface, because what moves is the thermocline. That claim is
+**measured, not written here**: `spread_by_level` computes the per-Level spread, `bake.py`
+writes it into the manifest as `anomalySpread`, and the guide panel quotes it through tokens.
+This paragraph and the guide bullet carried two different sets of figures for the same
+quantity - 0.74 / 1.55 / 0.08 degC here and 0.57 / 1.33 / 0.06 forty lines down - and neither was
+the bake that shipped.
 """
 
 from __future__ import annotations
@@ -93,6 +98,66 @@ def symmetric_encoding_range(
     return -reach, reach
 
 
+@dataclass(frozen=True)
+class LevelSpread:
+    """How much each Level moves across the series, and which Level moves most.
+
+    `degrees[i]` is the median over that Level's ocean cells of the per-cell standard deviation
+    across time. Median rather than mean because a handful of cells where the thermocline
+    travelled a long way vertically carry tens of degrees of departure, and the same clipping
+    argument `symmetric_encoding_range` makes applies to a summary figure.
+    """
+
+    metres: list[float]
+    degrees: list[float]
+
+    @property
+    def peak_metres(self) -> float:
+        return self.metres[int(np.argmax(self.degrees))]
+
+    @property
+    def peak_degrees(self) -> float:
+        return self.degrees[int(np.argmax(self.degrees))]
+
+    def at(self, metres: float) -> float:
+        """The spread at the Level nearest `metres`. The Levels are uneven, so nearest is right."""
+        index = int(np.argmin(np.abs(np.asarray(self.metres) - metres)))
+        return self.degrees[index]
+
+
+def spread_by_level(grids: Sequence[Grid]) -> LevelSpread:
+    """How far each Level's water moves across the series, Level by Level.
+
+    This is the sentence the guide panel makes about the Anomaly Field - *the signal is strongest
+    in the thermocline, not at the surface* - turned into a measurement. It existed as a number
+    typed into prose in two places with two different values for one quantity, and the value on
+    screen was from a bake that no longer exists. A figure nothing computes cannot be checked by
+    anything, so this computes it and `bake.py` writes it into the manifest.
+
+    Masked cells stay out of it entirely rather than counting as calm water: land does not have
+    a standard deviation of zero, it has none.
+    """
+    grids = list(grids)
+    if len(grids) < 2:
+        raise ValueError(
+            f"a spread needs at least two Timesteps to vary between, got {len(grids)}"
+        )
+    _require_same_axes(grids)
+
+    stacked = np.stack([g.values for g in grids])
+    # Population rather than sample: this is the spread of the steps that are here, not an
+    # estimate of a wider population, and there is no wider population - the baseline is these
+    # steps and nothing else, which is what every sentence about this Field already says.
+    deviation = np.std(stacked, axis=0, ddof=0)
+
+    metres = [float(v) for v in grids[0].levels]
+    degrees = []
+    for level in range(deviation.shape[0]):
+        ocean = deviation[level][np.isfinite(deviation[level])]
+        degrees.append(float(np.median(ocean)) if ocean.size else 0.0)
+    return LevelSpread(metres=metres, degrees=degrees)
+
+
 def _require_same_axes(grids: Sequence[Grid]) -> None:
     first = grids[0]
     for name in ("levels", "latitudes", "longitudes"):
@@ -110,17 +175,19 @@ def _require_same_axes(grids: Sequence[Grid]) -> None:
 # Two thresholds, and it has to pass both.
 #
 # **Unusual.** The departure divided by how much that cell varies across the series - a z-score.
-# A fixed threshold in degrees cannot work at every depth, because the per-cell spread runs 0.57
-# degC at 5 m and 1.33 at 100 m and 0.06 at 2000 m: one number would find nothing but thermocline
-# or nothing but noise. Measured on the current bake, |z| reaches 1.63 at the 90th percentile and
-# 2.42 at the 99th, so 2.0 selects roughly the top few per cent.
+# A fixed threshold in degrees cannot work at every depth, because the per-cell spread is about
+# twenty times larger in the thermocline than at 2000 m (`manifest.anomalySpread` has the whole
+# profile): one number would find nothing but thermocline or nothing but noise. Measured on the
+# 36-Timestep bake of 2026-09-09, |z| reaches 1.62 at the 90th percentile and 2.57 at the 99th,
+# and 4.1% of ocean cells clear 2.0 - so 2.0 selects the top few per cent. It said 1.63 and
+# 2.42 at twelve steps; the argument held and the figures moved.
 #
 # **Big enough to matter.** Half a degree. A hundredth of a degree in water that never moves is a
 # huge z-score and a physically meaningless one, and the deep ocean is full of those. Surfacing
 # one beside a 3 degC thermocline swing would be technically true and misleading.
 #
-# Together these give about ten features per Timestep on the current bake, which is a number a
-# person can actually work through. They are a presentation choice and are stated rather than
+# Together these give about eleven features per Timestep on the 36-step bake (404 in all),
+# which is a number a person can actually work through. They are a presentation choice and are stated rather than
 # hidden.
 Z_THRESHOLD = 2.0
 DEGREES_THRESHOLD = 0.5

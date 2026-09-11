@@ -37,7 +37,7 @@ a slab is a rendering construct. Asking for it returns 404 with that sentence, n
 
 Nor does a Field get to borrow a standard name it has no right to. Temperature, salinity and
 density have real CF standard names. The anomaly does not - a CF anomaly is a departure from a
-climatology and this is a departure from four months - so it carries a `long_name` and no
+climatology and this is a departure from the baked window - so it carries a `long_name` and no
 `standard_name` at all. Inventing one that looks official is the same class of error as printing
 "the conventional oceanographic scale for observation coverage", which this project has already
 made once.
