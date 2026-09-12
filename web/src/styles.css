@@ -649,152 +649,12 @@ body {
 /* ---------------------------------------------------------------- attribution */
 
 /*
- * The source credits, kept out from under the timeline.
- *
- * This was `right: 18px` with no width, so eight source names ran 1,582 px wide at a 1,600 px
- * viewport - past the left edge of the screen and straight under the centred timeline, which
- * covered 8,078 px2 of it at 1600x900 and 19,041 px2 at 1366x768. Attribution for Argo, INCOIS,
- * Copernicus and NOAA is a licence obligation; it is the last thing on the canvas that should
- * be sitting under a control.
- *
- * Squeezing it into the gap beside the timeline was tried first and was worse: capped at
- * (50% - half the timeline) it became a 370 px column **217 px tall** at 1366x768, which then
- * covered 33,500 px2 of the map key. One overlap traded for another.
- *
- * What actually works is the other axis. The timeline sits 22 px off the foot, so the band
- * below it is free across the whole width - the credits only ever collided with it by being
- * tall enough to reach up into it. So the credits keep the full width and wrap to as few lines
- * as that allows, and the **timeline is lifted to clear whatever height they end up**, from
- * their measured height published by `Chrome`. Neither has to guess at the other's size.
- *
- * It wraps rather than truncates, because a credit that has been cut off is not a credit.
+ * There is no credits band. The owner removed it on 2026-09-11: the folded "Sources" line under
+ * the time axis was a band of chrome between the water and the edge of the glass, and the full
+ * attribution string for every source is on `provenance.html`, one click from here. So the time
+ * axis sits on the foot of the frame and the bays reach down to it; `--attribution-height` is
+ * gone with the band it measured.
  */
-/*
- * The credits, in the frame rather than on the water.
- *
- * Nine source names set in tiny letterspaced monospace, running the full width of the glass,
- * reads as a debug log rather than as a credit - and it was the owner's first complaint about
- * this screen. Attribution for Argo, INCOIS, Copernicus and NOAA is a licence obligation, so
- * nothing may be dropped and nothing may be truncated. What can change is where it sits and how
- * it is set: it moves into the bottom band of the frame, gains a word that says what the list is,
- * and is set in the text face at a normal tracking, so it reads as a line of credit rather than
- * as console output.
- */
-.attribution {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 6;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: flex-start;
-  row-gap: 2px;
-  column-gap: 12px;
-  padding: 5px 18px 6px;
-  background: var(--frame);
-  line-height: 1.4;
-  font-family: var(--sans);
-  font-size: 11.5px;
-  letter-spacing: 0;
-  color: var(--on-surface-faint);
-  pointer-events: none;
-}
-
-/* The fold. A real button, because it is a control and the tick strip already taught this
-   project what a clickable span costs a keyboard.
-   The padding and the matching negative margin buy a 24 px press target out of a 16 px line
-   without giving the band back any of the height the fold was for. */
-.attribution-toggle {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: -4px 0;
-  padding: 4px 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-/* Says what the list is, so a row of proper nouns is a credit and not a stack trace. */
-.attribution-label {
-  font-weight: 600;
-  color: var(--on-surface-variant);
-}
-
-.attribution-lead,
-.attribution-more {
-  color: var(--on-surface-faint);
-}
-
-.attribution-toggle:hover .attribution-lead,
-.attribution-toggle:hover .attribution-more,
-.attribution-toggle:focus-visible .attribution-lead {
-  color: var(--on-surface-variant);
-}
-
-/* The same two-border caret the control groups use, so a fold looks like a fold anywhere in
-   the frame. */
-.attribution-caret {
-  align-self: center;
-  width: 5px;
-  height: 5px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(-135deg) translate(-1px, -1px);
-  transition: transform 0.16s var(--ease);
-}
-
-.attribution-caret.open {
-  transform: rotate(45deg) translate(-1px, -1px);
-}
-
-/*
- * The open list floats above the closed line rather than growing the band.
- *
- * In flow it took the footer from 27 px to 81, and the time axis sits at
- * `bottom: var(--attribution-height)` - so asking who supplied the data threw the timeline 54 px
- * up the screen. A band that changes height is a band every other band has to react to, and the
- * whole point of folding the credits was to stop them costing the frame height. Anchored to the
- * top of the footer it costs nothing, nothing else moves, and it is one of the two things in the
- * chrome that genuinely floats - so it is one of the two allowed a shadow.
- */
-.attribution-list {
-  position: absolute;
-  left: 18px;
-  bottom: 100%;
-  z-index: 1;
-  /* As wide as the eight names, not as wide as the glass. It opens into the band directly above
-     it, which is the time axis - the one thing nobody is reading while they check a credit. */
-  width: max-content;
-  max-width: calc(100% - 36px);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  row-gap: 3px;
-  column-gap: 14px;
-  padding: 9px 12px;
-  border: 1px solid var(--frame-rule);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  background: var(--frame);
-  box-shadow: var(--shadow-raised);
-  pointer-events: auto;
-}
-
-.attribution-list span {
-  cursor: help;
-  pointer-events: auto;
-}
-
-.generated {
-  margin-left: auto;
-}
 
 /* ---------------------------------------------------------------- panels */
 
@@ -815,10 +675,7 @@ body {
      and published by `Chrome` rather than assumed - 74 px of top offset, the credits' own
      height, their 8 px inset and a 12 px gap. */
   /* The gap between the two bands of the frame, and nothing else. Each band measures itself. */
-  max-height: calc(
-    100% - var(--topbar-height, 55px) - var(--timeline-height, 58px) -
-      var(--attribution-height, 24px)
-  );
+  max-height: calc(100% - var(--topbar-height, 55px) - var(--timeline-height, 58px));
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0;
@@ -2940,7 +2797,7 @@ input[type="range"]::-moz-range-thumb {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: var(--attribution-height, 24px);
+  bottom: 0;
   z-index: 5;
   display: flex;
   align-items: center;
@@ -3522,7 +3379,6 @@ input[type="range"]::-moz-range-thumb {
 .app.kiosk .timeline,
 .app.kiosk .tour,
 .app.kiosk .cue,
-.app.kiosk .attribution,
 .app.kiosk .mapkey {
   display: none !important;
 }

@@ -3,16 +3,11 @@ import { copyCurrentView } from "../deeplink";
 import { applyTheme, useStore } from "../store";
 
 /**
- * Publish the source credits' measured height, so the timeline can sit above them.
+ * Publish a band's measured height as a CSS custom property, so what sits beside it can clear it.
  *
- * The two shared the foot of the screen and overlapped in every state - 8,078 px2 at 1600x900
- * and 19,041 px2 at 1366x768, where the credits wrap to a second line. Attribution for Argo,
- * INCOIS, Copernicus and NOAA is a licence obligation, so it is the last thing that should be
- * sitting under a control.
- *
- * The height is measured rather than written down because it changes with the window: the
- * credits wrap, and how many lines they take depends on the width and on how many sources the
- * bake holds. A number chosen for one viewport is wrong at the next.
+ * Measured rather than written down because a band's height changes with the window and the type.
+ * It was written for the source credits, whose wrapping made any fixed number wrong at the next
+ * viewport; the credits band is gone (2026-09-11) and the top bar is what publishes now.
  */
 function usePublishedHeight(name: string) {
   const watcher = useRef<ResizeObserver | null>(null);
@@ -45,13 +40,6 @@ export function LoadingScreen() {
     </div>
   );
 }
-
-/**
- * The bodies named on the closed credit line: the four organisations a reader would recognise,
- * not the four whose entries happen to sort first. Everything else, including every full
- * attribution string, is behind the fold and on `provenance.html`.
- */
-const LEAD_SOURCES = ["INCOIS", "Argo", "Copernicus", "NOAA"];
 
 /**
  * The two icons on the bar, drawn rather than typed.
@@ -105,13 +93,11 @@ function CopyIcon({ state }: { state: "" | "copied" | "failed" }) {
 export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
   const store = useStore();
   const { manifest, stage, morph, field, timestepIndex, theme, touched, set } = store;
-  const [sourcesOpen, setSourcesOpen] = useState(false);
   // What the copy button last did, so it can say so for a moment. A control that fires and
   // shows nothing is a control a user presses three times.
   const [copied, setCopied] = useState<"" | "copied" | "failed">("");
-  // Before the early return: a hook cannot be called conditionally. Both bands of the frame
-  // publish their measured height, so the bays between them can be exactly as tall as the gap.
-  const credits = usePublishedHeight("--attribution-height");
+  // Before the early return: a hook cannot be called conditionally. The top bar publishes its
+  // measured height, so the bays under it can be exactly as tall as the gap.
   const bar = usePublishedHeight("--topbar-height");
   if (!manifest) return null;
 
@@ -263,43 +249,12 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
       )}
 
       {/*
-        * The credits, folded.
-        *
-        * Attribution for Argo, INCOIS, Copernicus and NOAA is a licence obligation, so nothing
-        * may be dropped and nothing may be truncated. What was costing the screen was the shape:
-        * nine full source strings laid out flat wrapped to two lines and measured **48 px** at
-        * 1366x768, which is a third of the frame's chrome and comes straight off a left bay that
-        * is already over. Folded it is one line of the four bodies a reader would name, with the
-        * remaining five and every full attribution string one press away - and the whole list
-        * is on `provenance.html` besides. Open, it is exactly the flat list it used to be.
+        * No credits band. It was a folded "Sources" line under the time axis, and the owner removed
+        * it on 2026-09-11, knowing the attribution for Argo, INCOIS, Copernicus and NOAA is a
+        * licence obligation. The console now credits no source itself; every full attribution
+        * string is on `provenance.html`, which the landing page links to. If a console link to it
+        * is ever wanted, that is where the credit should point.
         */}
-      <footer className="attribution" ref={credits}>
-        <button
-          type="button"
-          className="attribution-toggle"
-          aria-expanded={sourcesOpen}
-          onClick={() => setSourcesOpen(!sourcesOpen)}
-        >
-          <span className="attribution-label">Sources</span>
-          {!sourcesOpen && <span className="attribution-lead">{LEAD_SOURCES.join(" · ")}</span>}
-          {!sourcesOpen && manifest.sources.length > LEAD_SOURCES.length && (
-            <span className="attribution-more">
-              and {manifest.sources.length - LEAD_SOURCES.length} more
-            </span>
-          )}
-          <span className={`attribution-caret${sourcesOpen ? " open" : ""}`} aria-hidden="true" />
-        </button>
-        {sourcesOpen && (
-          <div className="attribution-list">
-            {manifest.sources.map((source) => (
-              <span key={source.name} title={source.attribution}>
-                {source.name}
-              </span>
-            ))}
-          </div>
-        )}
-        <span className="generated">baked {manifest.generated.slice(0, 10)}</span>
-      </footer>
     </>
   );
 }

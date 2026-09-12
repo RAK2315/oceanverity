@@ -188,8 +188,9 @@ monospaced so a column of readings lines up and a changing digit does not shift 
 
 **The chrome is a frame, not a deck of cards.** Every surface used to be a rounded panel hovering
 over the water with a hairline, a blur and a drop shadow - one idea applied ten times, which is
-what made it read as generated. It is four bands now: the top bar, a bay down each side, and a
-foot holding the time axis over the credits. They are anchored to the edge of the glass, square
+what made it read as generated. It is three bands now: the top bar, a bay down each side, and the
+time axis along the foot. (A fourth, a folded "Sources" credits line under the time axis, was
+removed by the owner on 2026-09-11; the attributions are on `provenance.html`.) They are anchored to the edge of the glass, square
 on the outside, opaque, and meet on shared rules. Each band measures its own height and publishes
 it, so the bays are exactly as tall as the gap between the other two.
 
@@ -216,7 +217,7 @@ visual clothes.
 **Layout.** The console is a framed viewport: a 344 px bay left, a 348 px bay right, a bar
 across the top and a foot across the bottom, with the water in the rectangle between them. The
 bands measure each other rather than sharing a grid - the bays take their height from
-`--topbar-height`, `--timeline-height` and `--attribution-height`, each published by the component
+`--topbar-height` and `--timeline-height`, each published by the component
 that owns it, and the map key and the depth caption read their neighbours'
 `getBoundingClientRect()` and step clear, because a fixed offset is wrong at the next viewport.
 The landing page is the opposite: a 1400 px shell, and a hero that is two columns - the headline
@@ -227,10 +228,10 @@ below 1180 px and the hero becomes one column.
 costs something already on screen, so the bay's height is a design figure and is re-measured after
 touching **any** band, not only the panel.
 
-The foot bought the bay 20 px back. The source credits laid nine full attribution strings out
-flat, wrapped to two lines and measured **48 px** - a third of the chrome, on a licence obligation
-that nobody reads twice. Folded behind a control they are **28 px**, and the bay is **635 px**,
-measured as the panel's own `clientHeight` at its cap. The current fold table - every panel state
+The foot bought the bay 48 px back in two steps. The source credits laid nine full attribution
+strings out flat, wrapped to two lines and measured **48 px**; folded behind a control they were
+**28 px** and the bay was **635 px**; removed on 2026-09-11, the bay is **663 px**, measured as
+the panel's own `clientHeight` at its cap, identical in both themes. The current fold table - every panel state
 against that bay, in both themes - is in `CLAUDE.md` under "The chrome is a frame", and it is the
 only copy. This section carried an older one for a round, against a "636 px" bay that was 615
 plus 20 done as arithmetic and never read off the panel, with figures from before the colourbar

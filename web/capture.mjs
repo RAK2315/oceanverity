@@ -426,7 +426,7 @@ const bare = async (run) => {
     const style = document.createElement("style");
     style.id = "bare-shot";
     style.textContent =
-      ".panel-left, .panel-right, .topbar, .timeline, .mapkey, .ruler, .cue, .attribution," +
+      ".panel-left, .panel-right, .topbar, .timeline, .mapkey, .ruler, .cue," +
       " .tour, .notice { display: none !important; }";
     document.head.append(style);
   });
