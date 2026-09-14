@@ -1,0 +1,539 @@
+{
+ "id": "montha",
+ "name": "Montha",
+ "grade": "Severe Cyclonic Storm",
+ "basin": "Bay of Bengal",
+ "source": {
+  "who": "India Meteorological Department, RSMC New Delhi",
+  "what": "Best Tracks Data (1982-2026), sheet 2025",
+  "url": "https://rsmcnewdelhi.imd.gov.in/report.php?internal_menu=MzM=",
+  "file": "data/storms/imd_best_track_montha_2025.csv"
+ },
+ "track": [
+  {
+   "time": "2025-10-25T00:00:00+00:00",
+   "lat": 10.8,
+   "lon": 89.0,
+   "grade": "D",
+   "windKt": 20.0
+  },
+  {
+   "time": "2025-10-25T03:00:00+00:00",
+   "lat": 10.8,
+   "lon": 88.8,
+   "grade": "D",
+   "windKt": 25.0
+  },
+  {
+   "time": "2025-10-25T06:00:00+00:00",
+   "lat": 10.8,
+   "lon": 88.6,
+   "grade": "D",
+   "windKt": 25.0
+  },
+  {
+   "time": "2025-10-25T12:00:00+00:00",
+   "lat": 10.9,
+   "lon": 88.1,
+   "grade": "D",
+   "windKt": 25.0
+  },
+  {
+   "time": "2025-10-25T18:00:00+00:00",
+   "lat": 11.0,
+   "lon": 87.7,
+   "grade": "D",
+   "windKt": 25.0
+  },
+  {
+   "time": "2025-10-26T00:00:00+00:00",
+   "lat": 11.1,
+   "lon": 87.3,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-26T03:00:00+00:00",
+   "lat": 11.2,
+   "lon": 87.1,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-26T06:00:00+00:00",
+   "lat": 11.3,
+   "lon": 86.9,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-26T12:00:00+00:00",
+   "lat": 11.4,
+   "lon": 86.6,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-26T18:00:00+00:00",
+   "lat": 11.6,
+   "lon": 85.9,
+   "grade": "CS",
+   "windKt": 35.0
+  },
+  {
+   "time": "2025-10-26T21:00:00+00:00",
+   "lat": 11.9,
+   "lon": 85.5,
+   "grade": "CS",
+   "windKt": 35.0
+  },
+  {
+   "time": "2025-10-27T00:00:00+00:00",
+   "lat": 12.2,
+   "lon": 85.3,
+   "grade": "CS",
+   "windKt": 35.0
+  },
+  {
+   "time": "2025-10-27T03:00:00+00:00",
+   "lat": 12.6,
+   "lon": 84.9,
+   "grade": "CS",
+   "windKt": 40.0
+  },
+  {
+   "time": "2025-10-27T06:00:00+00:00",
+   "lat": 12.8,
+   "lon": 84.6,
+   "grade": "CS",
+   "windKt": 40.0
+  },
+  {
+   "time": "2025-10-27T09:00:00+00:00",
+   "lat": 13.0,
+   "lon": 84.2,
+   "grade": "CS",
+   "windKt": 40.0
+  },
+  {
+   "time": "2025-10-27T12:00:00+00:00",
+   "lat": 13.3,
+   "lon": 84.0,
+   "grade": "CS",
+   "windKt": 45.0
+  },
+  {
+   "time": "2025-10-27T15:00:00+00:00",
+   "lat": 13.6,
+   "lon": 83.8,
+   "grade": "CS",
+   "windKt": 45.0
+  },
+  {
+   "time": "2025-10-27T18:00:00+00:00",
+   "lat": 14.0,
+   "lon": 83.5,
+   "grade": "CS",
+   "windKt": 45.0
+  },
+  {
+   "time": "2025-10-27T21:00:00+00:00",
+   "lat": 14.4,
+   "lon": 83.3,
+   "grade": "CS",
+   "windKt": 45.0
+  },
+  {
+   "time": "2025-10-28T00:00:00+00:00",
+   "lat": 14.7,
+   "lon": 83.0,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T03:00:00+00:00",
+   "lat": 14.9,
+   "lon": 82.9,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T06:00:00+00:00",
+   "lat": 15.2,
+   "lon": 82.7,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T09:00:00+00:00",
+   "lat": 15.6,
+   "lon": 82.5,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T12:00:00+00:00",
+   "lat": 16.0,
+   "lon": 82.2,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T15:00:00+00:00",
+   "lat": 16.2,
+   "lon": 82.0,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T18:00:00+00:00",
+   "lat": 16.3,
+   "lon": 81.7,
+   "grade": "SCS",
+   "windKt": 50.0
+  },
+  {
+   "time": "2025-10-28T21:00:00+00:00",
+   "lat": 16.5,
+   "lon": 81.5,
+   "grade": "CS",
+   "windKt": 40.0
+  },
+  {
+   "time": "2025-10-29T00:00:00+00:00",
+   "lat": 17.0,
+   "lon": 81.3,
+   "grade": "CS",
+   "windKt": 35.0
+  },
+  {
+   "time": "2025-10-29T03:00:00+00:00",
+   "lat": 17.3,
+   "lon": 81.2,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-29T06:00:00+00:00",
+   "lat": 17.7,
+   "lon": 81.1,
+   "grade": "DD",
+   "windKt": 30.0
+  },
+  {
+   "time": "2025-10-29T12:00:00+00:00",
+   "lat": 18.7,
+   "lon": 80.9,
+   "grade": "D",
+   "windKt": 25.0
+  },
+  {
+   "time": "2025-10-29T18:00:00+00:00",
+   "lat": 19.6,
+   "lon": 80.7,
+   "grade": "D",
+   "windKt": 20.0
+  }
+ ],
+ "peakWindKt": 50.0,
+ "formed": "2025-10-25T00:00:00+00:00",
+ "lastFix": "2025-10-29T18:00:00+00:00",
+ "landfall": {
+  "lat": 16.35,
+  "lon": 81.7,
+  "place": "Narsapur",
+  "day": "28 October",
+  "note": "Crossed Andhra Pradesh and Yanam between Machilipatnam and Kalingapatnam to the south of Kakinada close to Narsapur near latitude 16.35N and longitude 81.70 E during 1800 UTC-1900 UTC of 28th October (2330 hrs IST of 28th October and 0030 hrs IST of 29th October) with maximum sustained wind speed of 90-100 gusting to 110 kmph"
+ },
+ "steps": {
+  "before": 7,
+  "after": 8,
+  "beforeTime": "2025-10-20T00:00:00+00:00",
+  "afterTime": "2025-10-30T00:00:00+00:00"
+ },
+ "method": {
+  "nearKm": 150.0,
+  "farKm": 500.0,
+  "bay": {
+   "west": 78.0,
+   "east": 100.0,
+   "south": 5.0,
+   "north": 23.0
+  },
+  "floatKm": 300.0,
+  "floatDays": 3.0
+ },
+ "changes": {
+  "mixedLayerDepth": {
+   "units": "m",
+   "near": {
+    "cells": 29,
+    "medianBefore": 10.51,
+    "medianAfter": 10.6,
+    "shareIncreased": 0.655
+   },
+   "far": {
+    "cells": 131,
+    "medianBefore": 20.45,
+    "medianAfter": 10.93,
+    "shareIncreased": 0.115
+   }
+  },
+  "d26": {
+   "units": "m",
+   "near": {
+    "cells": 29,
+    "medianBefore": 74.27,
+    "medianAfter": 66.04,
+    "shareIncreased": 0.345
+   },
+   "far": {
+    "cells": 115,
+    "medianBefore": 82.7,
+    "medianAfter": 84.74,
+    "shareIncreased": 0.591
+   }
+  },
+  "heatPotential": {
+   "units": "kJ/cm2",
+   "near": {
+    "cells": 29,
+    "medianBefore": 76.43,
+    "medianAfter": 64.84,
+    "shareIncreased": 0.069
+   },
+   "far": {
+    "cells": 135,
+    "medianBefore": 62.27,
+    "medianAfter": 74.31,
+    "shareIncreased": 0.526
+   }
+  },
+  "temperature5m": {
+   "units": "degC",
+   "near": {
+    "cells": 29,
+    "medianBefore": 29.57,
+    "medianAfter": 28.87,
+    "shareIncreased": 0.069
+   },
+   "far": {
+    "cells": 145,
+    "medianBefore": 28.57,
+    "medianAfter": 28.85,
+    "shareIncreased": 0.621
+   },
+   "depthMetres": 5.0
+  }
+ },
+ "buoys": [
+  {
+   "id": "23459",
+   "lat": 14.0,
+   "lon": 87.031,
+   "distanceKm": 274,
+   "depthMetres": 10.0,
+   "measuredChange": -0.58,
+   "analysedChange": -0.25,
+   "reportTimes": [
+    "2025-10-20T00:00:00+00:00",
+    "2025-10-30T00:00:00+00:00"
+   ]
+  },
+  {
+   "id": "2300009",
+   "lat": 15.0502,
+   "lon": 88.9912,
+   "distanceKm": 472,
+   "depthMetres": 20.0,
+   "measuredChange": 0.09,
+   "analysedChange": 0.01,
+   "reportTimes": [
+    "2025-10-16T12:00:00+00:00",
+    "2025-11-01T12:00:00+00:00"
+   ]
+  },
+  {
+   "id": "23093",
+   "lat": 16.33,
+   "lon": 88.012,
+   "distanceKm": 534,
+   "depthMetres": 10.0,
+   "measuredChange": -0.91,
+   "analysedChange": -0.19,
+   "reportTimes": [
+    "2025-10-20T00:00:00+00:00",
+    "2025-10-30T00:00:00+00:00"
+   ]
+  }
+ ],
+ "floats": [
+  {
+   "id": "2903434",
+   "distanceKm": 3,
+   "time": "2025-10-25T04:28:24+00:00",
+   "lat": 11.6885,
+   "lon": 85.8263
+  },
+  {
+   "id": "1902681",
+   "distanceKm": 34,
+   "time": "2025-10-29T13:47:00+00:00",
+   "lat": 12.0445,
+   "lon": 85.0151
+  },
+  {
+   "id": "5907083",
+   "distanceKm": 35,
+   "time": "2025-10-28T14:05:32+00:00",
+   "lat": 11.6667,
+   "lon": 86.7833
+  },
+  {
+   "id": "7902249",
+   "distanceKm": 46,
+   "time": "2025-10-25T14:02:27+00:00",
+   "lat": 11.65,
+   "lon": 85.1667
+  },
+  {
+   "id": "2902772",
+   "distanceKm": 58,
+   "time": "2025-10-30T13:27:06+00:00",
+   "lat": 14.112,
+   "lon": 84.075
+  },
+  {
+   "id": "2903988",
+   "distanceKm": 69,
+   "time": "2025-10-23T14:24:03+00:00",
+   "lat": 12.0833,
+   "lon": 86.4833
+  },
+  {
+   "id": "7902248",
+   "distanceKm": 88,
+   "time": "2025-10-24T14:17:51+00:00",
+   "lat": 11.8167,
+   "lon": 87.6833
+  },
+  {
+   "id": "7902251",
+   "distanceKm": 91,
+   "time": "2025-10-25T14:15:20+00:00",
+   "lat": 11.6167,
+   "lon": 88.7333
+  },
+  {
+   "id": "4903776",
+   "distanceKm": 105,
+   "time": "2025-10-30T13:56:43+00:00",
+   "lat": 9.8667,
+   "lon": 89.1333
+  },
+  {
+   "id": "2902765",
+   "distanceKm": 139,
+   "time": "2025-10-24T21:35:13+00:00",
+   "lat": 12.369,
+   "lon": 87.572
+  },
+  {
+   "id": "2902770",
+   "distanceKm": 155,
+   "time": "2025-10-30T13:26:02+00:00",
+   "lat": 10.07,
+   "lon": 90.21
+  },
+  {
+   "id": "6990608",
+   "distanceKm": 161,
+   "time": "2025-11-01T13:46:56+00:00",
+   "lat": 9.4167,
+   "lon": 88.1167
+  },
+  {
+   "id": "2903892",
+   "distanceKm": 178,
+   "time": "2025-11-01T14:03:09+00:00",
+   "lat": 14.5667,
+   "lon": 85.1167
+  },
+  {
+   "id": "4903775",
+   "distanceKm": 178,
+   "time": "2025-10-28T14:12:57+00:00",
+   "lat": 12.3167,
+   "lon": 89.5167
+  },
+  {
+   "id": "6990609",
+   "distanceKm": 247,
+   "time": "2025-10-31T14:00:57+00:00",
+   "lat": 9.8667,
+   "lon": 84.4833
+  },
+  {
+   "id": "2903891",
+   "distanceKm": 254,
+   "time": "2025-10-30T14:22:17+00:00",
+   "lat": 12.9333,
+   "lon": 89.8167
+  },
+  {
+   "id": "2903989",
+   "distanceKm": 258,
+   "time": "2025-10-26T14:14:50+00:00",
+   "lat": 15.7,
+   "lon": 85.2833
+  },
+  {
+   "id": "2902768",
+   "distanceKm": 259,
+   "time": "2025-10-30T13:37:49+00:00",
+   "lat": 13.709,
+   "lon": 80.832
+  },
+  {
+   "id": "5907082",
+   "distanceKm": 267,
+   "time": "2025-10-27T14:24:34+00:00",
+   "lat": 16.8167,
+   "lon": 84.65
+  },
+  {
+   "id": "5907171",
+   "distanceKm": 272,
+   "time": "2025-11-01T14:14:48+00:00",
+   "lat": 13.2,
+   "lon": 89.45
+  },
+  {
+   "id": "7901127",
+   "distanceKm": 282,
+   "time": "2025-10-31T14:05:03+00:00",
+   "lat": 11.3,
+   "lon": 91.5333
+  },
+  {
+   "id": "1902594",
+   "distanceKm": 288,
+   "time": "2025-10-26T08:52:10+00:00",
+   "lat": 8.966,
+   "lon": 85.6862
+  },
+  {
+   "id": "1902669",
+   "distanceKm": 299,
+   "time": "2025-10-28T14:12:03+00:00",
+   "lat": 14.75,
+   "lon": 86.55
+  }
+ ],
+ "driftPin": {
+  "lon": 81.5,
+  "lat": 14.5,
+  "kmFromLandfall": 207,
+  "days": 10.0
+ }
+}

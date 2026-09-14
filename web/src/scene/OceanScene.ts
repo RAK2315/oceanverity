@@ -172,6 +172,11 @@ export interface ViewState {
    * claim: the drift lines are a prediction about water and this is only where a chart was cut.
    */
   sectionLine: [number, number][] | null;
+  /**
+   * A cyclone's best track, as IMD published it, while the storm walkthrough is open. Drawn in
+   * its own colour: it is neither a measured float track nor a prediction about water.
+   */
+  stormTrack: [number, number][] | null;
   theme: Theme;
 }
 
@@ -237,6 +242,9 @@ const SCENE_COLOURS = {
     // Where a vertical section was cut. A different claim from the drift lines - it is not a
     // prediction about water, only where a chart was taken - so a different colour.
     section: new Color(0x63e6c4),
+    // A cyclone's track. Red-pink: a storm, and unlike the orange float tracks, the violet drift
+    // and the green section line it is drawn beside.
+    storm: new Color(0xff3fb4),
     rim: new Color(0.1, 0.28, 0.42),
     shadeFloor: 0.62,
     coastOpacity: 0.75,
@@ -252,6 +260,7 @@ const SCENE_COLOURS = {
     track: new Color(0xc2621a),
     drift: new Color(0x6b3fc4),
     section: new Color(0x0b7a63),
+    storm: new Color(0xe0007a),
     rim: new Color(0.0, 0.0, 0.0),
     shadeFloor: 0.88,
     coastOpacity: 1.0,
@@ -430,6 +439,8 @@ export class OceanScene {
   private driftLine?: LineSegments;
   private predictedLine?: LineSegments;
   private sectionLine?: LineSegments;
+  private stormLine?: LineSegments;
+  private stormFixes?: Points;
   private driftPinPoints?: Points;
   private selectedColumn?: LineSegments;
 
@@ -441,6 +452,7 @@ export class OceanScene {
   private lastDriftKey = "";
   private lastPredictedKey = "";
   private lastSectionKey = "";
+  private lastStormKey = "";
   private lastAnomalyKey = "";
   private lastSheetKey = "";
   private lastArrowKey = "";
@@ -894,6 +906,9 @@ export class OceanScene {
       palette.section,
     );
     this.setUniform(this.sectionLine, "uOpacity", palette.driftOpacity);
+    (this.stormFixes?.material as ShaderMaterial | undefined)?.uniforms.uColour?.value.copy(palette.storm);
+    (this.stormLine?.material as ShaderMaterial | undefined)?.uniforms.uColour?.value.copy(palette.storm);
+    this.setUniform(this.stormLine, "uOpacity", palette.driftOpacity);
     this.setUniform(this.driftLine, "uOpacity", palette.driftOpacity);
     this.setUniform(this.predictedLine, "uOpacity", palette.driftOpacity);
 
@@ -914,6 +929,8 @@ export class OceanScene {
       this.driftLine,
       this.predictedLine,
       this.sectionLine,
+      this.stormLine,
+      this.stormFixes,
       this.driftPinPoints,
     ]) {
       this.setUniform(object, "uMorph", state.morph);
@@ -1052,7 +1069,9 @@ export class OceanScene {
     this.updateDrift(state);
 
     if (this.trackLines) {
-      this.trackLines.visible = state.showTracks;
+      // Float tracks step aside while a storm's track is on screen: two thin orange-and-pink
+      // lines through the same bay could not be told apart. The control is not changed.
+      this.trackLines.visible = state.showTracks && !state.stormTrack;
       // Only the drift that had already happened by this Timestep, so pressing play draws the
       // tracks out rather than showing every float's whole future at once.
       if (state.timeMs !== this.lastTrackTime) {
@@ -1151,6 +1170,8 @@ export class OceanScene {
     this.driftLine = line();
     this.predictedLine = line();
     this.sectionLine = line(SCENE_COLOURS.dark.section);
+    this.stormLine = line(SCENE_COLOURS.dark.storm);
+    this.stormFixes = this.buildStormFixes();
 
     // The pin itself: one point, drawn as a ring so it reads as a place rather than as an
     // instrument. A filled disc here would be a fifth kind of dot on a map that already has
@@ -1206,12 +1227,69 @@ export class OceanScene {
     this.scene.add(this.driftPinPoints);
   }
 
+  /**
+   * A dot at every position IMD recorded for a storm, so its track reads at a glance beside the
+   * one-pixel float tracks. Filled, with a dark rim, which is a different mark from the ring the
+   * drift pin uses and from the float markers.
+   */
+  private buildStormFixes(): Points {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("lonLat", new BufferAttribute(new Float32Array(0), 2));
+    geometry.setAttribute("position", new BufferAttribute(new Float32Array(0), 3));
+    const points = new Points(
+      geometry,
+      new ShaderMaterial({
+        glslVersion: GLSL3,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          uMorph: { value: 0 },
+          uColour: { value: SCENE_COLOURS.dark.storm.clone() },
+        },
+        vertexShader: /* glsl */ `
+          in vec2 lonLat;
+          uniform float uMorph;
+          const float EARTH_RADIUS = ${EARTH_RADIUS.toFixed(6)};
+          void main() {
+            float phi = radians(lonLat.x);
+            float theta = radians(lonLat.y);
+            float r = EARTH_RADIUS + 0.16;
+            vec3 sphere = vec3(r * cos(theta) * sin(phi), r * sin(theta), r * cos(theta) * cos(phi));
+            vec3 plane = vec3(lonLat.x, 0.16, -lonLat.y);
+            vec4 view = viewMatrix * vec4(mix(sphere, plane, uMorph), 1.0);
+            gl_Position = projectionMatrix * view;
+            gl_PointSize = clamp(9.0 * (60.0 / -view.z), 4.0, 14.0);
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          precision highp float;
+          uniform vec3 uColour;
+          out vec4 fragColor;
+          void main() {
+            float d = length(gl_PointCoord - 0.5);
+            if (d > 0.5) discard;
+            vec3 colour = d > 0.36 ? vec3(0.08) : uColour;
+            fragColor = vec4(colour, 1.0);
+          }
+        `,
+      }),
+    );
+    points.renderOrder = ORDER.markers;
+    points.frustumCulled = false;
+    points.visible = false;
+    this.scene.add(points);
+    return points;
+  }
+
   /** Rebuild a drift polyline only when its points actually changed. */
   private updateDrift(state: ViewState): void {
     const apply = (
       object: LineSegments | undefined,
       points: [number, number][] | null,
-      lastKey: "lastDriftKey" | "lastPredictedKey" | "lastSectionKey",
+      lastKey: "lastDriftKey" | "lastPredictedKey" | "lastSectionKey" | "lastStormKey",
+      // Parallel copies either side, in degrees. WebGL draws every line one pixel wide whatever
+      // `linewidth` says, so a line that has to read at a glance is drawn several times over.
+      offsets: number[] = [0],
     ) => {
       if (!object) return;
       object.visible = !!points && points.length > 1;
@@ -1223,7 +1301,14 @@ export class OceanScene {
         const a = points[i];
         const b = points[i + 1];
         if (!a || !b) continue;
-        lonLat.push(a[0], a[1], b[0], b[1]);
+        const dx = (b[0] - a[0]) * Math.cos((a[1] * Math.PI) / 180);
+        const dy = b[1] - a[1];
+        const length = Math.hypot(dx, dy) || 1;
+        for (const offset of offsets) {
+          const ox = (-dy / length) * offset;
+          const oy = (dx / length) * offset;
+          lonLat.push(a[0] + ox, a[1] + oy, b[0] + ox, b[1] + oy);
+        }
       }
       object.geometry.dispose();
       const geometry = new BufferGeometry();
@@ -1238,6 +1323,19 @@ export class OceanScene {
     apply(this.driftLine, state.driftPath, "lastDriftKey");
     apply(this.predictedLine, state.predictedTrack, "lastPredictedKey");
     apply(this.sectionLine, state.sectionLine, "lastSectionKey");
+    apply(this.stormLine, state.stormTrack, "lastStormKey", [-0.12, -0.06, 0, 0.06, 0.12]);
+    if (this.stormFixes) {
+      const fixes = state.stormTrack ?? [];
+      this.stormFixes.visible = fixes.length > 0;
+      const attribute = this.stormFixes.geometry.getAttribute("lonLat") as BufferAttribute;
+      if (attribute.count !== fixes.length) {
+        this.stormFixes.geometry.dispose();
+        const geometry = new BufferGeometry();
+        geometry.setAttribute("lonLat", new BufferAttribute(new Float32Array(fixes.flat()), 2));
+        geometry.setAttribute("position", new BufferAttribute(new Float32Array(fixes.length * 3), 3));
+        this.stormFixes.geometry = geometry;
+      }
+    }
 
     if (this.driftPinPoints) {
       this.driftPinPoints.visible = !!state.driftPin;

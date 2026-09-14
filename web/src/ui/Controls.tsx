@@ -499,8 +499,9 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
         * The basin-wide statement, and the reason it is two statements.
         *
         * INCOIS's analysis **assimilates Argo**, so a float's residual is largely the model
-        * agreeing with an observation it was fed. The moored buoys are not assimilated, and
-        * measured over this bake they disagree several times as much. Pooled into one figure
+        * agreeing with an observation it was fed. The moored buoys are not assimilated. Their
+        * typical gap is larger, but they stop at 500 m against the floats' 2000 m and deep water
+        * is easy to match, so the ratio is not quoted (measured 2026-09-13, `docs/NUMBERS.md`). Pooled into one figure
         * the seventeen of them vanish into 249 floats and the headline becomes a statement about
         * self-consistency, so the independent number is printed beside it - with its own count,
         * because seventeen instruments is a small sample and saying so is part of the answer.
@@ -535,7 +536,8 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
           <strong>
             {independent.meanAbsBias.toFixed(2)} {spec.units}
           </strong>
-          .
+          . The buoys stop far shallower than the floats, and deep water is easy to match, so
+          the two are not like for like.
         </p>
       )}
 

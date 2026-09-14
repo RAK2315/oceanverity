@@ -12,8 +12,8 @@ and what the instruments in the water actually measured.**
 [![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-ff9933)](https://sih.gov.in/)
 [![PS 26067](https://img.shields.io/badge/Problem%20Statement-26067-138808)](https://sih.gov.in/)
 [![MoES / INCOIS](https://img.shields.io/badge/MoES-INCOIS-000080)](https://incois.gov.in/)
-![Tests](https://img.shields.io/badge/tests-409%20passing-2ea043)
-![Probes](https://img.shields.io/badge/browser%20probes-13%20green-2ea043)
+![Tests](https://img.shields.io/badge/tests-430%20passing-2ea043)
+![Probes](https://img.shields.io/badge/browser%20probes-16%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
@@ -266,8 +266,9 @@ asserted. They are grouped the way a forecaster thinks rather than the way the d
 | Hazard | **Isothermal layer depth** | from the temperature profile |
 | Hazard | **Barrier layer thickness** | the difference between the two above |
 
-The five Hazard variables are the quantities INCOIS published operationally until 2019-03-30 and
-then stopped. Three of them *are* a depth, so they are drawn as a sheet inside the block rather
+The five Hazard variables are computed here from INCOIS's Argo analysis. INCOIS's own series of
+several of them from that analysis ended on 2019-03-30; INCOIS still publish heat potential and
+mixed layer depth from their forecast models, as maps. Three of them *are* a depth, so they are drawn as a sheet inside the block rather
 than as a block; two are a total for the whole column, so they are draped on the sea surface.
 
 One more quantity is on screen and is deliberately *not* a variable, because it did not go
@@ -332,7 +333,7 @@ each one that opens the platform with the control that answers it already set.
 | **3D volumetric rendering** across the full water column | **Met** | Temperature and salinity, ray-marched | `volumeShader.ts` |
 | ...with depth-slice views | **Met** | Two sliders cut the block to any depth range | `Controls.tsx` |
 | ...with isosurface extraction | **Met** | Draws the surface at one chosen value, e.g. the 20 °C isotherm | `volumeShader.ts` |
-| ...with time-step animation | **Met** | Play button, 12 analyses over 4 months | `Timeline.tsx` |
+| ...with time-step animation | **Met** | Play button, 36 analyses over a year | `Timeline.tsx` |
 | ...using WebGL / Three.js or Cesium.js | **Met** | Three.js and WebGL2. Why not Cesium: `docs/adr/0001` | `OceanScene.ts` |
 | ...of **current vectors** | **Met** | Copernicus Marine's own analysis at 1/12 degree - twelve times finer than the INCOIS grid - read as **numbers** and baked as float32 on the model's own axes. Arrows sit on the depth you have sliced to, coloured by speed, with a real value under the cursor. This was a rendered image until a free Copernicus account was registered; the credential lives in the bake and never in the browser. Held to the same test that killed our own derived field and passing it: **2.94 m/s at 9.5 N, 51.5 E** on the last Timestep, which is the Somali Current core in the month it peaks, against 0.16 m/s in the wrong place from the derivation. `docs/adr/0013` | `pipeline/samudra/sources/copernicus.py` |
 | **Instrument overlay** with geospatially accurate markers | **Met** | Floats drawn at the position they held at the moment on screen, with drift tracks | `OceanScene.ts` |
@@ -392,11 +393,11 @@ measurement rather than on effort:
   programme, not our adapter.**
 
 And it added the thing the revised problem statement is actually about. The theme is now
-**Disaster Management**, and INCOIS used to publish exactly the quantities a cyclone forecaster
-asks for - depth of the 26 degC isotherm, heat content, mixed layer depth, isothermal layer depth.
-**That series stopped on 2019-03-30**, measured twice and independently. All five are computed
-here from the temperature and salinity already in the grid, so this fills a gap INCOIS has rather
-than duplicating something they ship. ADR 0014.
+**Disaster Management**. INCOIS's value-added series from their Argo analysis - depth of the 26
+degC isotherm, heat content to 300 m, mixed layer depth, isothermal layer depth - **ended on
+2019-03-30**. INCOIS still publish heat potential and mixed layer depth from their forecast models,
+as maps. All five hazard fields are computed here from the Argo analysis, drawn in 3D beside the
+instruments, and checked against INCOIS's own 2004-2019 archive (`hazard_check.json`). ADR 0014.
 
 What is still missing is **ship CTD** - newest section here April 2025, which cannot share this
 timeline - and **HF-radar and ADCP**, which are behind a login that does not resolve. Both are
@@ -460,7 +461,7 @@ curl -o map.png 'http://localhost:8000/wms?service=WMS&version=1.3.0&request=Get
 
 If you skip step 2, the data is already committed, so the website still works.
 
-**Tests:** `cd pipeline && ../.venv/Scripts/python -m pytest` - 409 tests covering the depth
+**Tests:** `cd pipeline && ../.venv/Scripts/python -m pytest` - 430 tests covering the depth
 warp, volume encoding, grid interpolation, collocation maths, the Argo parser, observation
 coverage, the TEOS-10 density chain, the anomaly baseline and the features found in it, the
 isotherm depth, the adapter seam that lets four providers with incompatible layouts share one
@@ -468,7 +469,7 @@ protocol, the colour-vision ordering of the coverage bands, the current-tile ari
 OPeNDAP and WMS endpoints - the DAP2 one checked by opening it with a real `pydap` client rather
 than by asserting on our own bytes.
 
-**And fifteen probes**, which are a different thing from tests: they drive the built app in a
+**And 16 probes**, which are a different thing from tests: they drive the built app in a
 real browser and measure what reaches the screen, because every bad bug in this project's history
 looked like a shader bug and was not. They check that the browser's drift integrator and vertical
 section agree with the pipeline's; that every control has an explanation and every figure in one
@@ -516,7 +517,7 @@ A box diagram says two things are connected. These say what moves.
 
 | Layer | What it is responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 409 tests | `samudra/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
+| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 430 tests | `samudra/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
 | **`api/`** &middot; FastAPI | Answering what a static folder cannot: a collocation for an instrument the bake did not precompute, an arbitrary column, an arbitrary section line, and a NetCDF file a visitor uploads. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS | `data/grids/*.npz`, the native `Grid` saved server-side. **Every endpoint reads the `Grid`. None of them can reach a `Volume`** |
 | **`web/`** &middot; React + TypeScript + Three.js | One WebGL scene for both the globe and the ray-marched block, every control, every panel, and the two pieces of science that have to run offline | `web/public/data/`, the bake. The browser reads files, not endpoints - the only exception is a file the user themselves drops on the page |
 
@@ -541,8 +542,8 @@ behind it at all.
 3. **Grid.** `time x depth x latitude x longitude`, float64, on INCOIS's own 1&deg; mesh and 24
    uneven levels from 5 m to 2000 m. Land is `NaN`, not zero. **This is the scientific truth**,
    and everything below is derived from it.
-4. **Derive.** Density through TEOS-10, the five cyclone-hazard fields INCOIS stopped publishing
-   on 2019-03-30, the anomaly and its 404 automatically-found bodies of water, observation
+4. **Derive.** Density through TEOS-10, the five cyclone-hazard fields (checked against INCOIS's own
+   2004-2019 archive), the anomaly and its 404 automatically-found bodies of water, observation
    coverage, the bias map, and the drift score. Fifteen `Field`s in five groups.
 5. **Bake.** For each `Field` and each of the thirty-six 10-day analyses, write what that `Field`
    actually is. A value at every depth becomes a **`Volume`**: resampled onto an even lattice

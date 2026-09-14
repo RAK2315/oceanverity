@@ -1,3 +1,4 @@
+import type { StormCase } from "../cases";
 import {
   Data3DTexture,
   DataTexture,
@@ -65,6 +66,12 @@ export const loadResiduals = () => getJson<Residuals>("residuals.json");
  * `pipeline/samudra/drift.py` produced and tests cover - see the note at the top of `drift.ts`.
  */
 export const loadDrift = () => getJson<BakedDrift>("drift.json");
+
+/**
+ * Cyclone Montha, as the pipeline measured it: IMD's track and every figure the walkthrough
+ * quotes. A few kilobytes, fetched in the background; a build without it has no walkthrough.
+ */
+export const loadStormCase = () => getJson<StormCase>("cases/montha.json");
 
 /**
  * One Field at one Timestep on the model's own Levels: the **Grid**, not a Volume.

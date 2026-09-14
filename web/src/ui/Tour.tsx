@@ -424,7 +424,7 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       title: "Where would something adrift go",
       body:
         "Drop a pin and the analysed current carries it forward. What makes it worth having is" +
-        " the second half: the same integrator was run from 195 real floats' own positions, and" +
+        ` the second half: the same integrator was run from ${figures.driftFloats ?? "real"} floats' own positions, and` +
         " the error published. It is not a search-and-rescue product, and the panel says so.",
       covers: ["drift"],
       enter: () => {

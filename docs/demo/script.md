@@ -91,12 +91,12 @@ a scientific question from the picture.
 
 **Zone four is what comes back out.** The browser. A REST API. And OPeNDAP, CF NetCDF and OGC
 WMS, so anything that already speaks those standards can read our fields - including the five
-cyclone products INCOIS themselves stopped publishing in 2019."
+cyclone fields we compute from INCOIS's Argo analysis."
 
 > _Point at the green status strip. Slow down for this line._
 
-"Status: working prototype, on live INCOIS data. **Four hundred and nine automated
-tests** on the science, and fifteen browser probes that drive the built application and measure
+"Status: working prototype, on live INCOIS data. **430 automated
+tests** on the science, and 16 browser probes that drive the built application and measure
 what actually reaches the screen. **Zero network calls at demo time** - the data is baked into
 the build, so a dead venue network cannot kill this."
 
@@ -455,7 +455,7 @@ more than not having it.
 | "What resolution is the data?" | One degree, because that is what INCOIS publishes. We do not upsample. That would invent structure the instruments never measured. |
 | "Does it work offline?" | Yes. That is why it is baked. |
 | "Did you generate or simulate any of this?" | No. Every number comes from INCOIS's server or the Argo programme. |
-| "What is the accuracy?" | Across 206 floats the median RMS gap between model and instrument is 0.46 °C. That is the analysis's own accuracy, which is what we are measuring. Be careful with the word "typical": RMS is the quadratic mean, always at least the mean absolute deviation. |
+| "What is the accuracy?" | Across 249 floats the median RMS gap between model and instrument is 0.47 °C. That is the analysis's own accuracy, which is what we are measuring. Be careful with the word "typical": RMS is the quadratic mean, always at least the mean absolute deviation. |
 | "Doesn't the analysis already use Argo? Aren't you comparing it with itself?" | Partly, and that is the operational question rather than a flaw - did the analysis reproduce the observation it was given, here, at this depth? It does not always: the disagreement runs from 0.00 to 1.98 °C. The panel says this on screen so you do not have to. |
 | "Where do the currents come from?" | Copernicus Marine's own global analysis, at one twelfth of a degree - twelve times finer than the INCOIS grid. We read the actual eastward and northward velocity, not a picture of it, so there is a real speed under the cursor wherever you point. It needs a free Copernicus account **to rebuild the data**, and none at all to view or use the platform; the credential never leaves the machine that bakes. It was a picture until that account existed, and the change is written up in ADR 0013. |
 | "Are those all Argo floats?" | No. Nine are moored buoys - four from India's own OMNI network, three from RAMA. They are drawn as squares, they have no drift track because they are anchored, and their comparison follows the timeline. |
@@ -463,4 +463,4 @@ more than not having it.
 | "Has nobody built this before?" | Say it narrowly: **depth-resolved volumetric rendering in a browser, with the in-situ observations in the same water and the model scored against them.** Do not say "nobody has done this". Checked 2026-09-04: Copernicus **MyOcean Pro** is the reference and is a 2D map with a depth slider, no 3D at all; earth.nullschool is a 2D globe with surface currents; NOAA's Science on a Sphere is a physical globe; and browser volume rendering of ocean scalars exists as research (a WebGPU framework published March 2025, i4Ocean before it) but as prototypes, and none of them carries the observations. `docs/plan/05` Part 3. |
 | "Those moving lines - are they a forecast?" | No, and say so before they ask twice. Every dot is the flow at **one** analysis, frozen; the drift pin is the one that runs time forward. They share the same integrator, which is the point: the animation runs the maths whose error we published at a median 38 km over an Argo cycle. Measured, a particle and a drift pin from the same start land **2 metres apart after 724 km**. |
 | "Why are there no eddies, when the Copernicus viewer is full of them?" | Because we draw INCOIS's grid rather than upsampling it. Theirs is 1/12 degree, about 9 km; the analysis this platform reports every number from is 1 degree, about 110 km, so every swirl on their screen is smaller than one of our cells. We could bake a finer field just for the animation for about 27 MB and we refused: the picture would then be more detailed than every number on the platform, in the one place nobody would check. ADR 0017. |
-| "How long did this take?" | Built for this hackathon. 409 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |
+| "How long did this take?" | Built for this hackathon. 430 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |

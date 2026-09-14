@@ -26,6 +26,7 @@ from samudra.sources.osmc import (
     MIN_PROFILE_LEVELS,
     OsmcSource,
     parse_osmc,
+    reject_spikes,
     thin_to_one_per_day,
 )
 
@@ -104,6 +105,60 @@ def test_implausible_values_are_refused_per_channel():
     profile = parse_osmc(broken)[0]
     assert np.isfinite(profile.values["temperature"]).all()
     assert not np.isfinite(profile.values["salinity"][4])
+
+
+def test_a_zero_reading_inside_warm_water_is_refused_as_a_spike():
+    """The case that made this test exist. Buoy 23094, Bay of Bengal, September 2025, reported
+    29.55 degC at 15 m, **0.0 degC at 20 m** and 29.58 degC at 30 m. Zero is inside the regional
+    range, so the range check let it through, and it pushed the buoys' published typical gap from
+    0.88 to 1.01 degC on its own. Argo's spike test is what catches it."""
+    depths = np.array([0.0, 15.0, 20.0, 30.0, 75.0])
+    temperature = np.array([32.3, 29.55, 0.0, 29.58, 28.95])
+    cleaned = reject_spikes(depths, temperature, "temperature")
+    assert not np.isfinite(cleaned[2])
+    assert np.isfinite(np.delete(cleaned, 2)).all()
+
+
+def test_a_sharp_thermocline_is_a_step_and_not_a_spike():
+    """The second term of the test value is what spares a real gradient: a reading halfway
+    through a steep drop is not different from its neighbours in the way a spike is."""
+    depths = np.array([10.0, 20.0, 40.0, 60.0])
+    temperature = np.array([29.0, 28.9, 22.0, 18.0])
+    assert np.isfinite(reject_spikes(depths, temperature, "temperature")).all()
+
+
+def test_the_temperature_threshold_tightens_from_500_m():
+    """Argo QC manual v3.9, test 9: 6.0 degC above 500 dbar, 2.0 degC at or below it. A test
+    value of 2.5 degC fails deep and passes shallow."""
+    values = np.array([11.0, 13.5, 8.0])
+    shallow = reject_spikes(np.array([200.0, 400.0, 450.0]), values, "temperature")
+    deep = reject_spikes(np.array([300.0, 500.0, 750.0]), values, "temperature")
+    assert np.isfinite(shallow).all()
+    assert not np.isfinite(deep[1])
+
+
+def test_salinity_uses_its_own_threshold():
+    depths = np.array([10.0, 20.0, 30.0])
+    assert not np.isfinite(reject_spikes(depths, np.array([34.0, 35.2, 34.0]), "salinity")[1])
+    assert np.isfinite(reject_spikes(depths, np.array([34.0, 34.8, 34.0]), "salinity")).all()
+
+
+def test_the_end_levels_and_missing_neighbours_are_handled_without_guessing():
+    """A spike needs a value above and below it. The top and bottom level cannot be tested and
+    are kept, and a missing level is skipped over to the next real reading rather than read as
+    a neighbour of zero."""
+    depths = np.array([0.0, 10.0, 20.0, 30.0])
+    temperature = np.array([0.0, 29.0, np.nan, 29.0])
+    cleaned = reject_spikes(depths, temperature, "temperature")
+    assert cleaned[0] == 0.0 and cleaned[1] == 29.0 and cleaned[3] == 29.0
+    assert not np.isfinite(cleaned[2])
+
+
+def test_the_parser_applies_the_spike_test():
+    spiked = OMNI.replace(",20.0,29.09,33.72,", ",20.0,0.0,33.72,")
+    profile = parse_osmc(spiked)[0]
+    assert not np.isfinite(profile.values["temperature"][2])
+    assert np.isfinite(profile.values["salinity"][2]), "only the channel that failed is refused"
 
 
 def test_reports_are_thinned_to_one_a_day():

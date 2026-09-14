@@ -12,8 +12,8 @@ and what the instruments in the water actually measured.**
 Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / INCOIS
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
 
-![Tests](https://img.shields.io/badge/tests-409%20passing-2ea043)
-![Probes](https://img.shields.io/badge/browser%20probes-15%20green-2ea043)
+![Tests](https://img.shields.io/badge/tests-430%20passing-2ea043)
+![Probes](https://img.shields.io/badge/browser%20probes-16%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -65,10 +65,12 @@ venue network cannot kill it.
 scores the model against every instrument in the water and prints the result, including where it
 looks bad.
 
-> Across **266 instruments** the typical gap is **0.24 °C**. But INCOIS *assimilate* Argo, so a
-> float's agreement is largely the model agreeing with itself. Against the **17 moored buoys it
-> did not ingest, the gap is 1.01 °C** - five and a half times worse. We print both, separately,
-> because pooling them would flatter the model.
+> Across **266 instruments** the typical gap is **0.23 °C**. But INCOIS *assimilate* Argo, so a
+> float's agreement is largely the model agreeing with itself. The **17 moored buoys it did not
+> ingest** read **0.88 °C** against **0.18 °C** for floats - but floats are compared down to
+> about 2000 m and buoys only to 500 m, and deep water is easy to match, so the two are not like
+> for like and we do not quote a ratio. We print both, separately, because pooling them would
+> flatter the model.
 
 **2. Never answer a scientific question from the picture.** The rendered block is quantised to a
 byte per value and warped for the GPU. Every number a user reads - tooltips, comparisons, API
@@ -236,7 +238,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Layer | Responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 409 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
+| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 430 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
 | **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the `Grid`. None can reach a `Volume`.** |
 | **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints** - the only exception is a file the user drops. |
 
@@ -272,7 +274,7 @@ works with no server behind it at all.
 | **Standards out** | OPeNDAP (DAP2), CF-1.8 NetCDF, OGC WMS 1.3.0 | So the analysis is readable by a Python client, a file, or a GIS - not only by this page. |
 | **Rendering** | Three.js on WebGL2, GLSL ray marching | The volume is a single ray-marched block, not a stack of images. Nothing else gets you inside the water. |
 | **Frontend** | React 18, TypeScript 5, Zustand, Vite | Zustand because every control is one flat store the scene reads once a frame; Vite for a four-page build with no config. |
-| **Verification** | pytest, Playwright | 409 tests on the science; 15 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
+| **Verification** | pytest, Playwright | 430 tests on the science; 16 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
 | **Fonts** | Chivo, IBM Plex Mono, Space Grotesk, Inter - all self-hosted | The demo makes zero network calls. A Google Fonts link is a build failure, not a style choice. |
 
 ---
@@ -312,10 +314,10 @@ cd pipeline && ../.venv/Scripts/python -m samudra.bake
 Nothing in this README is asserted without something that can fail:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q         # 409 tests, ~35 s
+cd pipeline && ../.venv/Scripts/python -m pytest -q         # 430 tests, ~35 s
 cd web && npm run typecheck && npx vite build
 
-# the 15 browser probes measure the rendered page rather than trusting it.
+# the 16 browser probes measure the rendered page rather than trusting it.
 # They need a preview server; each takes a minute or two.
 cd web && npx vite preview --port 4173 &
 node probe-guide.mjs        # every control is explained, every figure came from the bake

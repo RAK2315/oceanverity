@@ -1,0 +1,40 @@
+# Severe Cyclonic Storm MONTHA, Bay of Bengal, 25-30 October 2025 (system 13 of 2025).
+# Source: India Meteorological Department, RSMC New Delhi, 'Best Tracks Data (1982-2026)',
+#   https://rsmcnewdelhi.imd.gov.in/download.php?path=uploads/best-track/78b4b0_Best_Tracks__Data__1982-2026_.xlsx
+#   listed at https://rsmcnewdelhi.imd.gov.in/report.php?internal_menu=MzM= ; sheet '2025'. Downloaded 2026-09-13.
+# Rows copied as published; only IMD's text rows are kept as comments below. Wind is maximum sustained surface wind in knots.
+# IMD, 28-10-2025: Crossed Andhra Pradesh and Yanam between Machilipatnam and Kalingapatnam to the south of Kakinada close to Narsapur near latitude 16.35N and longitude 81.70 E during 1800 UTC-1900 UTC of 28th October (2330 hrs IST of 28th October and 0030 hrs IST of 29th October) with maximum sustained wind speed of 90-100 gusting to 110 kmph
+# IMD, 30-10-2025: Weakened into a Well Marked Low Pressure Area over east Vidarbha and adjoining south Chhattisgarh
+time_utc,latitude,longitude,grade,wind_kt
+2025-10-25T00:00:00Z,10.8,89,D,20
+2025-10-25T03:00:00Z,10.8,88.8,D,25
+2025-10-25T06:00:00Z,10.8,88.6,D,25
+2025-10-25T12:00:00Z,10.9,88.1,D,25
+2025-10-25T18:00:00Z,11,87.7,D,25
+2025-10-26T00:00:00Z,11.1,87.3,DD,30
+2025-10-26T03:00:00Z,11.2,87.1,DD,30
+2025-10-26T06:00:00Z,11.3,86.9,DD,30
+2025-10-26T12:00:00Z,11.4,86.6,DD,30
+2025-10-26T18:00:00Z,11.6,85.9,CS,35
+2025-10-26T21:00:00Z,11.9,85.5,CS,35
+2025-10-27T00:00:00Z,12.2,85.3,CS,35
+2025-10-27T03:00:00Z,12.6,84.9,CS,40
+2025-10-27T06:00:00Z,12.8,84.6,CS,40
+2025-10-27T09:00:00Z,13,84.2,CS,40
+2025-10-27T12:00:00Z,13.3,84,CS,45
+2025-10-27T15:00:00Z,13.6,83.8,CS,45
+2025-10-27T18:00:00Z,14,83.5,CS,45
+2025-10-27T21:00:00Z,14.4,83.3,CS,45
+2025-10-28T00:00:00Z,14.7,83,SCS,50
+2025-10-28T03:00:00Z,14.9,82.9,SCS,50
+2025-10-28T06:00:00Z,15.2,82.7,SCS,50
+2025-10-28T09:00:00Z,15.6,82.5,SCS,50
+2025-10-28T12:00:00Z,16,82.2,SCS,50
+2025-10-28T15:00:00Z,16.2,82,SCS,50
+2025-10-28T18:00:00Z,16.3,81.7,SCS,50
+2025-10-28T21:00:00Z,16.5,81.5,CS,40
+2025-10-29T00:00:00Z,17,81.3,CS,35
+2025-10-29T03:00:00Z,17.3,81.2,DD,30
+2025-10-29T06:00:00Z,17.7,81.1,DD,30
+2025-10-29T12:00:00Z,18.7,80.9,D,25
+2025-10-29T18:00:00Z,19.6,80.7,D,20

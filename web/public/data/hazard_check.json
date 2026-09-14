@@ -1,0 +1,78 @@
+{
+ "generated": "2026-09-13",
+ "dataset": "incois_valueadded_products_datasets",
+ "dates": 183,
+ "first": "2004-01-10",
+ "last": "2019-03-10",
+ "exactMetres": 0.05,
+ "incoisRule": {
+  "thresholdDegC": 0.5,
+  "referenceMetres": 10.0
+ },
+ "incoisMldEqualsIld": {
+  "dates": 183,
+  "of": 183
+ },
+ "comparisons": [
+  {
+   "key": "d26",
+   "label": "Depth of 26 degC",
+   "question": "code",
+   "cells": 257548,
+   "exactShare": 0.9725,
+   "medianAbsMetres": 0.0,
+   "medianSignedMetres": 0.0,
+   "medianAbsWhereDifferentMetres": 9.5
+  },
+  {
+   "key": "d20",
+   "label": "Depth of 20 degC",
+   "question": "code",
+   "cells": 262042,
+   "exactShare": 0.9873,
+   "medianAbsMetres": 0.0,
+   "medianSignedMetres": 0.0,
+   "medianAbsWhereDifferentMetres": 6.9
+  },
+  {
+   "key": "isothermal_layer_depth",
+   "label": "Isothermal layer depth, INCOIS's rule (0.5 degC)",
+   "question": "code",
+   "cells": 263123,
+   "exactShare": 0.92,
+   "medianAbsMetres": 0.0,
+   "medianSignedMetres": 0.0,
+   "medianAbsWhereDifferentMetres": 19.0
+  },
+  {
+   "key": "mixed_layer_depth",
+   "label": "Mixed layer depth, INCOIS's rule (0.5 degC)",
+   "question": "code",
+   "cells": 263123,
+   "exactShare": 0.92,
+   "medianAbsMetres": 0.0,
+   "medianSignedMetres": 0.0,
+   "medianAbsWhereDifferentMetres": 19.0
+  },
+  {
+   "key": "isothermal_layer_depth_platform_rule",
+   "label": "Isothermal layer depth, this platform's rule (0.2 degC)",
+   "question": "definition",
+   "cells": 263215,
+   "exactShare": 0.0,
+   "medianAbsMetres": 5.92,
+   "medianSignedMetres": -5.24,
+   "medianAbsWhereDifferentMetres": 5.9
+  },
+  {
+   "key": "mixed_layer_depth_platform_rule",
+   "label": "Mixed layer depth, this platform's rule (0.03 kg/m3 of density)",
+   "question": "definition",
+   "cells": 263190,
+   "exactShare": 0.0013,
+   "medianAbsMetres": 14.55,
+   "medianSignedMetres": -13.35,
+   "medianAbsWhereDifferentMetres": 14.6
+  }
+ ]
+}

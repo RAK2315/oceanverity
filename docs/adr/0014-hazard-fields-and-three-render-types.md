@@ -16,6 +16,15 @@ density this project already computes. No new provider, no account, no new depen
 | Isothermal layer depth | 0.2 degC below the 10 m value | de Boyer Montegut 2004 |
 | Barrier layer thickness | isothermal layer depth minus mixed layer depth, signed | conventional |
 
+> **Correction, 2026-09-13.** The argument below is wrong in one respect. INCOIS still publish
+> cyclone heat potential and mixed layer depth, daily, from their forecast models
+> (incois.gov.in/site/services/tchp.jsp and /oceanservices/rsmc_ocean.jsp). What ended on
+> 2019-03-30 is only the value-added series computed from their Argo analysis on ERDDAP. The
+> decision stands for a different reason: these Fields come from the same Argo analysis the
+> instruments are compared against, are drawn in 3D beside them, and are now checked against
+> that 2004-2019 series (`hazard_check.py`: depth of 26 degC the same number in 97.2% of cells).
+> The section is kept as written, because a decision record shows what was believed at the time.
+
 ## Why this is filling a gap rather than duplicating one
 
 INCOIS used to publish exactly these, in `incois_valueadded_products_datasets`: depth of the 20

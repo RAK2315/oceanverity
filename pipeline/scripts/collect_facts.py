@@ -113,6 +113,28 @@ def drawn_per_timestep(manifest: dict, floats: list) -> tuple[int, int, int, int
     )
 
 
+def compared_depth(collocations: dict, residuals: dict, field: str = "temperature") -> dict[str, float]:
+    """The median deepest depth each kind of instrument is compared at, over the instruments ranked.
+
+    The typical gap per kind is an average over whole profiles, and floats and buoys do not reach
+    the same depth. Deep water is easy for the model to match, so a kind compared deeper reads
+    better for that reason alone - measured on 2026-09-13, most of the floats-against-buoys ratio
+    was this. The row exists so no sentence quoting the two gaps can leave it out.
+    """
+    deepest: dict[str, list[float]] = {}
+    for row in residuals["fields"][field]["instruments"]:
+        entry = collocations.get(row["id"])
+        if not entry:
+            continue
+        block = (entry["steps"][str(row["step"])]["fields"] if entry.get("kind") == "mooring" else entry["fields"]).get(field)
+        if not block:
+            continue
+        matched = [d for d, r in zip(block["depths"], block["residual"]) if r is not None]
+        if matched:
+            deepest.setdefault(row["kind"], []).append(max(matched))
+    return {kind: sorted(values)[len(values) // 2] for kind, values in deepest.items()}
+
+
 def worst_instrument(residuals: dict, field: str = "temperature") -> dict:
     rows = residuals["fields"][field]["instruments"]
     return max(rows, key=lambda r: abs(r["scaledRms"]))
@@ -135,6 +157,10 @@ def main() -> None:
     steps = manifest["timesteps"]
     normal = manifest["normalAnomaly"]
     low_f, high_f, low_m, high_m = drawn_per_timestep(manifest, load("floats.json"))
+    depths = compared_depth(load("collocations.json"), residuals)
+    optional = lambda name: load(name) if (DATA / name).exists() else None  # noqa: E731
+    hazard_check = optional("hazard_check.json")
+    storm = optional("cases/montha.json")
 
     rows = [
         ("The build", [
@@ -159,6 +185,7 @@ def main() -> None:
             ("Typical gap, all instruments", f"**{temperature['summary']['meanAbsBias']:.2f} degC**", "`summary.meanAbsBias`"),
             ("Typical gap, Argo floats", f"**{floats['meanAbsBias']:.2f} degC** across {floats['count']}", "`byKind.float`"),
             ("Typical gap, moored buoys", f"**{moorings['meanAbsBias']:.2f} degC** across {moorings['count']}", "`byKind.mooring`"),
+            ("Depth compared down to (median)", f"floats **{depths.get('float', 0):.0f} m**, moored buoys **{depths.get('mooring', 0):.0f} m** - so the two typical gaps are not like for like", "deepest matched depth per instrument, `collocations.json`"),
             ("Worst instrument", f"**{worst['id']}** ({worst['kind']}), model {'warmer' if worst['bias'] < 0 else 'cooler'} by {abs(worst['bias']):.2f} degC over {worst['matched']} depths", "`residuals` ranked on `scaledRms`"),
         ]),
         ("Drift, and its score", [
@@ -175,6 +202,27 @@ def main() -> None:
             ("A feature is marked only past", f"**{manifest['anomalyFeatures']['valueThreshold']} degC** and {manifest['anomalyFeatures']['zThreshold']} standard deviations", "`manifest.anomalyFeatures`"),
             ("Against the 1991-2020 normal", f"across **{normal['cells']:,}** cells: mean {normal['meanDegC']:+.2f} degC, 95th percentile of the magnitude {normal['p95AbsDegC']:.2f} degC", "`manifest.normalAnomaly`"),
         ]),
+        *([("Cyclone fields against INCOIS's own published ones", [
+            ("Dates compared", f"**{hazard_check['dates']}**, {hazard_check['first'][:4]} to {hazard_check['last'][:4]}", "`hazard_check.json`, `incois_valueadded_products_datasets`"),
+        ] + [
+            (c["label"], f"same number in **{c['exactShare'] * 100:.1f}%** of {c['cells']:,} cells" + (f"; where different, typical gap {c['medianAbsWhereDifferentMetres']} m" if c["medianAbsWhereDifferentMetres"] is not None else ""), f"`hazard_check.json` ({c['question']})")
+            for c in hazard_check["comparisons"]
+        ] + [
+            ("INCOIS's own mixed layer rule", f"temperature **{hazard_check['incoisRule']['thresholdDegC']} degC** below its {hazard_check['incoisRule']['referenceMetres']:.0f} m value; their MLD equalled their ILD on {hazard_check['incoisMldEqualsIld']['dates']} of {hazard_check['incoisMldEqualsIld']['of']} dates", "`hazard_check.json`"),
+        ])] if hazard_check else []),
+        *([("Cyclone Montha", [
+            ("Track", f"IMD best track, {len(storm['track'])} fixes, {day(storm['formed'])} to {day(storm['lastFix'])}, peak {storm['peakWindKt']:.0f} kt", "`data/storms/`, `cases/montha.json`"),
+            ("Landfall", f"near **{storm['landfall']['place']}**, {storm['landfall']['day']}", "IMD's own note, `cases/montha.json`"),
+            ("Analyses either side", f"{day(storm['steps']['beforeTime'])} and {day(storm['steps']['afterTime'])}", "`cases/montha.json`"),
+            ("Heat potential, within {0:.0f} km of the track".format(storm['method']['nearKm']), f"median **{storm['changes']['heatPotential']['near']['medianBefore']:.0f} -> {storm['changes']['heatPotential']['near']['medianAfter']:.0f} kJ/cm2**; beyond {storm['method']['farKm']:.0f} km in the same bay {storm['changes']['heatPotential']['far']['medianBefore']:.0f} -> {storm['changes']['heatPotential']['far']['medianAfter']:.0f}", "`cases/montha.json`"),
+            ("5 m temperature, within {0:.0f} km".format(storm['method']['nearKm']), f"median **{storm['changes']['temperature5m']['near']['medianBefore']:.1f} -> {storm['changes']['temperature5m']['near']['medianAfter']:.1f} degC**; far {storm['changes']['temperature5m']['far']['medianBefore']:.1f} -> {storm['changes']['temperature5m']['far']['medianAfter']:.1f}", "`cases/montha.json`"),
+            ("Mixed layer depth, within {0:.0f} km".format(storm['method']['nearKm']), f"median {storm['changes']['mixedLayerDepth']['near']['medianBefore']:.1f} -> {storm['changes']['mixedLayerDepth']['near']['medianAfter']:.1f} m - **no clear deepening along the track**", "`cases/montha.json`"),
+        ] + [
+            (f"Buoy {b['id']}", f"**{b['distanceKm']} km** from the track; measured {b['measuredChange']:+.2f} degC at {b['depthMetres']:.0f} m, analysis {b['analysedChange']:+.2f}", "`cases/montha.json`")
+            for b in storm["buoys"]
+        ] + [
+            ("Argo floats near the track", f"**{len(storm['floats'])}** surfaced within {storm['method']['floatKm']:.0f} km while it was active, nearest {storm['floats'][0]['distanceKm']} km" if storm["floats"] else "none", "`cases/montha.json`"),
+        ])] if storm else []),
         ("The glider finding", [
             ("Archive read", f"`{gliders['archive']}`", "the archive PS 26067 names"),
             ("Casts in this box", f"**{gliders['castsInRegion']:,}** from {gliders['gliders']} glider, {len(gliders['deployments'])} deployments", "`manifest.gliders`"),

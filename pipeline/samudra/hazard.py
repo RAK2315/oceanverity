@@ -6,10 +6,12 @@ would, and none of them needs a new provider, an account or a dependency that is
 the tree: every one falls out of the temperature and salinity in the Grid, plus the TEOS-10
 density this project already computes.
 
-INCOIS used to publish exactly these. `incois_valueadded_products_datasets` carried depth of the
-26 degC isotherm, heat content, isothermal layer depth and mixed layer depth, and it **stopped
-on 2019-03-30** - measured twice, once on their ERDDAP and once independently in their LAS
-catalogue. So this is filling a gap INCOIS has rather than duplicating something they ship.
+INCOIS's value-added series from this same Argo analysis, `incois_valueadded_products_datasets`,
+carried depth of the 26 degC isotherm, heat content to 300 m, isothermal layer depth and mixed
+layer depth, and it **ended on 2019-03-30**. INCOIS still publish cyclone heat potential and
+mixed layer depth today, from their forecast models, as maps (checked 2026-09-13). So these are
+not a gap INCOIS left: they are the same quantities computed from the Argo analysis, in 3D beside
+the instruments, and `hazard_check.py` holds the method against INCOIS's own 2004-2019 series.
 
 What each one is, in one line each:
 
@@ -128,9 +130,15 @@ def mixed_layer_depth(density: Grid) -> np.ndarray:
     return _threshold_depth(density, DENSITY_THRESHOLD, rising=True)
 
 
-def isothermal_layer_depth(temperature: Grid) -> np.ndarray:
-    """Depth in metres where temperature first falls 0.2 degC below its 10 m value."""
-    return _threshold_depth(temperature, TEMPERATURE_THRESHOLD, rising=False)
+def isothermal_layer_depth(temperature: Grid, threshold: float = TEMPERATURE_THRESHOLD) -> np.ndarray:
+    """Depth in metres where temperature first falls `threshold` degC below its 10 m value.
+
+    0.2 degC is the platform's, from de Boyer Montegut. The parameter exists for one caller:
+    INCOIS's own published layer depths use **0.5 degC** from the same 10 m reference, which
+    `hazard_check.py` measured by reproducing them, and a comparison has to be able to ask with
+    their rule as well as ours.
+    """
+    return _threshold_depth(temperature, threshold, rising=False)
 
 
 def _threshold_depth(grid: Grid, threshold: float, rising: bool) -> np.ndarray:

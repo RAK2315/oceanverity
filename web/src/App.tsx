@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   loadAnomalies,
   loadCollocations,
   loadDrift,
+  loadStormCase,
   loadFloats,
   loadManifest,
   loadNativeGrid,
@@ -30,6 +31,7 @@ import { SectionPanel } from "./ui/SectionPanel";
 import { Explore } from "./ui/Explore";
 import { Timeline } from "./ui/Timeline";
 import { Tour } from "./ui/Tour";
+import { CaseCard } from "./ui/CaseCard";
 
 const DIVE_MILLISECONDS = 2600;
 
@@ -137,6 +139,8 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
     }
   }
   if (query.get("tour") === "1") useStore.setState({ tourStep: 0 });
+  // The storm walkthrough. Only one case exists, and an unknown name is ignored, never guessed.
+  if (query.get("case") === "montha") useStore.setState({ caseStep: 0, tourStep: null });
   if (query.get("float")) useStore.setState({ selectedFloatId: query.get("float") });
   if (query.get("flow") === "arrows") useStore.setState({ currentStyle: "arrows" });
   if (query.get("explore") === "1") useStore.setState({ explore: true });
@@ -258,6 +262,14 @@ export default function App() {
         // it went". Same treatment - off the critical path, and its absence is a missing panel
         // rather than a broken app, because a bake that could not reach Copernicus has no
         // current field to have integrated.
+        // Cyclone Montha, measured by the pipeline. Absent in a build made before the case
+        // existed, which simply has no walkthrough to offer.
+        loadStormCase()
+          .then((stormCase) => {
+            if (!cancelled) useStore.setState({ stormCase });
+          })
+          .catch(() => undefined);
+
         loadDrift()
           .then((bakedDrift) => {
             if (!cancelled) useStore.setState({ bakedDrift });
@@ -564,6 +576,12 @@ export default function App() {
         store.showDriftCheck && store.selectedFloatId
           ? store.bakedDrift?.floats[store.selectedFloatId]?.path ?? null
           : null,
+      // IMD's track, while the walkthrough that quotes it is open and never otherwise: a storm
+      // line left on the water would be a claim about every other date on the timeline.
+      stormTrack:
+        store.caseStep !== null && store.stormCase
+          ? store.stormCase.track.map((f) => [f.lon, f.lat] as [number, number])
+          : null,
       sectionLine:
         store.sectionFrom && store.sectionTo
           ? [
@@ -597,6 +615,18 @@ export default function App() {
     };
     requestAnimationFrame(step);
   }, []);
+
+  // What Explore and the storm walkthrough move the camera with. One object, so the walkthrough's
+  // card is not handed a fresh one on every render of a component that re-renders constantly.
+  const helpers = useMemo(
+    () => ({
+      focusOn: (lon: number, lat: number) => sceneRef.current?.focusOn(lon, lat),
+      panTo: (lon: number, lat: number) => sceneRef.current?.panTo(lon, lat),
+      cameraPose: () => sceneRef.current?.cameraPose(),
+      setCameraPose: (pose: Parameters<OceanScene["setCameraPose"]>[0]) => sceneRef.current?.setCameraPose(pose),
+    }),
+    [],
+  );
 
   // ---- Timestep animation --------------------------------------------------
   useEffect(() => {
@@ -802,14 +832,8 @@ export default function App() {
           <SectionPanel />
           <Timeline />
           <Tour onDive={dive} />
-          <Explore
-            helpers={{
-              focusOn: (lon, lat) => sceneRef.current?.focusOn(lon, lat),
-              panTo: (lon, lat) => sceneRef.current?.panTo(lon, lat),
-              cameraPose: () => sceneRef.current?.cameraPose(),
-              setCameraPose: (pose) => sceneRef.current?.setCameraPose(pose),
-            }}
-          />
+          <CaseCard helpers={helpers} onDive={dive} />
+          <Explore helpers={helpers} />
         </>
       )}
     </div>

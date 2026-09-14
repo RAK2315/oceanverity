@@ -123,7 +123,8 @@ export const QUESTIONS: Question[] = [
       " of the platform in one picture.",
     caution:
       "INCOIS assimilate Argo, so a float largely shows the model agreeing with itself. The" +
-      " nine moored buoys are the independent check, and they disagree far more.",
+      " moored buoys are the independent check. Floats are compared to 2000 m and buoys only to" +
+      " 500 m, so the two are not like for like.",
     needsVolume: true,
     run: () => {
       calm();
@@ -137,7 +138,7 @@ export const QUESTIONS: Question[] = [
     why:
       "How far the water sits from NOAA's 1991-2020 average for the same month. Red is warmer" +
       " than the thirty-year normal, and the strongest departures are not at the surface.",
-    caution: "One season against a climatology. Four months is not a trend.",
+    caution: "One year against a thirty-year climatology. A single year is not a trend.",
     needsVolume: true,
     run: () => {
       calm();
@@ -150,7 +151,7 @@ export const QUESTIONS: Question[] = [
     question: "Where would something adrift go?",
     why:
       "Dropped off the Somali coast and carried by the analysed current for ten days. The same" +
-      " integrator was run from 195 real floats, so its error is published rather than assumed.",
+      " integrator was checked against real floats, so its error is published rather than assumed.",
     caution:
       "The current alone. A real search needs wind, waves and the object's own drift, which is" +
       " why INCOIS run SARAT and this is not SARAT.",

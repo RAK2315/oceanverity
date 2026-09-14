@@ -11,7 +11,7 @@ tables were written when there were five Fields and neither grew with the count:
   error estimate in degrees Celsius and went out as a bare number.
 - `standards.py` had a two-element `OURS` set and captioned everything else as "INCOIS's
   published analysis". That attributed E.U. Copernicus Marine's current analysis to INCOIS and
-  gave away the five hazard Fields, which INCOIS stopped publishing in 2019.
+  gave away the five hazard Fields, which this platform computes from the Argo analysis.
 
 Neither could be caught by running anything: both defaults produce a well-formed document
 saying something false. So the check is completeness against `bake.all_field_specs()`, which is

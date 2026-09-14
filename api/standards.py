@@ -86,24 +86,24 @@ PROVENANCE = {
         "analysis, landed on the model's own grid. Not INCOIS's."
     ),
     "heat_potential": (
-        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
-        "until 2019-03-30 and stopped."
+        "Computed by this platform from INCOIS's Argo analysis (Leipper and Volgenau). INCOIS "
+        "also publish a cyclone heat potential of their own, from their forecast models."
     ),
     "d26": (
-        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
-        "until 2019-03-30 and stopped."
+        "Computed by this platform from INCOIS's Argo analysis. INCOIS's own series from that "
+        "analysis ends on 2019-03-30; checked against it in hazard_check.json."
     ),
     "mixed_layer_depth": (
-        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
-        "until 2019-03-30 and stopped."
+        "Computed by this platform from INCOIS's Argo analysis, by a density criterion. INCOIS's "
+        "own series from that analysis used a temperature criterion and ends on 2019-03-30."
     ),
     "isothermal_layer_depth": (
-        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
-        "until 2019-03-30 and stopped."
+        "Computed by this platform from INCOIS's Argo analysis. INCOIS's own series from that "
+        "analysis ends on 2019-03-30; checked against it in hazard_check.json."
     ),
     "barrier_layer": (
-        "Computed by this platform from INCOIS's analysis. INCOIS published this quantity "
-        "until 2019-03-30 and stopped."
+        "Computed by this platform from INCOIS's Argo analysis, as isothermal layer depth minus "
+        "mixed layer depth; published nowhere else."
     ),
     "coverage": (
         "Computed by this platform on the rendering lattice, and not served here. "

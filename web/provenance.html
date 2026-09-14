@@ -439,6 +439,19 @@ variables:
     </p>
   </section>
 
+  <section class="reveal" id="hazard-check">
+    <h2>The cyclone fields, checked against INCOIS's own</h2>
+    <p>
+      INCOIS's value-added series from their Argo analysis carried four of these depths until
+      <span id="hc-last">&hellip;</span>. (INCOIS still publish heat potential and mixed layer depth
+      from their forecast models.) We ran our code over <b id="hc-dates">&hellip;</b> of those
+      dates, from the same INCOIS analysis, and compared it with the answer they published, cell by
+      cell. "Same" means within <span id="hc-exact">&hellip;</span> m.
+    </p>
+    <div class="scroll"><table id="hc-table"></table></div>
+    <p class="note" id="hc-rule"></p>
+  </section>
+
   <section class="reveal">
     <h2>How it is tested</h2>
     <p>
@@ -818,6 +831,36 @@ python -m samudra.bake</pre>
         el("test-count").textContent = "The";
         el("test-passed").textContent = "N";
       });
+
+    // ---- the hazard fields against INCOIS's published archive -----------
+    //
+    // Read from `hazard_check.json`, written by `pipeline/scripts/check_hazard_against_incois.py`.
+    // No figure here is typed: a missing file hides the section rather than printing a guess.
+    fetch(DATA + "hazard_check.json")
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(function (check) {
+        var pct = function (share) { return (share * 100).toFixed(1) + "%"; };
+        el("hc-last").textContent = check.last.slice(0, 4);
+        el("hc-dates").textContent = check.dates + " dates, " + check.first.slice(0, 4) + " to " + check.last.slice(0, 4);
+        el("hc-exact").textContent = String(check.exactMetres);
+        rows(el("hc-table"), ["Field", "Cells compared", "Same number", "Where different, typical gap"],
+          check.comparisons.map(function (c) {
+            return [
+              c.label.replace("degC", "°C").replace("kg/m3", "kg/m³"),
+              c.cells.toLocaleString(),
+              pct(c.exactShare),
+              c.medianAbsWhereDifferentMetres === null ? "-" : c.medianAbsWhereDifferentMetres + " m"
+            ];
+          }));
+        el("hc-rule").textContent =
+          "INCOIS's mixed layer depth and isothermal layer depth were the same numbers on " +
+          check.incoisMldEqualsIld.dates + " of " + check.incoisMldEqualsIld.of + " dates, and both follow " +
+          "one rule: the depth where the water is " + check.incoisRule.thresholdDegC + " °C colder than at " +
+          check.incoisRule.referenceMetres + " m. This platform uses the stricter published rule of de Boyer " +
+          "Montegut (2004), so its layers read shallower. That gap is a choice of definition, not an error, " +
+          "which is why both rules are shown.";
+      })
+      .catch(function () { el("hazard-check").hidden = true; });
 
     el("attrib").textContent = manifest.sources.map(function (source) {
       return source.attribution;

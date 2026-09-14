@@ -1571,6 +1571,16 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Where a section was cut, in the map key. Matches SCENE_COLOURS.section in OceanScene.ts. */
+/* Must match SCENE_COLOURS.storm in OceanScene.ts, in both themes. */
+.swatch.storm {
+  width: 16px;
+  height: 4px;
+  background: #ff3fb4;
+  align-self: center;
+}
+
+:root[data-theme="light"] .swatch.storm { background: #e0007a; }
+
 .swatch.section {
   width: 16px;
   height: 3px;
@@ -3498,4 +3508,32 @@ input[type="range"]::-moz-range-thumb {
   line-height: 1.35;
   white-space: normal;
   color: var(--on-surface-faint);
+}
+
+/*
+ * The storm walkthrough's card is the tour's card, plus the two lines a real event needs: the
+ * caveat, labelled like Explore's so it cannot read as more of the answer, and whose track it is.
+ */
+/* A short note under the step, in the body's own quiet ink: a limit stated, not a warning. */
+.case-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--on-surface-variant);
+  opacity: 1;
+}
+
+/* The one event in Explore, above the eight questions: a real storm on real dates. */
+.explore-case {
+  border-color: var(--primary-edge);
+}
+
+.explore-case .explore-question::before {
+  content: "Walkthrough";
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--primary);
 }

@@ -327,7 +327,7 @@ export function MapKey() {
         </span>
       )}
 
-      {showTracks && (
+      {showTracks && store.caseStep === null && (
         <span className="mapkey-item">
           <span className="swatch track" aria-hidden="true" />
           A float&apos;s drift across this build&apos;s window
@@ -352,6 +352,14 @@ export function MapKey() {
         <span className="mapkey-item">
           <span className="swatch drift" aria-hidden="true" />
           Drift the currents imply, not a search forecast
+        </span>
+      )}
+
+      {/* The storm track is on screen only while its walkthrough is, and it is IMD's line. */}
+      {store.caseStep !== null && store.stormCase && (
+        <span className="mapkey-item">
+          <span className="swatch storm" aria-hidden="true" />
+          Cyclone {store.stormCase.name}&apos;s track, from IMD
         </span>
       )}
 

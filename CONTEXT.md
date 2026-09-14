@@ -6,8 +6,9 @@ forecaster can compare what the model says against what the ocean actually measu
 
 Built for Smart India Hackathon 2026, Problem Statement **26067** (MoES / INCOIS), theme
 **Disaster Management**. The theme changed in the September 2026 revision, and the platform
-answered it by computing the five hazard quantities INCOIS themselves published until
-2019-03-30 and then stopped - see [`docs/adr/0014`](docs/adr/0014-hazard-fields-and-three-render-types.md).
+answered it by computing five hazard quantities from INCOIS's Argo analysis, whose own series of them on
+INCOIS's ERDDAP ended on 2019-03-30 (INCOIS still publish heat potential and mixed layer depth
+from their forecast models) - see [`docs/adr/0014`](docs/adr/0014-hazard-fields-and-three-render-types.md).
 
 ---
 
@@ -261,8 +262,9 @@ Everything above the line is being built. Everything below it is deliberately, k
 - **Anomaly Feature isolation**: clear the rest of the Volume away and leave only the body of
   water one Feature describes, which is the box every number on its panel is measured over.
 - **Five hazard Fields**, computed here: depth of the 26 degC isotherm, cyclone heat potential,
-  mixed layer depth, isothermal layer depth and barrier layer thickness. The quantities INCOIS
-  published until 2019-03-30 and stopped. Three are Sheets and two are Drapes. ADR 0014.
+  mixed layer depth, isothermal layer depth and barrier layer thickness, from the Argo analysis.
+  INCOIS's own series from that analysis ended on 2019-03-30, and the method is checked against
+  it (`hazard_check.py`). Three are Sheets and two are Drapes. ADR 0014.
 - **Current vectors as numbers**: Copernicus Marine's own analysis at 1/12 degree, arrows on the
   chosen depth, coloured by speed, with a real value under the cursor. ADR 0013.
 - **INCOIS's own evidence channels**, from their second analysis of the same Argo floats: their

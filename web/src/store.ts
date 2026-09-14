@@ -21,6 +21,7 @@ import type {
   SurfaceField,
   VectorField,
 } from "./types";
+import type { StormCase } from "./cases";
 
 export type Stage = "globe" | "diving" | "volume";
 export type Theme = "dark" | "light";
@@ -385,6 +386,14 @@ interface State {
    */
   tourStep: number | null;
   /**
+   * A real storm, walked through: the case file `cases.ts` reads, and which step is open.
+   *
+   * The case is data rather than code - `data/cases/montha.json`, measured by the pipeline - so
+   * every figure on its card comes from the build. Touching any control ends it, like the tour.
+   */
+  stormCase: StormCase | null;
+  caseStep: number | null;
+  /**
    * The second door: the platform as a list of questions rather than a panel of controls.
    *
    * PS 26067 names three audiences the console does not serve - school and college students, the
@@ -600,6 +609,8 @@ export const useStore = create<State>((setState, getState) => ({
   showAnomalies: true,
   hoverCurrent: null,
   tourStep: null,
+  stormCase: null,
+  caseStep: null,
   explore: false,
   kiosk: false,
   selectedAnomaly: null,
@@ -619,7 +630,7 @@ export const useStore = create<State>((setState, getState) => ({
       // is trying to drag a slider is worse than no tour at all, and `touched` is set by every
       // control in the panel, so this is the one place that has to know.
       key === "touched" && value !== null
-        ? ({ [key]: value, tourStep: null } as never)
+        ? ({ [key]: value, tourStep: null, caseStep: null } as never)
         : ({ [key]: value } as never),
     ),
 

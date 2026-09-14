@@ -53,6 +53,27 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
           </button>
         </header>
 
+        {store.stormCase && (
+          <div className="explore-grid">
+            <button
+              className="explore-card explore-case"
+              onClick={() => useStore.setState({ explore: false, tourStep: null, caseStep: 0 })}
+            >
+              <span className="explore-question">
+                What did Cyclone {store.stormCase.name} do to the ocean?
+              </span>
+              <span className="explore-why">
+                A real {store.stormCase.grade.toLowerCase()}, {store.stormCase.basin}, followed step by
+                step on the dates it happened, on IMD&apos;s own track.
+              </span>
+              <span className="explore-caution">
+                The analyses are ten days apart, so each change is shown beside water the storm
+                did not reach.
+              </span>
+            </button>
+          </div>
+        )}
+
         <div className="explore-grid">
           {QUESTIONS.map((question, index) => (
             <button key={question.id} className="explore-card" onClick={() => ask(index)}>

@@ -101,6 +101,9 @@ cd pipeline && ../.venv/Scripts/python scripts/refresh_palettes.py
 # Prose only; every measured key is left to the bake that took it. Run it after editing one.
 cd pipeline && ../.venv/Scripts/python scripts/refresh_field_prose.py
 
+# where a figure is typed wrong in a document, against the build. Read docs/NUMBERS.md first.
+cd pipeline && ../.venv/Scripts/python scripts/check_figures.py
+
 # what the provenance page says about the tests. Run it after adding or removing any.
 cd pipeline && ../.venv/Scripts/python scripts/collect_tests.py
 
@@ -133,6 +136,7 @@ cd web && node probe-palette.mjs        # the colourbar switcher: right alternat
 cd web && node probe-chrome.mjs         # every text role in the console chrome, both themes
 cd web && node probe-landing.mjs        # the landing page: no missing picture, an honest count, a readable hero
 cd web && node probe-requirements.mjs   # every figure filled, every deep link lands on what it promised
+cd web && node probe-case.mjs           # the Montha walkthrough: each step, each figure from montha.json, the track
 cd web && node probe-section.mjs        # the browser's section against /api/section   (needs the API)
 cd web && node probe-upload.mjs         # drop a NetCDF in, and refuse one              (needs the API)
 ```

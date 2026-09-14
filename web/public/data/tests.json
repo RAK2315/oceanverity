@@ -1,5 +1,5 @@
 {
- "total": 409,
+ "total": 430,
  "modules": [
   {
    "module": "test_anomaly.py",
@@ -63,8 +63,13 @@
   },
   {
    "module": "test_hazard.py",
-   "tests": 15,
+   "tests": 16,
    "defends": "The five disaster-management Fields, checked against physics rather than against themselves."
+  },
+  {
+   "module": "test_osmc.py",
+   "tests": 16,
+   "defends": "Moorings, from the real-time GTS feed."
   },
   {
    "module": "test_argo.py",
@@ -97,11 +102,6 @@
    "defends": "Departure from a real climatological normal, rather than from four months of its own."
   },
   {
-   "module": "test_osmc.py",
-   "tests": 10,
-   "defends": "Moorings, from the real-time GTS feed."
-  },
-  {
    "module": "test_standards.py",
    "tests": 9,
    "defends": "Every Field is described before it leaves the building, and the tables that describe it are checked against the whole set rather than against whichever Field is being edited."
@@ -120,6 +120,16 @@
    "module": "test_grid.py",
    "tests": 7,
    "defends": "`Grid.column_at`: the bilinear interpolation every Collocation, tooltip and API answer reads."
+  },
+  {
+   "module": "test_hazard_check.py",
+   "tests": 7,
+   "defends": "Our hazard surfaces held against INCOIS's published ones."
+  },
+  {
+   "module": "test_storm.py",
+   "tests": 7,
+   "defends": "A named storm, held against the water it crossed."
   },
   {
    "module": "test_plausibility.py",

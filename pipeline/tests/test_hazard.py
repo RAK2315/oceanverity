@@ -1,7 +1,7 @@
 """The five disaster-management Fields, checked against physics rather than against themselves.
 
-These are the quantities a cyclone forecaster names, and INCOIS stopped publishing them on
-2019-03-30 - see `docs/plan/04-ps-update-2026-09.md`. Every one is derived from the temperature
+These are the quantities a cyclone forecaster names. INCOIS's own series of them from the Argo
+analysis ended on 2019-03-30 (they still publish heat potential from their forecast models). Every one is derived from the temperature
 and salinity already in the Grid, so a wrong constant or a wrong reference level would produce a
 number that is finite, smooth and completely believable. That is exactly the failure ADR 0010
 was written about, so each function here is held to a hand-computable case.
@@ -140,6 +140,13 @@ def test_isothermal_layer_depth_uses_the_temperature_threshold_from_the_same_ref
     20 m (27.9) and 30 m (27.5): 20 + 10 * 0.1/0.4 = 22.5 m."""
     grid = column_grid([28.1, 28.0, 27.9, 27.5, 25.0, 20.0, 18.0])
     assert isothermal_layer_depth(grid)[0, 0] == pytest.approx(22.5, abs=1e-6)
+
+
+def test_the_isothermal_threshold_can_be_incois_own_half_a_degree():
+    """INCOIS's published layer depths use 0.5 degC from the 10 m value, measured by
+    reproducing them (`hazard_check.py`). Same column, threshold 27.5 reached exactly at 30 m."""
+    grid = column_grid([28.1, 28.0, 27.9, 27.5, 25.0, 20.0, 18.0])
+    assert isothermal_layer_depth(grid, threshold=0.5)[0, 0] == pytest.approx(30.0, abs=1e-6)
 
 
 def test_a_warming_column_does_not_cross_downwards_and_is_missing():

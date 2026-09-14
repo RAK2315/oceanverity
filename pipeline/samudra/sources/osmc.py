@@ -108,6 +108,46 @@ def _reject_implausible(values: np.ndarray, quantity: str) -> np.ndarray:
     return np.where((values >= low) & (values <= high), values, np.nan)
 
 
+# Argo's real-time spike test, because the range check alone let a 0.0 degC reading at 20 m in
+# the Bay of Bengal through (buoy 23094, September 2025, between 29.55 and 29.58 degC). Zero is a
+# temperature seawater can hold, so no range can refuse it; what is wrong with it is that it
+# disagrees with both neighbours at once. Applied to the shipped bake it refused 24 readings: that
+# one in five reports of 23094, the same 0.0 degC at 20 m in 18 reports of the OMNI buoy 23456 -
+# which reads like a dead sensor on that line rather than an ocean - and 2.09 degC at 60 m once at
+# RAMA 2300019. The buoys' typical gap went from 1.01 to 0.88 degC; the floats' did not move.
+# Argo Quality Control Manual for CTD and Trajectory
+# Data, v3.9 (20 Feb 2025), doi 10.13155/33951, section 2.1.2, test 9: the test value is
+# |V2 - (V3 + V1)/2| - |(V3 - V1)/2|, and V2 fails above these, split at 500 dbar. This feed
+# reports metres, and 500 m is about 503 dbar, which moves no level of a buoy that stops at 500 m.
+SPIKE_SPLIT_METRES = 500.0
+_SPIKE_LIMITS = {
+    "temperature": (6.0, 2.0),  # degC, shallower than the split and at or below it
+    "salinity": (0.9, 0.3),  # psu
+}
+
+
+def reject_spikes(depths: np.ndarray, values: np.ndarray, quantity: str) -> np.ndarray:
+    """A copy of `values` with every level that fails Argo's spike test made NaN.
+
+    Neighbours are the nearest *real* readings above and below, so a missing level is skipped
+    over rather than read as a zero. The top and bottom real readings have only one neighbour
+    and cannot be tested, so they are kept. Every level is tested against the original values,
+    never against a copy already cleaned, so the order of the levels cannot change the answer.
+    """
+    shallow, deep = _SPIKE_LIMITS[quantity]
+    out = np.array(values, dtype=float, copy=True)
+    real = np.flatnonzero(np.isfinite(out))
+    original = out.copy()
+    for position in range(1, len(real) - 1):
+        above, here, below = real[position - 1], real[position], real[position + 1]
+        v1, v2, v3 = original[above], original[here], original[below]
+        test = abs(v2 - (v3 + v1) / 2) - abs((v3 - v1) / 2)
+        limit = shallow if depths[here] < SPIKE_SPLIT_METRES else deep
+        if test > limit:
+            out[here] = np.nan
+    return out
+
+
 def parse_osmc(csv_text: str) -> list[Profile]:
     """Turn the GTS feed's flat CSV into Profiles, one per moored report."""
     reader = csv.reader(io.StringIO(csv_text))
@@ -155,8 +195,11 @@ def parse_osmc(csv_text: str) -> list[Profile]:
     profiles: list[Profile] = []
     for (platform_id, stamp), rows in levels.items():
         depths, temperature, salinity = (np.array(c, dtype=float) for c in zip(*rows))
-        temperature = _reject_implausible(temperature, "temperature")
-        salinity = _reject_implausible(salinity, "salinity")
+        order = np.argsort(depths)
+        depths, temperature, salinity = depths[order], temperature[order], salinity[order]
+        # Range first, then spikes: an impossible value must not stand as a neighbour.
+        temperature = reject_spikes(depths, _reject_implausible(temperature, "temperature"), "temperature")
+        salinity = reject_spikes(depths, _reject_implausible(salinity, "salinity"), "salinity")
 
         usable = np.isfinite(depths) & (np.isfinite(temperature) | np.isfinite(salinity))
         if usable.sum() < MIN_PROFILE_LEVELS:
