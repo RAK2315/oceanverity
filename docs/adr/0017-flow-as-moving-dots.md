@@ -10,8 +10,9 @@ what is now on screen had already been refused.
 ## The two things, and why only one of them is a lie
 
 **Volumetric streamlines** follow the water in three dimensions. Doing that needs a vertical
-velocity, `w`. The Copernicus product this platform reads publishes `uo` and `vo` and no `w`, and
-INCOIS's own analysis publishes neither. A three-dimensional particle drawn from two components
+velocity, `w`. The Copernicus dataset this platform reads carries only `uo` and `vo`; the same
+product does publish a modelled `wo`, which no instrument measured, and INCOIS's own analysis
+publishes no currents. A three-dimensional particle drawn from two components
 is a particle that is claiming a vertical motion nobody measured, in the one dimension this whole
 project exists to take seriously. That stays refused, and the reason is now written down rather
 than filed under "a project in itself".

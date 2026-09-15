@@ -109,7 +109,7 @@
   section[id] { scroll-margin-top: 104px; }
 
   /* ---------------------------------------------------------- reveal-on-scroll */
-  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(.16,1,.3,1), transform 0.9s cubic-bezier(.16,1,.3,1); }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1); }
   .reveal.in-view { opacity: 1; transform: translateY(0); }
   .reveal-1 { transition-delay: 0.06s; }
   .reveal-2 { transition-delay: 0.14s; }
@@ -247,14 +247,49 @@
 
   .clause p { margin: var(--sp-8) 0 0; font-size: var(--text-body-sm); line-height: 1.6; color: var(--color-ink); }
 
+  /*
+   * Every answer has the same shape, so a reader learns it once: one plain sentence saying what
+   * the answer is, short points with a bold lead-in for how, a limit on its own line where there
+   * is one, then the measured figure. They used to be one paragraph each, up to 170 words, with
+   * the answer somewhere in the middle.
+   */
+  .clause .lead { margin-top: var(--sp-15); font-size: var(--text-body); line-height: 1.45; max-width: 62ch; }
+  .clause .points-head {
+    margin-top: var(--sp-15); font-family: var(--font-display); font-size: var(--text-caption);
+    letter-spacing: var(--ls-caption); text-transform: uppercase; color: var(--ink-3);
+  }
+  .points { margin: var(--sp-8) 0 0; padding-left: 1.2em; max-width: 70ch; }
+  .points li { font-size: var(--text-body-sm); line-height: 1.55; color: var(--ink-2); margin-top: var(--sp-6); }
+  .points li::marker { color: var(--ink-3); }
+  .points li > b:first-child { color: var(--color-ink); font-weight: 600; }
+  /* A clause quote is a block; a control named inside a point is not. */
+  .points q { display: inline; font-size: inherit; color: var(--color-ink); }
+  .clause .limit { margin-top: var(--sp-15); max-width: 70ch; color: var(--ink-2); display: flex; align-items: baseline; gap: var(--sp-8); }
+  .limit > span:first-child {
+    flex: none;
+    font-family: var(--font-display); font-size: var(--text-caption); letter-spacing: var(--ls-caption);
+    text-transform: uppercase; color: var(--ink-3); border: 1px solid var(--color-ash); padding: 1px var(--sp-6);
+  }
+
   /* The measured figure. Read live from the manifest, never typed in here. */
   .measure {
-    display: inline-block; margin-top: var(--sp-8);
-    font-family: var(--font); font-size: var(--text-body-sm); color: var(--color-ink);
+    display: block; width: fit-content; max-width: 100%; margin-top: var(--sp-15);
+    font-family: var(--font); font-size: var(--text-body-sm); line-height: 1.5; color: var(--color-ink);
     border: 1px solid var(--color-ash); background: var(--color-paper);
-    padding: var(--sp-6) var(--sp-8);
+    padding: var(--sp-8) var(--sp-15);
   }
+  .measure + .measure { margin-top: var(--sp-6); }
+  .measure::before {
+    content: "Measured in this build"; display: block; margin-bottom: 2px;
+    font-family: var(--font-display); font-size: var(--text-caption); letter-spacing: var(--ls-caption);
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .measure + .measure::before { content: none; }
   .measure b { font-weight: 700; }
+  .measure ul { margin: 2px 0 0; padding-left: 1.1em; }
+  .measure li { margin-top: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-top: var(--sp-6); }
+  .chips span { border: 1px solid var(--color-ash); padding: 1px var(--sp-8); font-size: 13px; color: var(--ink-2); }
 
   .clause-links { margin-top: var(--sp-15); display: flex; gap: var(--sp-8); flex-wrap: wrap; }
   .open {
@@ -336,20 +371,25 @@
     <p class="err" id="problem" hidden></p>
   </header>
 
-  <section id="theme" class="reveal">
+  <section id="theme">
     <h2>The theme changed, and it is the reason for most of this page</h2>
     <p>
       The September 2026 revision made this a <b>Disaster Management</b> problem. That is an
-      opportunity rather than a difficulty, because the quantities a hazard forecaster names all
-      fall out of the temperature and salinity this platform already reads.
+      opportunity: the quantities a hazard forecaster needs all come from the temperature and
+      salinity this platform already reads.
     </p>
   <article class="clause">
     <div class="clause-head">
       <q>Theme: Disaster Management</q>
       <span class="verdict">Answered</span>
     </div>
-    <p>INCOIS publish cyclone heat potential and mixed layer depth today, as maps from their forecast models. What stopped is the series computed from their <em>Argo analysis</em> - depth of the 26 &deg;C isotherm, mixed layer depth, isothermal layer depth - on their ERDDAP, on <b>2019-03-30</b>. All five hazard fields are computed here from that same Argo analysis, drawn in 3D beside the instruments, and the method is checked against INCOIS's own archive: see the provenance page.</p>
-    <p class="measure" id="m-hazard">measuring&hellip;</p>
+    <p class="lead">All five cyclone-hazard fields are computed here, drawn in 3D beside the instruments, and checked against INCOIS's own archive.</p>
+    <ul class="points">
+      <li><b>What INCOIS publish.</b> Cyclone heat potential and mixed layer depth maps, from their ocean forecasts (ROMS, HYCOM) and analysis (GODAS).</li>
+      <li><b>What this platform adds.</b> All five fields computed from INCOIS's <em>Argo analysis</em>, in 3D, beside the instruments that measured the same water.</li>
+      <li><b>Checked against INCOIS.</b> Their ERDDAP archive of these fields from the Argo analysis (2004 to <b>2019-03-30</b>) was used to check the method. The results are on the provenance page.</li>
+    </ul>
+    <div class="measure" id="m-hazard">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;preset=hazard">Set up a cyclone question</a>
       <a class="open" href="./app.html?dive=1&amp;field=d26">Watch the 26 &deg;C surface</a>
@@ -358,15 +398,20 @@
   </article>
   </section>
 
-  <section id="gaps" class="reveal">
+  <section id="gaps">
     <h2>The five gaps INCOIS identified</h2>
   <article class="clause">
     <div class="clause-head">
       <q>Web-based, platform-independent 3D rendering with depth-resolved volumetric views</q>
       <span class="verdict">Met</span>
     </div>
-    <p>A GPU ray-marched water column from 5 m to 2000 m, in any WebGL2 browser. No install, no plugin, no account. Fly the camera inside the block and the water is still there, because the volume is drawn on the back faces of its own bounding box.</p>
-    <p class="measure" id="m-volume">measuring&hellip;</p>
+    <p class="lead">A 3D block of ocean from 5 m to 2000 m that runs in any modern browser.</p>
+    <ul class="points">
+      <li><b>Nothing to install.</b> Any WebGL2 browser. No plugin, no account.</li>
+      <li><b>Depth-resolved.</b> The GPU ray-marches through the whole water column.</li>
+      <li><b>You can fly inside it.</b> The volume is drawn on the back faces of its own box, so the water stays visible from inside.</li>
+    </ul>
+    <div class="measure" id="m-volume">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature">Open the volume</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/web/src/scene/volumeShader.ts">web/src/scene/volumeShader.ts</a>
@@ -377,8 +422,14 @@
       <q>Unified display of Argo and Glider profiles - latitude, longitude, depth, time, temperature, salinity, chlorophyll - alongside model fields</q>
       <span class="verdict partly">Argo met, gliders answered</span>
     </div>
-    <p>Argo in full, including chlorophyll from BGC floats, plus moored buoys from NOAA's GTS feed. Gliders now have an adapter of their own, read against <code>ftp.ifremer.fr/ifremer/glider/v2/</code> - the archive this problem statement names. What it finds is the answer: the gap is India's glider programme, not the software. The figures below are what the scan returned.</p>
-    <p class="measure" id="m-gliders">measuring&hellip;</p>
+    <p class="lead">Argo floats and moored buoys are shown beside the model. The glider archive is read too, and what it holds explains why no gliders are drawn.</p>
+    <ul class="points">
+      <li><b>Argo, in full.</b> Including chlorophyll from BGC floats.</li>
+      <li><b>Moored buoys.</b> From NOAA's GTS feed.</li>
+      <li><b>Gliders.</b> Their own adapter reads <code>ftp.ifremer.fr/ifremer/glider/v2/</code>, the archive this problem statement names.</li>
+    </ul>
+    <p class="limit"><span>Limit</span> The gap is India's glider programme, not the software. The figures below are what the scan returned.</p>
+    <div class="measure" id="m-gliders">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;float=7902384">Open a float comparison</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/glider.py">pipeline/samudra/sources/glider.py</a>
@@ -389,8 +440,14 @@
       <q>Interactive controls: variable selection, depth-slice navigation, time-step animation, customisable colourbars</q>
       <span class="verdict">Met</span>
     </div>
-    <p>All four. The variable selector is grouped the way a forecaster thinks rather than the way the data arrived; two sliders cut the block to any depth range; thirty-six analyses play as an animation; and the colourbar carries both range handles and a log/linear scale that bends the water and the legend together.</p>
-    <p class="measure" id="m-fields">measuring&hellip;</p>
+    <p class="lead">All four are controls in the left panel.</p>
+    <ul class="points">
+      <li><b>Variable selection.</b> Grouped the way a forecaster thinks, not the way the data arrived.</li>
+      <li><b>Depth slice.</b> Two sliders cut the block to any depth range.</li>
+      <li><b>Time animation.</b> Thirty-six analyses play in sequence.</li>
+      <li><b>Colourbar.</b> Two range handles, and a log or linear scale that bends the water and the legend together.</li>
+    </ul>
+    <div class="measure" id="m-fields">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;preset=hazard">Open the hazard group</a>
       <a class="open" href="./app.html?dive=1&amp;field=current_speed&amp;scale=log">Open with a log scale</a>
@@ -401,8 +458,12 @@
       <q>Ingest new data streams or model variables without significant re-engineering</q>
       <span class="verdict">Met</span>
     </div>
-    <p>One adapter class per provider, behind two Protocols, and nothing downstream has heard of ERDDAP. Proven rather than asserted: the September 2026 round added four more providers - INCOIS's second analysis, Copernicus Marine, the EGO glider archive and the World Ocean Atlas normal - and touched no renderer, no API endpoint and no UI file.</p>
-    <p class="measure" id="m-sources">measuring&hellip;</p>
+    <p class="lead">Adding a data provider means adding one adapter. Nothing else changes.</p>
+    <ul class="points">
+      <li><b>One adapter per provider.</b> Behind two shared interfaces, so nothing downstream knows where the data came from.</li>
+      <li><b>Proven, not claimed.</b> The September 2026 round added four providers (INCOIS's second analysis, Copernicus Marine, the EGO glider archive and the World Ocean Atlas normal) and touched no renderer, no API endpoint and no UI file.</li>
+    </ul>
+    <div class="measure" id="m-sources">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/base.py">pipeline/samudra/sources/base.py</a>
     </div>
@@ -412,7 +473,12 @@
       <q>Tools for intuitive, rapid understanding of 3D phenomena</q>
       <span class="verdict">Met</span>
     </div>
-    <p>Every control explains itself in plain language and says whether it changed the science or only the picture. A guided walk of <b>21 steps in six chapters</b> visits every one of the 44 controls this platform explains - each step drives the scene, opens the group the control lives in, and opens its explanation - and one button sets the whole scene up for a cyclone question.</p>
+    <p class="lead">Every control explains itself, and a guided tour visits all of them.</p>
+    <ul class="points">
+      <li><b>Plain-language explanations.</b> Each one says whether the control changed the science or only the picture.</li>
+      <li><b>Guided tour.</b> <b>21 steps in six chapters</b>, covering all 44 explained controls. Each step moves the scene and opens the control and its explanation.</li>
+      <li><b>One-press cyclone setup.</b> A single button arranges the whole scene for a cyclone question.</li>
+    </ul>
     <div class="clause-links">
       <a class="open" href="./app.html?tour=1">Take the tour</a>
       <a class="open" href="./app.html?dive=1&amp;preset=hazard">Set up a cyclone question</a>
@@ -420,15 +486,21 @@
   </article>
   </section>
 
-  <section id="core" class="reveal">
+  <section id="core">
     <h2>The six core functional requirements</h2>
   <article class="clause">
     <div class="clause-head">
       <q>3D volumetric rendering across the full water column, with depth-slice views, isosurface extraction and time-step animation, using WebGL / Three.js or Cesium.js</q>
       <span class="verdict">Met</span>
     </div>
-    <p>Three.js and WebGL2. The isosurface is named for the Field it cuts - an isotherm, an isohaline, an isopycnal - because a surface of constant value is a different object in each. The same block carries the current vectors the problem statement asks for next: Copernicus Marine's own analysis at one twelfth of a degree, read with a free account when the data is baked and never in the browser, drawn as arrows on the depth you have sliced to, coloured by speed, with a real number under the cursor.</p>
-    <p class="measure" id="m-currents">measuring&hellip;</p>
+    <p class="lead">Built on Three.js and WebGL2: a volume you can slice by depth, cut with an isosurface and play through time, with ocean currents in the same block.</p>
+    <ul class="points">
+      <li><b>Isosurface.</b> Named for what it cuts: an isotherm (temperature), an isohaline (salinity) or an isopycnal (density).</li>
+      <li><b>Currents.</b> Copernicus Marine's own analysis at one twelfth of a degree, drawn as arrows on the depth you slice to and coloured by speed.</li>
+      <li><b>Real numbers.</b> The speed under the cursor is read from the data, not from the picture.</li>
+      <li><b>No login for viewers.</b> A free Copernicus account is used once, when the data is baked, and never in the browser.</li>
+    </ul>
+    <div class="measure" id="m-currents">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;iso=1">Draw the 20 &deg;C isotherm</a>
       <a class="open" href="./app.html?dive=1&amp;field=current_speed&amp;flow=arrows">Open the currents</a>
@@ -440,9 +512,16 @@
       <q>Instrument overlay with geospatially accurate markers; click a float to inspect a depth-versus-variable profile chart with timestamps</q>
       <span class="verdict">Argo, moorings and BGC met; gliders read; CTD refused</span>
     </div>
-    <p>Every instrument is drawn where it actually was at the moment on screen, and is not drawn at all when its nearest cast is too far from that moment - showing it would imply an observation that does not exist. Click one and the chart is the observation against the model at that exact position and date, with the gap between them shaded. Chlorophyll from BGC-Argo is live in this window, and the glider archive the problem statement names is read by its own adapter and reports what it holds. Ship CTD stays out on a measurement rather than a shrug: the newest GO-SHIP section in this box is April 2025, which cannot share this timeline.</p>
-    <p class="measure" id="m-instruments">measuring&hellip;</p>
-    <p class="measure" id="m-bgc">measuring&hellip;</p>
+    <p class="lead">Click any instrument to see what it measured against what the model predicted at the same place and date.</p>
+    <ul class="points">
+      <li><b>Accurate positions.</b> Each instrument is drawn where it was at the moment on screen, and hidden when its nearest cast is too far from that moment, because showing it would imply an observation that does not exist.</li>
+      <li><b>The chart.</b> Observation against model, with the gap between them shaded.</li>
+      <li><b>Chlorophyll.</b> Live from BGC-Argo floats in this window.</li>
+      <li><b>Gliders.</b> The archive the problem statement names is read by its own adapter, which reports what it holds.</li>
+    </ul>
+    <p class="limit"><span>Limit</span> Ship CTD is left out: the newest GO-SHIP section in this box is April 2025, before this timeline starts.</p>
+    <div class="measure" id="m-instruments">measuring&hellip;</div>
+    <div class="measure" id="m-bgc">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;float=7902384">Open a comparison</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/plan/03-requirement-gaps.md">docs/plan/03-requirement-gaps.md</a>
@@ -453,8 +532,21 @@
       <q>Multi-format ingestion: NetCDF via an xarray backend, and delimited text formats, with new sources added with minimal code change</q>
       <span class="verdict">Met, and you can check it yourself</span>
     </div>
-    <p>NetCDF through xarray and netCDF4, CSV through a parser whose column layout is stored as data rather than code, and the EGO glider directory index through a parser that reads its columns from the file's own header rather than by position. <b>Then the part that can be falsified:</b> drag a CF-conventions NetCDF file of your own onto the platform's <q>Your own data</q> panel and its variables appear in the Variable selector, going through the same colourbar, depth slice, isosurface and 3D renderer as everything else. It is read by a Source Adapter behind exactly the same interface as INCOIS, Argo and Copernicus. A file it cannot read <b>names the axis</b> and draws nothing: no longitude, a sigma-level vertical coordinate, an ensemble dimension, or an ocean somewhere else in the world are each refused in words. It is an API feature, like OPeNDAP and WMS - the demo runs with the API stopped.</p>
-    <p class="measure" id="m-ingest">measuring&hellip;</p>
+    <p class="lead">NetCDF, CSV and the glider index are all read today, and you can test it by dropping your own NetCDF file on the platform.</p>
+    <p class="points-head">Formats read</p>
+    <ul class="points">
+      <li><b>NetCDF.</b> Through xarray and netCDF4.</li>
+      <li><b>CSV.</b> The column layout is stored as data, not code.</li>
+      <li><b>Glider index.</b> Columns are read from the file's own header, not by position.</li>
+    </ul>
+    <p class="points-head">Check it yourself</p>
+    <ul class="points">
+      <li><b>Drop a file.</b> Drag a CF-conventions NetCDF file onto the <q>Your own data</q> panel. Its variables join the Variable selector and use the same colourbar, depth slice, isosurface and 3D view as everything else.</li>
+      <li><b>Same interface.</b> It is read by a Source Adapter exactly like INCOIS, Argo and Copernicus.</li>
+      <li><b>Clear refusals.</b> A file it cannot read <b>names the problem</b> and draws nothing: no longitude, a sigma-level vertical axis, an ensemble dimension, or an ocean somewhere else in the world.</li>
+    </ul>
+    <p class="limit"><span>Limit</span> File upload needs the API running, like OPeNDAP and WMS. The demo itself runs without it.</p>
+    <div class="measure" id="m-ingest">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/netcdf.py">samudra/sources/netcdf.py</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/upload.py">api/upload.py</a>
@@ -465,8 +557,15 @@
       <q>Customizable colorbar: palette, min/max range, log/linear scale; variable selector; layer opacity control; vertical exaggeration slider</q>
       <span class="verdict">Met</span>
     </div>
-    <p>Both range handles, and the range is analytical rather than cosmetic - water outside it is not drawn at all. The log/linear toggle was cut once because the shader bent the water while the legend stayed straight; there is now exactly one curve, in one file, used by the ray marcher and the swatch alike. There is deliberately no palette chooser: each variable carries the cmocean scale designed for its quantity, because a chooser let a user put an oxygen scale on temperature. The variable selector carries five groups - most of them computed here rather than downloaded, which is the extensibility claim made visible: INCOIS publish two quantities and the platform offers many more from them - and the layer's opacity and the block's vertical exaggeration are each their own slider, because a lens and a read are different controls.</p>
-    <p class="measure" id="m-selector">measuring&hellip;</p>
+    <p class="lead">Every part of the clause is a control you can use.</p>
+    <ul class="points">
+      <li><b>Range.</b> Two handles. Water outside the range is not drawn at all, so narrowing it is analysis, not decoration.</li>
+      <li><b>Log or linear.</b> One curve in one file drives both the water and the legend, so they cannot disagree. It was cut once, when they did.</li>
+      <li><b>Palette.</b> Each variable opens on the cmocean scale designed for it, with a few alternates of the same kind, named by their colours and never by a quantity.</li>
+      <li><b>Variable selector.</b> Five groups, most computed here: INCOIS publish two quantities and the platform derives many more from them.</li>
+      <li><b>Opacity and exaggeration.</b> Each has its own slider, because changing how see-through the water is and stretching the depth are different things.</li>
+    </ul>
+    <div class="measure" id="m-selector">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=heat_potential&amp;scale=log">Open with a log scale</a>
       <a class="open" href="./app.html?dive=1">Open the selector</a>
@@ -478,7 +577,13 @@
       <q>Modern JavaScript frontend, lightweight REST API backend, OPeNDAP API backend, deployable on INCOIS infrastructure with no client-side dependencies</q>
       <span class="verdict">Met</span>
     </div>
-    <p>TypeScript, React and Vite in front; FastAPI behind, serving DAP2, CF-1.8 NetCDF and OGC WMS from the native analysis grids and never from the rendering volume. The OPeNDAP endpoint is checked in the test suite by opening it with a real pydap client rather than by asserting on our own bytes.</p>
+    <p class="lead">A TypeScript web app in front, a small Python API behind, and open data protocols served from the model's own grids.</p>
+    <ul class="points">
+      <li><b>Frontend.</b> TypeScript, React and Vite.</li>
+      <li><b>Backend.</b> FastAPI, serving DAP2 (OPeNDAP), CF-1.8 NetCDF and OGC WMS.</li>
+      <li><b>The platform's own numbers.</b> Served from the native analysis grids, never from the rendering volume.</li>
+      <li><b>Tested with a real client.</b> The test suite opens the OPeNDAP endpoint with pydap rather than checking our own bytes.</li>
+    </ul>
     <div class="clause-links">
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0012-open-standards-from-the-grids.md">docs/adr/0012</a>
     </div>
@@ -488,23 +593,34 @@
       <q>Extensible design for CTDs, moorings, HF-radar, ADCP and machine-learning derived products</q>
       <span class="verdict partly">Moorings met, the rest answered</span>
     </div>
-    <p>Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format, with depth rather than pressure, one row per level and no quality flags, absorbed behind the same Protocol. HF-radar and ADCP stay unmet because India's are behind a login that does not resolve, which is a data-policy fact rather than an architecture gap. Machine-learning products are refused on purpose: thirty-six analyses is not a training set, and a gap-filler would paint smooth believable temperature over the part of the block nobody measured, which is the most honest thing in the tool.</p>
-    <p class="measure" id="m-coverage">measuring&hellip;</p>
+    <p class="lead">Moored buoys are already added through the same design. HF-radar and ADCP are blocked by data access, and machine learning is left out on purpose.</p>
+    <ul class="points">
+      <li><b>Moorings, done.</b> NOAA's public GTS feed: a different format (depth instead of pressure, one row per level, no quality flags) behind the same interface.</li>
+      <li><b>HF-radar and ADCP.</b> India's are not open: INCOIS serves in-situ data on a request form and restricts data inside the EEZ. A data-policy limit, not a design gap.</li>
+      <li><b>Machine learning, refused.</b> Thirty-six analyses is not a training set, and a gap-filler would paint believable temperature over water nobody measured, which this platform shows honestly instead.</li>
+    </ul>
+    <div class="measure" id="m-coverage">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=coverage">Show where nothing was measured</a>
     </div>
   </article>
   </section>
 
-  <section id="more" class="reveal">
+  <section id="more">
     <h2>Beyond the six core: the rest of the problem statement</h2>
   <article class="clause">
     <div class="clause-head">
       <q>Tools that enable intuitive and rapid understanding of three-dimensional ocean phenomena</q>
       <span class="verdict">Met, and not asked for</span>
     </div>
-    <p>Draw a line between two points on the water and the platform cuts a <b>vertical section</b> along it: depth down, distance across, the variable as colour, with every float cast within 150 km of the line on the same axes and each drawn down to the depth it actually reached. This is the standard figure of physical oceanography - the one in every textbook and every INCOIS report - and no interactive web tool offers it cut live against a 3D block you can also fly through. It reads the model's <b>own grid on its own 24 levels</b>, never the depth-warped rendering volume, because a reader takes metres off one axis and a value off the colour. The three variables an instrument measures ship their full-precision grids in the build, so it works with the network unplugged; <code>/api/section</code> serves the same cut to anything else.</p>
-    <p class="measure" id="m-section">measuring&hellip;</p>
+    <p class="lead">Draw a line on the water and get a vertical section, the standard figure of physical oceanography, cut live beside the 3D block.</p>
+    <ul class="points">
+      <li><b>What you see.</b> Depth down, distance across, the variable as colour.</li>
+      <li><b>With the instruments.</b> Every float cast within 150 km of the line, each drawn to the depth it actually reached.</li>
+      <li><b>Real values.</b> Cut from the model's <b>own grid on its own 24 levels</b>, never from the stretched rendering volume, because a reader takes metres off one axis and a value off the colour.</li>
+      <li><b>Works offline.</b> The three variables an instrument measures ship full-precision grids in the build. <code>/api/section</code> serves the same cut to other tools.</li>
+    </ul>
+    <div class="measure" id="m-section">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;section=80,5,90,20">Cut across the Bay of Bengal</a>
     </div>
@@ -514,8 +630,15 @@
       <q>The absence of such a system impedes timely ... climate monitoring</q>
       <span class="verdict">Met</span>
     </div>
-    <p>Two variables answer this and the difference between them is the point. The <b>Temperature Anomaly</b> is a departure from the mean of the thirty-six analyses in this build - a year, August 2025 to July 2026 - which is a seasonal swing, and the panel beside it has always said so. <b>Temperature vs Normal</b> is a departure from NOAA's World Ocean Atlas 2023 <b>1991-2020</b> mean for that analysis's own calendar month, which is what a forecaster means by "warmer than usual". It is read anonymously over OPeNDAP at bake time, needs no account at any point, and sits on exactly the node centres INCOIS use - which is why no regridding happens and why the platform refuses outright rather than regridding if that ever stops being true. Below 1500 m the atlas has no normal, so the field is blank there rather than zero.</p>
-    <p class="measure" id="m-normal">measuring&hellip;</p>
+    <p class="lead">Two views of "warmer": against this year's own average, and against the 30-year normal.</p>
+    <ul class="points">
+      <li><b>Temperature Anomaly.</b> Departure from the mean of this build's 36 analyses (August 2025 to July 2026), so mostly the seasonal swing. The panel beside it says so.</li>
+      <li><b>Temperature vs Normal.</b> Departure from NOAA's World Ocean Atlas 2023 <b>1991-2020</b> mean for the same calendar month. This is what a forecaster means by "warmer than usual".</li>
+      <li><b>No regridding.</b> The atlas sits on exactly INCOIS's grid points. If that ever stops being true, the platform refuses rather than regrids.</li>
+      <li><b>Open access.</b> Read anonymously over OPeNDAP at bake time, with no account.</li>
+    </ul>
+    <p class="limit"><span>Limit</span> Below 1500 m the atlas has no normal, so the field is blank there, not zero.</p>
+    <div class="measure" id="m-normal">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature_normal_anomaly">Open the climatological anomaly</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0016-a-real-climatological-baseline.md">docs/adr/0016</a>
@@ -526,8 +649,13 @@
       <q>The absence of such a system impedes timely hazard assessment, search-and-rescue support, fishery advisories and climate monitoring</q>
       <span class="verdict">Search and rescue: built, and scored</span>
     </div>
-    <p><b>This is not a search-and-rescue forecast and is never labelled as one.</b> A real one needs surface wind, Stokes drift from the waves and a leeway coefficient for the specific object, and this carries none of them - which is why INCOIS run SARAT. What it shows is the drift the ocean analysis alone implies: drop a pin, and the Copernicus current field is integrated forward from it at the depth you have sliced to. What makes it worth having is that it checks itself. An Argo float's track <em>is</em> measured drift at its parking depth, so the same integrator was run from every drifting float's own position and the answer published, unflattering parts included.</p>
-    <p class="measure" id="m-drift">measuring&hellip;</p>
+    <p class="lead">Drop a pin and see where the ocean current alone would carry something, with the error of that prediction published.</p>
+    <ul class="points">
+      <li><b>What it does.</b> Carries the pin forward through the Copernicus current field, at the depth you slice to.</li>
+      <li><b>How it checks itself.</b> An Argo float's track <em>is</em> measured drift, so the same calculation runs from every drifting float's position and the result is published, unflattering parts included.</li>
+    </ul>
+    <p class="limit"><span>Limit</span> <span><b>Not a search-and-rescue forecast, and never labelled as one.</b> A real one adds surface wind, wave drift and the object's own leeway, which is why INCOIS run SARAT.</span></p>
+    <div class="measure" id="m-drift">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=current_speed&amp;pin=51.5,9.5">Drop a pin in the Somali Current</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0015-drift-that-scores-itself.md">docs/adr/0015</a>
@@ -538,8 +666,13 @@
       <q>Tools for intuitive, rapid understanding: where does the model disagree with the instruments?</q>
       <span class="verdict">Met, and not asked for</span>
     </div>
-    <p>The problem statement asks for a comparison. It does not ask for the comparison to be searchable, and clicking 266 instruments one at a time to find the three that matter is not rapid understanding. So every collocated instrument is also drawn coloured by how far the analysis sat from what it measured, ranked worst first, and binned onto 5 degree boxes so a regional bias is distinguishable from scatter. <b>It is not AI.</b> There is no model here, no training set and no confidence score: every figure is the mean or the root-mean-square of residuals already measured, and the ranking is on that value as a fraction of each variable's own range so a degree and a PSU can share one list.</p>
-    <p class="measure" id="m-bias">measuring&hellip;</p>
+    <p class="lead">Every instrument coloured by how far the model sat from it, so the worst disagreements are found at a glance instead of by clicking instruments one at a time.</p>
+    <ul class="points">
+      <li><b>Ranked.</b> Worst first, on the gap as a fraction of each variable's own range, so degrees and PSU share one list.</li>
+      <li><b>Regional or random?</b> Binned onto 5 degree boxes, so a regional bias stands out from scatter.</li>
+      <li><b>Not AI.</b> No model, no training set, no confidence score. Every figure is a mean or root-mean-square of gaps already measured.</li>
+    </ul>
+    <div class="measure" id="m-bias">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;bias=1">Colour the instruments by disagreement</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/residuals.py">samudra/residuals.py</a>
@@ -550,7 +683,13 @@
       <q>Open standards (OGC WMS/WCS, CF Conventions for NetCDF)</q>
       <span class="verdict">WMS, OPeNDAP and CF met; WCS declined with the reason</span>
     </div>
-    <p>Three standards read the model back out: <b>OGC WMS 1.3.0</b>, <b>DAP2 OPeNDAP</b> and <b>CF-1.8 NetCDF</b>, all served from the native analysis grids and never from the depth-warped rendering volume - a consumer pulling data over the wire gets the same numbers the platform reports. The axis-order trap is the first thing tested: WMS 1.3.0 takes EPSG:4326 as latitude-first while CRS:84 is longitude-first, and a flipped axis would draw an image flipped north-south without ever failing. The OPeNDAP and WMS endpoints are checked by opening them with a real client (pydap and owslib) rather than by asserting on our own bytes. <b>WCS is not served</b>, on the measurement rather than the hardware: there is no maintained pure-Python WCS server, DAP2 is what this community actually reads, and the same coverages are already on OPeNDAP - so the refusal is written down here instead of reading as an omission.</p>
+    <p class="lead">The model's data can be pulled out through three open standards. WCS is declined, and the reason is below.</p>
+    <ul class="points">
+      <li><b>Served.</b> <b>OGC WMS 1.3.0</b>, <b>DAP2 OPeNDAP</b> and <b>CF-1.8 NetCDF</b>, all from the native analysis grids, so a consumer gets the same numbers the platform reports.</li>
+      <li><b>Axis order tested first.</b> WMS 1.3.0 reads EPSG:4326 latitude-first and CRS:84 longitude-first. A mix-up would silently draw the map flipped north to south.</li>
+      <li><b>Real clients.</b> The OPeNDAP and WMS endpoints are tested with pydap and owslib, not against our own bytes.</li>
+      <li><b>WCS, declined.</b> No pure-Python WCS server fits this API (THREDDS is Java, EOxServer runs on MapServer), and the same coverages are already on OPeNDAP.</li>
+    </ul>
     <div class="clause-links">
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/standards.py">api/standards.py</a>
       <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/wms.py">api/wms.py</a>
@@ -562,8 +701,14 @@
       <q>Public outreach and science communication: school and college students, the general public during awareness campaigns, policymakers, outreach events, exhibitions, e-learning</q>
       <span class="verdict partly">Four of the six, and the two gaps named</span>
     </div>
-    <p>The problem statement gives this its own titled section and names five audiences and three settings by hand, and fifteen variables in five groups is the right toolkit for a forecaster and the wrong first minute for any of them. So there are two more doors, and the control panel gained nothing. <b>Show me around</b> is a guided walk in six chapters and 21 steps that visits every one of the 44 controls this platform explains - a probe fails if a control is ever added without a step, so that is a measurement rather than a promise. <b>Explore</b> is the same platform as eight questions, each of which sets up its own answer and each of which carries the caveat its simplification costs: the cyclone one says in as many words that it is a map of conditions and not a forecast. <b>Kiosk mode</b> hides the panels, scales the type and plays the questions on a loop, resetting thirty seconds after the last visitor walks away, which is what "exhibitions" actually asks for. <b>Copy this view</b> writes what is on screen into a link, which is a teacher's worksheet.</p>
-    <p>What is missing is stated rather than glossed: there is no printable one-page brief for the policymaker row, and the app carries one media query, at 1180 px, so a classroom of laptops is fine and a phone is not.</p>
+    <p class="lead">Easier ways in for students, the public and exhibitions, without adding anything to the expert control panel.</p>
+    <ul class="points">
+      <li><b>Show me around.</b> A guided walk of 21 steps in six chapters that visits all 44 explained controls. A check fails if a control is ever added without a step.</li>
+      <li><b>Explore.</b> The platform as eight questions. Each sets up its own answer and carries the caveat its simplification costs: the cyclone one says it is a map of conditions, not a forecast.</li>
+      <li><b>Kiosk mode.</b> For exhibitions: panels hidden, larger type, questions on a loop, and a reset thirty seconds after the last visitor walks away.</li>
+      <li><b>Copy this view.</b> Writes what is on screen into a link, ready for a teacher's worksheet.</li>
+    </ul>
+    <p class="limit"><span>Not yet</span> A printable one-page brief for policymakers, and a phone layout: the app is built for laptop screens (one layout breakpoint, at 1180 px).</p>
     <div class="clause-links">
       <a class="open" href="./app.html?explore=1">Open Explore</a>
       <a class="open" href="./app.html?kiosk=1">Open the exhibition screen</a>
@@ -572,7 +717,7 @@
   </article>
   </section>
 
-  <section id="refused" class="reveal">
+  <section id="refused">
     <h2>What is deliberately not built</h2>
     <p>
       Each of these has a measurement behind it rather than an excuse, and every one is written
@@ -581,19 +726,22 @@
     <div class="scroll">
       <table>
         <tr><th>Clause</th><th>Why not</th></tr>
-        <tr><td class="mono">OGC WCS</td><td>No maintained pure-Python server, and OPeNDAP is
-          what this community actually uses. It is already served.</td></tr>
+        <tr><td class="mono">OGC WCS</td><td>No pure-Python WCS server fits this API: THREDDS
+          is Java and EOxServer runs on MapServer. The same numbers are already served over OPeNDAP,
+          as INCOIS's ERDDAP and NOAA's THREDDS serve theirs.</td></tr>
         <tr><td class="mono">Machine-learning products</td><td>Thirty-six analyses is not a training
           set. A gap-filler would paint over the part of the block nobody measured, which is the
           most honest thing here.</td></tr>
         <tr><td class="mono">Ship CTD sections</td><td>Newest GO-SHIP section in this box is
           April 2025, four months before the window opens.</td></tr>
-        <tr><td class="mono">HF-radar and ADCP</td><td>India's are behind a login at
-          <code>services.incois.gov.in</code>, which does not resolve. A data-policy fact.</td></tr>
+        <tr><td class="mono">HF-radar and ADCP</td><td>India's are not open: INCOIS serves in-situ data
+          on a request form and restricts data inside the EEZ, and <code>services.incois.gov.in</code>
+          resolves only to a private address. A data-policy fact.</td></tr>
         <tr><td class="mono">INCOIS LAS as a data source</td><td>The catalogue reads fine; the
           OPeNDAP endpoint returned zero bytes at 90 s and again at 240 s.</td></tr>
-        <tr><td class="mono">Godas</td><td>Ends 2025-05-22, under three months before the
-          window opens.</td></tr>
+        <tr><td class="mono">Godas</td><td>INCOIS's LAS copy ends 2025-05-22, under three
+          months before the window opens, and its OPeNDAP does not answer. NOAA's own Godas runs to
+          July 2026, as monthly means.</td></tr>
         <tr><td class="mono">Glider casts on the map</td><td>The adapter is built and the archive
           is read. The newest cast in this box is 2022-10-14, so drawing one at a 2026 Timestep
           would claim an observation that does not exist.</td></tr>
@@ -623,10 +771,20 @@
     cue.classList.toggle('hidden', y > 120);
   }, { passive: true });
 
-  // scroll reveal
+  // scroll reveal, per box rather than per section. A section is thousands of pixels tall, so a
+  // 15% threshold on the whole of it left the page blank for a long scroll and then popped every
+  // clause in at once, which read as the page hanging. Boxes that arrive together are staggered.
+  document.querySelectorAll('section > h2, section > p, section > .scroll, .clause').forEach(function (el) {
+    el.classList.add('reveal');
+  });
   var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
-  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    var arriving = entries.filter(function (e) { return e.isIntersecting; });
+    arriving.forEach(function (e, i) {
+      e.target.style.transitionDelay = Math.min(i * 70, 280) + 'ms';
+      e.target.classList.add('in-view');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
   // theme toggle
@@ -650,6 +808,10 @@
     if (node) node.innerHTML = html;
   };
   var n = function (value) { return Number(value).toLocaleString("en-GB"); };
+  // A figure with several parts reads as a list, and a list of names as chips, rather than as one
+  // run-on sentence.
+  var list = function (items) { return "<ul><li>" + items.join("</li><li>") + "</li></ul>"; };
+  var chips = function (names) { return "<span class=\"chips\"><span>" + names.join("</span><span>") + "</span></span>"; };
 
   fetch(DATA + "manifest.json")
     .then(function (response) { return response.json(); })
@@ -685,11 +847,12 @@
       if (m.gliders) {
         var g = m.gliders;
         set("m-gliders",
-          "Scanned <code>" + g.archive + "</code>: <b>" + n(g.castsInRegion) + "</b> casts in " +
-          "this box from <b>" + g.gliders + "</b> glider in <b>" + g.deployments.length +
-          "</b> deployments. Newest cast <b>" +
-          (g.newestCast || "").slice(0, 10) + "</b>. Inside this bake's window: <b>" +
-          g.castsInWindow + "</b>.");
+          "Scanned <code>" + g.archive + "</code>" + list([
+            "<b>" + n(g.castsInRegion) + "</b> casts in this box, from <b>" + g.gliders +
+              "</b> glider in <b>" + g.deployments.length + "</b> deployments",
+            "Newest cast: <b>" + (g.newestCast || "").slice(0, 10) + "</b>",
+            "Inside this build's window: <b>" + g.castsInWindow + "</b>",
+          ]));
       } else {
         set("m-gliders", "The glider archive was not reachable when this build was baked.");
       }
@@ -697,13 +860,11 @@
       set("m-fields", "<b>" + m.fields.length + "</b> variables in " +
         (m.fieldGroups || []).length + " groups &middot; " + groups);
 
-      set("m-sources", "<b>" + m.sources.length + "</b> providers in this build: " +
-        m.sources.map(function (s) { return s.name; }).join(", "));
+      var sourceNames = m.sources.map(function (s) { return s.name; });
+      set("m-sources", "<b>" + m.sources.length + "</b> providers in this build" + chips(sourceNames));
 
-      set("m-ingest", "<b>" + m.sources.length + "</b> providers behind one interface in this " +
-        "build, plus one adapter for a file you supply. Everything below is read through the " +
-        "same two protocols: " + m.sources.map(function (s) { return s.name; }).join(", ") +
-        ", and your own NetCDF.");
+      set("m-ingest", "<b>" + m.sources.length + "</b> providers plus one adapter for a file you " +
+        "supply, all read through the same two interfaces" + chips(sourceNames.concat(["Your own NetCDF"])));
 
       set("m-selector", "<b>" + m.fields.length + "</b> variables &middot; " + groups);
 
@@ -729,11 +890,11 @@
       }
 
       var hazard = m.fields.filter(function (f) { return f.group === "hazard"; });
-      set("m-hazard", "<b>" + hazard.length + "</b> hazard variables: " +
-        hazard.map(function (f) {
-          return f.label + " (" + f.range[0].toFixed(1) + " to " + f.range[1].toFixed(1) + " " +
-            f.units + ")";
-        }).join(" &middot; "));
+      set("m-hazard", "<b>" + hazard.length + "</b> hazard variables, with the range each spans" +
+        list(hazard.map(function (f) {
+          return "<b>" + f.label + "</b>: " + f.range[0].toFixed(1) + " to " +
+            f.range[1].toFixed(1) + " " + f.units;
+        })));
 
       var sectioned = Object.keys(m.gridFiles || {});
       set("m-section", sectioned.length
@@ -761,16 +922,17 @@
       if (m.drift && m.drift.cycle) {
         var cycle = m.drift.cycle;
         var ten = (m.drift.horizons || []).filter(function (h) { return h.days === 10; })[0];
-        set("m-drift",
-          "Scored on <b>" + m.drift.floats + "</b> drifting floats at " +
-          m.drift.parkingDepthMetres + " m. Over one Argo cycle - <b>" + n(cycle.count) +
-          "</b> of them - the current field alone lands a median <b>" + cycle.medianKm +
-          " km</b> from where the float actually went, <b>" + cycle.p90Km +
-          " km</b> at the ninetieth percentile" +
-          (ten
-            ? ". Let go for " + ten.medianDaysUsed + " days: <b>" + ten.medianSeparationKm +
-              " km</b> apart, against <b>" + ten.medianTravelledKm + " km</b> the float travelled"
-            : "") + ".");
+        var driftRows = [
+          "Scored on <b>" + m.drift.floats + "</b> drifting floats at " + m.drift.parkingDepthMetres + " m",
+          "Over one Argo cycle (<b>" + n(cycle.count) + "</b> of them): a median <b>" +
+            cycle.medianKm + " km</b> from where the float actually went, <b>" + cycle.p90Km +
+            " km</b> at the ninetieth percentile",
+        ];
+        if (ten) {
+          driftRows.push("Let go for " + ten.medianDaysUsed + " days: <b>" + ten.medianSeparationKm +
+            " km</b> apart, against <b>" + ten.medianTravelledKm + " km</b> the float travelled");
+        }
+        set("m-drift", "How far the current field alone is from real float tracks" + list(driftRows));
       } else {
         set("m-drift", "This build has no current field, so there is no drift to score.");
       }
@@ -795,7 +957,7 @@
                   worst.meanAbsBias.toFixed(2) + " " + (units[key] || "")
                 : "");
           });
-          set("m-bias", rows.join(" &middot; "));
+          set("m-bias", "Per variable" + list(rows));
         })
         .catch(function () {
           set("m-bias", "The comparison figures were not written by this bake.");

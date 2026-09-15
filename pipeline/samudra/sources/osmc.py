@@ -19,7 +19,7 @@ On that sampling, five of those moorings reported a real water column:
     2300019  RAMA      3.9 S 65.0 E                     9 levels, 0-500 m
 
 The 23xxx buoys are India's OMNI network, run by NIOT with INCOIS as the data centre. The
-2300xxx pair are RAMA, the joint MoES-NOAA array. That table is the four-month sampling this
+2300xxx pair are RAMA, NOAA's array, run with MoES among its partners. That table is the four-month sampling this
 adapter was written against. The 36-step bake carries **17** moorings - 5 India, 10 United
 States, 2 unknown by operator - and draws between 5 and 14 at any one Timestep; `floats.json`
 is the list, and `collect_facts.py` counts it.
@@ -254,7 +254,7 @@ class OsmcSource:
     attribution = (
         "Moored buoy observations from the Global Telecommunication System, republished by "
         "NOAA's Observing System Monitoring Center. Public domain (CC0 1.0). Indian buoys are "
-        "the NIOT/INCOIS OMNI network; the RAMA array is a joint MoES-NOAA programme."
+        "the NIOT/INCOIS OMNI network; RAMA is NOAA's array, run with MoES among its partners."
     )
     endpoint = _SERVER
 

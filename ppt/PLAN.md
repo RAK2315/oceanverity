@@ -21,7 +21,7 @@ the last section.
 | A buoy was "under the storm" | **False.** Nearest moored buoy 23459 is 274 km from the track; 23093 is 534 km. An Argo float did surface 3 km from it. | `cases/montha.json` |
 | Mixed layer "deepened 11 m to 33 m" | **A single cell 200 km off the track.** Within 150 km of the track the median did not deepen. Use heat potential and surface cooling instead (below). | `cases/montha.json` |
 | INCOIS LAS is 2D | **Fair.** LAS offers maps, time series, Hovmoller and area averages - 2D plots, no 3D volume. Do not say "one depth at a time": whether INCOIS's LAS plots depth sections was not verified either way. | INCOIS LAS paper (ResearchGate, "INCOIS Live Access Server"), `las.incois.gov.in` |
-| Deadline | **20 September 2026** on the PS page as mirrored by community sites. Not checked on sih.gov.in itself - check the portal. | SIH 2026 explorer mirror |
+| Deadline | **30 September 2026**, read on sih.gov.in/sih2026PS on 2026-09-14 (the portal says the deadline was extended; community mirrors still show 20 September). | [sih.gov.in/sih2026PS](https://www.sih.gov.in/sih2026PS) |
 
 ---
 

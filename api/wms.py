@@ -19,9 +19,9 @@ Observation Coverage is *not* served, and its absence is stated rather than left
 it is counted on the Volume's warped lattice rather than on the analysis grid, so publishing it
 here would mean publishing the depth warp over a protocol where a consumer cannot see it.
 
-WCS is deliberately not here. There is no maintained pure-Python WCS server, hand-rolling the
-coverage encodings is a day that buys a checkbox, and the numbers are already served properly
-over OPeNDAP - which is what this community actually uses. `docs/plan/03-requirement-gaps.md`
+WCS is deliberately not here. No pure-Python WCS server fits (THREDDS is Java, EOxServer needs
+MapServer, pygeoapi offers only OGC API - Coverages), hand-rolling the coverage encodings is a
+day that buys a checkbox, and the numbers are already served properly over OPeNDAP. `docs/plan/03-requirement-gaps.md`
 records that as a decision rather than an omission.
 
 The trap this module exists to get right

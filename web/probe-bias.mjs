@@ -249,6 +249,45 @@ if (none.count !== 0 || none.residuals) {
   problems.push("a Field with no comparison still carries bias colours");
 }
 
+// ---- 6. the ring around a tint has to frame it, on both themes -------------------------
+//
+// Most instruments sit near the palette's pale midpoint, so what makes a marker read as a dot
+// is the ring around its core. On light the plain marker's ring is white, and the bias map
+// inherited it: a near-white tint inside a white ring on pale water is one blur, and every
+// marker in the basin looked the same while dark mode, with a near-black ring, looked right.
+// Checked on the uniforms the shader mixes rather than on pixels: the ring is a 3 px annulus
+// and a point sprite's sub-pixel placement makes a sampled ring pixel a guess.
+const luminance = ([r, g, b]) => {
+  const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+};
+for (const theme of ["dark", "light"]) {
+  await page.evaluate((t) => {
+    document.documentElement.dataset.theme = t;
+    const store = window.__store.getState();
+    store.set("theme", t);
+    store.selectField("temperature");
+    window.__store.setState({ biasMode: true });
+  }, theme);
+  await page.waitForTimeout(900);
+  const ring = await page.evaluate(() => {
+    const u = window.__scene.floatPoints.material.uniforms;
+    const mode = u.uBiasMode.value;
+    // What the shader draws as the ring with the mode on: the bias ring where there is one.
+    const colour = u.uBiasOutline ? u.uOutline.value.clone().lerp(u.uBiasOutline.value, mode) : u.uOutline.value;
+    const palette = window.__store.getState().manifest.palettes.balance;
+    const mid = palette[Math.round(0.5 * (palette.length - 1))];
+    return { ring: [colour.r, colour.g, colour.b], mid: mid.map((c) => c / 255) };
+  });
+  const a = luminance(ring.ring);
+  const b = luminance(ring.mid);
+  const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  console.log(`${theme}: bias ring against the palette midpoint ${ratio.toFixed(2)}:1`);
+  if (ratio < 3) {
+    problems.push(`${theme}: the ring around a bias tint is ${ratio.toFixed(2)}:1 against the pale midpoint`);
+  }
+}
+
 console.log("PROBLEMS", problems);
 await browser.close();
 process.exit(problems.length ? 1 : 0);

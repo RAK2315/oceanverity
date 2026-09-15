@@ -233,6 +233,7 @@ const SCENE_COLOURS = {
     coast: new Color(0x7fd4f5),
     float: new Color(0xfdfdfd),
     outline: new Color(0x07111d),
+    biasOutline: new Color(0x07111d),
     frame: new Color(0x3d5a76),
     track: new Color(0xf0a04b),
     // The drift the analysis implies, against the orange Track that was measured. Violet
@@ -256,6 +257,10 @@ const SCENE_COLOURS = {
     coast: new Color(0x0e9bb4),
     float: new Color(0x0c2531),
     outline: new Color(0xffffff),
+    // The bias map's ring stays dark on light. Most tints sit near the palette's pale midpoint,
+    // and inside the plain marker's white ring on pale water they merged into one white blur -
+    // measured 1.17:1 between ring and midpoint, against 17.79:1 on dark. probe-bias.mjs.
+    biasOutline: new Color(0x0c2531),
     frame: new Color(0x6f9cb0),
     track: new Color(0xc2621a),
     drift: new Color(0x6b3fc4),
@@ -699,6 +704,7 @@ export class OceanScene {
         uSize: { value: 10 },
         uColour: { value: SCENE_COLOURS.dark.float.clone() },
         uOutline: { value: SCENE_COLOURS.dark.outline.clone() },
+        uBiasOutline: { value: SCENE_COLOURS.dark.biasOutline.clone() },
         uSelectedColour: { value: SELECTED_COLOUR },
         uPulse: { value: 0 },
         uBiasMode: { value: 0 },
@@ -745,6 +751,7 @@ export class OceanScene {
         precision highp float;
         uniform vec3 uColour;
         uniform vec3 uOutline;
+        uniform vec3 uBiasOutline;
         uniform vec3 uSelectedColour;
         uniform float uPulse;
         uniform float uBiasMode;
@@ -777,7 +784,8 @@ export class OceanScene {
           vec3 mapped = mix(uColour, vBiasTint, uBiasMode * vBiasKnown);
           vec3 fill = mix(mapped, uSelectedColour, vSelected);
           float hollow = uBiasMode * (1.0 - vBiasKnown) * (1.0 - vSelected);
-          vec3 colour = mix(uOutline, fill, core * (1.0 - hollow));
+          vec3 ring = mix(uOutline, uBiasOutline, uBiasMode);
+          vec3 colour = mix(ring, fill, core * (1.0 - hollow));
           float alpha = body * (0.85 + 0.15 * core) * vFresh;
 
           // The selected Float breathes, so the eye can find it again after the camera moves.
@@ -897,6 +905,7 @@ export class OceanScene {
     const floatMaterial = this.floatPoints?.material as ShaderMaterial | undefined;
     floatMaterial?.uniforms.uColour?.value.copy(palette.float);
     floatMaterial?.uniforms.uOutline?.value.copy(palette.outline);
+    floatMaterial?.uniforms.uBiasOutline?.value.copy(palette.biasOutline);
 
     for (const object of [this.driftLine, this.predictedLine, this.driftPinPoints]) {
       const material = object?.material as ShaderMaterial | undefined;

@@ -540,7 +540,7 @@ Each was considered and rejected for a reason.
 | Claim machine learning anywhere | There is none, deliberately. Thirty-six timesteps is not a training set, and a neural gap-filler would paint over the 10.2% that is the most honest thing in the tool. |
 | Say "276 Argo floats" | It is 259 Argo floats **and** 17 moored buoys, and the number drawn at any one timestep is between 192 and 221 floats and 5 to 14 buoys. Say "instruments" unless you mean floats. |
 | Say the currents are a picture | They **were**, and are not any more. ADR 0013 superseded 0011: they are Copernicus's own `uo` and `vo` at 1/12 degree, with a real speed under the cursor. The old caveat is now the opposite of the truth. |
-| Call the moving current dots a simulation | They are 2,400 dots carried by the analysed field on one depth, running the drift model's own step rule - measured 0.002 km from a drift pin after 724 km. Not three-dimensional, and refused as such: neither provider publishes a vertical velocity. ADR 0017. |
+| Call the moving current dots a simulation | They are 2,400 dots carried by the analysed field on one depth, running the drift model's own step rule - measured 0.002 km from a drift pin after 724 km. Not three-dimensional, and refused as such: vertical velocity exists only as a model output nobody measured. ADR 0017. |
 | Claim the platform predicts a drift track | It integrates the analysed currents and nothing else - no wind, no Stokes drift, no leeway. What makes it worth showing is that it is **scored**: median 40.9 km out over one Argo cycle. |
 | Add a stock photo of the ocean | Every picture in this deck is the real software. That is itself the argument. |
 | Add a seventh slide | The portal caps it at six. |

@@ -304,8 +304,9 @@ Named here so nobody wonders whether we forgot.
   archive needs credentials we do not have; the Source Adapter is the seam where it would attach.
 - **OGC WCS.** WMS *is* served now, along with OPeNDAP and CF-1.8 NetCDF - ADR 0012. The three
   share one wrapper and cost an afternoon between them rather than a day each, which is what
-  changed the calculus. WCS stays out: no maintained pure-Python server, and the numbers are
-  already on OPeNDAP, which is what this community actually uses.
+  changed the calculus. WCS stays out: no pure-Python WCS server fits (THREDDS is Java, EOxServer
+  needs MapServer; pygeoapi offers only its successor, OGC API - Coverages), and the numbers are
+  already on OPeNDAP.
 - **User accounts, saved sessions, sharing.** No auth of any kind. Nothing a visitor does needs
   an account; rebuilding the data needs one free Copernicus Marine account, and the credential
   lives on the bake machine and never in the browser. ADR 0013.
@@ -314,7 +315,8 @@ Named here so nobody wonders whether we forgot.
   between them is the vertical. Currents are drawn as **moving dots with fading trails** on the
   chosen Level, or as arrows - two styles of one layer, both running the drift model's own step
   rule. What stays refused is advection through the *block*: that needs a vertical velocity `w`,
-  Copernicus publish `uo` and `vo` and no `w`, and INCOIS publish neither, so a 3-D particle would
+  which only a model supplies - Copernicus publish a modelled `wo` that nobody measured, and
+  INCOIS's analysis carries no currents at all - so a 3-D particle would
   be claiming a motion nobody measured in the one dimension this project exists to take
   seriously. ADR 0017.
 - **Glider casts on the map.** The adapter is built and the archive is read. The newest cast in

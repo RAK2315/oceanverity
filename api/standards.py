@@ -22,9 +22,9 @@ That was a fair call when each was a separate day. Two measurements changed the 
   `NOT_ON_A_NATIVE_GRID` says why; this paragraph named it as servable for a round, forty lines
   above the code refusing it.
 
-WCS stays unbuilt, and `docs/plan/03-requirement-gaps.md` records why: there is no maintained
-pure-Python WCS server, the coverage encodings are a day's work for a checkbox, and the numbers
-are already served properly over OPeNDAP, which is what this community actually uses.
+WCS stays unbuilt, and `docs/plan/03-requirement-gaps.md` records why: no pure-Python WCS
+server fits, the coverage encodings are a day's work for a checkbox, and the numbers are already
+served properly over OPeNDAP.
 
 The one rule
 ------------

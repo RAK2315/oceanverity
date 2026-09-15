@@ -208,7 +208,7 @@ export const GUIDE: Record<string, GuideEntry> = {
     ],
     look: [
       "Deep red is where a storm would get stronger.",
-      "Above 60 kJ/cm² is the usual threshold for rapid intensification.",
+      "Above about 60 kJ/cm², heat potential starts adding strength in NOAA's hurricane forecast model.",
       "The pale patch off Oman is cold water being dragged up. No fuel at all.",
     ],
     tryThis: "Press play and watch the fuel build through the monsoon.",
@@ -370,7 +370,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "The total: how much fuel there is. Depth of 26 °C says how far down it reaches.",
       "A cyclone stirs the column, so a thin warm skin cools out in hours and a deep one does not.",
       "Sea surface temperature cannot tell those two apart. This can.",
-      "Above 60 kJ/cm² is the usual threshold for rapid intensification.",
+      "Above about 60 kJ/cm², heat potential starts adding strength in NOAA's hurricane forecast model.",
     ],
     look: [
       "Deep red, Bay of Bengal, June to July: the deepest fuel in this ocean.",
@@ -876,7 +876,7 @@ export const GUIDE: Record<string, GuideEntry> = {
     means: [
       "Tethered in one place, sensors down a wire, measuring the same column for years.",
       "Four here are India's own OMNI network, run by NIOT with INCOIS as data centre.",
-      "Three are RAMA, the joint MoES-NOAA array.",
+      "Three are RAMA, NOAA's Indian Ocean array, run with India's MoES among its partners.",
       "INCOIS do not feed these into the analysis, so they are an independent check.",
     ],
     look: [

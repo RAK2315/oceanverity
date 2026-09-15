@@ -194,8 +194,8 @@ export const QUESTIONS: Question[] = [
     id: "float",
     question: "What does one robot float actually do?",
     why:
-      "About 4,000 of them are drifting worldwide. Each sinks to two kilometres, drifts for ten" +
-      " days and rises measuring on the way up. This is one of them, and what it found.",
+      "About 4,000 of them are drifting worldwide. Each drifts for ten days a kilometre down," +
+      " sinks to two, and rises measuring on the way up. This is one of them, and what it found.",
     needsVolume: true,
     run: ({ focusOn }) => {
       calm();

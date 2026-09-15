@@ -68,6 +68,9 @@
 
   --swatch-float: #fdfdfd;
   --swatch-float-ring: #07111d;
+  --swatch-bias-ring: 1px var(--outline-variant);
+  --swatch-bias-none: #07111d;
+  --swatch-bias-none-ring: 1px var(--on-surface-faint);
   --swatch-track: #f0a04b;
   --swatch-coast: #7fd4f5;
 
@@ -163,6 +166,9 @@
 
   --swatch-float: #0c2531;
   --swatch-float-ring: #ffffff;
+  --swatch-bias-ring: 2px #0c2531;
+  --swatch-bias-none: #0c2531;
+  --swatch-bias-none-ring: 2px #0c2531;
   --swatch-track: #c2621a;
   --swatch-coast: #0e9bb4;
 
@@ -2055,20 +2061,25 @@ input[type="range"]::-moz-range-thumb {
   margin: 0 2px;
 }
 
-/* An instrument the bias map has no comparison for: drawn without its bright core in the scene,
-   so the key shows a ring rather than a disc. Absence, not a value of zero. */
+/* An instrument the bias map has no comparison for. Absence, not a value of zero. The marker
+   loses its bright core, so in the water it is a solid disc of the ring's ink - measured, its
+   centre pixel is near-black on both themes - and the key used to show an empty ring, which on
+   light was the same picture as "agree": a pale core inside that ink. */
 .swatch.float.hollow {
-  background: transparent;
-  box-shadow: 0 0 0 2px var(--swatch-float);
+  background: var(--swatch-bias-none);
+  /* Ringed like the other three so it is the same size, and faint-ringed on dark so a dark
+     disc on a dark panel is still there. */
+  box-shadow: 0 0 0 var(--swatch-bias-none-ring);
 }
 
-/* The bias map's three ends. Round, because they are the same discs the water carries. */
+/* The bias map's three ends. Round, because they are the same discs the water carries, and on
+   light ringed in the same dark ink the markers are, or the pale "agree" end vanishes on white. */
 .mapkey-item .swatch[style] {
   width: 9px;
   height: 9px;
   border-radius: 50%;
   margin: 0 2px;
-  box-shadow: 0 0 0 1px var(--outline-variant);
+  box-shadow: 0 0 0 var(--swatch-bias-ring);
 }
 
 /* A square, matching the marker shape in the scene. The shape carries the distinction, not the

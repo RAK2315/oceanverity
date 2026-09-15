@@ -72,7 +72,7 @@ them is edited; the copies in `docs/`, `web/public/` and `ppt/` are published fr
 | <img src="docs/images/coverage.jpg" alt="The ocean block drawn as observation coverage, in four flat colour bands from grey through red and amber to green."> | <img src="docs/images/anomaly.jpg" alt="The ocean block as a temperature anomaly, red and blue, with rings marking each body of water that departed."> |
 | **Observation coverage.** Not the model - the *evidence* for it. **10.2%** of the block has no Argo cast behind it, and the picture shows exactly where. | **Anomaly features.** Every body of water that departed from its own average gets a ring. Click one and it tells you why it is there, and whether anything measured it. |
 | <img src="docs/images/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones."> | <img src="docs/images/hazard.jpg" alt="Cyclone heat potential draped on the sea surface, deep red over the Bay of Bengal."> |
-| **Against a thirty-year normal.** NOAA's 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual" - as distinct from this build's own four-month average. | **Cyclone heat potential.** The heat stored above 26 °C down the whole column, which is what a storm actually runs on. **Above 60 kJ/cm² is the usual threshold for rapid intensification.** |
+| **Against a thirty-year normal.** NOAA's 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual" - as distinct from this build's own four-month average. | **Cyclone heat potential.** The heat stored above 26 °C down the whole column, which is what a storm actually runs on. **Above about 60 kJ/cm², heat potential starts adding strength in NOAA's hurricane forecast model (Mainelli et al. 2008).** |
 | <img src="docs/images/d26.jpg" alt="The depth of the 26 degree Celsius isotherm drawn as an undulating sheet suspended inside the block."> | <img src="docs/images/flow.jpg" alt="Thousands of fine trails streaming across the Indian Ocean, drawing the shape of the currents."> |
 | **Depth of 26 °C.** The same fuel asked the other way: not how much, but how far down. A sheet suspended at its own depth inside the block, and it is not flat. | **The current, moving.** A few thousand dots carried by the water at the depth you have sliced to. Drag the depth slider and the whole basin changes direction. |
 | <img src="docs/images/arrows.jpg" alt="The same current field drawn as arrows on one depth, each coloured and sized by speed."> | <img src="docs/images/section.jpg" alt="A vertical section cut through the ocean, with Argo casts drawn down it on the same axes."> |
@@ -400,7 +400,7 @@ as maps. All five hazard fields are computed here from the Argo analysis, drawn 
 instruments, and checked against INCOIS's own 2004-2019 archive (`hazard_check.json`). ADR 0014.
 
 What is still missing is **ship CTD** - newest section here April 2025, which cannot share this
-timeline - and **HF-radar and ADCP**, which are behind a login that does not resolve. Both are
+timeline - and **HF-radar and ADCP**, which INCOIS serves only on a request form and restricts inside the EEZ. Both are
 data-policy facts rather than architecture gaps.
 
 The one clause we chose not to build at all is **ML-derived products**, and that refusal is
@@ -670,12 +670,12 @@ Being explicit so nobody assumes we forgot. The full list with reasons is in `CO
 
 - Connecting to INCOIS's **internal** archive - that needs credentials we do not have. Our
   Source Adapter is the exact place it would plug in.
-- **OGC WCS.** WMS is served; WCS is not. There is no maintained pure-Python WCS server, and the
-  numbers are already on OPeNDAP, which is what this community actually uses.
+- **OGC WCS.** WMS is served; WCS is not. No pure-Python WCS server fits this API, and the
+  numbers are already on OPeNDAP.
 - User accounts, saved sessions, mobile layout, WebGPU, machine-learning products.
 - **Flow through the block.** Currents are drawn as moving dots on the depth you have sliced to,
-  or as arrows. Advection through the whole *volume* is refused: it needs a vertical velocity and
-  neither provider publishes one, so a 3-D particle would claim a motion nobody measured. ADR 0017.
+  or as arrows. Advection through the whole *volume* is refused: it needs a vertical velocity, which
+  exists only as a model output nobody measured, so a 3-D particle would claim a motion nobody measured. ADR 0017.
 - **Glider casts on the map, and ship CTD.** The glider adapter is built and reads the archive
   the problem statement names; neither source can share this timeline, because the newest glider
   cast in this basin is Oct 2022 and the newest GO-SHIP section is Apr 2025. The glider *finding*
@@ -744,7 +744,7 @@ Information Services (INCOIS), Ministry of Earth Sciences, Government of India.
 
 Moored buoy observations reach us through the Global Telecommunication System, republished by
 NOAA's Observing System Monitoring Center. The Indian buoys are the NIOT/INCOIS OMNI network;
-RAMA is a joint MoES-NOAA programme.
+RAMA is NOAA's Indian Ocean array, run with India's MoES among its partners.
 
 The current vectors are E.U. Copernicus Marine Service Information, from the Global Ocean
 Physics Analysis and Forecast product. They are Copernicus's own model output, read with a free

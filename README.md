@@ -350,8 +350,8 @@ Saying no is part of the design.
 
 - **Geostrophic current speed.** Prototyped and rejected: it reported 0.16 m/s for the Somali
   Current against a real 1.5-2.5 m/s. Finite and plausible-looking is not the bar. (ADR 0010)
-- **3-D particle advection.** Nobody publishes vertical velocity for this region, so a 3-D
-  particle would claim a motion no one measured. The flow is drawn on one level instead. (ADR 0017)
+- **3-D particle advection.** Vertical velocity exists here only as model output
+  (Copernicus `wo`), never measured, so a 3-D particle would claim a motion no one measured. The flow is drawn on one level instead. (ADR 0017)
 - **A palette chooser.** A palette belongs to a variable, not to a dropdown. (ADR 0010)
 - **Login, upload storage, write access.** The platform is read-only. The one endpoint that
   accepts anything holds it in memory and stores nothing.

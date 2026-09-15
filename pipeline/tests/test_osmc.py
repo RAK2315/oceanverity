@@ -9,7 +9,7 @@ no login. Measured over the demo region for a single ten-day window, 20-30 Jul 2
 100,405 rows of which 94,653 carry subsurface temperature, from 169 profiling floats, 13 generic
 moored buoys, 2 tropical moored buoys, 122 ships and 14 drifters. Five of those moorings report a
 real vertical profile: 23459, 23451 and 23452 are India's OMNI network, and 2300009 and 2300019
-are RAMA, the joint MoES-NOAA array.
+are RAMA, NOAA's array, run with MoES among its partners.
 
 It is a genuinely different format from Argo's, which is the point: depth in metres rather than
 pressure, one row per level per report, the surface value in a different column from every other

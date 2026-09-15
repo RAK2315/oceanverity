@@ -32,7 +32,7 @@ somewhere other than the data.
 | 0.61 and 0.82 degC "on the same depths" | A quick calculation in chat | Never in the build, and the dates were not matched. | An estimate made in chat is not a figure. Put it in the pipeline or do not quote it. |
 | Buoy 23093 "directly in the track" of Cyclone Montha | Research artifact | IMD's best track puts it **534 km** away; 23459 is **271 km** away. | Measure distances to the official track, never to a news map or a guess. |
 | Mixed layer "deepened from 11 m to 33 m" | One grid cell, from the research artifact | That cell is about 200 km off the track. Within 150 km of the track the median did not deepen. | A single cell is a cherry-pick. `storm.change_near_track` compares near against far. |
-| Copernicus reanalysis "ends in 2022" | Research artifact | `docs/plan/04` measured **2026-06-23** on 1 Sep. The two disagree; "stops before our window ends" is true either way. | When two sources disagree, write the sentence that is true under both, and say which was measured. |
+| Copernicus reanalysis "ends in 2022" | Research artifact | `docs/plan/04` measured **2026-06-23** on 1 Sep, and Copernicus's own catalogue (STAC) still shows 1993-01-01 to 2026-06-23 on 14 Sep. "2022" was out of date. | When two sources disagree, write the sentence that is true under both, and say which was measured. |
 
 ---
 
