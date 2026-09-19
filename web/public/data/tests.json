@@ -1,6 +1,11 @@
 {
- "total": 430,
+ "total": 495,
  "modules": [
+  {
+   "module": "test_argo_qc.py",
+   "tests": 35,
+   "defends": "Argo's own quality flags, and the fallback chain that could not fire without them."
+  },
   {
    "module": "test_anomaly.py",
    "tests": 29,
@@ -13,7 +18,7 @@
   },
   {
    "module": "test_residuals.py",
-   "tests": 26,
+   "tests": 27,
    "defends": "Where the model most disagrees with the instruments, ranked and mapped."
   },
   {
@@ -52,14 +57,14 @@
    "defends": "The vertical section: depth against distance along a line somebody drew."
   },
   {
-   "module": "test_argo_qc.py",
-   "tests": 16,
-   "defends": "Argo's own quality flags, and the fallback chain that could not fire without them."
-  },
-  {
    "module": "test_coverage.py",
    "tests": 16,
    "defends": "Observation Coverage: how many Argo casts dived through each slab of water nearby."
+  },
+  {
+   "module": "test_fronts.py",
+   "tests": 16,
+   "defends": "Fronts: the edges between two bodies of surface water, which is where fish gather."
   },
   {
    "module": "test_hazard.py",
@@ -80,6 +85,11 @@
    "module": "test_volume.py",
    "tests": 13,
    "defends": "The Volume encoder: a Grid packed into bytes for the GPU, and nothing the science reads."
+  },
+  {
+   "module": "test_bgc.py",
+   "tests": 12,
+   "defends": "BGC-Argo: the same programme, the same server, one more quantity."
   },
   {
    "module": "test_thermocline.py",
@@ -107,14 +117,19 @@
    "defends": "Every Field is described before it leaves the building, and the tables that describe it are checked against the whole set rather than against whichever Field is being edited."
   },
   {
-   "module": "test_bgc.py",
-   "tests": 8,
-   "defends": "BGC-Argo: the same programme, the same server, one more quantity."
-  },
-  {
    "module": "test_depth_warp.py",
    "tests": 8,
    "defends": "The Depth Warp: INCOIS's 24 uneven Levels mapped onto an even axis a GPU texture can use."
+  },
+  {
+   "module": "test_woa.py",
+   "tests": 8,
+   "defends": "The World Ocean Atlas adapter, and the three routes it has to the same numbers."
+  },
+  {
+   "module": "test_field_specs.py",
+   "tests": 7,
+   "defends": "Which Fields may be cut by an isosurface, asserted across every declaration at once."
   },
   {
    "module": "test_grid.py",
@@ -132,6 +147,16 @@
    "defends": "A named storm, held against the water it crossed."
   },
   {
+   "module": "test_copernicus_bgc.py",
+   "tests": 6,
+   "defends": "The biogeochemistry adapter: the seam's contract, and the nearest-node rule it shares."
+  },
+  {
+   "module": "test_habitat.py",
+   "tests": 6,
+   "defends": "The oxygen floor: how deep the water still holds enough oxygen for fish."
+  },
+  {
    "module": "test_plausibility.py",
    "tests": 6,
    "defends": "A provider's value that no sea has ever held is masked, counted, and never silently kept."
@@ -147,9 +172,9 @@
    "defends": "The Copernicus adapter honours the seam's own contract: ask it for a Field it declares."
   },
   {
-   "module": "test_field_specs.py",
-   "tests": 5,
-   "defends": "Which Fields may be cut by an isosurface, asserted across every declaration at once."
+   "module": "test_copernicus_satellite.py",
+   "tests": 3,
+   "defends": "The satellite fronts adapter, offline: two fake satellite days, one known front in each."
   }
  ]
 }
