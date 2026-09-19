@@ -19,7 +19,7 @@ somewhere other than the data.
 | 5 | Decision records, `docs/BUGS.md`, `docs/plan/`, `CLAUDE.md` | **History** | They quote figures *as they were* on purpose ("at twelve Timesteps it was nine buoys"). Never quote them as current. |
 | 6 | Screenshots in `assets/screenshots/` and the three image folders | **Stale** | The data was generated on **9 Sep 2026**; every committed screenshot was last changed on **5 Sep or earlier**. `bias.jpg` shows 230 instruments, 9 buoys and 12 analyses. Check the counts and the timeline in a picture before using it. |
 | 7 | Handoffs, research artifacts, chat | **Not a source** | Useful for leads. Two findings from them were wrong (below). Verify against #1 before use. |
-| 8 | `ppt/script.md` - the recorded video | **Locked** | It cannot change, so it is allowed to disagree. The deck and the site must not copy from it. |
+| 8 | `ppt/script-v1-recorded.md` - the video already recorded | **Locked** | It cannot change, so it is allowed to disagree. The deck and the site must not copy from it. `ppt/script.md` (version 2, 2026-09-20) is the script for the next recording and is checked like the deck. |
 
 ---
 

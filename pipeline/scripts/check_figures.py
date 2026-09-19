@@ -16,8 +16,9 @@ Files are split into two kinds, because they need different action:
 - **History** - decision records, the defect list, plans, and `CLAUDE.md`, which quote the figure
   *as it was* on purpose ("at twelve Timesteps it was nine buoys"). Listed, not failed.
 
-`ppt/script.md` is the recorded video. It is locked, so it is reported on its own line and never
-counted as something to fix.
+`ppt/script-v1-recorded.md` is the video already recorded. It is locked, so it is reported on its
+own line and never counted as something to fix. `ppt/script.md` is the script for the next
+recording (version 2, 2026-09-20), and it is current.
 
     ../.venv/Scripts/python scripts/check_figures.py          # exits 1 on a current mismatch
 """
@@ -39,10 +40,11 @@ WORDS = {
 
 CURRENT = [
     "README.md", "CONTEXT.md", "docs/README-full.md", "docs/demo", "ppt/DECK.md", "ppt/NOTES.md",
+    "ppt/script.md",
     "web/index.html", "web/provenance.html", "web/requirements.html", "web/src", "scripts",
 ]
 HISTORY = ["CLAUDE.md", "pipeline/CLAUDE.md", "web/CLAUDE.md", "docs/adr", "docs/BUGS.md", "docs/plan", "pipeline/samudra"]
-LOCKED = ["ppt/script.md"]
+LOCKED = ["ppt/script-v1-recorded.md"]
 SUFFIXES = {".md", ".html", ".ts", ".tsx", ".py", ".mjs"}
 
 #: Lines that match a pattern and are right, each with why. A text fragment rather than a line
@@ -53,6 +55,7 @@ ALLOWED = {
     ("web/src/store.ts", "5 to 14 moored buoys"): "a range drawn per Timestep, not the total",
     ("web/src/ui/Controls.tsx", "seventeen instruments is a small sample"): "the buoys, which are 17",
     ("web/src/ui/ProfilePanel.tsx", "twelve-step bake's 237 instruments"): "a comment about an older bake, labelled as one",
+    ("ppt/script.md", "- \"Five and a half times.\""): "the 'what not to say' list, quoting version 1 so it is not repeated",
 }
 
 
