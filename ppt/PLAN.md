@@ -33,7 +33,7 @@ the last section.
 
 - **The chart.** Remove the 0.6/0.8 bars and the `5×` block (not in the build, and not like for like).
   Two honest options, pick one:
-  - **Words, no chart:** `Checked against water the model never saw: 266 instruments, with the 17 moored buoys it did not ingest reported on their own.`
+  - **Words, no chart:** `Checked against water the model never saw: 266 instruments, with the 17 moored buoys, not described as inputs, reported on their own.`
   - **A fresh screenshot** of the storm walkthrough, step 3 (heat potential after the storm, IMD track on the water). It is new, it is a real event, and it answers "show me it doing its job". Needs a fresh grab - every committed screenshot predates the current data.
 - **Innovation, "Cyclone fuel maps, rebuilt":** body becomes
   `Depth of 26 °C, heat potential, mixed layer depth and two more, from INCOIS's Argo analysis - and checked against INCOIS's own published archive: the same number in 97% of cells.`

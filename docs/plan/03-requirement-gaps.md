@@ -244,6 +244,8 @@ archives them as NetCDF, but access is behind a login at `services.incois.gov.in
 resolve from this machine at all. EMODnet publishes more than twenty HF-radar networks and every
 one is European or American. The OSMC feed carries no current components here.
 
+*Note, 2026-09-15:* INCOIS Data Holdings lists HF-radar data as "Registered access through Website" and moored-buoy data as "Public Access with only visualisation option", so using either needs a data request to INCOIS. The owner decided not to make one. See `docs/plan/06`.
+
 So the instruments exist, they are Indian, and their data is not on any open endpoint. That is a
 data-policy fact rather than an architecture gap, and saying so is a better answer than dropping
 a European radar dataset into an Indian Ocean tool.

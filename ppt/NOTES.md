@@ -97,8 +97,8 @@ Practically: whatever number is on the impact slide should appear on screen duri
 
 What we have that most teams do not, and should lead with:
 
-- **A number on our own error**, printed separately for assimilated and unassimilated
-  instruments - this is the differentiator and it should be on the first slide, not the fifth
+- **A number on our own error**, printed separately for floats (the analysis is built from them) and moored
+  buoys - this is the differentiator and it should be on the first slide, not the fifth
 - A **live deployed link** and a **public defect list**
 - Every figure on the deck **generated from the build** ([`FACTS.md`](FACTS.md)), so nothing on
   screen can go stale

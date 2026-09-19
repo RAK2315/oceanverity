@@ -18,7 +18,7 @@ Split the nine by whether the quantity behind them is real, derivable, or neithe
 | `balance` | Anomalies about zero | **Became a Field.** Departure from the mean of the baked steps. |
 | `delta` | Differences | Deleted. A second diverging scale with nothing to sit on. |
 | `algae` | Chlorophyll | Deleted. Biological and optical; needs BGC-Argo or satellite ocean colour, and either would be a 2-D surface layer rather than a Volume. |
-| `oxy` | Dissolved oxygen | Deleted. The only complete gridded field for this region is a decadal climatology with no date, which cannot share a ten-day 2026 timeline. Deriving it from T/S regressions would be inventing data. |
+| `oxy` | Dissolved oxygen | Deleted. The only complete gridded field for this region is a decadal climatology with no date, which cannot share a ten-day 2026 timeline. Deriving it from T/S regressions would be inventing data. *No longer true, 2026-09-15: see the amendment at the end.* |
 | `deep` | Bathymetry | Deleted. GEBCO is a download, not a derivation, and the sea floor is scenery rather than a variable. |
 | `speed` | Current speed | Deleted. See below. |
 
@@ -153,3 +153,20 @@ grey ramp and named the leak. Its first draft passed both of those, which is why
 default and still the thing `selectField` resets to, exactly as it resets `emphasis`, `scale` and
 `isoEnabled` - a chosen colourbar that survived a Field switch would be a hint leaking forwards,
 which is a bug this project has fixed three times in other clothes.
+
+---
+
+## Amendment, 2026-09-15: chlorophyll and oxygen now share the timeline
+
+Two statements in the table above were true when written and are not now.
+
+- **Oxygen.** "The only complete gridded field for this region is a decadal climatology with no
+  date" is wrong today. Copernicus Marine's `GLOBAL_ANALYSISFORECAST_BGC_001_028` publishes daily
+  `o2` and `chl` at 0.25 degree from 2021-11-01, which covers this bake's window, behind the same
+  free account the currents already use.
+- **Chlorophyll.** Copernicus also publishes gap-free satellite chlorophyll,
+  `OCEANCOLOUR_GLO_BGC_L4_NRT_009_102`, from 2023-10-01.
+
+The rule this record set is unchanged: a palette arrives attached to a `FieldSpec` and never on its
+own. If chlorophyll and oxygen become Fields, `algae` and `oxy` come back that way. Checked from the
+build machine on 2026-09-15; evidence in `docs/research/2026-09-15-integrations-and-datasets.md`.

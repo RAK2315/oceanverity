@@ -69,6 +69,6 @@ README, the demo script, the technical approach and the landing page, these rema
   The dossier PDF needs regenerating after these are fixed.
 - `scripts/ppt_diagrams.html` - 15 probes, and 15 REST routes against 21.
 
-Moving targets to expect: the **test count** moves whenever a test is added (it is 430 now), and
+Moving targets to expect: the **test count** moves whenever a test is added (it is 495 now), and
 the **probe count** is 16 now that `probe-case.mjs` exists. Both are read from the build by
 `collect_facts.py`; anything typing them by hand will drift again.

@@ -1,6 +1,6 @@
 # Every figure the deck may use, read off the build
 
-**Generated 2026-09-14 by `pipeline/scripts/collect_facts.py`. Do not edit by
+**Generated 2026-09-15 by `pipeline/scripts/collect_facts.py`. Do not edit by
 hand.** Re-run it after a bake and diff this file: a figure that moved shows up as a line.
 
 `ppt/DECK.md` is written by a person and quotes these numbers. This file is the source it quotes
@@ -16,32 +16,32 @@ not a point - see `CLAUDE.md`.
 
 | | | Where it comes from |
 | --- | --- | --- |
-| Fields, selectable | **15** in 5 groups | `manifest.fields` |
-| Source Adapters | **9** - 8 providers plus one for a file a visitor drops | `manifest.sources`, plus `sources/netcdf.py` |
+| Fields, selectable | **19** in 6 groups | `manifest.fields` |
+| Source Adapters | **11** - 10 providers plus one for a file a visitor drops | `manifest.sources`, plus `sources/netcdf.py` |
 | Analyses baked | **36** Timesteps, 10 Aug 2025 to 30 Jul 2026 | `manifest.timesteps` |
 | Region | 45-100 E, 10 S-25 N | `manifest.region` |
 | Volume lattice | **56 x 36 x 48**, 4 bytes a voxel | `manifest.volume` |
 | Depth range | 5 m to 2000 m over 24 uneven levels | `manifest.volume.levelMetres` |
-| Static bake | **192.0 MB**, committed, **0** network calls to run | `du web/public/data` |
+| Static bake | **223.0 MB**, committed, **0** network calls to run | `du web/public/data` |
 | HTTP routes on the API | **21** | `api/*.py` |
-| Tests | **430** | `web/public/data/tests.json` |
+| Tests | **495** | `web/public/data/tests.json` |
 | Browser probes | **16** | the allowlist in `.gitignore` |
 
 ## Instruments
 
 | | | Where it comes from |
 | --- | --- | --- |
-| Instruments in the water | **276** = 259 Argo floats + 17 moored buoys | `manifest.instruments` |
+| Instruments in the water | **274** = 257 Argo floats + 17 moored buoys | `manifest.instruments` |
 | Carrying chlorophyll | **57** floats | `manifest.instruments.withChlorophyll` |
-| Drawn at any one Timestep | between **192** and **221** floats and **5** to **14** buoys | `reportingByKind()`, replayed over all 36 steps |
+| Drawn at any one Timestep | between **190** and **219** floats and **5** to **14** buoys | `reportingByKind()`, replayed over all 36 steps |
 
 ## How far the model sits from the instruments
 
 | | | Where it comes from |
 | --- | --- | --- |
-| Compared | **266** instruments | `residuals.fields.temperature.summary` |
+| Compared | **263** instruments | `residuals.fields.temperature.summary` |
 | Typical gap, all instruments | **0.23 degC** | `summary.meanAbsBias` |
-| Typical gap, Argo floats | **0.18 degC** across 249 | `byKind.float` |
+| Typical gap, Argo floats | **0.18 degC** across 246 | `byKind.float` |
 | Typical gap, moored buoys | **0.88 degC** across 17 | `byKind.mooring` |
 | Depth compared down to (median) | floats **1967 m**, moored buoys **500 m** - so the two typical gaps are not like for like | deepest matched depth per instrument, `collocations.json` |
 | Worst instrument | **2300015** (mooring), model cooler by 3.53 degC over 10 depths | `residuals` ranked on `scaledRms` |
@@ -50,12 +50,12 @@ not a point - see `CLAUDE.md`.
 
 | | | Where it comes from |
 | --- | --- | --- |
-| Scored on | **219** Argo floats at **1000 m** | `manifest.drift` |
-| Over one Argo cycle | median **40.9 km** out, p90 92.7 km, across **6,246** cycles | `manifest.drift.cycle` |
-| Over 10 days | median **43.2 km** out on 214 floats, against 44.5 km travelled | `manifest.drift.horizons` |
-| Over 30 days | median **105.0 km** out on 206 floats, against 108.1 km travelled | `manifest.drift.horizons` |
-| Over 60 days | median **166.0 km** out on 205 floats, against 143.8 km travelled | `manifest.drift.horizons` |
-| Over 90 days | median **211.9 km** out on 198 floats, against 164.8 km travelled | `manifest.drift.horizons` |
+| Scored on | **217** Argo floats at **1000 m** | `manifest.drift` |
+| Over one Argo cycle | median **41.0 km** out, p90 92.8 km, across **6,185** cycles | `manifest.drift.cycle` |
+| Over 10 days | median **43.5 km** out on 212 floats, against 45.2 km travelled | `manifest.drift.horizons` |
+| Over 30 days | median **105.6 km** out on 204 floats, against 108.6 km travelled | `manifest.drift.horizons` |
+| Over 60 days | median **166.0 km** out on 203 floats, against 143.8 km travelled | `manifest.drift.horizons` |
+| Over 90 days | median **211.9 km** out on 196 floats, against 167.6 km travelled | `manifest.drift.horizons` |
 
 ## Evidence and change
 
@@ -65,7 +65,7 @@ not a point - see `CLAUDE.md`.
 | Coverage radius | casts within **334 km** and 5 days either side of the analysis | `manifest.coverage` |
 | Anomaly features found | **404** bodies of water across 36 analyses | `anomalies.json` |
 | A feature is marked only past | **0.5 degC** and 2.0 standard deviations | `manifest.anomalyFeatures` |
-| Against the 1991-2020 normal | across **1,049,076** cells: mean +0.07 degC, 95th percentile of the magnitude 2.05 degC | `manifest.normalAnomaly` |
+| Against the 1991-2020 normal | across **1,049,066** cells: mean +0.07 degC, 95th percentile of the magnitude 2.05 degC | `manifest.normalAnomaly` |
 
 ## Cyclone fields against INCOIS's own published ones
 
@@ -93,7 +93,16 @@ not a point - see `CLAUDE.md`.
 | Buoy 23459 | **274 km** from the track; measured -0.58 degC at 10 m, analysis -0.25 | `cases/montha.json` |
 | Buoy 2300009 | **472 km** from the track; measured +0.09 degC at 20 m, analysis +0.01 | `cases/montha.json` |
 | Buoy 23093 | **534 km** from the track; measured -0.91 degC at 10 m, analysis -0.19 | `cases/montha.json` |
-| Argo floats near the track | **23** surfaced within 300 km while it was active, nearest 3 km | `cases/montha.json` |
+| Argo floats near the track | **22** surfaced within 300 km while it was active, nearest 3 km | `cases/montha.json` |
+
+## The water under a fishing advisory
+
+| | | Where it comes from |
+| --- | --- | --- |
+| Chlorophyll, compared | **55** floats; model higher than the floats by **0.03 mg/m3** on average, typical gap 0.04 mg/m3 | `residuals.fields.chlorophyll.summary` (Copernicus model, not INCOIS) |
+| Dissolved oxygen, compared | **40** floats; model higher than the floats by **8.14 mmol/m3** on average, typical gap 8.85 mmol/m3 | `residuals.fields.oxygen.summary` (Copernicus model, not INCOIS) |
+| Oxygen floor cut at | **62.5 mmol/m3** (2 mg/L) | `manifest.habitat` |
+| Ocean pixels on a front, pooled | thermal **1.2%**, chlorophyll **3.0%** | `manifest.habitat.fronts` - fronts, not fishing zones |
 
 ## The glider finding
 

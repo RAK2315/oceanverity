@@ -43,9 +43,22 @@ honestly where a column total lives. Cyclone heat potential and barrier layer th
 Drapes.
 _Avoid_: overlay, map layer, heatmap
 
+**Front**:
+An edge where two bodies of surface water meet: a jump in sea surface temperature or in
+chlorophyll. The ingredient INCOIS build Potential Fishing Zone advisories from. Here it is found
+in satellite fields by the methods INCOIS name, and reaches the platform as the share of each cell
+lying on one. **A Front is never called a fishing zone.** ADR 0018.
+_Avoid_: fishing zone, PFZ, hotspot
+
+**Oxygen Floor**:
+The depth at which dissolved oxygen first falls below 2 mg/L on the way down from the surface.
+Below it the water is too poor in oxygen for most fish. A Sheet, like the 26 degC isotherm, cut
+from Copernicus Marine's modelled oxygen. ADR 0018.
+_Avoid_: dead zone, OMZ boundary
+
 **Field Group**:
-One heading in the Variable selector: Ocean state, Hazard, Circulation, Evidence, Change.
-Fifteen Fields cannot be a flat list of buttons, and they are grouped the way a forecaster
+One heading in the Variable selector: Ocean state, Hazard, Circulation, Evidence, Change, Biology.
+Nineteen Fields cannot be a flat list of buttons, and they are grouped the way a forecaster
 thinks rather than the way the data arrived.
 _Avoid_: category, section, tab
 
@@ -222,9 +235,10 @@ A small unit of code that turns one external provider's format into Grids or Pro
 a provider means adding an Adapter and nothing else. The problem statement's
 "ingest new data streams without re-engineering" requirement lives or dies here.
 
-Nine of them now, and the count was written as eight here for a round because the World Ocean
-Atlas adapter was left out of it: eight read a provider at bake time, and the ninth reads a file
-a visitor supplies. The September 2026 round added four - INCOIS's second analysis, Copernicus
+Eleven of them now: ten read a provider at bake time, and one reads a file a visitor supplies.
+The count was written as eight here for a round because the World Ocean Atlas adapter was left
+out of it. The 15 September 2026 round added two more - Copernicus Marine's biogeochemical model
+and its satellite temperature and chlorophyll - and again touched no renderer. The September 2026 round added four - INCOIS's second analysis, Copernicus
 Marine's current vectors, the EGO glider archive and the World Ocean Atlas normal - and touched
 no renderer, no API endpoint and no UI file, which is the claim demonstrated rather than
 asserted.
@@ -257,7 +271,7 @@ Everything above the line is being built. Everything below it is deliberately, k
   mean for the same calendar month, which is the climatological baseline the anomaly is not.
   ADR 0016.
 - **Drift**: a pin dropped in the water, integrated forward through the analysed currents, with
-  the honest limit stated first and a score attached - 219 Argo floats, median 41 km out over
+  the honest limit stated first and a score attached - 217 Argo floats, median 41 km out over
   one cycle. ADR 0015.
 - **Anomaly Feature isolation**: clear the rest of the Volume away and leave only the body of
   water one Feature describes, which is the box every number on its panel is measured over.
@@ -265,6 +279,10 @@ Everything above the line is being built. Everything below it is deliberately, k
   mixed layer depth, isothermal layer depth and barrier layer thickness, from the Argo analysis.
   INCOIS's own series from that analysis ended on 2019-03-30, and the method is checked against
   it (`hazard_check.py`). Three are Sheets and two are Drapes. ADR 0014.
+- **The water under a fishing advisory**: chlorophyll and dissolved oxygen from Copernicus
+  Marine's biogeochemical model, compared against the BGC-Argo floats on the bias map; the Oxygen
+  Floor as a Sheet; and Surface Fronts from satellite fields as a Drape. Never a fishing zone.
+  ADR 0018.
 - **Current vectors as numbers**: Copernicus Marine's own analysis at 1/12 degree, arrows on the
   chosen depth, coloured by speed, with a real value under the cursor. ADR 0013.
 - **INCOIS's own evidence channels**, from their second analysis of the same Argo floats: their
@@ -275,11 +293,12 @@ Everything above the line is being built. Everything below it is deliberately, k
 - **Vertical Exaggeration** control.
 - **Drop your own NetCDF file on the page** and see its variables in the same selector, through
   the same adapter interface. An API feature like OPeNDAP and WMS; the demo runs without it.
-- Nine **Source Adapters** behind one interface: INCOIS ERDDAP (the VAM analysis), INCOIS
+- Eleven **Source Adapters** behind one interface: INCOIS ERDDAP (the VAM analysis), INCOIS
   ERDDAP again (the Kessler-McCreary analysis and its evidence channels), Copernicus Marine
-  (current vectors), Argo GDAC (Profiles), Argo BGC (chlorophyll), NOAA's OSMC GTS feed (moored
-  buoys), the EGO glider GDAC, the World Ocean Atlas 2023 climatological normal, and a NetCDF
-  file a visitor drops on the page. The GTS feed is a genuinely different format - depth rather
+  (current vectors), Copernicus Marine again (chlorophyll and oxygen, modelled), Copernicus
+  Marine satellite temperature and chlorophyll (for fronts), Argo GDAC (Profiles), Argo BGC
+  (chlorophyll and oxygen), NOAA's OSMC GTS feed (moored buoys), the EGO glider GDAC, the World
+  Ocean Atlas 2023 climatological normal, and a NetCDF file a visitor drops on the page. The GTS feed is a genuinely different format - depth rather
   than pressure, one row per level, the surface reading in a different column, no quality flags
   at all - which is what makes the seam a demonstration rather than an assertion.
 - A **glider adapter** reading the FTP archive PS 26067 names, and the finding it produces: one
@@ -287,7 +306,7 @@ Everything above the line is being built. Everything below it is deliberately, k
   India's glider programme, not the adapter.
 - A REST API over the pipeline, plus **OPeNDAP, CF-1.8 NetCDF and OGC WMS** served from the
   native Grids and never the Volume. ADR 0012.
-- A **guided tour** of 21 steps in 6 chapters, covering every one of the 44 explained
+- A **guided tour** of 22 steps in 6 chapters, covering every one of the 47 explained
   controls, because the guide panel explains what you touched and a
   first-time visitor does not know what to touch, plus a one-click **Hazard preset** that sets
   the whole scene up for a cyclone question.

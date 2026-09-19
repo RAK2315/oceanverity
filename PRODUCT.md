@@ -52,7 +52,7 @@ kill it.
   digit does not shift the ones beside it, and a measurement always comes from the full-precision
   Grid rather than from the rendered picture.
 - **Candid** - the platform publishes its own error. The drift model ships its median separation,
-  the bias map prints assimilated and unassimilated instruments separately because pooling them
+  the bias map prints floats and moored buoys separately because pooling them
   would flatter the model, and Observation Coverage exists to say where nobody looked instead of
   colouring it in. `docs/BUGS.md` is a public defect list.
 - **Unshowy** - `styles.css` opens by calling this "an instrument, not a consumer app". Panels

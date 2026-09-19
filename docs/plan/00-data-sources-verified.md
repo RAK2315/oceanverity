@@ -38,7 +38,7 @@ INCOIS ARGO 10-day gridded, Variational Analysis Methodology.
 - ZAX = 5,10,20,30,50,75,100,125,150,200,250,300,400,500,600,700,800,900,
         1000,1200,1400,1600,1800,2000  (metres, UNEVEN - see Depth Warp)
 - extent: lon 30.5..119.5E, lat -29.5..29.5N, 1 deg
-- time: 2004-01-15 .. **2026-07-30** (current!), 10-day step
+- time: 2004-01-10 .. **2026-07-30** (current!), 10-day step (start corrected from 2004-01-15 against ERDDAP metadata, 2026-09-15)
 - vars: TEMP (degC), SAL (PSU), TERR/SERR (relative error)
 - CF-1.6 / COARDS / ACDD-1.3 compliant. NaN = land/seafloor (26-43% of cells).
 - TEMP observed range 2.65 .. 31.37 degC - physically sane.
@@ -73,6 +73,9 @@ erddap.emodnet-physics.eu, incois.gov.in
 - **coastwatch.pfeg.noaa.gov/erddap** - timeout.
 - **incois.gov.in/thredds** - responds, but it is an unconfigured default TDS install
   ("Initial TDS Installation (please change threddsConfig.xml)"). No datasets. Useless.
+  *Update 2026-09-15:* the title is still the default, but the catalogue now serves rolling
+  operational files - GODAS, ROMS, HYCOM, Ocean State Forecast currents, winds, waves, SST,
+  chlorophyll and storm surge - keeping two to four days of each. No history for this window.
 - od.incois.gov.in - no route.
 
 ## Consequence for the demo
@@ -133,7 +136,7 @@ Matrix sets EPSG:3857 and **EPSG:4326** (plus @2x and @3x). GetLegend as JSON gi
 
 ## Worth knowing about INCOIS's own server
 
-Eighteen datasets. Two carry the current analysis window:
+Seventeen datasets, plus the `allDatasets` index (corrected from eighteen on 2026-09-15). Two carry the current analysis window:
 
 - `incois_argo_10d_VAM` - the one the demo reads.
 - **`incois_argo_10day_McCreary`** - same 10-day cadence, current to **2026-07-30**, 921 steps,

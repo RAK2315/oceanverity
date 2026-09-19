@@ -14,7 +14,7 @@ PS against what answers it, with a link that opens the app on that control)
 
 **Read [`CONTEXT.md`](CONTEXT.md) first.** It defines the domain vocabulary and the scope cut
 line, and its terms - Grid, Volume, Profile, Collocation, Depth Warp, Source Adapter - are used
-precisely throughout the code. Then skim [`docs/adr/`](docs/adr/): seventeen decision records, several
+precisely throughout the code. Then skim [`docs/adr/`](docs/adr/): eighteen decision records, several
 of which document traps that already cost hours. **0013, 0014 and 0017 are the September 2026
 round**: currents became numbers and superseded 0011, five hazard Fields arrived with three new
 ways of drawing a Field that is not a Volume, and the currents became *moving dots* without
@@ -62,6 +62,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 - `web/public/data/` - manifest, volumes (`.bin`), `surfaces/*.bin` (the hazard Fields, float32 on the Grid), `currents/vectors_*.bin` (float32 u and v on the Grid), **`grids/*.bin`** (the native float32 Grid for the three collocated Fields, which is what the vertical section is cut from), `floats.json`, `collocations.json`, **`residuals.json`** (the bias map), **`drift.json`** (the drift check), `anomalies.json`, **`tests.json`** (what the provenance page says about the test suite, written by `pipeline/scripts/collect_tests.py` rather than by the bake) and coastlines. Written by `bake.py`. 192 MB across 36 Timesteps.
 - `web/public/fonts/` and `web/public/fonts.css` - the two typefaces, served from the build. Written by `scripts/fetch_fonts.py`. Do not replace with a Google Fonts link; that is the zero-network-calls rule.
 - `data/grids/` - native Grids as `.npz` for the API. Server-side only.
+- `data/woa/` - the World Ocean Atlas 2023 normal for this region, twelve months as `.npz`, 3.2 MB. Written by `pipeline/scripts/fetch_woa_normals.py` (and by any bake that had to fetch a month). Committed, because NOAA's OPeNDAP server was down on 2026-09-14 and 15. Server-side only.
 - `data/glider/glider_prof_index_region.txt` - the 2,876 rows of the 248 MB EGO glider index that fall inside the region, cut from the real thing on 2026-09-01 with its own header kept. Committed so the glider finding is reproducible in every bake without the download. Server-side only.
 
 ### Documents
@@ -71,7 +72,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 | `CONTEXT.md` | Domain vocabulary and the scope cut line. Read first. |
 | `README.md` | **The submittable one.** Problem, what makes it different, the numbers, the architecture as text rather than only a picture, how to run it. Kept short on purpose; anything that wants a page of its own goes in `docs/`. |
 | `docs/README-full.md` | The long-form README this replaced: every PS clause answered, every variable explained, the full requirement audit. Nothing was deleted, only moved. |
-| `docs/adr/00*.md` | Seventeen decision records. **0017 is the newest**: the flow drawn as moving dots, which is the drift model's own integrator and is *not* the volumetric streamlines this project still refuses. Before it, 0015 (drift that publishes its own score) and 0016 (a real 1991-2020 climatological baseline). |
+| `docs/adr/00*.md` | Eighteen decision records. **0018 is the newest**: chlorophyll, oxygen, the oxygen floor and surface fronts, never called a fishing zone. Before it, 0017: the flow drawn as moving dots, which is the drift model's own integrator and is *not* the volumetric streamlines this project still refuses. Before it, 0015 (drift that publishes its own score) and 0016 (a real 1991-2020 climatological baseline). |
 | `docs/Samudra3D-Dossier.pdf` | Full project dossier including an anticipated-questions section. Regenerate with `web/render-dossier.mjs` from `scripts/dossier.html`. |
 | `docs/demo/script.md` | The demo script: what to say, what to do. |
 | `docs/plan/00-data-sources-verified.md` | Every endpoint tested, including the dead ones. |
@@ -325,20 +326,26 @@ box back **in degrees** instead. **Before adding a probe, make it fail on purpos
 
 **"Show me around" walks every control, and that is a measurement.** It was five steps against 44
 explained controls - a demo, not a tour, and the four the user's teammates would present from were
-among the 38 it never visited. It is 21 steps in 6 chapters now, and every step declares the
+among the 38 it never visited. It is 22 steps in 6 chapters now, and every step declares the
 `GUIDE` keys it puts on screen. `probe-tour.mjs` fails if any entry in `GUIDE` is not named by
 some step, if a step ends the tour, or if a step changes nothing the scene reads. **Add a control,
 give it a guide entry as the rules already require, and the probe tells you the tour has stopped
 being complete.**
 
-**A step that presses a control on the user's behalf has to put the tour back.** `set("touched")`
-and `hazardPreset()` both null `tourStep`, correctly, because a *user* pressing them means "stop
-showing me things". The tour's own effect re-asserts the index after every step for exactly that
-reason. This is why every step drives `setState` directly and never `set`.
+**A touch pauses a tour or walkthrough; it does not close it.** Closing lost the reader's place:
+one slider tried mid-tour, and the tour was gone (owner report, 2026-09-15). `set("touched")` and
+`hazardPreset()` now set `cardPaused` instead of nulling `tourStep` and `caseStep`. The card
+stays with **Continue**, which re-applies that step, and **End**. Nothing moves the scene while
+paused, and any change of step clears the pause.
+
+**A step that presses a control on the user's behalf has to clear the pause itself.** The tour's
+and the walkthrough's effects re-assert the index and clear `cardPaused` after every step for
+exactly that reason. This is why every step drives `setState` directly and never `set`.
+`probe-tour.mjs` and `probe-case.mjs` check the pause, Continue and End.
 
 **The outreach half lives behind one door, and the console gains nothing.** Six scattered buttons
 would have been the easy version and it would have left the product with no front door at all.
-`Explore` is one full-screen surface holding all eight questions, the float journey, the coverage
+`Explore` is one full-screen surface holding all nine questions, the float journey, the coverage
 view and true scale; `?kiosk=1` is the same list with the panels hidden, the type scaled and a
 reset a minute after the last visitor walks away. **The left panel gained zero groups.**
 
@@ -387,9 +394,12 @@ notice, because a wrong number and a right number are the same shape. `probe-gui
 an unfilled token reaching the screen, and on a control with no entry at all: it found three,
 which is the rule two paragraphs down being broken silently for a round.
 
-**INCOIS assimilate Argo, so a float's residual is largely the model agreeing with itself.**
-The seventeen moored buoys are the only instruments in this bake their analysis did not ingest,
-and measured they disagree 5.5x more on temperature - 1.010 degC against 0.183 - 7.7x on salinity
+**INCOIS's gridded Argo analysis is built from these floats, so a float's residual is largely
+the analysis agreeing with data it was made from.** The seventeen moored buoys are not described
+as inputs to that analysis, which makes them the closer thing to an independent check. Do not
+write "INCOIS assimilate": the VAM analysis is gridding, not data assimilation into a model, and
+whether it excludes buoys is unverified (INCOIS-GODAS, a different product, does assimilate RAMA
+and NIOT moorings; `docs/plan/06`, 2026-09-15). Measured they disagree 5.5x more on temperature - 1.010 degC against 0.183 - 7.7x on salinity
 and 5.4x on density. Pooled into one basin-wide number the seventeen of them vanish into 249
 floats and the headline becomes a statement about self-consistency. At twelve Timesteps it was
 nine buoys at 4.5x; a full year roughly doubled the evidence and the ratio went **up**, not down.

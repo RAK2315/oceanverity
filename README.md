@@ -12,7 +12,7 @@ and what the instruments in the water actually measured.**
 Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / INCOIS
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
 
-![Tests](https://img.shields.io/badge/tests-430%20passing-2ea043)
+![Tests](https://img.shields.io/badge/tests-495%20passing-2ea043)
 ![Probes](https://img.shields.io/badge/browser%20probes-16%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
@@ -56,6 +56,7 @@ venue network cannot kill it.
 | **Live** | [Landing page](https://rak2315.github.io/samudra-sih26/) &middot; [The platform](https://rak2315.github.io/samudra-sih26/app.html) |
 | **Every figure, sourced** | [provenance.html](https://rak2315.github.io/samudra-sih26/provenance.html) |
 | **Every PS clause, answered** | [requirements.html](https://rak2315.github.io/samudra-sih26/requirements.html) - each clause links straight to the control that answers it |
+| **Prototype video** | [Watch on Google Drive](https://drive.google.com/file/d/1LTY8K1G6kZmPgNEslfE59tnTUSqkIc29/view). Recorded before these were built, so they are not in it: the Cyclone Montha walkthrough, the cyclone fields checked against INCOIS's own archive, the redesigned requirements and provenance pages, the Biology variables (chlorophyll, dissolved oxygen, the oxygen floor and surface fronts) with their fishing walkthrough, and the tour pausing instead of closing when you touch a control. |
 
 ---
 
@@ -65,9 +66,10 @@ venue network cannot kill it.
 scores the model against every instrument in the water and prints the result, including where it
 looks bad.
 
-> Across **266 instruments** the typical gap is **0.23 °C**. But INCOIS *assimilate* Argo, so a
-> float's agreement is largely the model agreeing with itself. The **17 moored buoys it did not
-> ingest** read **0.88 °C** against **0.18 °C** for floats - but floats are compared down to
+> Across **263 instruments** the typical gap is **0.23 °C**. But INCOIS's gridded Argo analysis
+> is built from these floats, so a float's agreement is largely the analysis agreeing with data it
+> was made from. The **17 moored buoys** are not described as inputs, which makes them the closer
+> thing to an independent check. They read **0.88 °C** against **0.18 °C** for floats - but floats are compared down to
 > about 2000 m and buoys only to 500 m, and deep water is easy to match, so the two are not like
 > for like and we do not quote a ratio. We print both, separately, because pooling them would
 > flatter the model.
@@ -81,7 +83,7 @@ architecture.
 **10.2%** of the block has no observation behind it, and there is a variable whose only job is to
 show you where.
 
-**4. It has a second door.** Fifteen variables is right for a forecaster and wrong for a school
+**4. It has a second door.** Nineteen variables is right for a forecaster and wrong for a school
 group, so `Explore` turns the platform into eight plain questions, and `?kiosk=1` runs it
 unattended on an exhibition screen.
 
@@ -95,14 +97,15 @@ hand.
 
 | | |
 | --- | --- |
-| Instruments in the water | **276** - 259 Argo floats + 17 moored buoys |
-| Variables | **15**, in 5 groups; 4 published by INCOIS, 11 computed here |
+| Instruments in the water | **274** - 257 Argo floats + 17 moored buoys |
+| Variables | **19**, in 6 groups; 4 published by INCOIS, 2 by Copernicus Marine, 13 computed here |
 | Analyses | **36** timesteps, 10 Aug 2025 to 30 Jul 2026, over 45-100 °E and 10 °S-25 °N |
 | Depth | **5 m to 2000 m** across 24 uneven levels |
-| Data shipped in the build | **192 MB**, committed, **0** network calls to run |
-| Source adapters | **9** - 8 providers, plus one for a file a visitor drops on the page |
-| Tests / browser probes | **409** / **15** |
-| Drift model, scored | median **40.9 km** out over one Argo cycle, across 6,246 cycles on 219 floats |
+| Data shipped in the build | **223 MB**, committed, **0** network calls to run |
+| Source adapters | **11** - 10 providers, plus one for a file a visitor drops on the page |
+| Tests / browser probes | **495** / **16** |
+| Drift model, scored | median **41.0 km** out over one Argo cycle, across 6,185 cycles on 217 floats |
+| Plankton and oxygen, scored | Copernicus's model against **55** floats for chlorophyll and **40** for oxygen: oxygen reads **8.14 mmol/m³** high on average |
 
 ## What it looks like
 
@@ -124,23 +127,24 @@ hand.
 **It is a fork, not a pipeline.** That is the one thing worth understanding, and it exists to
 enforce the rule above.
 
-**Nine providers → one adapter seam → one Grid → four ways out.** The fork is at step 3, and
+**Eleven providers → one adapter seam → one Grid → four ways out.** The fork is at step 3, and
 it is the whole of the rule above: the Grid keeps the numbers, the Volume gets the pixels, and
 nothing joins them back up.
 
 ```
-  ┌─ 1 · NINE PROVIDERS - public, dated, re-fetchable ────────────────────┐
+  ┌─ 1 · ELEVEN PROVIDERS - public, dated, re-fetchable ──────────────────┐
   │ INCOIS ERDDAP · VAM           Argo GDAC · Ifremer                     │
-  │ INCOIS ERDDAP · McCreary      Argo BGC · chlorophyll                  │
+  │ INCOIS ERDDAP · McCreary      Argo BGC · chlorophyll, oxygen          │
   │ NOAA OSMC · moored buoys      Copernicus Marine · uo, vo              │
-  │ EGO glider GDAC               World Ocean Atlas 2023                  │
+  │ EGO glider GDAC               Copernicus Marine · chl, o2 model       │
+  │ World Ocean Atlas 2023        Copernicus Marine · satellite SST, chl  │
   │ your own NetCDF file, dropped on the page                             │
   └──────────────────────────────┬────────────────────────────────────────┘
                                  │  NetCDF · CSV · FTP index
                                  │  subset at the server, not after download
                                  ▼
   ┌─ 2 · ONE ADAPTER SEAM - samudra/sources/base.py ──────────────────────┐
-  │ GridSource / ProfileSource · nine classes                             │
+  │ GridSource / ProfileSource · eleven classes                           │
   │ the only code in the project that has heard of ERDDAP                 │
   │ quality control per channel · land masked, never filled               │
   └──────────────────────────────┬────────────────────────────────────────┘
@@ -168,7 +172,7 @@ nothing joins them back up.
   ┌─ 4 · FOUR WAYS OUT ───────────────────────────────────────────────────┐
   │ REST API         Grid only   FastAPI · 21 routes                      │
   │ Open standards   Grid only   OPeNDAP · CF-1.8 · WMS 1.3.0             │
-  │ Static bake      both        192 MB committed · 0 network calls       │
+  │ Static bake      both        223 MB committed · 0 network calls       │
   │ Browser          both        reads the bake, never the API            │
   └───────────────────────────────────────────────────────────────────────┘
 ```
@@ -183,17 +187,19 @@ Each one public, each tested and dated in
 | **INCOIS ERDDAP** `incois_argo_10d_VAM` | The 10-day gridded analysis - temperature and salinity |
 | **INCOIS ERDDAP** 10-day McCreary | The second analysis, for the spread between them |
 | **Argo GDAC** · Ifremer | Float profiles, with per-channel QC flags |
-| **Argo BGC** · Ifremer | Chlorophyll, on 57 of the floats |
-| **NOAA OSMC** | Moored buoys over GTS - **the instruments INCOIS do not assimilate** |
+| **Argo BGC** · Ifremer | Chlorophyll on 57 of the floats and oxygen on 40, compared against the Copernicus model |
+| **NOAA OSMC** | Moored buoys over GTS - **not described as inputs to INCOIS's Argo analysis** |
 | **Copernicus Marine** | Current vectors `uo`, `vo` at 1/12° |
+| **Copernicus Marine** biogeochemistry | Chlorophyll and dissolved oxygen at 0.25°, and the oxygen floor cut from it |
+| **Copernicus Marine** satellite | OSTIA sea surface temperature and gap-free chlorophyll, for surface fronts (never called fishing zones) |
 | **EGO glider GDAC** · `ftp.ifremer.fr` | The glider archive PS 26067 names |
 | **World Ocean Atlas 2023** · NOAA NCEI | The 1991-2020 climatological normal |
-| **Your own NetCDF file**, dropped on the page | The ninth adapter, `POST /api/netcdf` |
+| **Your own NetCDF file**, dropped on the page | The eleventh adapter, `POST /api/netcdf` |
 
 ### 2 · What the seam actually is
 
 [`samudra/sources/base.py`](pipeline/samudra/sources/base.py) declares `GridSource` and
-`ProfileSource` and nothing else. Nine classes implement them, and **they are the only code in
+`ProfileSource` and nothing else. Eleven classes implement them, and **they are the only code in
 the project that has ever heard of ERDDAP**, or of a column layout, or of an FTP index. Each
 subsets *at the server*, so one region and one window come down rather than a global archive.
 
@@ -217,7 +223,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Out | Reads from | What it is |
 | --- | --- | --- |
-| **Static bake** | Grid **and** Volume | 192 MB committed · **0 network calls** |
+| **Static bake** | Grid **and** Volume | 223 MB committed · **0 network calls** |
 | **Browser** | Grid **and** Volume | Three.js · WebGL2 · GLSL ES 3.00 |
 | **REST API** | **Grid only** | FastAPI · 21 routes |
 | **Open standards** | **Grid only** | OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0 · 5 endpoints |
@@ -238,7 +244,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Layer | Responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 430 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
+| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 495 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
 | **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the `Grid`. None can reach a `Volume`.** |
 | **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints** - the only exception is a file the user drops. |
 
@@ -248,7 +254,7 @@ works with no server behind it at all.
 
 ### The data path
 
-1. **Provider** - nine adapters, eight of them public endpoints and the ninth a file a
+1. **Provider** - eleven adapters, ten of them public endpoints and the last a file a
    visitor drops on the page. Each tested and dated in
    [`docs/plan/00-data-sources-verified.md`](docs/plan/00-data-sources-verified.md).
 2. **Adapter** - one class per provider, subsetting *at the server* so we pull one region and one
@@ -258,7 +264,7 @@ works with no server behind it at all.
 4. **Derived variables** - density, cyclone heat potential, mixed layer depth and ten more,
    each computed here and each held to a hand-computable test.
 5. **Bake** - the `Volume` for the GPU, plus float32 grids, float positions, collocations,
-   residuals and the drift check. 192 MB, committed.
+   residuals and the drift check. 223 MB, committed.
 6. **Browser** - reads those files. No network.
 
 ---
@@ -274,7 +280,7 @@ works with no server behind it at all.
 | **Standards out** | OPeNDAP (DAP2), CF-1.8 NetCDF, OGC WMS 1.3.0 | So the analysis is readable by a Python client, a file, or a GIS - not only by this page. |
 | **Rendering** | Three.js on WebGL2, GLSL ray marching | The volume is a single ray-marched block, not a stack of images. Nothing else gets you inside the water. |
 | **Frontend** | React 18, TypeScript 5, Zustand, Vite | Zustand because every control is one flat store the scene reads once a frame; Vite for a four-page build with no config. |
-| **Verification** | pytest, Playwright | 430 tests on the science; 16 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
+| **Verification** | pytest, Playwright | 495 tests on the science; 16 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
 | **Fonts** | Chivo, IBM Plex Mono, Space Grotesk, Inter - all self-hosted | The demo makes zero network calls. A Google Fonts link is a build failure, not a style choice. |
 
 ---
@@ -314,7 +320,7 @@ cd pipeline && ../.venv/Scripts/python -m samudra.bake
 Nothing in this README is asserted without something that can fail:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q         # 430 tests, ~35 s
+cd pipeline && ../.venv/Scripts/python -m pytest -q         # 495 tests, ~35 s
 cd web && npm run typecheck && npx vite build
 
 # the 16 browser probes measure the rendered page rather than trusting it.
@@ -338,7 +344,7 @@ not.
 | | |
 | --- | --- |
 | [`CONTEXT.md`](CONTEXT.md) | Domain vocabulary and the scope cut line. **Read first.** |
-| [`docs/adr/`](docs/adr/) | Seventeen decision records, several documenting traps that cost hours. |
+| [`docs/adr/`](docs/adr/) | Eighteen decision records, several documenting traps that cost hours. |
 | [`docs/README-full.md`](docs/README-full.md) | The long-form version of this file: every clause of the PS answered, every variable explained, the full architecture. |
 | [`docs/BUGS.md`](docs/BUGS.md) | A public defect list. 100 fixed, 2 open by design. |
 | [`docs/plan/`](docs/plan/) | Every endpoint tested including the dead ones; the requirement gaps and the decision on each. |

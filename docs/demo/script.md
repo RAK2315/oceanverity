@@ -58,9 +58,10 @@ that *moderate disagreement*, in those words. That is the point: the tool puts a
 comparison whichever way it comes out, and it says so when the answer is unflattering.
 
 Turn on the bias map and all two hundred and thirty instruments are ranked by that same figure.
-The worst is a moored buoy, one point six six degrees out - and buoys matter here, because INCOIS
-assimilate Argo. A float largely shows the model agreeing with data it was already given. The
-seventeen buoys are the independent check, and we print the two separately rather than pooling them
+The worst is a moored buoy, one point six six degrees out - and buoys matter here, because INCOIS's
+gridded analysis is built from Argo floats. A float largely shows the analysis agreeing with data it
+was made from. The seventeen buoys are not described as inputs, so they are the closer thing to an
+independent check, and we print the two separately rather than pooling them
 into one flattering average."
 
 ---
@@ -304,7 +305,7 @@ questions afterwards, one per question. Reach for the one the question actually 
 > disagreement**._
 
 "Every dot is now coloured by how far the analysis sat from what that instrument measured. Across
-266 instruments it reads 0.01 degrees off on average, and the typical gap is 0.24 degrees. The
+263 instruments it reads 0.01 degrees off on average, and the typical gap is 0.23 degrees. The
 list underneath is worst-first - click one and its comparison opens. And one box is in the worst
 three on all three variables: 15 to 20 north, 85 to 90 east, the northern Bay of Bengal, where
 the Ganges and Brahmaputra come out. It is the worst box on salinity, second on density and
@@ -322,7 +323,7 @@ wind, wave drift and the object's own leeway, and this has none of them. That is
 SARAT. What this shows is the drift the ocean analysis alone implies.
 
 What makes it worth having is that we can score it. An Argo float's track **is** measured drift at
-its parking depth, so we ran the same maths from 219 floats' own positions. Over one Argo cycle the
+its parking depth, so we ran the same maths from 217 floats' own positions. Over one Argo cycle the
 current field alone lands a median 40.9 kilometres from where the float actually went, 92.7 at
 the ninetieth percentile across 6,246 cycles. By thirty days the gap is the same size as the distance travelled. No other
 drift demo will tell you that number, because none of them has the observations in the same file."
@@ -381,7 +382,7 @@ deep it runs, rather than taking our word for it."
 **Do:** press **Explore** on the top bar.
 
 **Say:** *"The problem statement asks for a science communication tool in its own section, and
-names school students, the public and policymakers. Fifteen variables in five groups is the
+names school students, the public and policymakers. Nineteen variables in six groups is the
 wrong first minute for any of them. So the same platform asks questions instead, and every one
 of them carries its own caveat: this cyclone card says in as many words that it is a map of
 conditions and not a forecast."*
@@ -431,7 +432,7 @@ more than not having it.
 | --- | --- |
 | Venue wifi dies | Nothing happens. Every byte is baked into the page - including the typefaces, the hazard fields and the current vectors - and the demo makes zero network calls. Verified: zero external requests on load. |
 | Rendering is sluggish | Drop **Ray steps** to 64. Still readable, changes nothing scientific. |
-| Cannot find a float to click | Almost any marker works: 266 of the 276 instruments carry a comparison. Squares are moored buoys, and those follow the timeline. |
+| Cannot find a float to click | Almost any marker works: 263 of the 274 instruments carry a comparison. Squares are moored buoys, and those follow the timeline. |
 | Lost in 3D | Press **Return to globe**, then dive again. |
 | The page misbehaves | Refresh. It reloads in seconds from cache. |
 | Asked something you do not know | "That is in our decision records, we wrote up why." `docs/adr/` genuinely has seventeen. |
@@ -463,4 +464,4 @@ more than not having it.
 | "Has nobody built this before?" | Say it narrowly: **depth-resolved volumetric rendering in a browser, with the in-situ observations in the same water and the model scored against them.** Do not say "nobody has done this". Checked 2026-09-04: Copernicus **MyOcean Pro** is the reference and is a 2D map with a depth slider, no 3D at all; earth.nullschool is a 2D globe with surface currents; NOAA's Science on a Sphere is a physical globe; and browser volume rendering of ocean scalars exists as research (a WebGPU framework published March 2025, i4Ocean before it) but as prototypes, and none of them carries the observations. `docs/plan/05` Part 3. |
 | "Those moving lines - are they a forecast?" | No, and say so before they ask twice. Every dot is the flow at **one** analysis, frozen; the drift pin is the one that runs time forward. They share the same integrator, which is the point: the animation runs the maths whose error we published at a median 38 km over an Argo cycle. Measured, a particle and a drift pin from the same start land **2 metres apart after 724 km**. |
 | "Why are there no eddies, when the Copernicus viewer is full of them?" | Because we draw INCOIS's grid rather than upsampling it. Theirs is 1/12 degree, about 9 km; the analysis this platform reports every number from is 1 degree, about 110 km, so every swirl on their screen is smaller than one of our cells. We could bake a finer field just for the animation for about 27 MB and we refused: the picture would then be more detailed than every number on the platform, in the one place nobody would check. ADR 0017. |
-| "How long did this take?" | Built for this hackathon. 430 automated tests on the scientific logic, seventeen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |
+| "How long did this take?" | Built for this hackathon. 495 automated tests on the scientific logic, eighteen architecture decision records, and a defects file that lists what was wrong and what the numbers were. |

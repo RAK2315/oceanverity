@@ -12,7 +12,7 @@ and what the instruments in the water actually measured.**
 [![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-ff9933)](https://sih.gov.in/)
 [![PS 26067](https://img.shields.io/badge/Problem%20Statement-26067-138808)](https://sih.gov.in/)
 [![MoES / INCOIS](https://img.shields.io/badge/MoES-INCOIS-000080)](https://incois.gov.in/)
-![Tests](https://img.shields.io/badge/tests-430%20passing-2ea043)
+![Tests](https://img.shields.io/badge/tests-495%20passing-2ea043)
 ![Probes](https://img.shields.io/badge/browser%20probes-16%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 
@@ -68,7 +68,7 @@ them is edited; the copies in `docs/`, `web/public/` and `ppt/` are published fr
 | <img src="docs/images/isosurface.jpg" alt="A shaded three-dimensional surface showing the undulating 17.7 degree Celsius isotherm inside the water."> | <img src="docs/images/density.jpg" alt="The ocean block drawn in the density palette, pale at the surface and deep purple below."> |
 | **Isosurface.** A surface of one constant value, visibly doming. The depth of an isotherm like this is what drives cyclone-intensity forecasts. | **Density**, computed here from temperature and salinity via TEOS-10. Across the year the Bay of Bengal is 3.0 kg/m³ *lighter* than the Arabian Sea while its temperature swings from cooler to warmer by season, because the rivers make it fresher. |
 | <img src="docs/images/salinity.jpg" alt="The ocean block in the salinity palette, with the fresh Bay of Bengal in dark blue against the salty Arabian Sea in yellow."> | <img src="docs/images/bias.jpg" alt="Instrument markers recoloured by how far the analysis sat from each one, with a ranked list of the worst beside them."> |
-| **Salinity.** The reason for that density: the Ganges and Brahmaputra make the northern Bay 3.7 PSU fresher than the Arabian Sea, averaged across the year. | **The bias map.** Every dot stops meaning "an instrument" and starts meaning "how wrong the analysis was here", ranked worst first. INCOIS assimilate Argo, so the **17 moored buoys are the independent check: 1.01 °C typical gap against 0.18 °C across 249 floats.** |
+| **Salinity.** The reason for that density: the Ganges and Brahmaputra make the northern Bay 3.7 PSU fresher than the Arabian Sea, averaged across the year. | **The bias map.** Every dot stops meaning "an instrument" and starts meaning "how wrong the analysis was here", ranked worst first. INCOIS's analysis is built from Argo floats, so the **17 moored buoys are the closer thing to an independent check: 1.01 °C typical gap against 0.18 °C across 249 floats.** |
 | <img src="docs/images/coverage.jpg" alt="The ocean block drawn as observation coverage, in four flat colour bands from grey through red and amber to green."> | <img src="docs/images/anomaly.jpg" alt="The ocean block as a temperature anomaly, red and blue, with rings marking each body of water that departed."> |
 | **Observation coverage.** Not the model - the *evidence* for it. **10.2%** of the block has no Argo cast behind it, and the picture shows exactly where. | **Anomaly features.** Every body of water that departed from its own average gets a ring. Click one and it tells you why it is there, and whether anything measured it. |
 | <img src="docs/images/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones."> | <img src="docs/images/hazard.jpg" alt="Cyclone heat potential draped on the sea surface, deep red over the Bay of Bengal."> |
@@ -186,8 +186,9 @@ That third step is the thing that does not exist today.
    typical temperature gap there is **0.69 degC** against 0.19 degC across the whole basin.
 
    The panel splits the two kinds of instrument, because they are not answering the same
-   question. INCOIS **assimilate Argo**, so a float's residual is largely the analysis agreeing
-   with an observation it was fed; the seventeen moored buoys are not assimilated. Measured: the
+   question. INCOIS's gridded analysis is **built from Argo floats**, so a float's residual is
+   largely the analysis agreeing with data it was made from; the seventeen moored buoys are not
+   described as inputs, which makes them the closer thing to an independent check. Measured: the
    typical temperature gap is **0.18 degC** across 249 floats and **1.01 degC** across the 17
    buoys, and pooled into one number the buoys disappear.
 
@@ -218,17 +219,17 @@ That third step is the thing that does not exist today.
 
 The problem statement gives Public Outreach and Science Communication its own section and names
 five audiences and three settings by hand: school and college students, the general public at
-awareness campaigns, policymakers, outreach events, exhibitions and e-learning. Fifteen variables
-in five groups is the right toolkit for a forecaster and the wrong first minute for any of those.
+awareness campaigns, policymakers, outreach events, exhibitions and e-learning. Nineteen variables
+in six groups is the right toolkit for a forecaster and the wrong first minute for any of those.
 So there are two more ways in, and **the control panel gained nothing**.
 
-- **Show me around.** A guided walk in **six chapters and 21 steps** that visits **every one of
-  the 44 controls the platform explains**. Each step drives the scene, opens the group the
+- **Show me around.** A guided walk in **six chapters and 22 steps** that visits **every one of
+  the 47 controls the platform explains**. Each step drives the scene, opens the group the
   control lives in on the left, and opens its explanation on the right. `probe-tour.mjs` fails if
   a control ever has no step, so "it covers everything" is a measurement and not a promise.
-- **Explore.** The same platform as **eight questions**: *Where could a cyclone get stronger?
+- **Explore.** The same platform as **nine questions**: *Where could a cyclone get stronger?
   Where is the model guessing? How far is the model from the instruments? Has this ocean changed?
-  Where would something adrift go? Why are India's two seas so different? What does one robot
+  Why do fish gather here? Where would something adrift go? Why are India's two seas so different? What does one robot
   float actually do? How deep is the ocean, really?* Press one and the whole scene is set up.
   Every question carries the caveat its simplification costs, beside the answer and never after
   it - the cyclone one says in as many words that it is a map of conditions and not a forecast.
@@ -239,10 +240,11 @@ So there are two more ways in, and **the control panel gained nothing**.
 - **Copy this view.** The link button on the top bar writes whatever is on screen - the variable,
   the date, the depth, the pin, the section line - into a URL. A teacher's worksheet is six links.
 
-### Fifteen variables, eleven of them computed here
+### Nineteen variables, thirteen of them computed here
 
 INCOIS publish four of them - temperature and salinity, and their own cast count and error
-estimate from their second analysis. Everything else is worked out in the bake from what they
+estimate from their second analysis. Copernicus Marine's biogeochemical model publishes two more,
+chlorophyll and dissolved oxygen. Everything else is worked out in the bake from what they
 publish, or from a second provider through an adapter of its own - current speed is computed from
 Copernicus Marine's velocity vectors - which is the problem
 statement's "additional model variables with minimal code change" demonstrated rather than
@@ -265,18 +267,19 @@ asserted. They are grouped the way a forecaster thinks rather than the way the d
 | Hazard | **Mixed layer depth** | from the density profile |
 | Hazard | **Isothermal layer depth** | from the temperature profile |
 | Hazard | **Barrier layer thickness** | the difference between the two above |
+| Biology | **Chlorophyll** | Copernicus Marine's biogeochemical model at 0.25 degree, compared against the BGC-Argo floats. ADR 0018 |
+| Biology | **Dissolved oxygen** | the same model, compared against the floats' oxygen sensors |
+| Biology | **Oxygen floor** | the depth where oxygen first falls below 2 mg/L, drawn as a sheet |
+| Biology | **Surface fronts** | the share of each cell on a front in satellite temperature or chlorophyll, by the methods INCOIS name for their fishing advisories. Not a fishing zone |
 
 The five Hazard variables are computed here from INCOIS's Argo analysis. INCOIS's own series of
 several of them from that analysis ended on 2019-03-30; INCOIS still publish heat potential and
 mixed layer depth from their forecast models, as maps. Three of them *are* a depth, so they are drawn as a sheet inside the block rather
 than as a block; two are a total for the whole column, so they are draped on the sea surface.
 
-One more quantity is on screen and is deliberately *not* a variable, because it did not go
-through this pipeline:
-
-| Layer | What it is |
-| --- | --- |
-| **Chlorophyll** | Measured by 57 Argo floats that carry a fluorometer. Drawn on its own, because no gridded chlorophyll shares this timeline - INCOIS's own ocean-colour products end in 2006 and 2020 - so there is nothing to compare it against |
+The float's own chlorophyll is also drawn under the chart of any other variable, for the 57 Argo
+floats that carry a fluorometer. INCOIS's own ocean-colour products end in 2006 and 2020, so the
+model it is compared against is Copernicus Marine's.
 
 
 ### Two kinds of instrument in the water
@@ -350,7 +353,7 @@ each one that opens the platform with the control that answers it already set.
 | **Lightweight REST API backend** | **Met** | FastAPI, including live collocation for any float, a vertical section along any line, and the NetCDF upload | `api/main.py` |
 | ...**OPeNDAP** API backend | **Met** | DAP2 over the native grids: `.das`, `.dds`, `.dods` with constraint expressions. Verified by opening our own endpoint with `xarray` + `pydap` in the test suite. (ERDDAP's griddap *is* DAP2, so we always consumed OPeNDAP; what was missing was serving it) | `api/dap.py` |
 | **Deployable on INCOIS infrastructure with no client-side dependencies** | **Met** | Static site plus one Python service. No tokens, no accounts, no plugins | `web/`, `api/` |
-| **Extensible design** for CTDs, moorings, HF-radar, ADCP | **Met for moorings and gliders** | Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format (depth not pressure, one row per level, no quality flags) absorbed behind the same protocol - and the glider archive has its own adapter reading a 248 MB directory index. 17 moored buoys are in this build, and between 5 and 14 report at any one Timestep. HF-radar and ADCP stay unmet because India's are behind a login, not because the seam cannot carry them | `sources/osmc.py`, `sources/glider.py` |
+| **Extensible design** for CTDs, moorings, HF-radar, ADCP | **Met for moorings and gliders** | Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format (depth not pressure, one row per level, no quality flags) absorbed behind the same protocol - and the glider archive has its own adapter reading a 248 MB directory index. 17 moored buoys are in this build, and between 5 and 14 report at any one Timestep. HF-radar and ADCP stay unmet because INCOIS lists HF-radar data as registered access and moored-buoy currents as view-only, so using either needs a data request to INCOIS - a data-policy limit, not because the seam cannot carry them | `sources/osmc.py`, `sources/glider.py` |
 | **Vertical section** along a line you draw | **Met, and not asked for** | The standard figure of physical oceanography, cut live from the native grid along a great circle between two points you click, with every cast within a corridor of the line on the same axes and drawn to the depth it reached. Reads the model's own 24 levels, never the depth-warped rendering volume. The three collocated variables ship their full-precision grids in the build - 7.0 MB - so it works offline and on the static site, and `/api/section` serves the same cut to anything else. The browser's answer is checked against the pipeline's value by value: 1,102 values, worst gap **5.07e-5 °C** | `samudra/section.py`, `web/src/section.ts` |
 | **Search-and-rescue support**, named in the PS's own list of impeded mandates | **Built, and scored** | Drop a pin; the Copernicus current field is integrated forward from it at the depth you have sliced to. **Never labelled a search forecast**: a real one needs surface wind, Stokes drift and object-specific leeway, and this carries none of them, which is why INCOIS run SARAT. The reason it ships anyway is that it checks itself - an Argo track is measured drift at the parking depth, so the same integrator was run from **219** floats' own positions, over the days the current field actually covers, and the result published: median **40.9 km** out over one Argo cycle, 92.7 km at the ninetieth percentile across 6,246 cycles, and by 30 days the separation is the same size as the distance travelled, and larger than it after that. `docs/adr/0015` | `pipeline/samudra/drift.py` |
 | **Where the model disagrees**, found automatically | **Met, and not asked for** | Two scans, over two different questions. *Where did the field depart from its own average* is the Anomaly Features: 404 connected bodies across the thirty-six steps, each ringed and explained. *Where does the model depart from the instruments* is the bias map: every collocated instrument coloured by its gap and ranked worst first, with the region binned onto 5 degree boxes so a regional bias is distinguishable from scatter. **Neither is AI and neither is captioned as one** - there is no model, no training set and no confidence score, only the mean and the RMS of residuals already measured | `samudra/anomaly.py`, `samudra/residuals.py` |
@@ -364,7 +367,7 @@ each one that opens the platform with the control that answers it already set.
 | **OGC WMS / WCS** | **Partly** | WMS 1.3.0 is served, with both axis orders handled and tested. It publishes the fields that exist nowhere else - density and the anomaly - because INCOIS's own ERDDAP already serves WMS for their temperature, so re-serving that is re-publishing. **WCS is not built**, deliberately: no maintained Python server, and the numbers are already on OPeNDAP |
 | **Interoperability with data portals** | **Partly** | We read **8** independent sources through open APIs - INCOIS ERDDAP twice, Ifremer Coriolis for Argo and for BGC, NOAA AOML's OSMC feed, Copernicus Marine, Ifremer's EGO glider archive and NOAA NCEI - each behind one adapter, plus a ninth that reads a NetCDF file a visitor supplies, and expose OPeNDAP, CF-1.8 NetCDF and WMS so another system can read us back. We are not listed in anybody's catalogue, which a prototype should not be |
 | **Climate monitoring**, named in the PS's own list of impeded mandates | **Met** | Two Change variables, and the difference between them is the point. The Temperature Anomaly is a departure from this bake's own year and says so. **Temperature vs Normal** is a departure from NOAA's World Ocean Atlas 2023 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual". Read anonymously over OPeNDAP at bake time - no account at any point. Measured across 1,049,076 cells: mean +0.074 °C, 95th percentile of the magnitude 2.050 °C. Below 1500 m the atlas has no normal and the field is blank rather than zero. `docs/adr/0016` |
-| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 21 steps that visits all **44** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as eight questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
+| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 22 steps that visits all **47** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as nine questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
 
 ### The honest summary
 
@@ -400,7 +403,7 @@ as maps. All five hazard fields are computed here from the Argo analysis, drawn 
 instruments, and checked against INCOIS's own 2004-2019 archive (`hazard_check.json`). ADR 0014.
 
 What is still missing is **ship CTD** - newest section here April 2025, which cannot share this
-timeline - and **HF-radar and ADCP**, which INCOIS serves only on a request form and restricts inside the EEZ. Both are
+timeline - and **HF-radar and ADCP**, which INCOIS lists as registered access and view-only, so using either needs a data request. Both are
 data-policy facts rather than architecture gaps.
 
 The one clause we chose not to build at all is **ML-derived products**, and that refusal is
@@ -461,7 +464,7 @@ curl -o map.png 'http://localhost:8000/wms?service=WMS&version=1.3.0&request=Get
 
 If you skip step 2, the data is already committed, so the website still works.
 
-**Tests:** `cd pipeline && ../.venv/Scripts/python -m pytest` - 430 tests covering the depth
+**Tests:** `cd pipeline && ../.venv/Scripts/python -m pytest` - 495 tests covering the depth
 warp, volume encoding, grid interpolation, collocation maths, the Argo parser, observation
 coverage, the TEOS-10 density chain, the anomaly baseline and the features found in it, the
 isotherm depth, the adapter seam that lets four providers with incompatible layouts share one
@@ -474,7 +477,7 @@ real browser and measure what reaches the screen, because every bad bug in this 
 looked like a shader bug and was not. They check that the browser's drift integrator and vertical
 section agree with the pipeline's; that every control has an explanation and every figure in one
 came from the bake; that the moving flow is the drift model and puts no dot on land; that the
-guided walk visits all 44 controls and survives every step; that each Explore question sets up
+guided walk visits all 47 controls and survives every step; that each Explore question sets up
 its own answer and the exhibition screen advances with nobody standing at it; and that the
 landing page names no picture that is not there and keeps its headline readable in both themes.
 
@@ -517,7 +520,7 @@ A box diagram says two things are connected. These say what moves.
 
 | Layer | What it is responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 430 tests | `samudra/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
+| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 495 tests | `samudra/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
 | **`api/`** &middot; FastAPI | Answering what a static folder cannot: a collocation for an instrument the bake did not precompute, an arbitrary column, an arbitrary section line, and a NetCDF file a visitor uploads. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS | `data/grids/*.npz`, the native `Grid` saved server-side. **Every endpoint reads the `Grid`. None of them can reach a `Volume`** |
 | **`web/`** &middot; React + TypeScript + Three.js | One WebGL scene for both the globe and the ray-marched block, every control, every panel, and the two pieces of science that have to run offline | `web/public/data/`, the bake. The browser reads files, not endpoints - the only exception is a file the user themselves drops on the page |
 
@@ -638,9 +641,9 @@ leaving the building is still science.
 | `web/src/transfer.ts` | The colour Scale. One curve, one file, two languages |
 | `web/src/drift.ts` | The drift integrator, and the step rule the current animation shares with it |
 | `web/src/particles.ts` | The moving flow: 2,400 dots with fading trails, on the chosen depth |
-| `web/src/guide.ts` | Plain-language explanation of every control. 44 entries, and a probe fails if one is missing |
-| `web/src/explore.ts` | The eight questions, and the depth landmarks the exhibition screen shows |
-| `web/src/ui/Tour.tsx` | The guided walk: 21 steps, 6 chapters, every control covered |
+| `web/src/guide.ts` | Plain-language explanation of every control. 47 entries, and a probe fails if one is missing |
+| `web/src/explore.ts` | The nine questions, and the depth landmarks the exhibition screen shows |
+| `web/src/ui/Tour.tsx` | The guided walk: 22 steps, 6 chapters, every control covered |
 
 The design decisions, including the ones that were hard-won, are written up in
 [`docs/adr/`](docs/adr/) - seventeen of them. The shared vocabulary and the deliberate scope
@@ -680,7 +683,8 @@ Being explicit so nobody assumes we forgot. The full list with reasons is in `CO
   the problem statement names; neither source can share this timeline, because the newest glider
   cast in this basin is Oct 2022 and the newest GO-SHIP section is Apr 2025. The glider *finding*
   ships instead of the casts.
-- **India's HF-radar and ADCP currents.** Behind a login that does not resolve, and no row in the
+- **India's HF-radar and ADCP currents.** INCOIS lists HF-radar data as registered access and
+  moored-buoy currents as view-only, so using either needs a data request to INCOIS. No row in the
   public GTS feed carries a current component for this region.
 
 ---
