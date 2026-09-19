@@ -197,7 +197,7 @@ slide and used to be in the footer in small print.
 | Only this layer knows a provider's format | `samudra/sources/base.py` |
 | Argo's own flags decide what we keep | `3, 4 and 9 refused value by value` |
 | Land stays empty | `a gap is never filled in to look nicer` |
-| The five hazard fields are computed here | `INCOIS stopped publishing them in 2019` |
+| The five hazard fields are computed here | `the depths checked against INCOIS's 2004-2019 archive` |
 
 **Zone 3 - `3  TWO FORMS OF THE SAME FIELD`.** Two boxes, and they must not look alike. This is
 the only place in the picture where green and cyan appear, because those two are the opposites.
@@ -290,7 +290,7 @@ will look for them. Keep them.*
 | --- | --- |
 | **01 Fetch** | Subset each source at the server, over one region and one window. Every endpoint tested and dated before it was trusted. |
 | **02 Check** | Quality flags read per channel, so a float with a dead salinity sensor still gives its good temperature. Land masked, never back-filled into the sea. |
-| **03 Derive** | Density from TEOS-10, the five cyclone-hazard fields INCOIS stopped publishing in 2019, a temperature anomaly, two observation counts, and 404 unusual bodies of water located automatically. |
+| **03 Derive** | Density from TEOS-10, the five cyclone-hazard fields (the depths checked against INCOIS's own archive), a temperature anomaly, two observation counts, and 404 unusual bodies of water located automatically. |
 | **04 Bake** | Native grids for the API and the standards; byte volumes for the GPU; depth sheets and drapes left unquantised. **192 MB, committed**, so the demo needs no network. |
 | **05 Render and compare** | Ray-march the block in the browser, draw every instrument where it truly was, score the model against each cast, and **publish the score**. |
 
@@ -322,7 +322,7 @@ rather than filled in."*
 | --- |
 | **Built, deployed and public today.** Open it on the evaluator's own laptop during the pitch. |
 | **Ordinary hardware is enough.** Built and tested on integrated graphics with 2 GB of shared memory. |
-| **409 automated tests** cover the science, and **15 browser probes** measure what reaches the screen. CI runs both on every push. |
+| **495 automated tests** cover the science, and **16 browser probes** measure what reaches the screen. |
 
 | **It costs nothing to keep** *(viability)* |
 | --- |
@@ -467,14 +467,13 @@ the exact request you can run yourself:
 
 ### Our own engineering record
 
-- **Seventeen architecture decision records** covering the renderer choice, the data sourcing,
+- **Eighteen architecture decision records** covering the renderer choice, the data sourcing,
   the depth warp, the volume encoding, the derived fields we built and deleted, the open
-  standards, the scored drift model, the climatological baseline and the current flow.
+  standards, the scored drift model, the climatological baseline, the current flow and the water under a fishing advisory.
   `github.com/RAK2315/samudra-sih26` &rarr; `docs/adr/`
 - **Every unmet clause of PS 26067**, researched with dates and row counts, with the decision
   taken on each. `docs/plan/03-requirement-gaps.md`
-- **409 automated tests** on the science and on what we serve, plus **15 browser probes**. Both
-  run in CI on every push.
+- **495 automated tests** on the science and on what we serve, plus **16 browser probes**.
 
 > **Before you export, click every link on this slide.** All four DOIs were checked on
 > 4 September 2026 and resolve. Three references from an earlier draft were removed because they
@@ -557,7 +556,7 @@ than in an appendix.
 | Link | Where it goes | Why it earns its space |
 | --- | --- | --- |
 | **The live prototype** | https://rak2315.github.io/samudra-sih26/ | Nothing else on six slides proves execution as fast as a working link. It needs no install and no account, so a judge can open it while you are still talking. |
-| **The repository** | https://github.com/RAK2315/samudra-sih26 | 409 tests, seventeen decision records and a public defect list are all claims until someone can open them. |
+| **The repository** | https://github.com/RAK2315/samudra-sih26 | 495 tests, eighteen decision records and a public defect list are all claims until someone can open them. |
 | **The video** | the recording of [`script.md`](script.md) | The prototype walkthrough, guaranteed to run. A live demo can fail on the venue's network; this cannot. |
 
 Slide 1 carries the prototype link. Slide 6 carries all three, with the repository and the video

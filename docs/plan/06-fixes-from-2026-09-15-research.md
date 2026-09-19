@@ -1,7 +1,7 @@
 # Fixes and next steps from the 15 September 2026 research
 
-**Status, 2026-09-15 (evening session): section 6 items 1 to 6 done; item 7 not started.** Not
-committed. What changed and what was left is at the end of this file, under "Done". Read this file, then the research note it rests
+**Status, 2026-09-19: section 6 items 1 to 6 done and pushed (9f783e7, 57fc2cd, ca8ab50); item 7
+not started.** See "Still open" at the end. What changed and what was left is at the end of this file, under "Done". Read this file, then the research note it rests
 on: [`docs/research/2026-09-15-integrations-and-datasets.md`](../research/2026-09-15-integrations-and-datasets.md).
 The plain-language brief for the owner is the artifact
 https://claude.ai/artifact/TncqufHwDyhvi1rzqHBSEH (not in the repo).
@@ -186,7 +186,7 @@ window.
 6. After the bake: `collect_facts.py`, `check_figures.py`, screenshots, deck figures, README line updated.
 7. Later: PFZ harvester, marine heatwaves below the surface, forecast scorecard, wind and waves in drift.
 
-## Done, 2026-09-15 (not committed)
+## Done, 2026-09-15 (committed 2026-09-19)
 
 1. **Pause, not close.** A touch sets `cardPaused`; the card offers Continue and End. Both probes check it.
 2. **Wording.** 2a, 2b, 2d, 2e done; history files got dated notes. 2c was done inside item 4, because
@@ -208,3 +208,21 @@ window.
 
 Found on the way: Ifremer's `ArgoFloats` no longer returns floats 5907083 and 7901128 for this
 window, so the bake has 257 floats, not 259. Upstream, not the new QC.
+
+## Done, 2026-09-19
+
+- **Fronts palette.** `turbid` (pale yellow to dark brown) hid the orange float tracks: closest
+  colour difference 19.5 CIE76 on dark, 25.6 on light. Now reversed `ice` (pale blue to
+  near-black): 69 and 83. Applied with `refresh_palettes.py`, which now also re-points a Field's
+  `palette` from its `FieldSpec` and refuses a change into or out of a diverging or banded palette.
+  No bake.
+- **Stale figures.** `check_figures.py` reports 0 current. Also removed "CI runs both on every
+  push" from `ppt/DECK.md` (CI typechecks and builds only) and "INCOIS stopped publishing in 2019"
+  from the deck and dossier. Dossier PDF and `technical-approach.png` re-rendered.
+
+## Still open, 2026-09-19
+
+- **Screenshots.** Twelve frames of the Biology views in `web/shots/biology-2026-09-15/` (fronts
+  frames there show the old palette, so re-shoot those). Nothing ingested or published; the owner
+  chooses before any `capture.mjs --publish`.
+- **Item 7** of section 6. Deliberately after the 30 September submission.

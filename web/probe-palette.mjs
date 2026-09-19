@@ -56,7 +56,7 @@ const OWN_LOOK = {
   balance: "Navy, white, red",
   algae: "Pale green to near-black",
   oxy: "Dark red, grey, yellow",
-  turbid: "Pale yellow to near-black",
+  ice_r: "Pale blue to near-black",
 };
 
 const browser = await chromium.launch({

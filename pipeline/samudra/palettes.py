@@ -53,7 +53,11 @@ AVAILABLE = {
     # `oxy` is built for exactly this: its low end turns red where oxygen runs out.
     "algae": "Chlorophyll - little plant life to a great deal",
     "oxy": "Dissolved oxygen - red where it runs out, grey to yellow above",
-    "turbid": "A share of a cell on a front - pale where there is none, dark where there is most",
+    # `turbid` was here until 2026-09-19. Its dark end is brown, and the float tracks are orange:
+    # measured, the closest pair was 19.5 CIE76 apart on dark and 25.6 on light, so tracks
+    # vanished into the cells with most front in them. Reversed `ice` keeps the same reading,
+    # pale for none and dark for most, and its closest approach to either track colour is 69.
+    "ice_r": "A share of a cell on a front - pale blue where there is none, near-black where there is most",
     # Alternates, added 2026-09-07 for the colourbar switcher. See ALTERNATES below: these are
     # offered as a *rendering* of the Field already on screen, never as a different quantity,
     # which is the distinction ADR 0010 was written about.

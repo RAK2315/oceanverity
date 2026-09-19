@@ -112,7 +112,7 @@
     <dt>Theme</dt><dd>Disaster Management</dd>
     <dt>Live prototype</dt><dd>rak2315.github.io/samudra-sih26</dd>
     <dt>Source</dt><dd>github.com/RAK2315/samudra-sih26</dd>
-    <dt>Status</dt><dd>Working prototype on live INCOIS data, 377 automated tests passing</dd>
+    <dt>Status</dt><dd>Working prototype on live INCOIS data, 495 automated tests passing</dd>
   </dl>
 
   <h2 style="margin-top:26pt">Contents</h2>
@@ -320,7 +320,7 @@
   <table>
     <thead><tr><th>Feature</th><th>What it does and why it matters</th></tr></thead>
     <tbody>
-      <tr><td>Variable selector</td><td><em>Science.</em> Fifteen variables in five groups, arranged the way a forecaster thinks rather than the way the data arrived. <strong>Ocean state</strong> is what INCOIS publish plus the density derived from it. <strong>Hazard</strong> is the five quantities a cyclone forecaster names - depth of the 26&nbsp;&deg;C isotherm, cyclone heat potential, mixed layer depth, isothermal layer depth and barrier layer thickness - all computed here, because INCOIS published them until 2019 and then stopped. <strong>Circulation</strong> is the current vectors. <strong>Evidence</strong> is how much measurement stands behind the model, including INCOIS's own observation count and their own error estimate beside ours. <strong>Change</strong> holds two: departure from this build's own period average, and departure from the World Ocean Atlas 2023 1991-2020 normal for the same calendar month.</td></tr>
+      <tr><td>Variable selector</td><td><em>Science.</em> Nineteen variables in six groups, arranged the way a forecaster thinks rather than the way the data arrived. <strong>Ocean state</strong> is what INCOIS publish plus the density derived from it. <strong>Hazard</strong> is the five quantities a cyclone forecaster names - depth of the 26&nbsp;&deg;C isotherm, cyclone heat potential, mixed layer depth, isothermal layer depth and barrier layer thickness - computed here from INCOIS's Argo analysis, with the depths checked against INCOIS's own 2004-2019 archive of them. <strong>Circulation</strong> is the current vectors. <strong>Evidence</strong> is how much measurement stands behind the model, including INCOIS's own observation count and their own error estimate beside ours. <strong>Change</strong> holds two: departure from this build's own period average, and departure from the World Ocean Atlas 2023 1991-2020 normal for the same calendar month. <strong>Biology</strong> is chlorophyll, dissolved oxygen, the depth where oxygen runs out, and surface fronts, the ingredient INCOIS build fishing advisories from.</td></tr>
       <tr><td>Time animation</td><td><em>Navigation.</em> Thirty-six analyses at ten-day intervals covering August 2025 to July 2026. Each frame is a separate analysis published by INCOIS, not an interpolation. The colour scale is held fixed across all frames deliberately, so an apparent change is a real change and not the scale rescaling itself.</td></tr>
       <tr><td>Sea surface level</td><td><em>Navigation.</em> On the globe, chooses which depth is painted on the map, so a pattern can be followed downward without entering the 3D view.</td></tr>
     </tbody>
@@ -361,7 +361,7 @@
       <tr><td>Guide panel</td><td><em>Comprehension.</em> Explains whatever control was last touched, and otherwise describes the current view in plain language. 44 entries, one per control, and an automated browser check fails the build if a control is ever added without one.</td></tr>
       <tr><td>Bias map</td><td><em>The contribution, at basin scale.</em> Every instrument recoloured by how far the analysis sat from it, with a ranked list of the worst. Split by instrument kind, because INCOIS's gridded analysis is built from Argo floats and the moored buoys are not described as inputs: measured, the typical temperature gap is 0.18 &deg;C across 249 floats against 1.01 &deg;C across the seventeen moored buoys, and pooling the two hides the honest number.</td></tr>
       <tr><td>Vertical section</td><td><em>Science.</em> Draw a line and the model is cut open along it, depth down and distance across, with every cast within 150 km on the same axes. Cut from the model's own grid rather than the rendered block, and checked value by value against the API: 1,102 values, worst gap 5&times;10<sup>-5</sup> &deg;C.</td></tr>
-      <tr><td>Drift</td><td><em>Search and rescue.</em> Drop a pin and the analysed current carries it forward. The same integrator was run from 219 real floats' own positions, so it ships with a measured error rather than an assumed one: median 40.9 km over one Argo cycle, 93 km at the ninetieth percentile, across 6,246 cycles.</td></tr>
+      <tr><td>Drift</td><td><em>Search and rescue.</em> Drop a pin and the analysed current carries it forward. The same integrator was run from 217 real floats' own positions, so it ships with a measured error rather than an assumed one: median 41.0 km over one Argo cycle, 92.8 km at the ninetieth percentile, across 6,185 cycles.</td></tr>
     </tbody>
   </table>
 
@@ -508,7 +508,7 @@
         <li>NumPy, SciPy - resampling and gradients</li>
         <li>cmocean - oceanographic colour scales</li>
         <li>FastAPI, Uvicorn - the REST API</li>
-        <li>pytest - 409 tests on the science</li>
+        <li>pytest - 495 tests on the science</li>
       </ul>
     </div>
     <div>
@@ -701,7 +701,7 @@
     <p>
       This project was built with AI assistance, and we would say so if asked. What matters is
       what was verified rather than assumed: every data endpoint was tested with real requests
-      before being relied on, the scientific logic carries 377 automated tests, rendering defects
+      before being relied on, the scientific logic carries 495 automated tests, rendering defects
       were diagnosed by measuring pixel extents and GPU state rather than by eye, and every
       number quoted in this document comes from the running system. Two findings in these pages -
       that INCOIS runs a public ERDDAP, and that a float in this region reports impossible
@@ -764,7 +764,7 @@
       <tr><td>Can it predict cyclones?</td><td>No, and it does not claim to. It shows the ocean conditions that determine how much energy a cyclone can draw on. Forecasting is a separate discipline; this makes one of its inputs visible.</td></tr>
       <tr><td>How much would this cost to run?</td><td>Effectively nothing. It currently runs on free static hosting, with no licences, no databases and no compute servers.</td></tr>
       <tr><td>What is the hardest part technically?</td><td>Making a monotonic field legible. Ocean temperature just decreases with depth, so a naive 3D render is an opaque warm lid over darkness. Weighting opacity by rate of change is what solves it, and it took several attempts.</td></tr>
-      <tr><td>How long did it take?</td><td>Built for this hackathon, with 377 automated tests and sixteen written decision records.</td></tr>
+      <tr><td>How long did it take?</td><td>Built for this hackathon, with 495 automated tests and eighteen written decision records.</td></tr>
       <tr><td>What would you do next?</td><td>Render geostrophic currents as 3D flow, add a bias map showing model error at every float across the whole EEZ, and connect the internal INCOIS archive.</td></tr>
     </tbody>
   </table>

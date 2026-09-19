@@ -235,7 +235,7 @@ export const PALETTE_LOOKS: Record<string, string> = {
   diff: "Navy, white, olive",
   algae: "Pale green to near-black",
   oxy: "Dark red, grey, yellow",
-  turbid: "Pale yellow to near-black",
+  ice_r: "Pale blue to near-black",
   coverage: "Four flat bands",
 };
 

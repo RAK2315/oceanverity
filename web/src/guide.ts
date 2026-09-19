@@ -1394,13 +1394,14 @@ export const PALETTES: Record<string, PaletteNote> = {
       "Built so water running out of oxygen stands out in red before you read a number.",
     ],
   },
-  turbid: {
-    title: "turbid",
+  ice_r: {
+    title: "ice, reversed",
     designedFor: "A share on a front",
     form: "sequential",
     suits: ["fronts"],
     note: [
-      "Pale yellow where no front crossed the cell, dark brown where fronts crossed most of it.",
+      "Pale blue where no front crossed the cell, near-black where fronts crossed most of it.",
+      "Chosen so the orange float tracks stay visible on top of it.",
       "Anchored at zero, because a cell with no front in it is a real answer.",
     ],
   },
