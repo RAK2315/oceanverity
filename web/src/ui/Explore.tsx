@@ -57,7 +57,15 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
           <div className="explore-grid">
             <button
               className="explore-card explore-case"
-              onClick={() => useStore.setState({ explore: false, tourStep: null, caseStep: 0 })}
+              onClick={() =>
+                useStore.setState({
+                  explore: false,
+                  tourStep: null,
+                  caseStep: 0,
+                  walkthrough: "montha",
+                  cardPaused: false,
+                })
+              }
             >
               <span className="explore-question">
                 What did Cyclone {store.stormCase.name} do to the ocean?
@@ -69,6 +77,32 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
               <span className="explore-caution">
                 The analyses are ten days apart, so each change is shown beside water the storm
                 did not reach.
+              </span>
+            </button>
+          </div>
+        )}
+
+        {store.manifest.fields.some((f) => f.key === "fronts" || f.key === "oxygen") && (
+          <div className="explore-grid">
+            <button
+              className="explore-card explore-case"
+              onClick={() =>
+                useStore.setState({
+                  explore: false,
+                  tourStep: null,
+                  caseStep: 0,
+                  walkthrough: "fishing",
+                  cardPaused: false,
+                })
+              }
+            >
+              <span className="explore-question">What is under a fishing advisory?</span>
+              <span className="explore-why">
+                The fronts INCOIS build advisories from, then the plankton, the oxygen and how deep
+                fish can go, step by step.
+              </span>
+              <span className="explore-caution">
+                Fronts are the ingredient of an advisory, not a fishing zone.
               </span>
             </button>
           </div>
@@ -95,7 +129,7 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
         <footer className="explore-foot">
           <button
             className="primary"
-            onClick={() => useStore.setState({ explore: false, tourStep: 0 })}
+            onClick={() => useStore.setState({ explore: false, tourStep: 0, cardPaused: false })}
           >
             Show me every control instead
           </button>

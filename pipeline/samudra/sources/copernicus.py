@@ -170,26 +170,32 @@ class CopernicusCurrentsSource:
         Nearest node in all three dimensions - see the module docstring for why averaging is the
         wrong answer for a jet two degrees wide.
         """
-        subset = _open(bbox, timestep).sel(
-            depth=np.asarray(levels, dtype=float),
-            latitude=np.asarray(latitudes, dtype=float),
-            longitude=np.asarray(longitudes, dtype=float),
-            method="nearest",
-        )
+        day = _open(bbox, timestep)
         return (
-            Grid(
-                levels=np.asarray(levels, dtype=float),
-                latitudes=np.asarray(latitudes, dtype=float),
-                longitudes=np.asarray(longitudes, dtype=float),
-                values=subset["uo"].values.astype(float),
-            ),
-            Grid(
-                levels=np.asarray(levels, dtype=float),
-                latitudes=np.asarray(latitudes, dtype=float),
-                longitudes=np.asarray(longitudes, dtype=float),
-                values=subset["vo"].values.astype(float),
-            ),
+            land_on_axes(day, "uo", levels, latitudes, longitudes),
+            land_on_axes(day, "vo", levels, latitudes, longitudes),
         )
+
+
+def land_on_axes(dataset, variable: str, levels, latitudes, longitudes) -> Grid:
+    """One Copernicus variable on the model's own axes, by nearest source node in all three.
+
+    Shared by the currents and the biogeochemistry adapters, because the rule is one rule: a value
+    the source actually published, at a place a few kilometres away, rather than an average that
+    exists nowhere. See the module docstring for the jet that made it a rule.
+    """
+    levels = np.asarray(levels, dtype=float)
+    latitudes = np.asarray(latitudes, dtype=float)
+    longitudes = np.asarray(longitudes, dtype=float)
+    subset = dataset[variable].sel(
+        depth=levels, latitude=latitudes, longitude=longitudes, method="nearest"
+    )
+    return Grid(
+        levels=levels,
+        latitudes=latitudes,
+        longitudes=longitudes,
+        values=subset.transpose("depth", "latitude", "longitude").values.astype(float),
+    )
 
 
 def speed(u: Grid, v: Grid) -> Grid:

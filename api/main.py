@@ -39,6 +39,7 @@ from samudra.grid import Grid  # noqa: E402
 from samudra.section import casts_near_line, section_along  # noqa: E402
 from samudra.sources.argo import ArgoErddapSource, BgcArgoSource, IncoisArgoSource  # noqa: E402
 from samudra.sources.copernicus import CopernicusCurrentsSource  # noqa: E402
+from samudra.sources.copernicus_bgc import CopernicusBgcSource  # noqa: E402
 from samudra.sources.glider import GliderSource  # noqa: E402
 from samudra.sources.incois import IncoisErddapSource, IncoisMcCrearySource  # noqa: E402
 from samudra.sources.osmc import OsmcSource  # noqa: E402
@@ -223,7 +224,12 @@ def health() -> dict:
 # what makes it a baseline rather than a value (ADR 0016). Forcing it into this list would make
 # `/api/sources` claim it can be asked for a date. The uploaded-file adapter is the ninth and
 # lives behind `api/upload.py`. This comment said "seven" over eight for a round.
-GRID_SOURCES = [IncoisErddapSource(), IncoisMcCrearySource(), CopernicusCurrentsSource()]
+GRID_SOURCES = [
+    IncoisErddapSource(),
+    IncoisMcCrearySource(),
+    CopernicusCurrentsSource(),
+    CopernicusBgcSource(),
+]
 PROFILE_SOURCES = [
     ArgoErddapSource(),
     BgcArgoSource(),

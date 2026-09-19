@@ -24,8 +24,10 @@ drawn from one float, which is the same refusal `find_anomaly_features` makes wi
 
 **`field_bias`** - the one-line summary. What the model does on average across the whole basin,
 and **split by kind of instrument**, which is the difference between a measurement and a
-tautology. INCOIS's analysis assimilates Argo, so a float's residual is largely the model
-agreeing with an observation it was fed. The seventeen moored buoys are not assimilated.
+tautology. INCOIS's gridded analysis is built from Argo floats, so a float's residual is largely
+the analysis agreeing with data it was made from. The seventeen moored buoys are not described as
+inputs to it, which makes them the closer thing to an independent check. (It is gridding, not data
+assimilation into a model, and whether it excludes buoys is unverified.)
 Measured on the 36-step bake, off `residuals.json`'s own `byKind` blocks, the moorings disagree
 5.5x more on temperature (1.010 degC against 0.183), 7.7x on salinity and 5.4x on density, and
 pooled into one basin-wide figure they vanish into 249 floats. At twelve steps it was nine buoys
@@ -175,7 +177,7 @@ def rank_residuals(
     ranking fifth worst in the Indian Ocean on three. A moored buoy carries a handful of sensors
     on a wire - 3 to 9 here - and that is the whole instrument working normally. One flat
     threshold either keeps the truncated casts or deletes every buoy, and the buoys are the only
-    instruments in this bake the analysis did not assimilate.
+    instruments in this bake not described as inputs to the analysis.
 
     This is the discipline `bias_grid` already applies one level up, where a cell with fewer
     than three instruments is not drawn at all.
@@ -201,15 +203,18 @@ def rank_residuals(
             kind = str(entry.get("kind") or "float")
             if matched < (min_matched or {}).get(kind, 1):
                 continue
+            # A series taken from a different cast than the chart's - the BGC product runs a cycle
+            # behind the core one - carries its own fix, and is ranked where it was measured.
+            has_own_fix = series.get("lon") is not None and series.get("lat") is not None
             out.append(
                 ResidualEntry(
                     platform_id=platform_id,
                     kind=kind,
                     field=field,
-                    longitude=longitude,
-                    latitude=latitude,
-                    timestep_index=int(entry.get("timestepIndex") or 0),
-                    time=str(entry.get("time") or ""),
+                    longitude=float(series["lon"]) if has_own_fix else longitude,
+                    latitude=float(series["lat"]) if has_own_fix else latitude,
+                    timestep_index=int(series.get("timestepIndex", entry.get("timestepIndex")) or 0),
+                    time=str(series.get("time") or entry.get("time") or ""),
                     mean_residual=float(mean),
                     rms_residual=float(rms),
                     matched=matched,
@@ -285,8 +290,9 @@ def field_bias(
     """What the model does against the instruments across the whole region.
 
     `kind` narrows it to one kind of instrument, which is the only way to ask the question that
-    matters. INCOIS assimilate Argo, so a summary over floats is largely a measurement of the
-    analysis agreeing with itself; the moorings are independent of it. See the module docstring.
+    matters. INCOIS's analysis is built from Argo floats, so a summary over floats is largely a
+    measurement of the analysis agreeing with its own data; the moorings are not described as
+    inputs. See the module docstring.
 
     None when nothing was compared, because a summary of nothing is a sentence with no
     measurement in it.

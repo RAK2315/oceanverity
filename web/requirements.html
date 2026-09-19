@@ -476,7 +476,7 @@
     <p class="lead">Every control explains itself, and a guided tour visits all of them.</p>
     <ul class="points">
       <li><b>Plain-language explanations.</b> Each one says whether the control changed the science or only the picture.</li>
-      <li><b>Guided tour.</b> <b>21 steps in six chapters</b>, covering all 44 explained controls. Each step moves the scene and opens the control and its explanation.</li>
+      <li><b>Guided tour.</b> <b>22 steps in six chapters</b>, covering all 47 explained controls. Each step moves the scene and opens the control and its explanation.</li>
       <li><b>One-press cyclone setup.</b> A single button arranges the whole scene for a cyclone question.</li>
     </ul>
     <div class="clause-links">
@@ -516,7 +516,7 @@
     <ul class="points">
       <li><b>Accurate positions.</b> Each instrument is drawn where it was at the moment on screen, and hidden when its nearest cast is too far from that moment, because showing it would imply an observation that does not exist.</li>
       <li><b>The chart.</b> Observation against model, with the gap between them shaded.</li>
-      <li><b>Chlorophyll.</b> Live from BGC-Argo floats in this window.</li>
+      <li><b>Chlorophyll and oxygen.</b> Measured by BGC-Argo floats in this window, and compared against Copernicus Marine&apos;s biogeochemical model on the same chart.</li>
       <li><b>Gliders.</b> The archive the problem statement names is read by its own adapter, which reports what it holds.</li>
     </ul>
     <p class="limit"><span>Limit</span> Ship CTD is left out: the newest GO-SHIP section in this box is April 2025, before this timeline starts.</p>
@@ -593,10 +593,10 @@
       <q>Extensible design for CTDs, moorings, HF-radar, ADCP and machine-learning derived products</q>
       <span class="verdict partly">Moorings met, the rest answered</span>
     </div>
-    <p class="lead">Moored buoys are already added through the same design. HF-radar and ADCP are blocked by data access, and machine learning is left out on purpose.</p>
+    <p class="lead">Moored buoys are already added through the same design. HF-radar and ADCP need a data request to INCOIS, and machine learning is left out on purpose.</p>
     <ul class="points">
       <li><b>Moorings, done.</b> NOAA's public GTS feed: a different format (depth instead of pressure, one row per level, no quality flags) behind the same interface.</li>
-      <li><b>HF-radar and ADCP.</b> India's are not open: INCOIS serves in-situ data on a request form and restricts data inside the EEZ. A data-policy limit, not a design gap.</li>
+      <li><b>HF-radar and ADCP.</b> INCOIS lists HF-radar data as registered access and moored-buoy currents as view-only, so using either needs a data request to INCOIS. A data-policy limit, not a design gap.</li>
       <li><b>Machine learning, refused.</b> Thirty-six analyses is not a training set, and a gap-filler would paint believable temperature over water nobody measured, which this platform shows honestly instead.</li>
     </ul>
     <div class="measure" id="m-coverage">measuring&hellip;</div>
@@ -703,8 +703,8 @@
     </div>
     <p class="lead">Easier ways in for students, the public and exhibitions, without adding anything to the expert control panel.</p>
     <ul class="points">
-      <li><b>Show me around.</b> A guided walk of 21 steps in six chapters that visits all 44 explained controls. A check fails if a control is ever added without a step.</li>
-      <li><b>Explore.</b> The platform as eight questions. Each sets up its own answer and carries the caveat its simplification costs: the cyclone one says it is a map of conditions, not a forecast.</li>
+      <li><b>Show me around.</b> A guided walk of 22 steps in six chapters that visits all 47 explained controls. A check fails if a control is ever added without a step.</li>
+      <li><b>Explore.</b> The platform as nine questions. Each sets up its own answer and carries the caveat its simplification costs: the cyclone one says it is a map of conditions, not a forecast.</li>
       <li><b>Kiosk mode.</b> For exhibitions: panels hidden, larger type, questions on a loop, and a reset thirty seconds after the last visitor walks away.</li>
       <li><b>Copy this view.</b> Writes what is on screen into a link, ready for a teacher's worksheet.</li>
     </ul>
@@ -734,9 +734,9 @@
           most honest thing here.</td></tr>
         <tr><td class="mono">Ship CTD sections</td><td>Newest GO-SHIP section in this box is
           April 2025, four months before the window opens.</td></tr>
-        <tr><td class="mono">HF-radar and ADCP</td><td>India's are not open: INCOIS serves in-situ data
-          on a request form and restricts data inside the EEZ, and <code>services.incois.gov.in</code>
-          resolves only to a private address. A data-policy fact.</td></tr>
+        <tr><td class="mono">HF-radar and ADCP</td><td>INCOIS lists HF-radar data as registered access and
+          moored-buoy currents as view-only, so using either needs a data request to INCOIS. A
+          data-policy limit, not a design gap.</td></tr>
         <tr><td class="mono">INCOIS LAS as a data source</td><td>The catalogue reads fine; the
           OPeNDAP endpoint returned zero bytes at 90 s and again at 240 s.</td></tr>
         <tr><td class="mono">Godas</td><td>INCOIS's LAS copy ends 2025-05-22, under three
@@ -876,7 +876,11 @@
 
       set("m-bgc", m.instruments
         ? "<b>" + m.instruments.withChlorophyll + "</b> of the floats carry a fluorometer and " +
-          "show a chlorophyll profile"
+          "show a chlorophyll profile" +
+          (m.instruments.withOxygen
+            ? " &middot; <b>" + m.instruments.withChlorophyllCompared + "</b> compared against the model " +
+              "for chlorophyll and <b>" + m.instruments.withOxygen + "</b> for oxygen"
+            : "")
         : "");
 
       if (m.currents) {

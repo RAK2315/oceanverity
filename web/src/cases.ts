@@ -19,11 +19,12 @@
  *   is always shown beside the change far from it, in the same bay over the same ten days.
  * - That a float's chart is from October. A float's comparison is from its newest cast.
  *
- * Touching any control ends it, the same rule as the tour, enforced in `store.set`.
+ * Touching any control pauses it, the same rule as the tour, enforced in `store.set`.
  */
 
 import { useStore } from "./store";
 import type { ExploreHelpers } from "./explore";
+import type { Manifest } from "./types";
 
 export interface StormBand {
   cells: number;
@@ -224,5 +225,93 @@ export function buildCaseSteps(c: StormCase, dive: (into: boolean) => void): Cas
     },
   });
 
+  return steps;
+}
+
+/**
+ * The water under a fishing advisory, walked through with the Biology variables.
+ *
+ * INCOIS's advisories are drawn on the sea surface from fronts. This goes from the fronts down:
+ * the plankton, the oxygen, how deep fish can go, and whether the model behind the last three
+ * agrees with the floats. It opens on the newest analysis, where the monsoon upwelling is.
+ *
+ * **It never calls anything a fishing zone.** Every figure is a count read from the manifest, so
+ * a step whose Field this bake did not ship is left out rather than drawn empty.
+ */
+export function buildFishingSteps(manifest: Manifest, dive: (into: boolean) => void): CaseStep[] {
+  const has = (key: string) => manifest.fields.some((f) => f.key === key);
+  const last = Math.max(manifest.timesteps.length - 1, 0);
+  const inVolume = () => store.getState().morph > 0.5;
+  const chlorophyllFloats = manifest.instruments?.withChlorophyllCompared;
+  const oxygenFloats = manifest.instruments?.withOxygen;
+  const arabianSea: [number, number] = [62, 14];
+
+  const open = (key: string, extra: Partial<ReturnType<typeof store.getState>> = {}) =>
+    (helpers: ExploreHelpers) => {
+      calm();
+      store.getState().selectField(key);
+      store.setState({ timestepIndex: last, ...extra });
+      if (!inVolume()) dive(true);
+      helpers.panTo(...arabianSea);
+    };
+
+  const steps: CaseStep[] = [];
+  if (has("fronts")) {
+    steps.push({
+      title: "Where surface waters meet",
+      body:
+        "INCOIS build their fishing advisories from fronts: edges where warm meets cool, or green" +
+        " meets clear. Dark cells are crossed by the most front, found in satellite images of the" +
+        " sea surface.",
+      caution: "The ingredient of an advisory, not a fishing zone.",
+      enter: open("fronts"),
+    });
+  }
+  if (has("chlorophyll")) {
+    steps.push({
+      title: "The food under the front",
+      body:
+        "Chlorophyll is plankton, the bottom of the food chain. This is a model, so it goes below" +
+        " the surface and under cloud, where a satellite sees nothing. In the monsoon, upwelling" +
+        " turns the Arabian Sea coasts green.",
+      enter: open("chlorophyll"),
+    });
+  }
+  if (has("oxygen")) {
+    steps.push({
+      title: "The air fish breathe",
+      body:
+        "Dissolved oxygen. Red is water running out of it. Under the Arabian Sea a thick layer" +
+        " holds almost none, however much food sits above it.",
+      enter: open("oxygen"),
+    });
+  }
+  if (has("oxygen_floor")) {
+    steps.push({
+      title: "How deep fish can go",
+      body:
+        "The sheet is where oxygen first falls below 2 mg/L. Above it fish can live; below it they" +
+        " cannot. A high sheet packs them into a thin layer near the surface.",
+      enter: open("oxygen_floor"),
+    });
+  }
+  if (has("chlorophyll") && manifest.residuals) {
+    steps.push({
+      title: "Is the model right?",
+      body:
+        (chlorophyllFloats
+          ? `${chlorophyllFloats} floats measured chlorophyll${oxygenFloats ? ` and ${oxygenFloats} measured oxygen` : ""}` +
+            " in this water. Each dot is how far the model sat from one of them."
+          : "Each dot is how far the model sat from a float that measured it."),
+      caution: "One model, checked against a few dozen floats.",
+      enter: (helpers) => {
+        calm();
+        store.getState().selectField("chlorophyll");
+        store.getState().setBiasMode(true);
+        if (!inVolume()) dive(true);
+        helpers.panTo(...arabianSea);
+      },
+    });
+  }
   return steps;
 }

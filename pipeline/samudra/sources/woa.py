@@ -25,12 +25,29 @@ which are the same node centres INCOIS's analysis uses. That is not a happy acci
 follow the same convention - and it is the entire reason this Field is cheap: no horizontal
 regridding, so no chance of quietly differencing two different pieces of water.
 `climatology.climatological_anomaly` refuses outright if the axes ever stop matching.
+
+**Three routes to the same numbers, because one of them keeps going down.** NOAA's OPeNDAP server
+timed out on 2026-09-14 and answered 503 on 2026-09-15, while the plain HTTPS file server beside it
+answered 200 (60.5 MB a month, about 80 s from this machine). So `fetch_grid` reads, in order:
+
+1. a regional subset already saved under `data/woa/` - small, committed like the glider index, so
+   a bake normally needs no network for the normal at all;
+2. OPeNDAP, which subsets at the server;
+3. the whole monthly file over HTTPS, subset here.
+
+Whichever remote route answers, its subset is saved for next time. The atlas files were last
+modified 2024-01-29 and a climatology does not change, so a saved copy cannot go stale the way a
+saved analysis would.
 """
 
 from __future__ import annotations
 
+import os
+import tempfile
 from datetime import datetime, timezone
 from functools import lru_cache
+from pathlib import Path
+from typing import Callable
 
 import numpy as np
 
@@ -42,11 +59,16 @@ from .base import BoundingBox, FieldSpec
 DECADE = "decav91C0"
 RESOLUTION = "1.00"
 ROOT = "https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA"
+HTTPS_ROOT = "https://www.ncei.noaa.gov/data/oceans/woa/WOA23/DATA"
+
+#: Where saved regional subsets live. Server-side, beside `data/glider/`.
+CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "woa"
 
 ATTRIBUTION = (
     "World Ocean Atlas 2023, NOAA National Centers for Environmental Information. "
     "Objectively analysed monthly climatological mean for 1991-2020 (decav91C0), one degree. "
-    "Read anonymously over OPeNDAP at bake time; no account is needed at any point."
+    "Read anonymously at bake time (OPeNDAP, or the HTTPS file server when OPeNDAP is down), "
+    "with a regional subset kept beside the build; no account is needed at any point."
 )
 
 #: The two quantities this platform can difference, and how WOA names them. `t_an` and `s_an`
@@ -90,8 +112,27 @@ class WoaClimatologySource:
     endpoint = "ncei.noaa.gov/thredds-ocean/dodsC/woa23"
     dataset = f"woa23_{DECADE}"
 
+    def __init__(
+        self,
+        cache_dir: Path | None = CACHE_DIR,
+        open_opendap: Callable[[str], object] | None = None,
+        open_https: Callable[[str], object] | None = None,
+    ):
+        # The two remote routes are injectable so the fallback order is testable offline.
+        self.cache_dir = cache_dir
+        self._open_opendap = open_opendap or _open
+        self._open_https = open_https or _download_and_open
+        #: Which route the last `fetch_grid` answered from: "cache", "opendap" or "https".
+        self.last_route: str | None = None
+
     def fields(self) -> list[FieldSpec]:
         return list(_FIELDS)
+
+    def https_url_for(self, variable: str, month: int) -> str:
+        """The same file on NOAA's plain HTTPS server, for when OPeNDAP is down."""
+        folder, letter, _ = VARIABLES[variable]
+        name = f"woa23_{DECADE}_{letter}{month:02d}_01.nc"
+        return f"{HTTPS_ROOT}/{folder}/netcdf/{DECADE}/{RESOLUTION}/{name}"
 
     def url_for(self, variable: str, month: int) -> str:
         """The OPeNDAP address of one month's normal. Public, because it is worth being able to
@@ -113,24 +154,73 @@ class WoaClimatologySource:
         if not 1 <= month <= 12:
             raise ValueError(f"month must be 1 to 12, got {month}")
 
-        dataset = _open(self.url_for(variable, month))
-        name = VARIABLES[variable][2]
-        subset = dataset[name].isel(time=0).sel(
-            lat=slice(bbox.south, bbox.north), lon=slice(bbox.west, bbox.east)
+        saved = self._from_cache(variable, month, bbox)
+        if saved is not None:
+            self.last_route = "cache"
+            return saved
+
+        errors = []
+        for route, opener, url in (
+            ("opendap", self._open_opendap, self.url_for(variable, month)),
+            ("https", self._open_https, self.https_url_for(variable, month)),
+        ):
+            try:
+                grid = _subset(opener(url), VARIABLES[variable][2], bbox)
+            except Exception as error:  # noqa: BLE001 - a route is down in many ways, all the same here
+                errors.append(f"{route}: {error}")
+                continue
+            self.last_route = route
+            self._save(variable, month, grid)
+            return grid
+        raise OSError(
+            f"World Ocean Atlas unreachable for {variable} month {month}: " + "; ".join(errors)
         )
 
-        values = np.asarray(subset.values, dtype=float)
-        fill = dataset[name].attrs.get("_FillValue", dataset[name].attrs.get("missing_value"))
-        if fill is not None:
-            values = np.where(np.isclose(values, float(fill)), np.nan, values)
-        values[np.abs(values) >= _FILL_THRESHOLD] = np.nan
+    def _cache_path(self, variable: str, month: int) -> Path | None:
+        if self.cache_dir is None:
+            return None
+        letter = VARIABLES[variable][1]
+        return Path(self.cache_dir) / f"woa23_{DECADE}_{letter}{month:02d}_region.npz"
 
-        return Grid(
-            levels=np.asarray(dataset["depth"].values, dtype=float),
-            latitudes=np.asarray(subset["lat"].values, dtype=float),
-            longitudes=np.asarray(subset["lon"].values, dtype=float),
-            values=values,
+    def _save(self, variable: str, month: int, grid: Grid) -> None:
+        path = self._cache_path(variable, month)
+        if path is None:
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            path,
+            levels=grid.levels,
+            latitudes=grid.latitudes,
+            longitudes=grid.longitudes,
+            values=grid.values.astype(np.float32),
         )
+
+    def _from_cache(self, variable: str, month: int, bbox: BoundingBox) -> Grid | None:
+        """The saved subset cut to `bbox`, or None when nothing saved covers it.
+
+        "Covers" means it holds every node a remote read of `bbox` would return. A saved box that
+        stops short would hand back a smaller grid with no error, and the anomaly beside it would
+        refuse the mismatched axes one step later, far from the cause.
+        """
+        path = self._cache_path(variable, month)
+        if path is None or not path.exists():
+            return None
+        with np.load(path) as saved:
+            lats, lons = saved["latitudes"], saved["longitudes"]
+            eps = 1e-6
+            rows = (lats >= bbox.south - eps) & (lats <= bbox.north + eps)
+            columns = (lons >= bbox.west - eps) & (lons <= bbox.east + eps)
+            # One-degree nodes at half degrees: the request holds every node within it.
+            wanted_rows = np.arange(np.ceil(bbox.south - 0.5) + 0.5, bbox.north + eps, 1.0)
+            wanted_columns = np.arange(np.ceil(bbox.west - 0.5) + 0.5, bbox.east + eps, 1.0)
+            if rows.sum() != wanted_rows.size or columns.sum() != wanted_columns.size:
+                return None
+            return Grid(
+                levels=saved["levels"].astype(float),
+                latitudes=lats[rows].astype(float),
+                longitudes=lons[columns].astype(float),
+                values=saved["values"][:, rows][:, :, columns].astype(float),
+            )
 
     def months_for(self, timesteps) -> set[int]:
         """The calendar months a set of Timesteps needs, and no more.
@@ -140,6 +230,47 @@ class WoaClimatologySource:
         bake spans a year and fetches all twelve, which is still a third of one file per step.
         """
         return {when.month for when in timesteps}
+
+
+def _subset(dataset, name: str, bbox: BoundingBox) -> Grid:
+    """One variable over one box, with WOA's fill value turned into Mask."""
+    subset = dataset[name].isel(time=0).sel(
+        lat=slice(bbox.south, bbox.north), lon=slice(bbox.west, bbox.east)
+    )
+    values = np.asarray(subset.values, dtype=float)
+    fill = dataset[name].attrs.get("_FillValue", dataset[name].attrs.get("missing_value"))
+    if fill is not None:
+        values = np.where(np.isclose(values, float(fill)), np.nan, values)
+    values[np.abs(values) >= _FILL_THRESHOLD] = np.nan
+    return Grid(
+        levels=np.asarray(dataset["depth"].values, dtype=float),
+        latitudes=np.asarray(subset["lat"].values, dtype=float),
+        longitudes=np.asarray(subset["lon"].values, dtype=float),
+        values=values,
+    )
+
+
+def _download_and_open(url: str):
+    """The whole monthly file over HTTPS, read into memory, and the download deleted.
+
+    60.5 MB a month. Used only when OPeNDAP is down and nothing is saved, so at most once per
+    month of the atlas on any machine.
+    """
+    import requests
+    import xarray as xr
+
+    handle, path = tempfile.mkstemp(suffix=".nc")
+    os.close(handle)
+    try:
+        with requests.get(url, stream=True, timeout=300) as response:
+            response.raise_for_status()
+            with open(path, "wb") as out:
+                for chunk in response.iter_content(chunk_size=1 << 20):
+                    out.write(chunk)
+        with xr.open_dataset(path, decode_times=False) as dataset:
+            return dataset.load()
+    finally:
+        os.remove(path)
 
 
 @lru_cache(maxsize=8)

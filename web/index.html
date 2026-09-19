@@ -489,7 +489,7 @@
   }
   .sheet-foot { display: flex; flex-wrap: wrap; gap: var(--sp-19); align-items: center; margin-top: var(--sp-30); }
 
-  /* ---------------------------------------------------------- the chips (fifteen variables) */
+  /* ---------------------------------------------------------- the chips (every variable) */
   /* An even grid, not a wrapping flex. Fifteen chips of fifteen different widths left three
      ragged rows that read as a paragraph of boxes; equal columns make it a table of variables,
      which is what it is. */
@@ -697,7 +697,7 @@
           data-image="./images/collocation.jpg"
           data-image-light="./images/light/collocation.jpg"
           data-body="Click any float and a chart appears: what that instrument measured on its way up, drawn on top of what the model said at that exact place and date. The gap between the two lines is shaded and sized as a number. This is the thing that does not exist in any other tool."
-          data-measure="266 instruments compared, typical temperature gap 0.23 degC"
+          data-measure="263 instruments compared, typical temperature gap 0.23 degC"
           data-link="./app.html?dive=1&amp;tour=1">
           <img src="./images/collocation.jpg" data-light="./images/light/collocation.jpg" alt="The ocean block with one float highlighted and a panel comparing measured against modelled temperature.">
           <div class="feature-body">
@@ -776,7 +776,7 @@
           data-title="Where would something adrift go?"
           data-image="./images/drift.jpg"
           data-image-light="./images/light/drift.jpg"
-          data-body="Drop a pin and the analysed current carries it forward. What makes it worth having is the second half: an Argo float's track is measured drift at 1000 m, so the same maths was run from 219 real floats' own positions and the error published rather than assumed. The panel's first line says what it is not, because a real search needs wind, waves and the object's own leeway."
+          data-body="Drop a pin and the analysed current carries it forward. What makes it worth having is the second half: an Argo float's track is measured drift at 1000 m, so the same maths was run from 217 real floats' own positions and the error published rather than assumed. The panel's first line says what it is not, because a real search needs wind, waves and the object's own leeway."
           data-measure="Median 40.9 km out over one Argo cycle, 93 km at the 90th percentile, 6,246 cycles"
           data-link="./app.html?dive=1&amp;field=current_speed&amp;pin=51.5,9.5">
           <img src="./images/drift.jpg" data-light="./images/light/drift.jpg" alt="A pin dropped in the Arabian Sea with the purple track the analysed currents imply running away from it, over the moving current flow, and the panel beside it reporting the distance, the bearing and the method's own measured error.">
@@ -807,7 +807,7 @@
         <button class="feature" type="button"
           data-title="Every instrument at once"
           data-image="./images/bias.jpg"
-          data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS assimilate Argo, so a float largely shows the model agreeing with itself; the seventeen moored buoys are the independent check, and the panel prints both rather than pooling them."
+          data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS's analysis is built from Argo floats, so a float largely shows the analysis agreeing with data it was made from; the seventeen moored buoys are not described as inputs, so they are the closer thing to an independent check, and the panel prints both rather than pooling them."
           data-measure="Typical temperature gap 0.18 degC across 249 floats (compared to about 2000 m) and 0.88 degC across 17 buoys (to 500 m)"
           data-link="./app.html?dive=1&amp;bias=1">
           <img src="./images/bias.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
@@ -989,7 +989,7 @@
         <span class="tag">Students</span>
         <h3>Explore by question</h3>
         <p>
-          Eight questions in plain words. Press one and the whole scene sets itself up: the
+          Nine questions in plain words. Press one and the whole scene sets itself up: the
           variable, the date, the way the water is drawn, the camera. Every question carries the
           caveat its simplification costs, beside the answer and never after it.
         </p>
@@ -1127,7 +1127,7 @@
       <div><h3>Data and science</h3><ul><li>Python 3.10</li><li>xarray + netCDF4</li><li>NumPy / SciPy</li><li>cmocean</li></ul></div>
       <div><h3>Backend</h3><ul><li>FastAPI</li><li>Uvicorn</li><li>ERDDAP / OPeNDAP</li><li>CF-1.6 conventions</li></ul></div>
       <div><h3>Frontend</h3><ul><li>TypeScript</li><li>React 19 + Vite</li><li>Three.js / WebGL2</li><li>GLSL ES 3.00</li></ul></div>
-      <div><h3>Quality</h3><ul><li>430 automated tests</li><li>17 decision records</li><li>0 network calls at demo time</li></ul></div>
+      <div><h3>Quality</h3><ul><li>495 automated tests</li><li>18 decision records</li><li>0 network calls at demo time</li></ul></div>
     </div>
 
     <ul class="plain stack-claims reveal">

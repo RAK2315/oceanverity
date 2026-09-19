@@ -316,7 +316,7 @@ interface State {
   /**
    * Which Field Group's buttons the Variable selector is showing.
    *
-   * Fourteen buttons (there are fifteen Fields now) in a two-column grid under five sub-headings
+   * Fourteen buttons (there are nineteen Fields now) in a two-column grid under five sub-headings
    * was 640 px on its own, and the
    * height changed every time the reader switched group. Five short words fit one row of tabs,
    * so the selector shows 1 to 5 buttons instead of 14 and stops changing height. It follows
@@ -382,23 +382,37 @@ interface State {
    *
    * The guide panel explains whatever you touched, which is right for a forecaster and useless
    * for the audience PS 26067 names by hand - schools, exhibitions, policymakers. A first-time
-   * visitor does not know what to touch. Any control ending the tour is deliberate: see Tour.tsx.
+   * visitor does not know what to touch. Touching a control pauses it: see `cardPaused`.
    */
   tourStep: number | null;
   /**
    * A real storm, walked through: the case file `cases.ts` reads, and which step is open.
    *
    * The case is data rather than code - `data/cases/montha.json`, measured by the pipeline - so
-   * every figure on its card comes from the build. Touching any control ends it, like the tour.
+   * every figure on its card comes from the build. Touching any control pauses it, like the tour.
    */
   stormCase: StormCase | null;
   caseStep: number | null;
+  /**
+   * Which walkthrough `caseStep` is a step of: the storm, or the water under a fishing advisory.
+   * The storm's track is drawn only for the storm.
+   */
+  walkthrough: "montha" | "fishing";
+  /**
+   * The open tour or walkthrough card is paused, not closed.
+   *
+   * Touching a control used to end either one. That kept the tour from fighting a reader's hand,
+   * and it also threw away their place: a visitor who tried one slider mid-tour lost the tour.
+   * Now a touch pauses it. The card stays, the scene stops being driven, and "Continue" puts
+   * that step's view back. Any change of step clears it, so it can never outlive the step.
+   */
+  cardPaused: boolean;
   /**
    * The second door: the platform as a list of questions rather than a panel of controls.
    *
    * PS 26067 names three audiences the console does not serve - school and college students, the
    * general public at awareness campaigns, and policymakers - and three channels: outreach
-   * events, exhibitions and e-learning. Fifteen variables in five groups is the right toolkit
+   * events, exhibitions and e-learning. Nineteen variables in six groups is the right toolkit
    * for a forecaster and the wrong first minute for any of those three. `explore.ts` holds the
    * questions; nothing behind them is a new capability.
    */
@@ -611,6 +625,8 @@ export const useStore = create<State>((setState, getState) => ({
   tourStep: null,
   stormCase: null,
   caseStep: null,
+  walkthrough: "montha",
+  cardPaused: false,
   explore: false,
   kiosk: false,
   selectedAnomaly: null,
@@ -625,14 +641,21 @@ export const useStore = create<State>((setState, getState) => ({
   showDriftCheck: true,
 
   set: (key, value) =>
-    setState(
-      // Touching a control ends the tour. A panel that keeps moving the camera while somebody
-      // is trying to drag a slider is worse than no tour at all, and `touched` is set by every
-      // control in the panel, so this is the one place that has to know.
-      key === "touched" && value !== null
-        ? ({ [key]: value, tourStep: null, caseStep: null } as never)
-        : ({ [key]: value } as never),
-    ),
+    setState((s) => {
+      // Touching a control pauses the tour or walkthrough. A card that keeps moving the camera
+      // while somebody drags a slider is worse than no tour, but closing it lost the reader's
+      // place, so it stops driving the scene and waits. `touched` is set by every control in
+      // the panel, so this is the one place that has to know.
+      if (key === "touched" && value !== null) {
+        const open = s.tourStep !== null || s.caseStep !== null;
+        return { [key]: value, ...(open ? { cardPaused: true } : {}) } as never;
+      }
+      // Moving to another step, or ending, is never a paused state.
+      if (key === "tourStep" || key === "caseStep") {
+        return { [key]: value, cardPaused: false } as never;
+      }
+      return { [key]: value } as never;
+    }),
 
   selectField: (key) => {
     const spec = getState().manifest?.fields.find((f) => f.key === key);
@@ -805,7 +828,7 @@ export const useStore = create<State>((setState, getState) => ({
   /**
    * Set the scene up for a cyclone question, in one click.
    *
-   * Fifteen Fields and a panel of controls is the right toolkit for a forecaster and the wrong
+   * Nineteen Fields and a panel of controls is the right toolkit for a forecaster and the wrong
    * first minute for everyone else. This is the shape of the question the September 2026 problem
    * statement is about: how much heat is in the water, over the whole column, at the most recent
    * analysis - and it puts the Field, the depth slice and the render hints in the one
@@ -820,7 +843,9 @@ export const useStore = create<State>((setState, getState) => ({
       playing: false,
       showAnomalies: false,
       touched: "hazardPreset",
-      tourStep: null,
+      // A reader pressing it mid-tour pauses the tour, like any other control. A tour step that
+      // presses it on the reader's behalf clears the pause again in `Tour.tsx`.
+      ...(state.tourStep !== null || state.caseStep !== null ? { cardPaused: true } : {}),
     });
     // Deliberately does NOT touch `volumeEnabled`. The scene already hides the Volume mesh for a
     // Field that has none, so turning it off here would achieve nothing on this Field and would

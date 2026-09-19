@@ -210,7 +210,7 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
             </button>
             {/*
               * The second door. PS 26067 names school students, the public and policymakers,
-              * and fifteen variables in five groups is the wrong first minute for all three.
+              * and nineteen variables in six groups is the wrong first minute for all three.
               * One button, and everything outreach lives behind it rather than in this bar.
               */}
             <button

@@ -31,8 +31,9 @@ import { useStore } from "../store";
  *
  * Two rules it keeps from the five-step version.
  *
- * **It never fights the user.** Touching any control ends the tour, because a panel that keeps
- * moving the camera while somebody is trying to drag a slider is worse than no tour at all.
+ * **It never fights the user.** Touching any control pauses the tour, because a panel that keeps
+ * moving the camera while somebody is trying to drag a slider is worse than no tour at all. It
+ * pauses rather than ends so the reader keeps their place: the card offers Continue and End.
  * That is enforced in `store.set`, which is why every step here drives `setState` directly.
  *
  * **It never says anything the guide panel would not.** If a caption here ever disagrees with
@@ -241,7 +242,7 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
     // ---- 3. Every variable -------------------------------------------------------------
     {
       chapter: "Every variable",
-      title: "Fifteen variables, in five groups",
+      title: `${figures.fieldCount ?? "Every"} variables, in ${figures.groupCount ?? "their"} groups`,
       body:
         "Ocean state is what INCOIS publish plus what can be worked out exactly from it -" +
         " density here is computed from temperature and salinity, not downloaded. Salinity is" +
@@ -302,6 +303,21 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
     },
     {
       chapter: "Every variable",
+      title: "The water under a fishing advisory",
+      body:
+        "INCOIS build fishing advisories from surface fronts. Biology shows those fronts, then" +
+        " what is under them: plankton, oxygen, and the oxygen floor, the depth fish cannot go" +
+        " below. Fronts are the ingredient of an advisory, not a fishing zone.",
+      covers: ["fronts", "oxygen", "oxygen_floor"],
+      enter: () => {
+        calm();
+        store.getState().selectField("fronts");
+        store.setState({ timestepIndex: steps() - 1, touched: "fronts" });
+        open("field");
+      },
+    },
+    {
+      chapter: "Every variable",
       title: "Every departure gets a ring",
       body:
         "A blob of colour says water departed and nothing about where it starts or how deep it" +
@@ -316,7 +332,7 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
         // The features belong to the Timestep, so pick after the Field has switched.
         setTimeout(() => {
           const state = store.getState();
-          if (state.tourStep !== null && state.features().length > 0) {
+          if (state.tourStep !== null && !state.cardPaused && state.features().length > 0) {
             store.setState({ selectedAnomaly: 0 });
           }
         }, 350);
@@ -334,7 +350,7 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       covers: ["hazardPreset", "heat_potential"],
       enter: () => {
         calm();
-        // This ends the tour by design when a user presses it - the effect below puts it back.
+        // This pauses the tour by design when a user presses it - the effect below clears that.
         store.getState().hazardPreset();
         open("field");
       },
@@ -470,28 +486,34 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
 }
 
 export function Tour({ onDive }: { onDive: (into: boolean) => void }) {
-  const { tourStep, manifest, set } = useStore();
+  const { tourStep, cardPaused, manifest, set } = useStore();
   const steps = buildTour(onDive);
   const step = tourStep === null ? undefined : steps[tourStep];
 
-  // Apply the step when it opens, not on every render.
+  // Apply the step when it opens, and again when a paused step is continued. Never while paused:
+  // the reader is using the controls, and the tour must not move anything under their hand.
   useEffect(() => {
-    if (tourStep === null) return;
+    if (tourStep === null || cardPaused) return;
     steps[tourStep]?.enter();
-    // Some store actions end the tour on purpose - `hazardPreset` is one - because a user
-    // pressing them means "stop showing me things". A step that presses one on the user's
-    // behalf has to put the tour back, and this is the one place that knows the difference.
-    if (useStore.getState().tourStep !== tourStep) useStore.setState({ tourStep });
-    // `steps` is rebuilt each render and `enter` closes over the store, so the index is the
-    // only real dependency.
+    // Some store actions pause the tour on purpose - `hazardPreset` is one - because a user
+    // pressing them means "let me drive". A step that presses one on the user's behalf has to
+    // undo that, and this is the one place that knows the difference.
+    const now = useStore.getState();
+    if (now.tourStep !== tourStep || now.cardPaused) useStore.setState({ tourStep, cardPaused: false });
+    // `steps` is rebuilt each render and `enter` closes over the store, so the index and the
+    // pause are the only real dependencies.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourStep]);
+  }, [tourStep, cardPaused]);
 
   if (!manifest || tourStep === null || !step) return null;
 
   const last = tourStep === steps.length - 1;
   const chapters = [...new Set(steps.map((s) => s.chapter))];
   const chapter = chapters.indexOf(step.chapter) + 1;
+
+  if (cardPaused) {
+    return <PausedCard label="Guided tour" title={step.title} onEnd={() => set("tourStep", null)} />;
+  }
 
   return (
     <aside className="tour" role="dialog" aria-label="Guided tour">
@@ -528,6 +550,33 @@ export function Tour({ onDive }: { onDive: (into: boolean) => void }) {
           onClick={() => set("tourStep", last ? null : tourStep + 1)}
         >
           {last ? "Explore on your own" : "Next"}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+/**
+ * The tour or walkthrough card while the reader is using the controls.
+ *
+ * Small on purpose: it says where they were and offers two things. "Continue" clears the pause,
+ * and the card's own effect puts that step's view back. "End" closes it. Shared by the tour and
+ * the storm walkthrough so the two cannot behave differently.
+ */
+export function PausedCard({ label, title, onEnd }: { label: string; title: string; onEnd: () => void }) {
+  return (
+    <aside className="tour tour-paused" role="dialog" aria-label={`${label}, paused`}>
+      <div className="tour-head">
+        <span className="tour-count">{label} &middot; paused</span>
+      </div>
+      <h2 className="tour-title">{title}</h2>
+      <p className="tour-body">Paused while you use the controls. Continue puts this step back.</p>
+      <div className="tour-actions">
+        <button className="ghost" onClick={onEnd}>
+          End
+        </button>
+        <button className="primary" onClick={() => useStore.setState({ cardPaused: false })}>
+          Continue
         </button>
       </div>
     </aside>

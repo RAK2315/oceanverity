@@ -126,6 +126,30 @@ def profile_density(
     return np.asarray(gsw.sigma0(absolute, conservative), dtype=float)
 
 
+def oxygen_per_volume(
+    latitude: float,
+    longitude: float,
+    depths: np.ndarray,
+    temperature: np.ndarray,
+    salinity: np.ndarray,
+    oxygen_umol_kg: np.ndarray,
+) -> np.ndarray:
+    """A float's oxygen in the model's units: micromoles per kilogram to millimoles per cubic metre.
+
+    Floats report per kilogram of seawater; Copernicus's model publishes per cubic metre. The same
+    molecules in a cubic metre are the per-kilogram figure times the water's in-situ density, which
+    runs from about 1021 kg/m3 in warm surface water to about 1036 at 2000 m - a 1.5% spread that a
+    fixed 1025 would put straight into the comparison. So the density is the cast's own, from its
+    own temperature and salinity, and a level without both is NaN rather than a guess.
+    """
+    depths = np.asarray(depths, dtype=float)
+    pressure = gsw.p_from_z(-depths, latitude)
+    absolute = gsw.SA_from_SP(np.asarray(salinity, dtype=float), pressure, longitude, latitude)
+    conservative = gsw.CT_from_t(absolute, np.asarray(temperature, dtype=float), pressure)
+    rho = np.asarray(gsw.rho(absolute, conservative, pressure), dtype=float)
+    return np.asarray(oxygen_umol_kg, dtype=float) * rho / 1000.0
+
+
 def _require_same_axes(temperature: Grid, salinity: Grid) -> None:
     for name in ("levels", "latitudes", "longitudes"):
         if not np.array_equal(getattr(temperature, name), getattr(salinity, name)):

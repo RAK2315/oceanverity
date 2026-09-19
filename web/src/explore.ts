@@ -79,6 +79,7 @@ function calm(): void {
     depthTo: 1,
     touched: null,
     tourStep: null,
+    cardPaused: false,
   });
 }
 
@@ -122,9 +123,9 @@ export const QUESTIONS: Question[] = [
       "Every dot becomes how wrong the analysis was at that instrument. This is the whole point" +
       " of the platform in one picture.",
     caution:
-      "INCOIS assimilate Argo, so a float largely shows the model agreeing with itself. The" +
-      " moored buoys are the independent check. Floats are compared to 2000 m and buoys only to" +
-      " 500 m, so the two are not like for like.",
+      "INCOIS's analysis is built from Argo floats, so a float largely shows it agreeing with" +
+      " its own data. The moored buoys are the closer thing to an independent check. Floats are" +
+      " compared to 2000 m and buoys only to 500 m, so the two are not like for like.",
     needsVolume: true,
     run: () => {
       calm();
@@ -144,6 +145,23 @@ export const QUESTIONS: Question[] = [
       calm();
       store.getState().selectField("temperature_normal_anomaly");
       store.setState({ timestepIndex: lastStep() });
+    },
+  },
+  {
+    id: "fish",
+    question: "Why do fish gather here?",
+    why:
+      "Where two bodies of surface water meet, plankton collects and fish follow. INCOIS build" +
+      " their fishing advisories from these fronts. Dark cells are crossed by the most front.",
+    caution:
+      "Fronts are the ingredient of an advisory, not a fishing zone. Nothing here says where to" +
+      " fish.",
+    needsVolume: true,
+    run: ({ panTo }) => {
+      calm();
+      store.getState().selectField("fronts");
+      store.setState({ timestepIndex: lastStep() });
+      panTo(62, 14);
     },
   },
   {

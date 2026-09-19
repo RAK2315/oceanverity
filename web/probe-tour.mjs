@@ -17,6 +17,10 @@
  *      pretending to be a demonstration is worse than no step. Each one is checked for a real
  *      change in the state the scene reads.
  *
+ *   4. **Touching a control pauses it.** The card stays with End and Continue, the scene is left
+ *      alone, Continue restores the step and End closes it - including cyclone mode, whose own
+ *      action used to end the tour.
+ *
  * Console errors and page errors fail it too: a step driving the store into a state no panel
  * expects is exactly the sort of thing that throws in a corner nobody watches.
  *
@@ -107,7 +111,61 @@ for (let index = 0; index < total; index++) {
 // The card itself has to be on screen at the end, not just the state behind it.
 const showing = await page.evaluate(() => !!document.querySelector(".tour .tour-title"));
 if (!showing) problems.push("the tour card is not rendered on the last step");
-await page.evaluate(() => window.__store.setState({ tourStep: null }));
+
+// ---- 4. touching a control pauses the tour, and Continue restores the step ----------------
+// Step 9 selects density. The reader switches to salinity by hand.
+const densityStep = await page.evaluate(() =>
+  window.__tour.buildTour(() => {}).findIndex((s) => s.covers.includes("density")),
+);
+await page.evaluate((i) => window.__store.setState({ tourStep: i }), densityStep);
+await page.waitForTimeout(1400);
+await page.evaluate(() => {
+  const s = window.__store.getState();
+  s.selectField("salinity");
+  s.set("touched", "field");
+});
+await page.waitForTimeout(800);
+const paused = await page.evaluate(() => {
+  const s = window.__store.getState();
+  return {
+    tourStep: s.tourStep,
+    paused: s.cardPaused,
+    fieldKey: s.fieldKey,
+    card: !!document.querySelector(".tour.tour-paused"),
+    buttons: [...document.querySelectorAll(".tour-paused .tour-actions button")].map((b) => b.textContent.trim()),
+  };
+});
+console.log(`after a touch: ${JSON.stringify(paused)}`);
+if (paused.tourStep !== densityStep || !paused.paused || !paused.card) {
+  problems.push(`touching a control did not pause the tour: ${JSON.stringify(paused)}`);
+}
+if (paused.buttons.join("|") !== "End|Continue") problems.push(`paused card offers ${paused.buttons.join(", ")}`);
+if (paused.fieldKey !== "salinity") problems.push("the paused tour moved the scene under the reader's hand");
+
+// The hazard mode switch is the one control that used to end the tour through its own action.
+await page.evaluate(() => window.__store.setState({ cardPaused: false }));
+await page.waitForTimeout(1400);
+await page.evaluate(() => window.__store.getState().setHazardMode(true));
+await page.waitForTimeout(800);
+const hazard = await page.evaluate(() => ({ tourStep: window.__store.getState().tourStep, paused: window.__store.getState().cardPaused }));
+if (hazard.tourStep !== densityStep || !hazard.paused) problems.push(`cyclone mode did not pause the tour: ${JSON.stringify(hazard)}`);
+
+await page.click(".tour-paused .tour-actions .primary");
+await page.waitForTimeout(1400);
+const resumed = await page.evaluate(() => {
+  const s = window.__store.getState();
+  return { tourStep: s.tourStep, paused: s.cardPaused, fieldKey: s.fieldKey, card: !!document.querySelector(".tour .tour-title") };
+});
+if (resumed.paused || resumed.tourStep !== densityStep || resumed.fieldKey !== "density" || !resumed.card) {
+  problems.push(`Continue did not put the step back: ${JSON.stringify(resumed)}`);
+}
+
+await page.evaluate(() => window.__store.getState().set("touched", "opacity"));
+await page.waitForTimeout(500);
+await page.click(".tour-paused .tour-actions .ghost");
+await page.waitForTimeout(500);
+const ended = await page.evaluate(() => ({ tourStep: window.__store.getState().tourStep, card: !!document.querySelector(".tour") }));
+if (ended.tourStep !== null || ended.card) problems.push(`End did not close the paused tour: ${JSON.stringify(ended)}`);
 
 console.log(problems.length ? `PROBLEMS: ${problems.join(" | ")}` : "clean");
 await browser.close();

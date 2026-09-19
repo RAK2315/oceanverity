@@ -54,6 +54,7 @@ from .drift import (
 )
 from .depth_warp import DepthWarp
 from .grid import Grid
+from .habitat import OXYGEN_FLOOR_MMOL, oxygen_floor
 from .hazard import (
     barrier_layer_thickness,
     depth_of_26,
@@ -68,6 +69,8 @@ from .thermocline import isotherm_depth, swept_through
 from .sources.argo import ArgoErddapSource, BgcArgoSource
 from .sources.base import BoundingBox, FieldSpec
 from .sources.copernicus import CopernicusCurrentsSource, speed as current_speed
+from .sources.copernicus_bgc import CopernicusBgcSource
+from .sources.copernicus_satellite import FRONTS_FIELD, SatelliteFrontsSource
 from .sources.glider import GliderSource
 from .sources.incois import IncoisErddapSource, IncoisMcCrearySource
 from .sources.osmc import OsmcSource
@@ -321,6 +324,33 @@ HAZARD_FIELDS = (
 HAZARD_FIELD_KEYS = tuple(f.key for f in HAZARD_FIELDS)
 
 
+# ---------------------------------------------------------------------------------------------
+# The water under a fishing advisory.
+#
+# INCOIS's fishing advisories are drawn from the sea surface. These answer what is under it: the
+# plankton and the oxygen from Copernicus's biogeochemical model (`sources/copernicus_bgc.py`),
+# how deep the oxygen lasts, and the surface fronts the advisories are built from
+# (`sources/copernicus_satellite.py`). None of them is a fishing zone, and nothing says so.
+# ---------------------------------------------------------------------------------------------
+OXYGEN_FLOOR_FIELD = FieldSpec(
+    key="oxygen_floor",
+    label="Oxygen Floor",
+    units="m",
+    palette="deep",
+    display_min=0.0,
+    display_max=300.0,
+    isosurface=False,
+    render="depth",
+    group="biology",
+    description=(
+        "How deep the water still holds enough oxygen for fish: the depth where dissolved oxygen "
+        "first falls below 2 mg/L on the way down. Drawn as a sheet at that depth. Where it sits "
+        "high, fish are squeezed into a thin surface layer. From Copernicus Marine's "
+        "biogeochemical model, which the floats show runs too high at 100 to 150 m."
+    ),
+)
+
+
 def all_field_specs() -> tuple[FieldSpec, ...]:
     """Every `FieldSpec` the bake can put in the manifest, without fetching anything.
 
@@ -335,6 +365,9 @@ def all_field_specs() -> tuple[FieldSpec, ...]:
         *IncoisErddapSource().fields(),
         *IncoisMcCrearySource().fields(),
         *CopernicusCurrentsSource().fields(),
+        *CopernicusBgcSource().fields(),
+        *SatelliteFrontsSource().fields(),
+        OXYGEN_FLOOR_FIELD,
         *DERIVED_FIELDS,
         NORMAL_ANOMALY_FIELD,
         SPREAD_FIELD,
@@ -361,14 +394,13 @@ ISOTHERM_VALUE = 20.0
 COVERAGE_WINDOW_DAYS = 5.0
 
 
-# Channels an instrument measures that the model has no counterpart for, so they are shown on
-# their own rather than as half of a comparison. Chlorophyll is the only one today.
+# A float's own chlorophyll curve, drawn under the chart of whatever Field is on screen.
 #
-# PS 26067 names chlorophyll in the same clause as Argo and glider profiles. It is reachable -
-# 532 casts from 49 BGC floats over this region and window, measured - and there is no gridded
-# chlorophyll on this timeline to hold it against: INCOIS's own ocean colour products end
-# 2006-03-21 and 2020-05-01. So it is an observation with no model side, which is the same thing
-# Observation Coverage says one quantity further on.
+# PS 26067 names chlorophyll in the same clause as Argo and glider profiles. Until 2026-09-15 it
+# had no model side: INCOIS's own ocean colour products end 2006-03-21 and 2020-05-01. Copernicus's
+# biogeochemical model now gives it one, and when that Field is selected the float's chlorophyll
+# is compared against it like temperature. This small curve stays for every other Field, because a
+# reader looking at temperature should still see that the float carries a fluorometer.
 OBSERVED_ONLY_CHANNELS = (("chlorophyll", "Chlorophyll a", "mg/m3"),)
 
 # How far a BGC cast may be from the cast being charted and still describe the same float's
@@ -385,9 +417,10 @@ OBSERVED_ONLY_CHANNELS = (("chlorophyll", "Chlorophyll a", "mg/m3"),)
 # 36-step bake; what that bake does record is the result - 57 floats carrying chlorophyll after
 # this window, `manifest.instruments.withChlorophyll`.
 #
-# Nothing is being compared against the model at an instant here - chlorophyll has no model side
-# - so a neighbouring cast costs nothing as long as the panel says which cast it is, which
-# `sameDive` below is for.
+# The small curve compares nothing, so a neighbouring cast costs nothing as long as the panel says
+# which cast it is, which `sameDive` below is for. The comparison against the model does compare,
+# so it is taken against the analysis nearest the BGC cast's own date and ranked at its own
+# position (`_build_observations`).
 BGC_MATCH_DAYS = 12.0
 
 
@@ -411,8 +444,8 @@ RESIDUAL_MIN_COUNT = 3
 # ranked fifth worst in the Indian Ocean, in a list that printed the gap and never printed what
 # it rested on. A moored buoy carries a handful of sensors down a wire, 3 to 9 here, and that is
 # the whole instrument working normally. One flat threshold either keeps the truncated casts or
-# deletes every buoy, and the buoys are the only instruments in this bake that INCOIS's analysis
-# did not assimilate. See `residuals.rank_residuals`.
+# deletes every buoy, and the buoys are the only instruments in this bake not described as inputs
+# to INCOIS's analysis. See `residuals.rank_residuals`.
 RESIDUAL_MIN_MATCHED = {"float": 20, "mooring": 1}
 
 
@@ -479,6 +512,8 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     # protocols as the four before them. None is on the critical path.
     second_analysis = IncoisMcCrearySource()
     copernicus = CopernicusCurrentsSource()
+    bgc_model = CopernicusBgcSource()
+    satellite = SatelliteFrontsSource()
     climatology = WoaClimatologySource()
     gliders = GliderSource(index_lines=_glider_index())
     warp = DepthWarp(top=SURFACE_METRES, bottom=FLOOR_METRES)
@@ -556,12 +591,30 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     current_fields = list(copernicus.fields()) if vectors else []
     volume_fields = [*volume_fields, *current_fields]
 
+    # ---- the water under a fishing advisory --------------------------------------------------
+    #
+    # Chlorophyll and oxygen from Copernicus's biogeochemical model, on the model's own nodes.
+    # Not fatal, for the reason the currents are not: the same credential.
+    bgc_fields = _fetch_bgc_model(bgc_model, grids, wanted)
+    volume_fields = [*volume_fields, *bgc_fields]
+
     # ---- the disaster-management Fields ----------------------------------------------------
     #
     # Computed here from Grids already in hand, exactly as density is. Two dimensions rather than
     # three, so they never touch the Volume encoder.
     surfaces = _build_hazard_fields(grids, wanted)
     print(f"[bake] hazard fields: {', '.join(HAZARD_FIELD_KEYS)}")
+
+    biology_surfaces: list[FieldSpec] = []
+    if any(f.key == "oxygen" for f in bgc_fields):
+        surfaces[OXYGEN_FLOOR_FIELD.key] = [
+            oxygen_floor(grids[("oxygen", i)]) for i in range(len(wanted))
+        ]
+        biology_surfaces.append(OXYGEN_FLOOR_FIELD)
+    fronts, fronts_stats = _build_fronts(satellite, grids, wanted)
+    if fronts:
+        surfaces[FRONTS_FIELD.key] = fronts
+        biology_surfaces.append(FRONTS_FIELD)
 
     # One encoding range per Field across every Timestep. If each frame were scaled to its own
     # min/max the colours would breathe as the animation ran and a viewer would read that
@@ -637,13 +690,14 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     )
 
     bgc = _try_fetch("BGC-Argo", biogeochemical, DEMO_REGION, start, end)
-    with_chlorophyll = [
-        p for p in bgc if np.isfinite(p.values.get("chlorophyll", np.array([np.nan]))).any()
-    ]
+    with_chlorophyll = [p for p in bgc if _carries(p, "chlorophyll")]
+    with_oxygen = [p for p in bgc if _carries(p, "oxygen")]
     print(
-        f"[bake] {len(bgc)} BGC profiles, {len(with_chlorophyll)} carrying chlorophyll, "
-        f"from {len(set(p.platform_id for p in with_chlorophyll))} floats"
+        f"[bake] {len(bgc)} BGC profiles, {len(with_chlorophyll)} carrying chlorophyll from "
+        f"{len(set(p.platform_id for p in with_chlorophyll))} floats, {len(with_oxygen)} carrying "
+        f"oxygen from {len(set(p.platform_id for p in with_oxygen))} floats"
     )
+    bgc_usable = [p for p in bgc if _carries(p, "chlorophyll") or _carries(p, "oxygen")]
 
     moorings = _try_fetch("moorings", moored, DEMO_REGION, start, end)
     print(
@@ -679,7 +733,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         print(f"[bake] {field.key}: {len(paths)} volumes, range {vmin:.2f}..{vmax:.2f}")
 
     surface_files = _write_surfaces(output_dir, surfaces, wanted)
-    surface_ranges = {key: _surface_range(surfaces[key], key) for key in HAZARD_FIELD_KEYS}
+    surface_ranges = {key: _surface_range(surfaces[key], key) for key in surfaces}
     ranges.update(surface_ranges)
     for key, (low, high) in surface_ranges.items():
         print(f"[bake] {key}: {len(wanted)} surfaces, range {low:.2f}..{high:.2f}")
@@ -707,7 +761,13 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     )
 
     floats, collocations = _build_observations(
-        in_region, grids, wanted, collocated, extra=with_chlorophyll, moorings=moorings
+        in_region,
+        grids,
+        wanted,
+        collocated,
+        extra=bgc_usable,
+        moorings=moorings,
+        bgc_fields=bgc_fields,
     )
     (output_dir / "floats.json").write_text(json.dumps(floats), encoding="utf-8")
     (output_dir / "collocations.json").write_text(json.dumps(collocations), encoding="utf-8")
@@ -730,7 +790,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     else:
         print("[bake] no currents, so no drift comparison")
 
-    residuals = _build_residuals(collocations, floats, collocated, ranges)
+    residuals = _build_residuals(collocations, floats, [*collocated, *bgc_fields], ranges)
     (output_dir / "residuals.json").write_text(json.dumps(residuals), encoding="utf-8")
     for key, block in residuals["fields"].items():
         summary = block["summary"]
@@ -784,11 +844,11 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
                 {
                     "name": biogeochemical.name,
                     "attribution": biogeochemical.attribution,
-                    "role": "Chlorophyll profiles",
+                    "role": "Chlorophyll and oxygen profiles",
                     "endpoint": "erddap.ifremer.fr/erddap/tabledap/ArgoFloats-synthetic-BGC",
                 }
             ]
-            if with_chlorophyll
+            if bgc_usable
             else []
         )
         + (
@@ -842,6 +902,30 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         + (
             [
                 {
+                    "name": bgc_model.name,
+                    "attribution": bgc_model.attribution,
+                    "role": "Chlorophyll and dissolved oxygen, modelled",
+                    "endpoint": bgc_model.endpoint,
+                }
+            ]
+            if bgc_fields
+            else []
+        )
+        + (
+            [
+                {
+                    "name": satellite.name,
+                    "attribution": satellite.attribution,
+                    "role": "Satellite temperature and chlorophyll, for surface fronts",
+                    "endpoint": satellite.endpoint,
+                }
+            ]
+            if fronts
+            else []
+        )
+        + (
+            [
+                {
                     "name": gliders.name,
                     "attribution": gliders.attribution,
                     "role": "Glider profiles - read, and empty for a reason worth reading",
@@ -856,7 +940,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         # a hazard quantity under HAZARD rather than under "the fourth one along".
         "fields": [
             asdict(f) | {"range": list(ranges[f.key])}
-            for f in (*volume_fields, COVERAGE_FIELD, *HAZARD_FIELDS)
+            for f in (*volume_fields, COVERAGE_FIELD, *HAZARD_FIELDS, *biology_surfaces)
         ],
         # What each group is called, in the order the panel shows them.
         "fieldGroups": [
@@ -865,6 +949,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
             {"key": "circulation", "label": "Circulation"},
             {"key": "evidence", "label": "Evidence"},
             {"key": "change", "label": "Change"},
+            {"key": "biology", "label": "Biology"},
         ],
         "coverage": {
             "bands": list(BANDS),
@@ -959,11 +1044,31 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         # The glider answer. Present whether or not a single cast came back, because "we read
         # the archive the PS names and this is what is in it" is the finding.
         **({"gliders": glider_finding} if glider_finding else {}),
+        # What the fishing water column is built on, measured, so the guide panel quotes the bake
+        # rather than a sentence. Absent when the sources could not be reached.
+        **(
+            {
+                "habitat": {
+                    "oxygenFloorMmol": OXYGEN_FLOOR_MMOL,
+                    **({"fronts": fronts_stats} if fronts_stats else {}),
+                }
+            }
+            if biology_surfaces
+            else {}
+        ),
         # What the Instruments panel and the map key need to name what is on the water.
         "instruments": {
             "floats": sum(1 for f in floats if f.get("kind", "float") == "float"),
             "moorings": sum(1 for f in floats if f.get("kind") == "mooring"),
             "withChlorophyll": sum(1 for f in floats if f.get("bgc")),
+            # Floats whose oxygen was compared against the model: the evidence behind the
+            # Dissolved Oxygen Field's bias map.
+            "withOxygen": sum(
+                1 for c in collocations.values() if (c.get("fields") or {}).get("oxygen")
+            ),
+            "withChlorophyllCompared": sum(
+                1 for c in collocations.values() if (c.get("fields") or {}).get("chlorophyll")
+            ),
         },
         "observedOnly": [
             {"key": key, "label": label, "units": units}
@@ -1039,6 +1144,82 @@ def _fetch_second_analysis(source, grids, timesteps, masked: dict[str, int]) -> 
                 grids.pop((key, index), None)
         return False
     return True
+
+
+def _fetch_bgc_model(source, grids, timesteps) -> list[FieldSpec]:
+    """Chlorophyll and oxygen on the model's own nodes for every Timestep, or nothing at all.
+
+    Masked to the analysis's own ocean, so the block has one coastline: Copernicus's land mask is
+    not INCOIS's, and a column of plankton over a cell INCOIS call land would be drawn over India.
+
+    Not fatal: a bake without a Copernicus credential keeps everything else.
+    """
+    fields = list(source.fields())
+    try:
+        for spec in fields:
+            for index, stamp in enumerate(timesteps):
+                axes = grids[("temperature", index)]
+                grid = source.fetch_on_axes(
+                    spec.key, stamp, DEMO_REGION, axes.levels, axes.latitudes, axes.longitudes
+                )
+                grid.values[np.isnan(axes.values)] = np.nan
+                grids[(spec.key, index)] = grid
+            finite = np.concatenate(
+                [grids[(spec.key, i)].values[np.isfinite(grids[(spec.key, i)].values)] for i in range(len(timesteps))]
+            )
+            print(
+                f"[bake]   {spec.key} x{len(timesteps)}: median {np.median(finite):.3g}, "
+                f"99th percentile {np.percentile(finite, 99):.3g} {spec.units}"
+            )
+    except Exception as error:  # noqa: BLE001 - credentials, network, upstream, all the same
+        print(f"[bake] WARNING: biogeochemistry unavailable ({error}); continuing without it")
+        for spec in fields:
+            for index in range(len(timesteps)):
+                grids.pop((spec.key, index), None)
+        return []
+    return fields
+
+
+def _build_fronts(source, grids, timesteps):
+    """The share of each cell on a surface front, one (lat, lon) array per Timestep, or (None, None).
+
+    Read on each analysis's own date: one day of satellite data for a ten-day analysis. Masked to
+    the analysis's own ocean at 5 m, like every other Drape. The second half of the return is what
+    the guide panel quotes: how much of the ocean sat on a front, of each kind, pooled.
+    """
+    out = []
+    thermal = colour = ocean = 0
+    try:
+        for index, stamp in enumerate(timesteps):
+            sample = grids[("temperature", index)]
+            box = BoundingBox(
+                south=float(sample.latitudes[0]) - 0.5,
+                north=float(sample.latitudes[-1]) + 0.5,
+                west=float(sample.longitudes[0]) - 0.5,
+                east=float(sample.longitudes[-1]) + 0.5,
+            )
+            share, stats = source.front_share(stamp, box, sample.latitudes, sample.longitudes)
+            share[np.isnan(sample.values[0])] = np.nan
+            out.append(share)
+            thermal += stats["thermalPixels"]
+            colour += stats["chlorophyllPixels"]
+            ocean += stats["oceanPixels"]
+            print(
+                f"[bake]   fronts {stamp:%Y-%m-%d}: {stats['thermalPixels']} thermal and "
+                f"{stats['chlorophyllPixels']} chlorophyll front pixels of {stats['oceanPixels']}"
+            )
+    except Exception as error:  # noqa: BLE001 - credentials, network, upstream, all the same
+        print(f"[bake] WARNING: satellite fronts unavailable ({error}); continuing without them")
+        return None, None
+    return out, {
+        "thermalShare": _json_number(thermal / ocean) if ocean else None,
+        "chlorophyllShare": _json_number(colour / ocean) if ocean else None,
+    }
+
+
+def _carries(profile, channel: str) -> bool:
+    values = profile.values.get(channel)
+    return values is not None and bool(np.isfinite(values).any())
 
 
 def _fetch_currents(source, grids, timesteps, sample_axes):
@@ -1584,10 +1765,10 @@ def _build_residuals(collocations, floats, fields, ranges) -> dict:
         summary = field_bias(entries, field.key)
         if summary is None:
             continue
-        # Split by kind, because the two kinds are answering different questions. INCOIS
-        # assimilate Argo: a float's residual is largely the analysis agreeing with an
-        # observation it was fed, and the moored buoys are the only independent check in the
-        # bake. Pooled, the seventeen of them disappear into 249 floats and the headline becomes a
+        # Split by kind, because the two kinds are answering different questions. INCOIS's
+        # analysis is built from Argo floats: a float's residual is largely the analysis agreeing
+        # with data it was made from, and the moored buoys, not described as inputs, are the
+        # closest thing to an independent check in the bake. Pooled, the seventeen of them disappear into 249 floats and the headline becomes a
         # statement about self-consistency. See `residuals.py`.
         by_kind = {
             kind: field_bias(entries, field.key, kind=kind)
@@ -1788,12 +1969,10 @@ def _collocate_cast(cast, grids, index, fields):
 
 
 def _observed_only(cast) -> dict:
-    """Channels a Float measured that the model has no counterpart for.
+    """A float's chlorophyll as measured, for the small curve under the chart.
 
-    Chlorophyll is the one that exists today. There is no gridded chlorophyll on this timeline -
-    INCOIS's own ocean colour stops at 2020-05-01 - so it is an observation with nothing to be
-    held against, and it is written somewhere the Collocation panel cannot mistake for a
-    comparison. Drawing a second curve out of nowhere is the failure this shape prevents.
+    Written apart from `fields`, where the model comparison lives, so the panel cannot mistake a
+    measurement shown on its own for a comparison.
     """
     out: dict[str, dict] = {}
     for key, label, units in OBSERVED_ONLY_CHANNELS:
@@ -1810,7 +1989,7 @@ def _observed_only(cast) -> dict:
     return out
 
 
-def _build_observations(profiles, grids, timesteps, fields, extra=(), moorings=()):
+def _build_observations(profiles, grids, timesteps, fields, extra=(), moorings=(), bgc_fields=()):
     """Group Profiles into instruments, and pre-compute a Collocation for each.
 
     Which cast a Float's Collocation uses is a decision, not a default - see
@@ -1900,6 +2079,18 @@ def _build_observations(profiles, grids, timesteps, fields, extra=(), moorings=(
         if bgc:
             nearest = min(bgc, key=lambda c: abs((c.time - chosen.time).total_seconds()))
             apart = abs((nearest.time - chosen.time).total_seconds())
+            if apart <= BGC_MATCH_DAYS * 86400 and bgc_fields:
+                # Chlorophyll and oxygen against the model, from the BGC cast itself: its own
+                # analysis step, its own position. It is often one cycle behind the core cast, so
+                # the series says where and when it was measured, and the bias map uses that.
+                bgc_index = _nearest_timestep(nearest.time, timesteps)
+                for key, series in _collocate_cast(nearest, grids, bgc_index, bgc_fields).items():
+                    entry["fields"][key] = series | {
+                        "time": nearest.time.isoformat(),
+                        "timestepIndex": bgc_index,
+                        "lat": round(nearest.latitude, 4),
+                        "lon": round(nearest.longitude, 4),
+                    }
             if apart <= BGC_MATCH_DAYS * 86400:
                 observed_only = _observed_only(nearest)
                 if observed_only:

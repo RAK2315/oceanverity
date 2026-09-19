@@ -139,8 +139,11 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
     }
   }
   if (query.get("tour") === "1") useStore.setState({ tourStep: 0 });
-  // The storm walkthrough. Only one case exists, and an unknown name is ignored, never guessed.
-  if (query.get("case") === "montha") useStore.setState({ caseStep: 0, tourStep: null });
+  // The two walkthroughs. An unknown name is ignored, never guessed.
+  const walk = query.get("case");
+  if (walk === "montha" || walk === "fishing") {
+    useStore.setState({ caseStep: 0, walkthrough: walk, tourStep: null });
+  }
   if (query.get("float")) useStore.setState({ selectedFloatId: query.get("float") });
   if (query.get("flow") === "arrows") useStore.setState({ currentStyle: "arrows" });
   if (query.get("explore") === "1") useStore.setState({ explore: true });
@@ -162,7 +165,7 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
  * exists to prevent on the pipeline side. Small today only by luck - 80% of the comparisons sit
  * on the last two steps - and one re-bake from mattering.
  *
- * A Map rather than a lookup through the array on every marker: 276 instruments times 60 frames
+ * A Map rather than a lookup through the array on every marker: 274 instruments times 60 frames
  * a second is 16,560 linear scans a second for a number that changes only when the Field does.
  */
 function biasMap(residuals: FieldResiduals | null): Map<string, BiasMark> | null {
@@ -579,7 +582,7 @@ export default function App() {
       // IMD's track, while the walkthrough that quotes it is open and never otherwise: a storm
       // line left on the water would be a claim about every other date on the timeline.
       stormTrack:
-        store.caseStep !== null && store.stormCase
+        store.caseStep !== null && store.walkthrough === "montha" && store.stormCase
           ? store.stormCase.track.map((f) => [f.lon, f.lat] as [number, number])
           : null,
       sectionLine:

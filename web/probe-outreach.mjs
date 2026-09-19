@@ -44,6 +44,7 @@ const PROMISED = {
   changed: (s) => s.fieldKey === "temperature_normal_anomaly",
   adrift: (s) => s.fieldKey === "current_speed" && s.driftPin !== null,
   twoseas: (s) => s.fieldKey === "density",
+  fish: (s) => s.fieldKey === "fronts",
   float: (s) => typeof s.selectedFloatId === "string" && s.selectedFloatId.length > 0,
   // The lowest exaggeration seen while it was running, not the value at one instant. A third of
   // the way down is well past anything a rounding error or a single stray frame produces.
@@ -116,7 +117,7 @@ for (const question of questions) {
 
 // A caveat is required on every question that simplifies a limit away. Three of them state a
 // finding with no limit worth naming; the rest must say what they left out.
-const needsCaution = ["cyclone", "guessing", "disagree", "changed", "adrift"];
+const needsCaution = ["cyclone", "guessing", "disagree", "changed", "adrift", "fish"];
 for (const id of needsCaution) {
   const one = questions.find((q) => q.id === id);
   if (!one?.caution) {

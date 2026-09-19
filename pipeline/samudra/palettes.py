@@ -47,6 +47,13 @@ AVAILABLE = {
     "speed": "Current speed - still to fast",
     "tempo": "A count of observations",
     "matter": "An error estimate - small to large",
+    # Back on 2026-09-15, each attached to a FieldSpec and to nothing else, which is the only way
+    # ADR 0010 allows a palette in. `algae` and `oxy` were deleted because nothing gridded shared
+    # the timeline; Copernicus's biogeochemical model now does (see ADR 0010's last amendment).
+    # `oxy` is built for exactly this: its low end turns red where oxygen runs out.
+    "algae": "Chlorophyll - little plant life to a great deal",
+    "oxy": "Dissolved oxygen - red where it runs out, grey to yellow above",
+    "turbid": "A share of a cell on a front - pale where there is none, dark where there is most",
     # Alternates, added 2026-09-07 for the colourbar switcher. See ALTERNATES below: these are
     # offered as a *rendering* of the Field already on screen, never as a different quantity,
     # which is the distinction ADR 0010 was written about.

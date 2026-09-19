@@ -105,6 +105,23 @@ PROVENANCE = {
         "Computed by this platform from INCOIS's Argo analysis, as isothermal layer depth minus "
         "mixed layer depth; published nowhere else."
     ),
+    "chlorophyll": (
+        "E.U. Copernicus Marine's biogeochemical model, restated on the model's own grid by "
+        "nearest node. Not INCOIS's."
+    ),
+    "oxygen": (
+        "E.U. Copernicus Marine's biogeochemical model, restated on the model's own grid by "
+        "nearest node. Not INCOIS's."
+    ),
+    "oxygen_floor": (
+        "Computed by this platform from E.U. Copernicus Marine's modelled oxygen, as the depth "
+        "where it first falls below 2 mg/L; published nowhere else."
+    ),
+    "fronts": (
+        "Computed by this platform from E.U. Copernicus Marine satellite temperature and "
+        "chlorophyll, by the methods INCOIS name for their advisories. Not an INCOIS advisory "
+        "and not a fishing zone."
+    ),
     "coverage": (
         "Computed by this platform on the rendering lattice, and not served here. "
         "See /api/volume/coverage/0."

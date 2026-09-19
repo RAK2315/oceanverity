@@ -26,10 +26,14 @@ from samudra.bake import (
     COVERAGE_FIELD,
     DENSITY_FIELD,
     HAZARD_FIELDS,
+    NORMAL_ANOMALY_FIELD,
+    OXYGEN_FLOOR_FIELD,
     SPREAD_FIELD,
 )
 from samudra.sources.base import FieldSpec
 from samudra.sources.copernicus import CopernicusCurrentsSource
+from samudra.sources.copernicus_bgc import CopernicusBgcSource
+from samudra.sources.copernicus_satellite import SatelliteFrontsSource
 from samudra.sources.incois import IncoisErddapSource, IncoisMcCrearySource
 
 # Every Field whose isosurface is a real object, and what that object is called. Anything not
@@ -41,6 +45,11 @@ ISOSURFACE_IS_MEANINGFUL = {
     "density": "isopycnal",
     "temperature_anomaly": "contour of departure",
     "analysis_spread": "contour of disagreement",
+    "temperature_normal_anomaly": "contour of departure from the normal",
+    # A surface of equal chlorophyll traces the edge of a bloom in 3D; a surface of equal oxygen
+    # at the hypoxic line is the roof of the low-oxygen layer fish avoid.
+    "chlorophyll": "surface of equal chlorophyll",
+    "oxygen": "surface of equal oxygen",
 }
 
 
@@ -50,8 +59,12 @@ def all_specs() -> list[FieldSpec]:
         *IncoisErddapSource().fields(),
         *IncoisMcCrearySource().fields(),
         *CopernicusCurrentsSource().fields(),
+        *CopernicusBgcSource().fields(),
+        *SatelliteFrontsSource().fields(),
+        OXYGEN_FLOOR_FIELD,
         DENSITY_FIELD,
         ANOMALY_FIELD,
+        NORMAL_ANOMALY_FIELD,
         SPREAD_FIELD,
         COVERAGE_FIELD,
         *HAZARD_FIELDS,
@@ -67,7 +80,7 @@ def selectable() -> list[FieldSpec]:
     return [spec for spec in all_specs() if spec.group]
 
 
-def test_exactly_the_five_continuous_fields_offer_an_isosurface():
+def test_exactly_the_continuous_volume_fields_offer_an_isosurface():
     offered = {spec.key for spec in selectable() if spec.isosurface}
     assert offered == set(ISOSURFACE_IS_MEANINGFUL)
 
@@ -90,8 +103,25 @@ def test_every_field_key_is_unique():
     assert len(keys) == len(set(keys))
 
 
-def test_every_selectable_field_is_in_one_of_the_five_groups():
+def test_every_selectable_field_is_in_one_of_the_six_groups():
     """A Field with a group the panel does not know about gets no button at all."""
-    groups = {"state", "hazard", "circulation", "evidence", "change"}
+    groups = {"state", "hazard", "circulation", "evidence", "change", "biology"}
     for spec in selectable():
         assert spec.group in groups, (spec.key, spec.group)
+
+
+def test_this_file_and_the_bake_agree_about_every_field():
+    """`all_specs` here and `bake.all_field_specs` are two lists of one set. If they disagree, a
+    Field is escaping one of the rules above."""
+    from samudra.bake import all_field_specs
+
+    assert {s.key for s in all_specs()} == {s.key for s in all_field_specs()}
+
+
+def test_the_fishing_fields_never_call_themselves_a_fishing_zone():
+    """INCOIS issue Potential Fishing Zone advisories. Nothing this platform computes is one."""
+    for spec in all_specs():
+        if spec.group != "biology":
+            continue
+        text = f"{spec.label} {spec.description}".lower().replace("not a fishing zone", "")
+        assert "fishing zone" not in text, spec.key

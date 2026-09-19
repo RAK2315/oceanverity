@@ -142,6 +142,21 @@ export function guideFigures(source: {
     figures.driftDepth = `${manifest.drift.parkingDepthMetres.toFixed(0)} m`;
   }
 
+  const instruments = manifest.instruments;
+  if (instruments?.withChlorophyllCompared) {
+    figures.chlorophyllFloats = String(instruments.withChlorophyllCompared);
+  }
+  if (instruments?.withOxygen) figures.oxygenFloats = String(instruments.withOxygen);
+  const habitat = manifest.habitat;
+  if (habitat) {
+    figures.oxygenFloorMmol = `${habitat.oxygenFloorMmol.toFixed(1)} mmol/m³`;
+    const fronts = habitat.fronts;
+    if (fronts?.thermalShare != null) figures.frontsThermalPct = `${(fronts.thermalShare * 100).toFixed(1)}%`;
+    if (fronts?.chlorophyllShare != null) {
+      figures.frontsChlorophyllPct = `${(fronts.chlorophyllShare * 100).toFixed(1)}%`;
+    }
+  }
+
   const features = source.anomalies;
   if (features && features.length) {
     const all = features.flat();
@@ -182,9 +197,9 @@ export const GUIDE: Record<string, GuideEntry> = {
     does: "Switches which ocean property is drawn. {fieldCount} of them, in {groupCount} groups.",
     means: [
       "OCEAN STATE - what INCOIS publish, plus the density worked out from it.",
-      "CIRCULATION - which way the water is moving.",
-      "EVIDENCE - how much real measurement stands behind the model.",
+      "CIRCULATION - which way the water moves. EVIDENCE - how much was really measured.",
       "CHANGE - how far the water is from its own average. HAZARD is behind cyclone mode.",
+      "BIOLOGY - the water under a fishing advisory: plankton, oxygen and surface fronts.",
     ],
     look: [
       "Not every variable is a block of water, and its shape tells you which.",
@@ -222,7 +237,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Linear - equal steps in value are equal steps in colour. Right for temperature.",
       "Wrong when most values are piled up near zero, as heat potential and speed are.",
       "Log gives the small values most of the colour range, so their structure appears.",
-      "Offered on three variables only: the three whose range starts at a real zero.",
+      "Offered only where the range starts at a real zero and never goes below it.",
     ],
     look: [
       "The colourbar bends with it, so a colour reads the same number on both.",
@@ -790,14 +805,15 @@ export const GUIDE: Record<string, GuideEntry> = {
     does: "Ranks every instrument by how far the analysis sat from what it measured.",
     means: [
       "The gap is the model minus the instrument, at the cast that was compared.",
-      "INCOIS feed the Argo floats into their analysis, so the buoys are the real test.",
+      "INCOIS build their analysis from Argo floats, so the buoys are the closer test.",
+      "Chlorophyll and oxygen are checked against Copernicus's model, not INCOIS's analysis.",
       "Ranked as a share of each variable's range, so degrees and PSU share one list.",
     ],
     look: [
       "Blue is where the analysis reads low against the instruments, red where it reads high.",
       "One colour over a patch is a regional bias. A mix is scatter, a different problem.",
       "The map holds every comparison at once, so it does not change with the timeline.",
-      "Only Temperature, Salinity and Density have one. Nothing measures the rest.",
+      "Five variables have one: the five an instrument measures. Nothing measures the rest.",
     ],
     tryThis: "Click the top row. The comparison for that instrument opens on the right.",
   },
@@ -877,7 +893,7 @@ export const GUIDE: Record<string, GuideEntry> = {
       "Tethered in one place, sensors down a wire, measuring the same column for years.",
       "Four here are India's own OMNI network, run by NIOT with INCOIS as data centre.",
       "Three are RAMA, NOAA's Indian Ocean array, run with India's MoES among its partners.",
-      "INCOIS do not feed these into the analysis, so they are an independent check.",
+      "INCOIS's Argo analysis is not described as using them, so they are the closer independent check.",
     ],
     look: [
       "Click one and move the timeline. It never drifts, so you watch one patch all season.",
@@ -886,19 +902,80 @@ export const GUIDE: Record<string, GuideEntry> = {
     tryThis: "Open the buoy in the Bay of Bengal and play the timeline right through.",
   },
 
+  // Chlorophyll is both a variable and a badge on the floats that carry a fluorometer, and one
+  // entry explains both: the model's field and the measurements it is checked against.
   chlorophyll: {
     title: "Chlorophyll",
     kind: "science",
-    does: "How much plant life a float measured, where it carries the sensor for it.",
+    does:
+      "How much plant life is in the water, from Copernicus Marine's model, checked against" +
+      " floats that measure it.",
     means: [
-      "It marks where nutrients reach the sunlit layer: upwelling, river plumes, blooms.",
-      "It is what fisheries advisories are built on.",
-      "It is drawn alone: no gridded chlorophyll shares this timeline to compare against.",
+      "Plankton at the bottom of the food chain. Fish gather where there is food.",
+      "A model, so it has a value under cloud and below the surface, where satellites see nothing.",
+      "Compared against {chlorophyllFloats} floats that carry a fluorometer.",
+      "INCOIS's own ocean-colour series end in 2006 and 2020, so this is Copernicus's.",
     ],
     look: [
-      "The peak is usually not at the surface.",
-      "Look for the bulge between about 30 and 80 m, where there is light and food left.",
+      "The peak is usually not at the surface. Look between about 30 and 80 m.",
+      "Where the monsoon pulls deep water up, the sunlit layer turns green.",
+      "Turn on the bias map to see how far the model sits from the floats.",
     ],
+    tryThis: "Click a float marked + chlorophyll and read its cast against the model.",
+  },
+
+  oxygen: {
+    title: "Dissolved Oxygen",
+    kind: "science",
+    does: "How much oxygen is dissolved in the water, from Copernicus Marine's model.",
+    means: [
+      "Fish need it. Where it runs out is water they cannot use, however much food is there.",
+      "The Arabian Sea holds one of the largest low-oxygen layers in the world ocean.",
+      "Compared against {oxygenFloats} floats that carry an oxygen sensor.",
+      "Floats report per kilogram; each is converted with its own water's density.",
+    ],
+    look: [
+      "Red is water running out of oxygen. It sits under a thin, well-aired surface layer.",
+      "The bias map shows where the model holds too much or too little.",
+    ],
+    tryThis: "Switch to Oxygen Floor to see how deep the usable water goes.",
+  },
+
+  oxygen_floor: {
+    title: "Oxygen Floor",
+    kind: "science",
+    does:
+      "How deep the water still holds enough oxygen for fish, drawn as a sheet at that depth.",
+    means: [
+      "Dissolved Oxygen says how much; this says how far down fish can go.",
+      "Where oxygen first falls below 2 mg/L ({oxygenFloorMmol}) on the way down.",
+      "A high sheet squeezes fish into a thin layer near the surface, where nets reach them.",
+      "From the model's oxygen, found between levels 25 m apart near 100 m.",
+    ],
+    look: [
+      "It spreads under the Arabian Sea and the Bay of Bengal, where the low-oxygen layer is.",
+      "South of the equator there is mostly no sheet: the oxygen never runs that low.",
+    ],
+    tryThis: "Press play and watch the floor rise and fall with the monsoon.",
+  },
+
+  fronts: {
+    title: "Surface Fronts",
+    kind: "science",
+    does:
+      "Where two bodies of surface water meet, as the share of each cell lying on a front.",
+    means: [
+      "Fronts gather plankton and the fish that eat it.",
+      "INCOIS build their fishing advisories from them. This is the ingredient, not a fishing zone.",
+      "Found in satellite temperature and chlorophyll by the methods INCOIS name.",
+      "Pooled over this build: {frontsThermalPct} of ocean pixels on a thermal front, {frontsChlorophyllPct} on a chlorophyll one.",
+    ],
+    look: [
+      "Dark along coasts and upwelling edges, pale in the open southern ocean.",
+      "A front is a few kilometres wide and a cell is about 110 km, so read cells, not lines.",
+      "The satellite fields are gap-free, so under long cloud part of a front is interpolated.",
+    ],
+    tryThis: "Switch to Chlorophyll without moving the camera and look under the dark cells.",
   },
 
   tracks: {
@@ -962,6 +1039,18 @@ const PROVENANCE: Record<string, string> = {
   analysis_spread:
     "worked out here for %d as INCOIS's Variational analysis minus their Kessler-McCreary" +
     " analysis of the same floats",
+  chlorophyll:
+    "read from Copernicus Marine's biogeochemical model for %d, at a quarter of a degree, taken at" +
+    " the nearest of their grid points to each of ours",
+  oxygen:
+    "read from Copernicus Marine's biogeochemical model for %d, at a quarter of a degree, taken at" +
+    " the nearest of their grid points to each of ours",
+  oxygen_floor:
+    "worked out here from Copernicus Marine's modelled oxygen for %d, as the depth where it first" +
+    " falls below 2 mg/L",
+  fronts:
+    "worked out here from Copernicus Marine satellite temperature and chlorophyll for %d, by the" +
+    " methods INCOIS name for their advisories. It is not an INCOIS advisory",
 };
 
 /** A plain-language description of the current view, for when no control is being touched. */
@@ -1016,8 +1105,10 @@ export function describeView(options: {
       ? "It is drawn as a sheet inside the block, sitting at the depth it reports - so where the" +
         " sheet dips, the value is larger."
       : render === "column"
-        ? "It is one number for the whole water column, so it is painted on the sea surface" +
-          " rather than drawn inside the water."
+        ? fieldKey === "fronts"
+          ? "It is read from the sea surface itself, so it is painted on the sea surface."
+          : "It is one number for the whole water column, so it is painted on the sea surface" +
+            " rather than drawn inside the water."
         : render === "vector"
           ? currentStyle === "arrows"
             ? `The arrows sit at ${(arrowDepth ?? 5).toFixed(0)} m and point the way the water` +
@@ -1113,6 +1204,10 @@ export const RANGE_NOTE: Record<string, string> = {
   isothermal_layer_depth: "The sheet is drawn only where it sits between the two depths.",
   barrier_layer: "Lift the minimum past zero for only the genuine barrier layers.",
   current_speed: "Lift the minimum and only the jets are left, which finds the Somali Current.",
+  chlorophyll: "Lift the minimum for only the water rich in plankton.",
+  oxygen: "Lower the maximum to about 60 for only the water fish avoid.",
+  oxygen_floor: "The sheet is drawn only where it sits between the two depths.",
+  fronts: "Lift the minimum for only the cells most crossed by fronts.",
 };
 
 export const PALETTES: Record<string, PaletteNote> = {
@@ -1279,6 +1374,36 @@ export const PALETTES: Record<string, PaletteNote> = {
       "The dark end is water INCOIS themselves say they do not know well.",
     ],
   },
+  algae: {
+    title: "algae",
+    designedFor: "Chlorophyll",
+    form: "sequential",
+    suits: ["chlorophyll"],
+    note: [
+      "Pale where there is little plant life, deep green where there is most.",
+      "The house palette for chlorophyll.",
+    ],
+  },
+  oxy: {
+    title: "oxy",
+    designedFor: "Dissolved oxygen",
+    form: "sequential",
+    suits: ["oxygen"],
+    note: [
+      "Red at the bottom, grey through the middle, yellow at the top.",
+      "Built so water running out of oxygen stands out in red before you read a number.",
+    ],
+  },
+  turbid: {
+    title: "turbid",
+    designedFor: "A share on a front",
+    form: "sequential",
+    suits: ["fronts"],
+    note: [
+      "Pale yellow where no front crossed the cell, dark brown where fronts crossed most of it.",
+      "Anchored at zero, because a cell with no front in it is a real answer.",
+    ],
+  },
   coverage: {
     title: "coverage",
     designedFor: "Observation coverage",
@@ -1378,6 +1503,32 @@ export const ISOSURFACES: Record<
     ],
     hint: "The surface encloses water that departed from its 1991-2020 normal by this much.",
     tryThis: "Set it near 1 °C and count the separate bodies of each sign.",
+  },
+  chlorophyll: {
+    name: "surface of equal chlorophyll",
+    hint: "The surface wraps the water richer in plankton than the value you set.",
+    means: [
+      "A skin through every point with exactly this much chlorophyll.",
+      "It wraps a bloom, so you see how thick and how deep the green layer is.",
+    ],
+    look: [
+      "Near the surface in upwelling water, deeper and thinner in the open ocean.",
+      "Chlorophyll is small numbers: try the log scale before setting a value.",
+    ],
+    tryThis: "Set it near 0.3 mg/m³ and look along the Arabian Sea coasts.",
+  },
+  oxygen: {
+    name: "surface of equal oxygen",
+    hint: "Near 60 mmol/m³ this surface is the roof of the water fish avoid.",
+    means: [
+      "A skin through every point with exactly this much oxygen.",
+      "Near 60 mmol/m³ it is the top of the low-oxygen layer, in 3D.",
+    ],
+    look: [
+      "Where it rises close to the surface, usable water is thin.",
+      "Compare it with the Oxygen Floor sheet, which is the same line found per column.",
+    ],
+    tryThis: "Set it near 60 mmol/m³ and look under the Arabian Sea.",
   },
   temperature_anomaly: {
     name: "contour of departure",

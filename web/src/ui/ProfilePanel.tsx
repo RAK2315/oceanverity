@@ -61,7 +61,6 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
   const anchored = chosen?.kind === "mooring";
   const atStep = collocation?.steps?.[String(timestepIndex)];
   const fields = atStep?.fields ?? collocation?.fields;
-  const castTime = atStep?.time ?? collocation?.time;
 
   const available = fields ? Object.keys(fields) : [];
   const shownKey = fields?.[fieldKey] ? fieldKey : available[0];
@@ -69,6 +68,12 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
   const shownSpec = manifest?.fields.find((f) => f.key === shownKey) ?? spec;
   const substituted = shownKey !== undefined && shownKey !== fieldKey;
   const volume = manifest?.volume;
+  // Chlorophyll and oxygen are compared against Copernicus Marine's biogeochemical model, not
+  // INCOIS's analysis, and from the float's BGC cast, which can be a cycle away from the core one.
+  // The series carries its own date and analysis step when that is so.
+  const biology = shownSpec.group === "biology";
+  const modelBy = biology ? "Copernicus Marine" : "INCOIS";
+  const castTime = series?.time ?? atStep?.time ?? collocation?.time;
 
   // Where this Float actually was at the moment on screen, which is where its marker is drawn.
   // The header used to read `chosen.latest` instead - its newest report, whatever the timeline
@@ -93,12 +98,11 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
   // to the analysis step nearest its own cast. Name the step this chart is actually against -
   // and note that this is the *analysis* date from the manifest, not `collocation.time`, which
   // is when the float surfaced.
-  const analysisIndex = atStep ? timestepIndex : collocation?.timestepIndex;
+  const analysisIndex = series?.timestepIndex ?? (atStep ? timestepIndex : collocation?.timestepIndex);
   const analysisDate =
     analysisIndex === undefined ? undefined : manifest?.timesteps[analysisIndex]?.slice(0, 10);
   // A mooring never drifts off the step on screen, because it has one for every step.
-  const analysisDrifted =
-    !atStep && collocation !== undefined && collocation.timestepIndex !== timestepIndex;
+  const analysisDrifted = !atStep && analysisIndex !== undefined && analysisIndex !== timestepIndex;
 
 
   return (
@@ -211,12 +215,13 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
                 ? " - follows the timeline."
                 : "."}
           </p>
-          <Chart series={series} spec={shownSpec} volume={volume} anchored={anchored} />
+          <Chart series={series} spec={shownSpec} volume={volume} anchored={anchored} modelBy={modelBy} />
           <Verdict
             series={series}
             units={shownSpec.units}
             label={shownSpec.label}
             range={shownSpec.range}
+            modelBy={biology ? "The model" : "The analysis"}
           />
           <Stats series={series} units={shownSpec.units} />
 
@@ -245,16 +250,24 @@ export function ProfilePanel({ onFocus }: { onFocus: (lon: number, lat: number) 
               </p>
             )}
             <p className="note">
-              {anchored ? (
+              {biology ? (
                 <>
-                  A moored buoy is <b>not</b> part of what INCOIS assimilated. Nothing about this
-                  water column went into the analysis being drawn against it, which makes this
-                  the more independent of the two comparisons the platform can show.
+                  This is Copernicus Marine&apos;s biogeochemical model, not INCOIS&apos;s analysis,
+                  and the measurement is from this float&apos;s BGC cast
+                  {series.time ? ` of ${shortDate(series.time)}` : ""}. Whether that model draws on
+                  these floats is not checked here. In July 2026 it held too much oxygen at 100-150 m
+                  and about twice the floats&apos; chlorophyll in the top 100 m.
+                </>
+              ) : anchored ? (
+                <>
+                  A moored buoy is <b>not</b> described as an input to INCOIS&apos;s Argo analysis,
+                  which makes this the more independent of the two comparisons the platform can
+                  show.
                 </>
               ) : (
                 <>
-                  INCOIS's analysis assimilates Argo, so this float may be one of the observations
-                  that went into it. That is the question a forecaster asks: did the analysis
+                  INCOIS&apos;s gridded analysis is built from Argo floats, so this float may be one
+                  of the observations it was made from. That is the question a forecaster asks: did the analysis
                   reproduce the measurement it was given, here, at this depth? Not always -
                   across this bake the disagreement runs from 0.00 to 1.98 &deg;C.
                 </>
@@ -321,13 +334,13 @@ function titleCase(value: string): string {
 const CHLOROPHYLL_FLOOR = 300;
 
 /**
- * A quantity this instrument measured that the model has no counterpart for.
+ * A float's chlorophyll as measured, drawn under the chart of whatever other Field is on screen.
  *
- * Chlorophyll is the one that exists today, and it is drawn on its own rather than as half of a
- * comparison, because there is nothing to compare it against: no gridded chlorophyll shares this
- * timeline. INCOIS publish ocean colour themselves and both series are dead - `IRS_chlorophyll`
- * ends 2006-03-21 and the Oceansat-2 product ends 2020-05-01 - so the honest thing is one curve
- * with a sentence saying why there is only one.
+ * It used to be the only chlorophyll on the platform, because no gridded chlorophyll shared this
+ * timeline: INCOIS's own ocean-colour series end 2006-03-21 and 2020-05-01. Copernicus Marine's
+ * biogeochemical model now does, and selecting the Chlorophyll variable compares this float's
+ * cast against it. This small curve stays so a reader on temperature can still see the float
+ * carries a fluorometer.
  *
  * It gets its own depth axis, linear and stopping at 300 m. The main chart's warp exists to give
  * the thermocline room down a 2000 m column; chlorophyll lives in the top 100 m and is zero
@@ -409,9 +422,7 @@ function ObservedOnly({
           ? " "
           : " That is this float's neighbouring dive - the BGC product is assembled a cycle" +
             " behind the core one. "}
-        There is no second curve because no gridded chlorophyll shares this timeline:
-        INCOIS&apos;s own ocean-colour products end in 2006 and 2020. It is an observation with
-        nothing to hold it against, which is what Observation Coverage says one variable along.
+        Select the Chlorophyll variable to see it against Copernicus Marine&apos;s model.
       </p>
     </figure>
   );
@@ -458,12 +469,15 @@ function Chart({
   spec,
   volume,
   anchored,
+  modelBy,
 }: {
   series: CollocationSeries;
   spec: { label: string; units: string };
   volume: VolumeSpec;
   /** A moored buoy, not a drifting float. It changes two words and the depth axis. */
   anchored: boolean;
+  /** Whose model the second curve is. Not always INCOIS's. */
+  modelBy: string;
 }) {
   // The Depth Warp, read back from the axis the pipeline shipped rather than re-derived here.
   // A third copy of the formula would drift out of step the moment the pipeline changed, and
@@ -607,7 +621,7 @@ function Chart({
 
       <div className="legend">
         <span className="key key-observed">Measured by the {anchored ? "buoy" : "float"}</span>
-        <span className="key key-model">Predicted by INCOIS</span>
+        <span className="key key-model">Predicted by {modelBy}</span>
         <span className="key key-gap">The difference</span>
       </div>
     </figure>
@@ -626,12 +640,15 @@ function Verdict({
   units,
   label,
   range,
+  modelBy,
 }: {
   series: CollocationSeries;
   units: string;
   label: string;
   /** The Field's encoded range, which is what the thresholds are a fraction of. */
   range: [number, number];
+  /** "The analysis" for INCOIS's, "The model" for Copernicus's. */
+  modelBy: string;
 }) {
   const rms = series.rmsResidual;
   const bias = series.meanResidual;
@@ -656,7 +673,7 @@ function Verdict({
 
   const detail =
     rms < close
-      ? `The analysis reproduced this float's ${quantity} well through the water column.`
+      ? `${modelBy} reproduced this float's ${quantity} well through the water column.`
       : `The model reads on average ${Math.abs(bias).toFixed(2)} ${units} ${sense} the` +
         ` instrument measured. Worth a look.`;
 
@@ -677,6 +694,8 @@ const SENSE: Record<string, [string, string]> = {
   temperature: ["cooler than", "warmer than"],
   salinity: ["fresher than", "more saline than"],
   density: ["lighter than", "denser than"],
+  chlorophyll: ["lower than", "higher than"],
+  dissolved_oxygen: ["lower than", "higher than"],
 };
 
 /** The Field key behind a label, without threading it through every caller. */

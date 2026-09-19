@@ -58,6 +58,8 @@ def test_no_field_borrows_a_standard_name_this_platform_invented():
         "sea_water_practical_salinity",
         "sea_water_sigma_theta",
         "sea_water_speed",
+        "mass_concentration_of_chlorophyll_a_in_sea_water",
+        "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
     }
     declared = {name for name in cf._STANDARD_NAMES.values() if name is not None}
     assert declared <= real
@@ -100,6 +102,8 @@ def test_nothing_computed_here_is_captioned_as_somebody_elses_analysis():
         "mixed_layer_depth",
         "isothermal_layer_depth",
         "barrier_layer",
+        "oxygen_floor",
+        "fronts",
     }
     for key in computed:
         assert standards.PROVENANCE[key].startswith("Computed"), key

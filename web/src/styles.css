@@ -1031,14 +1031,16 @@ select:hover {
 .field-tabs {
   display: flex;
   justify-content: space-between;
-  gap: 4px;
+  gap: 2px;
   margin-bottom: 6px;
   border-bottom: 1px solid var(--outline-variant);
 }
 
 /*
- * Four tabs, and none of them may wrap or run into its neighbour.
+ * Five tabs, and none of them may wrap or run into its neighbour.
  *
+ * Biology made it five on 2026-09-15, and at 12 px "Ocean state", "Circulation" and "Biology"
+ * all ellipsised in the 290 px bay. 11 px with a 2 px gap fits all five whole.
  * The first version had `flex: 1` and nothing else, so "OCEAN STATE" wrapped to two lines while
  * the rest stayed on one - an uneven strip - and CIRCULATION ran straight into EVIDENCE and
  * printed "CIRCULATIEVIDENCE". Three things fix it and all three are needed: nowrap so nothing
@@ -1062,7 +1064,7 @@ select:hover {
   background: none;
   color: var(--on-surface-faint);
   font-family: var(--sans);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: -0.005em;
   white-space: nowrap;

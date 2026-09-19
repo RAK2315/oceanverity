@@ -233,6 +233,9 @@ export const PALETTE_LOOKS: Record<string, string> = {
   delta: "Navy, pale yellow, green",
   curl: "Navy, white, purple",
   diff: "Navy, white, olive",
+  algae: "Pale green to near-black",
+  oxy: "Dark red, grey, yellow",
+  turbid: "Pale yellow to near-black",
   coverage: "Four flat bands",
 };
 

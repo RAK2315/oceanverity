@@ -424,6 +424,8 @@ const SENSE: Record<string, [string, string]> = {
   temperature: ["cooler than", "warmer than"],
   salinity: ["fresher than", "saltier than"],
   density: ["lighter than", "denser than"],
+  chlorophyll: ["lower than", "higher than"],
+  oxygen: ["lower than", "higher than"],
 };
 
 type Focus = (lon: number, lat: number) => void;
@@ -451,7 +453,7 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
   // Absent, not disabled. The Isosurface group leaves a "not applicable" line behind because an
   // isosurface is a thing you can *imagine* on any Field and a reader has to be told why not.
   // This is different: nothing measures cast count or heat potential in the water, so there is
-  // no comparison to explain the absence of. Eleven of the fifteen Fields were carrying a row
+  // no comparison to explain the absence of. Eleven Fields were carrying a row
   // that said only "switch to something else", which is clutter wearing the clothes of help.
   // What a reader needs instead is for the group to appear on the Fields where it means
   // something - which the Variable tabs make one click away - and the guide entry says which.
@@ -463,7 +465,7 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
   const rows = block.instruments.slice(0, BIAS_ROWS);
   const colours = manifest.palettes[BIAS_PALETTE] ?? [];
   const cell = store.residuals?.cellDegrees ?? 5;
-  // The instruments INCOIS's analysis did not assimilate. See the note under the headline.
+  // The instruments not described as inputs to INCOIS's analysis. See the note under the headline.
   const independent = block.byKind?.mooring ?? null;
   // Where the palette runs out: the Field's own ninetieth percentile, measured by the bake. See
   // `biasPosition` - the verdict threshold read as white on nine markers in ten.
@@ -498,8 +500,9 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
       {/*
         * The basin-wide statement, and the reason it is two statements.
         *
-        * INCOIS's analysis **assimilates Argo**, so a float's residual is largely the model
-        * agreeing with an observation it was fed. The moored buoys are not assimilated. Their
+        * INCOIS's gridded analysis is **built from Argo floats**, so a float's residual is largely
+        * the analysis agreeing with data it was made from. The moored buoys are not described as
+        * inputs. Their
         * typical gap is larger, but they stop at 500 m against the floats' 2000 m and deep water
         * is easy to match, so the ratio is not quoted (measured 2026-09-13, `docs/NUMBERS.md`). Pooled into one figure
         * the seventeen of them vanish into 249 floats and the headline becomes a statement about
@@ -516,7 +519,8 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
         </p>
       ) : (
         <p className="readout-line">
-          Across <strong>{summary.count}</strong> instruments the analysis reads{" "}
+          Across <strong>{summary.count}</strong> instruments{" "}
+          {spec.group === "biology" ? "Copernicus's model reads" : "the analysis reads"}{" "}
           <strong>
             {Math.abs(summary.meanBias).toFixed(2)} {spec.units}
           </strong>{" "}
@@ -530,9 +534,10 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
 
       {independent && independent.meanAbsBias !== null && (
         <p className="note">
-          INCOIS assimilate Argo, so most of that is the analysis agreeing with data it was
-          given. Against the <strong>{independent.count}</strong> moored buoys, which it was
-          not, the typical gap is{" "}
+          INCOIS&apos;s analysis is built from Argo floats, so most of that is the analysis
+          agreeing with data it was made from. Against the{" "}
+          <strong>{independent.count}</strong> moored buoys, which are not described as inputs,
+          the typical gap is{" "}
           <strong>
             {independent.meanAbsBias.toFixed(2)} {spec.units}
           </strong>
@@ -1214,7 +1219,7 @@ export function Controls({
       {inVolume && (
         <>
           {/* A depth sheet and a sea-surface drape are not cut by a depth range, so the two
-              sliders would sit there doing nothing on five of the fifteen Fields. On the
+              sliders would sit there doing nothing on five Fields. On the
               currents they do something important instead - they choose the depth the arrows
               sit on - so the group stays, with a readout that says which job it is doing. */}
           {(isVolumeField || spec.render === "vector") && (

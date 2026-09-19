@@ -191,7 +191,7 @@ export interface Manifest {
   region: { south: number; north: number; west: number; east: number };
   sources: SourceSpec[];
   fields: FieldSpec[];
-  /** Headings for the Variable selector. Fifteen Fields cannot be a flat list of buttons. */
+  /** Headings for the Variable selector. Nineteen Fields cannot be a flat list of buttons. */
   fieldGroups?: FieldGroup[];
   timesteps: string[];
   volume: VolumeSpec;
@@ -207,7 +207,23 @@ export interface Manifest {
   /** How much each Level moves across the series. Absent on a bake older than it. */
   anomalySpread?: AnomalySpreadSpec;
   /** How many of each kind are on the water, so the panel and the key can name them. */
-  instruments?: { floats: number; moorings: number; withChlorophyll: number };
+  instruments?: {
+    floats: number;
+    moorings: number;
+    withChlorophyll: number;
+    /** Floats whose oxygen and chlorophyll were compared against the model. Absent on older bakes. */
+    withOxygen?: number;
+    withChlorophyllCompared?: number;
+  };
+  /**
+   * The water under a fishing advisory: what the oxygen floor is cut at, and how much of the ocean
+   * sat on a surface front of each kind, pooled over the bake. Absent when the sources were not
+   * reachable.
+   */
+  habitat?: {
+    oxygenFloorMmol: number;
+    fronts?: { thermalShare: number | null; chlorophyllShare: number | null };
+  };
   /** Quantities measured but not modelled, so the panel knows what to expect. */
   observedOnly?: { key: string; label: string; units: string }[];
   /** Absent entirely when the bake could not reach Copernicus. */
@@ -362,8 +378,8 @@ export interface FieldResiduals {
    * The same summary split by kind of instrument, which is the difference between a measurement
    * and a tautology.
    *
-   * INCOIS's analysis **assimilates Argo**, so a float's residual is largely the model agreeing
-   * with an observation it was fed; the moored buoys are not assimilated. Measured over this
+   * INCOIS's gridded analysis is **built from Argo floats**, so a float's residual is largely the
+   * analysis agreeing with data it was made from; the moored buoys are not described as inputs. Measured over this
    * bake the moorings disagree several times as much, and pooled into one basin-wide figure the
    * seventeen of them disappear into 249 floats. Absent on a bake made before the split existed.
    */
@@ -426,6 +442,17 @@ export interface CollocationSeries {
   aboveModel: number;
   meanResidual: number | null;
   rmsResidual: number | null;
+  /**
+   * Where and when this series was measured, when that is not the chart's own cast.
+   *
+   * Chlorophyll and oxygen come from the BGC product, which often runs one cycle behind the core
+   * cast - about ten days and tens of kilometres away - so they are compared against the analysis
+   * nearest their own date and carry that date and position with them.
+   */
+  time?: string;
+  timestepIndex?: number;
+  lat?: number;
+  lon?: number;
 }
 
 export interface Collocation {
@@ -441,7 +468,7 @@ export interface Collocation {
    * next step, so its chart is pinned to one date and says so.
    */
   steps?: Record<string, { time: string; fields: Record<string, CollocationSeries> }>;
-  /** Chlorophyll, where this float carries a fluorometer. No model side exists for it. */
+  /** Chlorophyll as measured, for the small curve under a chart of any other Field. */
   observedOnly?: Record<string, ObservedOnlySeries>;
   observedOnlyTime?: string;
   /** False when it came from this float's neighbouring dive rather than the charted one. */

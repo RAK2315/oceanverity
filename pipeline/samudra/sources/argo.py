@@ -36,14 +36,16 @@ from __future__ import annotations
 
 import csv
 import io
+import time
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Iterable, Sequence
+from typing import Callable, Iterable, Sequence, TypeVar
 
 import numpy as np
 import requests
 
+from ..density import oxygen_per_volume
 from ..tls import ca_bundle
 from .base import BoundingBox, Profile
 
@@ -73,6 +75,9 @@ _PLAUSIBLE = {
     "temperature": (-2.5, 40.0),
     "salinity": (25.0, 41.0),
     "chlorophyll": (-1.0, 20.0),
+    # Argo's own gross range for dissolved oxygen, in the micromoles per kilogram floats report
+    # (BGC-Argo QC manual, DOXY global range test). Applied before the conversion below.
+    "oxygen": (0.0, 600.0),
 }
 
 # A cast with fewer points than this is not worth drawing as a Profile.
@@ -101,10 +106,18 @@ class ProfileColumns:
     # adding the channel here is the whole cost of reading one - the parser below loops over
     # `measurements` rather than naming three quantities.
     chlorophyll: tuple[str, ...] = ()
+    # Dissolved oxygen, in micromoles per kilogram as floats report it. Converted to the model's
+    # millimoles per cubic metre in `parse_profiles`, from the cast's own in-situ density.
+    oxygen: tuple[str, ...] = ()
     # How this provider spells the quality flag beside a value: `temp_adjusted` + `_qc`. None
     # says the provider serves no flags, which is a fact about the provider rather than a
     # licence to ignore them.
     qc_suffix: str | None = "_qc"
+    # The flags on the cast's own fix: where and when it was. A perfect thermometer at a
+    # condemned position is a measurement of somewhere else, so a cast flagged 3, 4 or 9 on
+    # either is refused whole. None where the provider serves no such column.
+    position_qc: str | None = "position_qc"
+    time_qc: str | None = "time_qc"
 
     @property
     def measurements(self) -> tuple[tuple[str, tuple[str, ...]], ...]:
@@ -121,6 +134,7 @@ class ProfileColumns:
                 ("temperature", self.temperature),
                 ("salinity", self.salinity),
                 ("chlorophyll", self.chlorophyll),
+                ("oxygen", self.oxygen),
             )
             if variants
         )
@@ -134,6 +148,7 @@ class ProfileColumns:
         provider the demo actually reads.
         """
         names = [self.platform, self.time, self.latitude, self.longitude]
+        names += [flag for flag in (self.position_qc, self.time_qc) if flag]
         for variants in (self.pressure, *(v for _, v in self.measurements)):
             for name in variants:
                 names.append(name)
@@ -165,6 +180,10 @@ INCOIS_COLUMNS = ProfileColumns(
     temperature=("TEMP_ADJUSTED", "TEMP"),
     salinity=("PSAL_ADJUSTED", "PSAL"),
     qc_suffix="_QC",
+    # INCOIS's archive calls the time flag JULD_QC and serves no position flag at all. Checked
+    # against its ERDDAP variable list on 2026-09-15.
+    position_qc=None,
+    time_qc="JULD_QC",
 )
 
 
@@ -172,13 +191,11 @@ INCOIS_COLUMNS = ProfileColumns(
 # biogeochemical channels the core dataset does not. Same host, same tabledap protocol, same
 # lower-case adjusted-first convention - so it costs a column layout and four attributes.
 #
-# Only chlorophyll is read. Measured over the demo region across the twelve-step bake's window,
-# this dataset
-# returns 635 casts from 59 floats; applying the QC rules already in this module, 532 casts from
-# 49 floats carry usable chlorophyll, 21 casts from 2 floats carry nitrate, and *no* cast
-# carries usable oxygen. Declaring channels nothing serves would be declaring a capability the
-# data does not have. The 36-step bake keeps 57 floats with chlorophyll after the pairing window
-# in `bake.py`; the per-channel split above has not been re-fetched for the longer window.
+# Chlorophyll and oxygen are read. Over the twelve-step bake's window this dataset carried usable
+# chlorophyll on 49 floats and usable oxygen on none, so oxygen was not declared. Over the
+# 36-step window, checked on 2026-09-15, 58 floats carry good-flag chlorophyll and 45 carry
+# good-flag oxygen (flag 1 or 8), so oxygen is declared now. Nitrate (27 floats) is not, because
+# the platform has no nitrate Field to compare it with.
 BGC_COLUMNS = ProfileColumns(
     platform="platform_number",
     time="time",
@@ -188,6 +205,7 @@ BGC_COLUMNS = ProfileColumns(
     temperature=("temp_adjusted", "temp"),
     salinity=("psal_adjusted", "psal"),
     chlorophyll=("chla_adjusted", "chla"),
+    oxygen=("doxy_adjusted", "doxy"),
 )
 
 
@@ -202,6 +220,9 @@ class ArgoErddapSource:
     )
     columns = GDAC_COLUMNS
     endpoint = "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.csv"
+    # Seconds to wait before each retry. About twenty minutes in all, because the one outage seen
+    # (2026-09-15) answered 404 from 11:10 to at least 11:33 IST and was back later that day.
+    retry_delays: tuple[float, ...] = (30.0, 120.0, 300.0, 600.0)
 
     @property
     def requested(self) -> str:
@@ -227,32 +248,34 @@ class ArgoErddapSource:
         # Timesteps that was 2 x 175 MB and nobody noticed; at thirty-six it is 2 x 498 MB, and
         # the bake was killed for memory twice at exactly this call - measured, a step from
         # 958 MB to over 3.6 GB inside one 15-second sample.
-        with requests.get(
-            f"{self.endpoint}?{selector}",
-            timeout=_TIMEOUT,
-            verify=self.certificates(),
-            stream=True,
-        ) as response:
-            response.raise_for_status()
-            # ERDDAP does not always name the charset, and without one `iter_lines` would hand
-            # back bytes rather than the str `csv.reader` needs.
-            if not response.encoding:
-                response.encoding = "utf-8"
-            return parse_profiles(response.iter_lines(decode_unicode=True), self.columns)
+        def fetch() -> list[Profile]:
+            with requests.get(
+                f"{self.endpoint}?{selector}",
+                timeout=_TIMEOUT,
+                verify=self.certificates(),
+                stream=True,
+            ) as response:
+                response.raise_for_status()
+                # ERDDAP does not always name the charset, and without one `iter_lines` would
+                # hand back bytes rather than the str `csv.reader` needs.
+                if not response.encoding:
+                    response.encoding = "utf-8"
+                return parse_profiles(response.iter_lines(decode_unicode=True), self.columns)
+
+        return with_retries(fetch, delays=self.retry_delays)
 
 
 class BgcArgoSource(ArgoErddapSource):
-    """Chlorophyll, from the Argo floats that carry a fluorometer.
+    """Chlorophyll and oxygen, from the Argo floats that carry a fluorometer or an optode.
 
     PS 26067 asks for chlorophyll in the same clause as Argo and glider profiles, and this is
     where it actually exists on a timeline the demo can share. INCOIS publish ocean colour
     themselves - `IRS_chlorophyll_datasets` and `incois_oceansat2_datasets` - but those series
     end 2006-03-21 and 2020-05-01, so neither can sit beside a 2026 analysis.
 
-    Unlike temperature, salinity and density, chlorophyll has **no model side**. There is no
-    gridded chlorophyll field on this timeline, so it is an observation with nothing to be held
-    against, and everything downstream says so rather than drawing a second curve out of
-    nowhere. That is the same argument Observation Coverage makes, one quantity further on.
+    INCOIS's own ocean-colour series end in 2006 and 2020. Copernicus's biogeochemical model
+    covers this window (`sources/copernicus_bgc.py`), so these floats are what that model is
+    checked against: chlorophyll and oxygen join the bias map.
     """
 
     name = "Argo BGC (Coriolis/Ifremer ERDDAP)"
@@ -290,6 +313,47 @@ class IncoisArgoSource(ArgoErddapSource):
 
     def certificates(self) -> str | bool:
         return ca_bundle()  # INCOIS omits an intermediate certificate; see tls.py
+
+
+T = TypeVar("T")
+
+# Status codes that mean "the server blinked", not "the request is wrong". 404 is here on purpose:
+# ERDDAP answers 404 "Currently unknown datasetID" while it reloads a dataset.
+_TRANSIENT_STATUS = frozenset({404, 408, 429, 500, 502, 503, 504})
+
+
+def with_retries(
+    fetch: Callable[[], T],
+    delays: Sequence[float],
+    sleep: Callable[[float], None] = time.sleep,
+) -> T:
+    """Run `fetch`, and run it again after each delay while the server is down.
+
+    Retried: a connection error, a timeout, a stream cut mid-download, and the status codes in
+    `_TRANSIENT_STATUS`. Not retried: anything else, because a malformed request stays malformed.
+    The last error is raised unchanged, so a bake that gives up says what it gave up on.
+
+    The alternative was a second route to the same floats through the GDAC FTP index, one NetCDF
+    file per cast. That is a second parser for an outage that lasted under a day, so it is not
+    built.
+    """
+    for attempt in range(len(delays) + 1):
+        try:
+            return fetch()
+        except requests.HTTPError as error:
+            status = error.response.status_code if error.response is not None else None
+            body = error.response.text if error.response is not None else ""
+            # ERDDAP's 404 also means "your query matched nothing", which is an answer.
+            if status not in _TRANSIENT_STATUS or "no matching results" in body or attempt == len(delays):
+                raise
+            reason = f"HTTP {status}"
+        except (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError) as error:
+            if attempt == len(delays):
+                raise
+            reason = type(error).__name__
+        print(f"[argo] {reason}; retrying in {delays[attempt]:.0f} s ({attempt + 1} of {len(delays)})")
+        sleep(delays[attempt])
+    raise AssertionError("unreachable")
 
 
 def parse_profiles(
@@ -336,12 +400,21 @@ def parse_profiles(
     ]
     served = [(name, at) for name, at in served if at]
 
+    # The fix flags, where this provider served them. Absent is not condemned.
+    fix_flags_at = [
+        index[flag] for flag in (columns.position_qc, columns.time_qc) if flag and flag in index
+    ]
+    refused: set[tuple[str, str]] = set()
+
     casts: dict[tuple[str, str], list[tuple[float, ...]]] = defaultdict(list)
     positions: dict[tuple[str, str], tuple[float, float]] = {}
 
     for row in reader:
         try:
             key = (row[platform_at], row[time_at])
+            if any(row[at].strip() in _REJECTED_QC for at in fix_flags_at):
+                refused.add(key)
+                continue
             latitude = float(row[latitude_at])
             longitude = float(row[longitude_at])
             measurement = (
@@ -360,6 +433,10 @@ def parse_profiles(
 
     profiles: list[Profile] = []
     for (platform_id, stamp), rows in casts.items():
+        # One condemned fix row condemns the cast: every row of a cast repeats the same fix, so a
+        # disagreement between rows is itself a reason not to trust where it was.
+        if (platform_id, stamp) in refused:
+            continue
         columns_out = [np.array(c, dtype=float) for c in zip(*rows)]
         pressure, channels = columns_out[0], columns_out[1:]
 
@@ -370,6 +447,15 @@ def parse_profiles(
             name: _reject_implausible(channel, name)
             for (name, _), channel in zip(served, channels)
         }
+        if "oxygen" in values:
+            values["oxygen"] = oxygen_per_volume(
+                latitude,
+                longitude,
+                depths,
+                values.get("temperature", np.full(len(depths), np.nan)),
+                values.get("salinity", np.full(len(depths), np.nan)),
+                values["oxygen"],
+            )
 
         # A level is usable when it has a depth and at least one quantity that survived QC.
         # Chlorophyll counts here like anything else: a BGC cast whose fluorometer worked and

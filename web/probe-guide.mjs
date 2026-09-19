@@ -128,7 +128,7 @@ for (const entry of shape) {
 // real 44 - including `requirements.html`, which is the page whose whole claim is that its
 // figures are live. This is the one place that can notice, because it is the one thing that
 // reads `GUIDE` and prints a count.
-const EXPLAINED_CONTROLS = 44;
+const EXPLAINED_CONTROLS = 47;
 if (touchable.length !== EXPLAINED_CONTROLS) {
   problems.push(
     `GUIDE holds ${touchable.length} entries and the documents say ${EXPLAINED_CONTROLS}; ` +

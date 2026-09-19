@@ -147,3 +147,141 @@ def test_a_flagged_pressure_drops_the_level_entirely():
     profile = only(cast(rows))
     assert len(profile) == 6
     assert profile.depths.max() < 200
+
+
+# ---------------------------------------------------------------- where and when the cast was
+
+POS_HEAD = (
+    "platform_number,time,latitude,longitude,position_qc,time_qc,"
+    "pres_adjusted,pres_adjusted_qc,temp_adjusted,temp_adjusted_qc\n"
+    ",UTC,degrees_north,degrees_east,,,decibar,,degree_Celsius,\n"
+)
+
+
+def fixed_cast(position_qc: str, time_qc: str, platform: str = "1900001") -> str:
+    return "".join(
+        f"{platform},2026-06-09T20:58:41Z,3.87,80.22,{position_qc},{time_qc},"
+        f"{5.0 + 10 * i},1,29.0,1\n"
+        for i in range(6)
+    )
+
+
+def test_the_request_asks_for_the_position_and_time_flags():
+    """A good thermometer at a wrong position is a measurement of somewhere else."""
+    asked = ArgoErddapSource().requested.split(",")
+    assert "position_qc" in asked
+    assert "time_qc" in asked
+
+
+def test_incois_asks_for_its_own_time_flag_and_no_position_flag_it_does_not_serve():
+    """INCOIS's archive calls the time flag JULD_QC and serves no position flag at all
+    (checked against its ERDDAP variable list on 2026-09-15)."""
+    asked = IncoisArgoSource().requested.split(",")
+    assert "JULD_QC" in asked
+    assert not any("POSITION" in name.upper() for name in asked)
+
+
+@pytest.mark.parametrize("flag", ["3", "4", "9"])
+def test_a_cast_with_a_condemned_position_is_refused(flag):
+    text = POS_HEAD + fixed_cast(flag, "1")
+    assert parse_profiles(text, GDAC_COLUMNS) == []
+
+
+@pytest.mark.parametrize("flag", ["3", "4", "9"])
+def test_a_cast_with_a_condemned_time_is_refused(flag):
+    text = POS_HEAD + fixed_cast("1", flag)
+    assert parse_profiles(text, GDAC_COLUMNS) == []
+
+
+@pytest.mark.parametrize("flag", ["1", "2", "5", "8", ""])
+def test_a_usable_or_absent_fix_flag_keeps_the_cast(flag):
+    text = POS_HEAD + fixed_cast(flag, flag)
+    assert len(parse_profiles(text, GDAC_COLUMNS)) == 1
+
+
+def test_a_bad_fix_on_one_cast_leaves_the_next_cast_alone():
+    text = POS_HEAD + fixed_cast("4", "1", platform="1900001") + fixed_cast("1", "1", platform="1900002")
+    assert [p.platform_id for p in parse_profiles(text, GDAC_COLUMNS)] == ["1900002"]
+
+
+# ---------------------------------------------------------------- a provider that blinks
+
+class _Flaky:
+    """Fails `failures` times the way Ifremer did on 2026-09-15, then answers."""
+
+    def __init__(self, failures: int, error: Exception):
+        self.failures = failures
+        self.error = error
+        self.calls = 0
+
+    def __call__(self):
+        self.calls += 1
+        if self.calls <= self.failures:
+            raise self.error
+        return ["ok"]
+
+
+def test_a_transient_outage_is_retried_until_it_answers():
+    import requests
+
+    from samudra.sources.argo import with_retries
+
+    waits: list[float] = []
+    flaky = _Flaky(2, requests.ConnectionError("down"))
+    assert with_retries(flaky, delays=(1.0, 2.0, 3.0), sleep=waits.append) == ["ok"]
+    assert flaky.calls == 3
+    assert waits == [1.0, 2.0]
+
+
+def test_an_unknown_dataset_answer_is_treated_as_an_outage():
+    """ERDDAP said 404 "Currently unknown datasetID" for ArgoFloats three times on 15 Sep, and it
+    came back later the same day. A 404 from a dataset that exists is a blink, not a verdict."""
+    import requests
+
+    from samudra.sources.argo import with_retries
+
+    response = requests.Response()
+    response.status_code = 404
+    flaky = _Flaky(1, requests.HTTPError("404", response=response))
+    assert with_retries(flaky, delays=(0.0,), sleep=lambda _: None) == ["ok"]
+
+
+def test_it_gives_up_after_the_last_wait_and_says_why():
+    import requests
+
+    from samudra.sources.argo import with_retries
+
+    flaky = _Flaky(10, requests.Timeout("slow"))
+    with pytest.raises(requests.Timeout):
+        with_retries(flaky, delays=(0.0, 0.0), sleep=lambda _: None)
+    assert flaky.calls == 3
+
+
+def test_a_bad_request_is_not_retried():
+    """A 400 is our fault. Waiting twenty minutes to be told the same thing helps nobody."""
+    import requests
+
+    from samudra.sources.argo import with_retries
+
+    response = requests.Response()
+    response.status_code = 400
+    flaky = _Flaky(10, requests.HTTPError("400", response=response))
+    with pytest.raises(requests.HTTPError):
+        with_retries(flaky, delays=(0.0, 0.0), sleep=lambda _: None)
+    assert flaky.calls == 1
+
+
+def test_a_query_that_matched_nothing_is_not_retried():
+    """ERDDAP also answers 404 for "Your query produced no matching results". That is an answer,
+    not an outage, and waiting twenty minutes to hear it again helps nobody."""
+    import requests
+
+    from samudra.sources.argo import with_retries
+
+    response = requests.Response()
+    response.status_code = 404
+    response._content = b'Error {\n    code=404;\n    message="Not Found: Your query produced no matching results. (nRows = 0)";\n}'
+    flaky = _Flaky(10, requests.HTTPError("404", response=response))
+    with pytest.raises(requests.HTTPError):
+        with_retries(flaky, delays=(0.0, 0.0), sleep=lambda _: None)
+    assert flaky.calls == 1

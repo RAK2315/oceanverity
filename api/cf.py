@@ -69,6 +69,12 @@ _STANDARD_NAMES = {
     "mixed_layer_depth": None,
     "isothermal_layer_depth": None,
     "barrier_layer": None,
+    # Real CF names for the two quantities Copernicus's model publishes. The oxygen floor and the
+    # fronts share are this platform's own, so they get none.
+    "chlorophyll": "mass_concentration_of_chlorophyll_a_in_sea_water",
+    "oxygen": "mole_concentration_of_dissolved_molecular_oxygen_in_sea_water",
+    "oxygen_floor": None,
+    "fronts": None,
 }
 
 # Short, label-like, the way CF means a long name: one noun phrase a client can put on an axis
@@ -94,6 +100,10 @@ _LONG_NAMES = {
     "mixed_layer_depth": "Depth of the density-defined mixed layer",
     "isothermal_layer_depth": "Depth of the temperature-defined isothermal layer",
     "barrier_layer": "Barrier layer thickness",
+    "chlorophyll": "Chlorophyll-a concentration",
+    "oxygen": "Dissolved oxygen concentration",
+    "oxygen_floor": "Depth where dissolved oxygen first falls below 2 mg/L",
+    "fronts": "Share of the cell on a surface temperature or chlorophyll front",
 }
 
 # What the long name cannot say in a noun phrase, on the variable itself.
@@ -140,6 +150,23 @@ _COMMENTS = {
         "Isothermal layer depth minus mixed layer depth. Negative where salinity stratifies "
         "water the temperature says is mixed."
     ),
+    "chlorophyll": (
+        "E.U. Copernicus Marine biogeochemical model at 0.25 degree, landed on this grid by "
+        "nearest node. A model, compared against BGC-Argo floats in this build."
+    ),
+    "oxygen": (
+        "E.U. Copernicus Marine biogeochemical model at 0.25 degree, landed on this grid by "
+        "nearest node. A model, compared against BGC-Argo floats in this build."
+    ),
+    "oxygen_floor": (
+        "First crossing below 62.5 mmol m-3 (2 mg/L) from the surface down, in the Copernicus "
+        "biogeochemical model's oxygen. See samudra/habitat.py."
+    ),
+    "fronts": (
+        "Percent of the cell's ocean pixels on a thermal front (Cayula and Cornillon) in OSTIA "
+        "sea surface temperature or a chlorophyll front (Canny) in GlobColour gap-free "
+        "chlorophyll. Not a fishing zone."
+    ),
 }
 
 # UDUNITS strings, which are not the display units in the manifest: practical salinity is
@@ -161,6 +188,10 @@ _UNITS = {
     "mixed_layer_depth": "m",
     "isothermal_layer_depth": "m",
     "barrier_layer": "m",
+    "chlorophyll": "mg m-3",
+    "oxygen": "mmol m-3",
+    "oxygen_floor": "m",
+    "fronts": "percent",
 }
 
 # Who published the numbers, as the CF global attributes a consumer reads first.
@@ -218,6 +249,25 @@ _SOURCES = {
         ),
         "references": "https://erddap.incois.gov.in/erddap/griddap/index.html",
     },
+}
+_SOURCES["chlorophyll"] = {
+    "institution": "E.U. Copernicus Marine Service",
+    "source": (
+        "Global Ocean Biogeochemistry Analysis and Forecast (GLOBAL_ANALYSISFORECAST_BGC_001_028) "
+        "at 0.25 degree, landed on the analysis grid by nearest node"
+    ),
+    "references": "https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_BGC_001_028/description",
+}
+_SOURCES["oxygen"] = _SOURCES["chlorophyll"]
+_SOURCES["oxygen_floor"] = {**_SOURCES["chlorophyll"], "institution": "Samudra 3D, from E.U. Copernicus Marine Service"}
+_SOURCES["fronts"] = {
+    "institution": "Samudra 3D, from E.U. Copernicus Marine Service",
+    "source": (
+        "Fronts computed by Samudra 3D from OSTIA sea surface temperature "
+        "(SST_GLO_SST_L4_NRT_OBSERVATIONS_010_001) and GlobColour gap-free chlorophyll "
+        "(OCEANCOLOUR_GLO_BGC_L4_MY_009_104)"
+    ),
+    "references": "https://marine.copernicus.eu",
 }
 _SOURCES["incois_rmse"] = _SOURCES["incois_casts"]
 

@@ -97,3 +97,50 @@ def test_the_bgc_source_is_a_registered_provider_reading_its_own_dataset():
     assert "ArgoFloats-synthetic-BGC" in source.endpoint
     assert source.columns is BGC_COLUMNS
     assert "Argo" in source.attribution
+
+
+# ---------------------------------------------------------------- oxygen
+
+OXY = """platform_number,time,latitude,longitude,pres_adjusted,pres_adjusted_qc,temp_adjusted,temp_adjusted_qc,psal_adjusted,psal_adjusted_qc,doxy_adjusted,doxy_adjusted_qc,doxy,doxy_qc
+,UTC,degrees_north,degrees_east,decibar,,degree_Celsius,,PSU,,micromole/kg,,micromole/kg,
+1902367,2026-04-10T14:19:48Z,15.0,65.0,5.0,1,29.0,1,35.0,1,200.0,1,210.0,3
+1902367,2026-04-10T14:19:48Z,15.0,65.0,50.0,1,27.0,1,35.5,1,190.0,1,,
+1902367,2026-04-10T14:19:48Z,15.0,65.0,150.0,1,18.0,1,35.4,1,20.0,8,,
+1902367,2026-04-10T14:19:48Z,15.0,65.0,300.0,1,13.0,1,35.3,1,5.0,4,5.0,4
+1902367,2026-04-10T14:19:48Z,15.0,65.0,500.0,1,11.0,1,35.1,1,900.0,1,,
+"""
+
+
+def test_oxygen_is_read_and_converted_to_the_models_units():
+    """Floats report micromoles per kilogram; the model publishes millimoles per cubic metre.
+    The same number of molecules in a cubic metre of seawater is the per-kilogram figure times the
+    water's in-situ density, which is about 1022 kg/m3 at 29 degC and 35 PSU near the surface."""
+    import gsw
+
+    profile = only(parse_profiles(OXY, BGC_COLUMNS))
+    pressure = gsw.p_from_z(-profile.depths[0], 15.0)
+    sa = gsw.SA_from_SP(35.0, pressure, 65.0, 15.0)
+    rho = gsw.rho(sa, gsw.CT_from_t(sa, 29.0, pressure), pressure)
+    assert profile.values["oxygen"][0] == pytest.approx(200.0 * rho / 1000.0, rel=1e-6)
+    assert 203.0 < profile.values["oxygen"][0] < 206.0
+
+
+def test_oxygen_flags_and_range_are_applied_before_it_is_converted():
+    profile = only(parse_profiles(OXY, BGC_COLUMNS))
+    oxygen = profile.values["oxygen"]
+    assert np.isfinite(oxygen[2])  # flag 8, interpolated: usable
+    assert np.isnan(oxygen[3])  # flag 4 in both variants
+    assert np.isnan(oxygen[4])  # 900 micromol/kg is beyond any sea
+
+
+def test_oxygen_with_no_temperature_or_salinity_beside_it_is_refused():
+    """No salinity, no density, no conversion - and a guessed 1025 would be a number nobody measured."""
+    text = OXY.replace(",29.0,1,35.0,1,200.0,1,", ",29.0,1,,,200.0,1,")
+    profile = only(parse_profiles(text, BGC_COLUMNS))
+    assert np.isnan(profile.values["oxygen"][0])
+
+
+def test_the_request_asks_for_every_oxygen_variant_and_its_flag():
+    requested = BGC_COLUMNS.request().split(",")
+    for name in ("doxy", "doxy_qc", "doxy_adjusted", "doxy_adjusted_qc"):
+        assert name in requested

@@ -223,6 +223,15 @@ def main() -> None:
         ] + [
             ("Argo floats near the track", f"**{len(storm['floats'])}** surfaced within {storm['method']['floatKm']:.0f} km while it was active, nearest {storm['floats'][0]['distanceKm']} km" if storm["floats"] else "none", "`cases/montha.json`"),
         ])] if storm else []),
+        *([("The water under a fishing advisory", [
+            (f"{label}, compared", f"**{block['summary']['count']}** floats; model {'lower' if block['summary']['meanBias'] > 0 else 'higher'} than the floats by **{abs(block['summary']['meanBias']):.2f} {units}** on average, typical gap {block['summary']['meanAbsBias']:.2f} {units}", f"`residuals.fields.{key}.summary` (Copernicus model, not INCOIS)")
+            for key, label, units in (("chlorophyll", "Chlorophyll", "mg/m3"), ("oxygen", "Dissolved oxygen", "mmol/m3"))
+            if (block := residuals["fields"].get(key))
+        ] + [
+            ("Oxygen floor cut at", f"**{manifest['habitat']['oxygenFloorMmol']:.1f} mmol/m3** (2 mg/L)", "`manifest.habitat`"),
+        ] + ([
+            ("Ocean pixels on a front, pooled", f"thermal **{manifest['habitat']['fronts']['thermalShare'] * 100:.1f}%**, chlorophyll **{manifest['habitat']['fronts']['chlorophyllShare'] * 100:.1f}%**", "`manifest.habitat.fronts` - fronts, not fishing zones"),
+        ] if manifest["habitat"].get("fronts") else []))] if manifest.get("habitat") else []),
         ("The glider finding", [
             ("Archive read", f"`{gliders['archive']}`", "the archive PS 26067 names"),
             ("Casts in this box", f"**{gliders['castsInRegion']:,}** from {gliders['gliders']} glider, {len(gliders['deployments'])} deployments", "`manifest.gliders`"),

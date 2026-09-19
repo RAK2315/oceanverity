@@ -113,7 +113,8 @@ def test_one_instrument_carrying_two_fields_yields_two_entries():
 
 
 def test_a_field_with_no_range_is_not_ranked_rather_than_ranked_wrongly():
-    """Chlorophyll has no model side at all. Without a range there is no scale to rank on."""
+    """A Field the bake gave no encoded range, such as chlorophyll in a bake without Copernicus.
+    Without a range there is no scale to rank on."""
     collocations, floats = build(
         collocation("A", lon=60.0, lat=10.0, fields={"chlorophyll": (0.1, 0.2, 50)}),
     )
@@ -403,7 +404,7 @@ def test_a_moored_buoy_keeps_its_nine_sensors_where_a_float_would_be_refused():
     """A buoy carries a handful of sensors on a wire. Nine is the whole instrument, not a stub.
 
     One flat threshold either keeps the truncated float casts or deletes every buoy, and the
-    buoys are the only instruments in this bake INCOIS's analysis did not assimilate.
+    buoys are the only instruments in this bake not described as inputs to INCOIS's analysis.
     """
     collocations, floats = build(
         collocation("BUOY", lon=60.0, lat=10.0, kind="mooring", fields={"temperature": (0.8, 0.9, 9)}),
@@ -419,7 +420,7 @@ def test_a_moored_buoy_keeps_its_nine_sensors_where_a_float_would_be_refused():
 
 
 def test_the_summary_can_be_asked_for_one_kind_of_instrument():
-    """The whole point of the split: nine unassimilated buoys do not vanish into 224 floats.
+    """The whole point of the split: nine buoys, not described as inputs, do not vanish into 224 floats.
 
     Three floats sitting at 0.10 degC and one buoy at 1.00 degC. Pooled the mean magnitude is
     0.325 degC, which is mostly a statement about the floats; the buoy on its own says 1.00.
@@ -440,3 +441,27 @@ def test_the_summary_can_be_asked_for_one_kind_of_instrument():
 def test_a_kind_nothing_reported_is_none_rather_than_a_zero():
     rows = [entry("temperature", 60.0, 10.0, 0.10, 0.10, "f1")]
     assert field_bias(rows, "temperature", kind="mooring") is None
+
+
+def test_a_comparison_from_a_neighbouring_cast_is_ranked_where_and_when_that_cast_was():
+    """Chlorophyll and oxygen come from the BGC product, which is often one cycle behind the core
+    cast the float's chart uses - about ten days and tens of kilometres away. That series carries
+    its own position, time and analysis step, and the ranking must use them rather than the core
+    cast's, or the bias map draws a measurement at a place it was not taken."""
+    collocations, floats = build(
+        collocation("A", lon=60.0, lat=10.0, fields={"temperature": (0.1, 0.2, 50)}),
+    )
+    collocations["A"]["fields"]["chlorophyll"] = {
+        "matched": 50,
+        "meanResidual": -0.1,
+        "rmsResidual": 0.2,
+        "lon": 60.4,
+        "lat": 9.7,
+        "time": "2026-07-15T00:00:00+00:00",
+        "timestepIndex": 10,
+    }
+    ranges = {**RANGES, "chlorophyll": (0.0, 1.0)}
+    ranked = {e.field: e for e in rank_residuals(collocations, positions_from(floats, collocations), ranges)}
+    assert (ranked["temperature"].longitude, ranked["temperature"].latitude) == (60.0, 10.0)
+    chl = ranked["chlorophyll"]
+    assert (chl.longitude, chl.latitude, chl.timestep_index, chl.time) == (60.4, 9.7, 10, "2026-07-15T00:00:00+00:00")

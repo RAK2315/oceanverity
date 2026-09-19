@@ -11,7 +11,8 @@
  *      one the probe can derive from the file. A number typed into a caption fails.
  *   3. **IMD's track is drawn while the walkthrough is open and not after it.** A frame pair that
  *      differs only in the line's `visible`, and the line's vertex count against the file.
- *   4. **Touching a control ends it**, like the tour.
+ *   4. **Touching a control pauses it**, like the tour: the card stays with End and Continue,
+ *      the scene is left alone, Continue puts the step's view back and End closes it.
  *
  *   node probe-case.mjs        (needs a preview server on 4173)
  */
@@ -148,16 +149,78 @@ console.log(`track on against off: ${pair.count} px`);
 // A hairline polyline: the question is drawn or not drawn, as in probe-drift.mjs.
 if (pair.count < 40) problems.push(`the storm track changes only ${pair.count} px, so it is not really drawn`);
 
-// ---- 4. touching a control ends it, and the track goes with it --------------------------
+// ---- 4. touching a control pauses it; Continue puts the step back; End ends it ----------
+// Step 1 is on screen (temperature at `before`). A reader switches Field and touches a control.
+await page.evaluate(() => {
+  const s = window.__store.getState();
+  s.selectField("salinity");
+  s.set("touched", "field");
+});
+await page.waitForTimeout(1000);
+const paused = await page.evaluate(() => ({
+  caseStep: window.__store.getState().caseStep,
+  paused: window.__store.getState().cardPaused,
+  fieldKey: window.__store.getState().fieldKey,
+  visible: window.__scene.stormLine.visible,
+  card: !!document.querySelector(".tour.tour-paused"),
+  buttons: [...document.querySelectorAll(".tour-paused .tour-actions button")].map((b) => b.textContent.trim()),
+}));
+console.log(`after a touch: ${JSON.stringify(paused)}`);
+if (paused.caseStep !== 0 || !paused.paused) problems.push(`touching a control did not pause the walkthrough (${JSON.stringify(paused)})`);
+if (!paused.card) problems.push("the paused card is not on screen");
+if (paused.buttons.join("|") !== "End|Continue") problems.push(`the paused card offers ${paused.buttons.join(", ")} rather than End and Continue`);
+if (paused.fieldKey !== "salinity") problems.push("the paused walkthrough moved the scene under the reader's hand");
+if (!paused.visible) problems.push("IMD's track left the water while the walkthrough was only paused");
+
+await page.click(".tour-paused .tour-actions .primary");
+await page.waitForTimeout(2000);
+const resumed = await page.evaluate(() => {
+  const s = window.__store.getState();
+  return { caseStep: s.caseStep, paused: s.cardPaused, fieldKey: s.fieldKey, timestepIndex: s.timestepIndex, card: !!document.querySelector(".tour.case") };
+});
+if (resumed.paused || resumed.caseStep !== 0 || !resumed.card) problems.push(`Continue did not resume the walkthrough (${JSON.stringify(resumed)})`);
+if (!PROMISED[0](resumed)) problems.push(`Continue did not put step 1's view back (${JSON.stringify(resumed)})`);
+
 await page.evaluate(() => window.__store.getState().set("touched", "timestep"));
+await page.waitForTimeout(500);
+await page.click(".tour-paused .tour-actions .ghost");
 await page.waitForTimeout(1000);
 const after4 = await page.evaluate(() => ({
   caseStep: window.__store.getState().caseStep,
   visible: window.__scene.stormLine.visible,
-  card: !!document.querySelector(".tour.case"),
+  card: !!document.querySelector(".tour"),
 }));
-if (after4.caseStep !== null || after4.card) problems.push("touching a control did not end the walkthrough");
+if (after4.caseStep !== null || after4.card) problems.push("End on the paused card did not end the walkthrough");
 if (after4.visible) problems.push("IMD's track stayed on the water after the walkthrough ended");
+
+// ---- 5. the fishing walkthrough: each step on its Field, no storm track, never a fishing zone --
+const FISHING = ["fronts", "chlorophyll", "oxygen", "oxygen_floor", "chlorophyll"];
+await page.goto(`${SERVER}/app.html?case=fishing`, { waitUntil: "load", timeout: 60000 });
+await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
+await page.waitForSelector(".tour.case", { timeout: 60000 });
+const fishingCount = Number(/of (\d+)/.exec(await page.evaluate(() => document.querySelector(".tour-count")?.textContent ?? ""))?.[1] ?? 0);
+if (fishingCount !== FISHING.length) problems.push(`fishing card says ${fishingCount} steps, this probe checks ${FISHING.length}`);
+for (let index = 0; index < fishingCount; index++) {
+  await page.evaluate((i) => window.__store.setState({ caseStep: i }), index);
+  await page.waitForTimeout(1500);
+  const s = await page.evaluate(() => {
+    const st = window.__store.getState();
+    const card = document.querySelector(".tour.case");
+    return {
+      caseStep: st.caseStep,
+      fieldKey: st.fieldKey,
+      biasMode: st.biasMode,
+      storm: !!window.__scene.stormLine?.visible,
+      text: card ? card.textContent : "",
+    };
+  });
+  const last = index === FISHING.length - 1;
+  if (s.caseStep !== index) problems.push(`fishing step ${index + 1} closed itself (caseStep ${s.caseStep})`);
+  if (s.fieldKey !== FISHING[index] || (last && !s.biasMode)) problems.push(`fishing step ${index + 1} landed on ${s.fieldKey}, bias ${s.biasMode}`);
+  if (s.storm) problems.push(`fishing step ${index + 1} draws Cyclone Montha's track`);
+  if (/fishing zone/i.test(s.text.replace(/not a fishing zone/gi, ""))) problems.push(`fishing step ${index + 1} calls something a fishing zone`);
+  console.log(`fishing step ${index + 1}: ${s.fieldKey}`);
+}
 
 await browser.close();
 if (problems.length) {
