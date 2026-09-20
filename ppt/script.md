@@ -14,9 +14,9 @@ Plain text is what you say out loud. Read it as written.
 > **Note ·** Grey lines marked "Note" are directions to you, like this one. If a direction is not
 > grey, it is a mistake in this file: make it grey rather than reading it aloud.
 
-**Length:** about 860 spoken words. That is **5:20 at 160 words a minute** or 5:45 at 150, plus
-the silences, the camera moves and the opening on the landing page: expect **5:50 to 6:10** on the
-recording. The trims below take about 70 words out if you want it shorter.
+**Length:** about 900 spoken words. That is **5:40 at 160 words a minute**, plus the silences,
+the camera moves and the landing-page opening: expect **about 6:10** recorded, and read it at 160
+rather than dawdling. The trims below take roughly 90 words out, which brings it near 5:30.
 
 **It tells the deck's story in the deck's order:** the problem, the one view, where the model is
 wrong, the four uses the problem statement names (cyclones, search and rescue, fisheries,
@@ -62,7 +62,8 @@ Everything else supports them.
 2. **The float comparison**, around 1:35. Stop moving the mouse and let people read the chart.
 3. **The gap drawn as a gap**, around 2:10.
 4. **The storm's warm-water sheet, then the heat falling along its path**, around 2:45 to 3:10.
-5. **The Wi-Fi coming off**, around 5:05.
+5. **The closing montage**, from 5:20. It is the only place the whole build is seen at once, so
+   cut it fast and let it run under the last lines.
 
 ## How to say it
 
@@ -77,6 +78,7 @@ Do not fill them.
 - the Currents, Plankton, Temperature switch at 1:10 (keep the clicks, drop the sentence);
 - "A cold wake behind it" and "An instrument that felt it" in the storm (click straight through);
 - the plankton float in the fisheries section (keep the fronts and the oxygen floor);
+- the second line of "The figure an oceanographer draws";
 - the last sentence of "It runs anywhere".
 
 **If a live take makes you nervous**, record the screen and the narration separately and lay the
@@ -260,34 +262,45 @@ same month, at every depth. Red is warmer than normal, blue is cooler.
 
 ---
 
-## 4:40 - 5:25 · It runs anywhere
+## 4:40 - 5:05 · The figure an oceanographer draws
 
-> **On screen ·** Click "Explore" in the top bar, let the question cards show for two seconds,
-> then press its Close button.
+> **On screen ·** Open "Vertical section" and press "Draw a line". Click once off the Somali
+> coast and once in the Bay of Bengal. The slice draws under the panel. Let it sit for two
+> seconds.
 
-For students and the public, the same platform becomes plain questions, each carrying the caveat
-that simplifying it costs. There is an exhibition mode for public screens.
+One more, for the people who do this for a living. Draw a line anywhere across the ocean and the
+platform cuts the water along it, from the surface to the sea floor, with the real casts near
+that line drawn on the same figure.
 
-> **On screen ·** Turn the Wi-Fi off on camera. Wait a beat so the viewer sees it go. Then click
-> two or three float markers. Do not change the variable or the date.
-
-And now the Wi-Fi is off.
-
-> **On screen ·** Keep clicking floats. Let it go on working for a few seconds in silence.
-
-Once the page has loaded, it makes no network calls at all. The data travels with it. **A dead
-venue network cannot stop this demonstration**, and there is nothing to install and no licence to
-buy.
-
-A new data source is one small class, and it hands its data back out in the formats ocean
-institutes already use.
+**It is cut in the browser, from the full-precision numbers**, not read off the picture on screen.
 
 ---
 
-## 5:25 - 5:40 · The close
+## 5:05 - 5:20 · It runs anywhere
 
-> **On screen ·** Back out to the full block of water and let it turn. Two seconds of silence
-> before the last two lines, with the live link on screen or as a caption.
+> **On screen ·** Turn the Wi-Fi off on camera, then click a float marker and open its
+> comparison. Do not change the variable or the date.
+
+That is with the network off, by the way. Everything the page needs travels with it, so a dead
+venue network cannot stop a demonstration. Nothing to install, no licence, and a new data source
+is one small class.
+
+---
+
+## 5:20 - 5:55 · The close
+
+> **Note ·** Turn the Wi-Fi back on before this, or shoot the montage as its own clip. It opens
+> views the page has not fetched yet, and those need the network the first time.
+
+> **On screen ·** A fast montage while these lines play, about half a second a cut: every Field
+> button in the five Variable tabs, then "Set up a cyclone question" for the five cyclone fields,
+> then the depth slice dragged down, the timeline scrubbed, the instruments coloured by
+> disagreement, an anomaly ring, the guided tour card and the exhibition screen. End on the full
+> block of water turning, with the live link on screen or as a caption, and two seconds of
+> silence before the last two lines.
+
+Every variable in the build, the depth, the time, the instruments, the odd water it finds by
+itself, a guided tour and a screen for a public hall. One platform, one browser tab.
 
 Everything in this video is running right now, at that link. Open it, click any float, and check
 our numbers yourself.
