@@ -3241,12 +3241,22 @@ input[type="range"]::-moz-range-thumb {
  * accident of layout.
  * ========================================================================================== */
 
+/*
+ * Centred with an auto margin rather than `align-items: center`, because this surface scrolls.
+ *
+ * A flex item centred on the cross axis and taller than its scrolling container overflows in
+ * *both* directions, and a scroll container cannot reach what is above its own top edge: the
+ * storm walkthrough, which is the first card on the list, was cut off above the viewport with
+ * the scrollbar already at the top (owner report, 2026-09-20). An auto margin absorbs free
+ * space only where there is some, so the list centres while it fits and sits at the top once it
+ * does not.
+ */
 .explore {
   position: fixed;
   inset: 0;
   z-index: 40;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 24px;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -3257,6 +3267,7 @@ input[type="range"]::-moz-range-thumb {
 
 .explore-inner {
   width: min(1080px, 100%);
+  margin-block: auto;
   display: flex;
   flex-direction: column;
   gap: 22px;
