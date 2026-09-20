@@ -8,12 +8,16 @@ file**, or the video linked on slide 6 contradicts slides 4 and 5.
 
 Plain text is what you say out loud. Read it as written.
 
-> **On screen ·** Indented, quoted lines are what you do. Never spoken. Every one names a real
-> control by its label in the app.
+> **On screen ·** Every indented grey line is an instruction and is **never spoken**. "On screen"
+> lines are what you do, and each names a real control by its label in the app.
 
-**Length:** about 750 spoken words, counted from this file. That is **4:40 at 160 words a
-minute** or **5:00 at 150**, plus the marked silences and the camera moves: expect about 5:10 on
-the recording, inside the 4:30 to 5:30 target.
+> **Note ·** Grey lines marked "Note" are directions to you, like this one. If a direction is not
+> grey, it is a mistake in this file: make it grey rather than reading it aloud.
+
+**Length:** about 760 spoken words, counted from this file. That is **4:40 at 160 words a
+minute** or **5:00 at 150**, plus the marked silences, the camera moves and the opening on the
+landing page: expect about **5:20** on the recording, inside the 4:30 to 5:30 target. If a take
+runs long, the trims are listed at the end.
 
 **It tells the deck's story in the deck's order:** the problem, the one view, why you can trust
 it, the four uses the problem statement names (cyclones, search and rescue, fisheries, climate),
@@ -31,8 +35,12 @@ uses a word the picture has not already shown.
 
 ## Before you press record
 
-1. Open **https://rak2315.github.io/samudra-sih26/app.html** and let it finish loading.
-2. Press **F11**, so no browser chrome is in the recording.
+1. Open **https://rak2315.github.io/samudra-sih26/** - the landing page - and let the globe in
+   its hero finish drawing. Open the platform once in a second tab so it is warm, and leave the
+   landing page in front.
+2. Record the opening **with the address bar visible**, so the live link is on screen. Everything
+   from the dive onwards is recorded full screen with **F11**, as a second clip, and the two are
+   cut together. If you would rather not cut, stay windowed for the whole take.
 3. In the left panel, close every group except **Variable**.
 4. Record at **1920 x 1080**. Pick light or dark and keep it for the whole take.
 5. Rehearse the dive and both walkthroughs twice.
@@ -44,10 +52,11 @@ uses a word the picture has not already shown.
 
 ---
 
-## 0:00 - 0:20 · The hook
+## 0:00 - 0:25 · The hook, on the live site
 
-> **On screen ·** Already dived into the water, on the full block, rotating slowly. Two seconds
-> of silence before the first word.
+> **On screen ·** Open on the landing page, address bar visible. The hero reads "Fly into the
+> Indian Ocean." over the ocean render. Two seconds of silence before the first word, then scroll
+> slowly down through one section while you speak.
 
 India's ocean agency, INCOIS, publishes an analysis of the ocean around India. It is the kind of
 information behind cyclone warnings, search and rescue, and fishing advisories.
@@ -56,12 +65,17 @@ And in that same water, robotic floats and moored buoys are measuring the real o
 
 The problem was never a lack of data. It was that nobody could see the two together.
 
+> **On screen ·** Press the hero's button into the platform. It opens on the globe. This is where
+> the full-screen clip starts if you are cutting two clips together.
+
+This is live today, and anyone can open it.
+
 ---
 
-## 0:20 - 0:40 · The problem
+## 0:25 - 0:45 · The problem
 
-> **On screen ·** Click "Return to globe", top right. Press play at the left of the timeline and
-> let the analyses run so the colours change.
+> **On screen ·** On the globe, press play at the left of the timeline and let the analyses run so
+> the colours change.
 
 This is how ocean data is usually seen: a flat map, one depth at a time, with the measurements
 in a different tool.
@@ -73,9 +87,9 @@ right, here, at this depth, today?**
 
 ---
 
-## 0:40 - 1:35 · One view, and the comparison
+## 0:45 - 1:40 · One view, and the comparison
 
-**The heart of the video. Do not rush it.**
+> **Note ·** The heart of the video. Do not rush it.
 
 > **On screen ·** Click "Dive into the water", top right. Let the whole camera move play out.
 
@@ -105,7 +119,7 @@ as a number.
 
 ---
 
-## 1:35 - 2:15 · Why you can trust it
+## 1:40 - 2:20 · Why you can trust it
 
 > **On screen ·** Close the float panel. Open "Model vs instruments" and tick "Colour instruments
 > by disagreement". Every marker recolours.
@@ -127,7 +141,7 @@ percent** of cells.
 
 ---
 
-## 2:15 - 3:15 · Cyclones, and search and rescue: a real storm
+## 2:20 - 3:20 · Cyclones, and search and rescue: a real storm
 
 > **On screen ·** Click "Explore" in the top bar. Click "What did Cyclone Montha do to the ocean?"
 > The first card opens, with IMD's track drawn in pink.
@@ -159,7 +173,7 @@ search, not a rescue forecast.
 
 ---
 
-## 3:15 - 3:50 · Fisheries
+## 3:20 - 3:55 · Fisheries
 
 > **On screen ·** Close the card with its cross. Click "Explore", then "What is under a fishing
 > advisory?". The first card opens on Surface Fronts.
@@ -177,7 +191,7 @@ before the water runs out of oxygen.
 
 ---
 
-## 3:50 - 4:10 · Climate
+## 3:55 - 4:15 · Climate
 
 > **On screen ·** Close the card. In Variable, click the "Change" tab and "Temperature vs Normal".
 > Let it rotate.
@@ -187,7 +201,7 @@ month, at every depth. Red is warmer than normal, blue is cooler.
 
 ---
 
-## 4:10 - 4:45 · It runs anywhere
+## 4:15 - 4:50 · It runs anywhere
 
 > **On screen ·** Click "Explore" and let the question cards show for two seconds, then close it.
 
@@ -206,7 +220,7 @@ the page and see it in the same view.
 
 ---
 
-## 4:45 - 5:00 · The close
+## 4:50 - 5:05 · The close
 
 > **On screen ·** Back out to the full block and let it rotate. Two seconds of silence before the
 > last three lines.
@@ -223,11 +237,11 @@ Samudra 3D. Team Sigmoid.
 
 **The five moments that have to land.** Everything else supports them.
 
-1. **The dive**, around 0:45. Let the camera move play out in full.
-2. **The float comparison**, around 1:25. Stop moving the mouse and let people read the chart.
-3. **The gap drawn as a gap**, around 2:00.
-4. **Montha's warm-water sheet, then the heat falling along its path**, around 2:30 to 2:50.
-5. **The Wi-Fi coming off**, around 4:25.
+1. **The dive**, around 0:50. Let the camera move play out in full.
+2. **The float comparison**, around 1:30. Stop moving the mouse and let people read the chart.
+3. **The gap drawn as a gap**, around 2:05.
+4. **Montha's warm-water sheet, then the heat falling along its path**, around 2:35 to 2:55.
+5. **The Wi-Fi coming off**, around 4:30.
 
 **Pacing.** Say numbers slowly and in full: "ninety-seven percent", "nineteen ninety-one to
 twenty twenty".
@@ -237,7 +251,8 @@ deliberate. Do not fill them.
 
 **If you overrun**, lose these first, about sixty words together, without losing an argument:
 
-- the Currents, Plankton, Temperature switch at 1:00 (keep the clicks, drop the sentence);
+- "This is live today, and anyone can open it", once the address bar has shown it;
+- the Currents, Plankton, Temperature switch at 1:05 (keep the clicks, drop the sentence);
 - "A cold wake" and "An instrument that felt it" (click straight through);
 - the last paragraph of "It runs anywhere".
 
