@@ -1,4 +1,4 @@
-# Samudra 3D
+# OceanVerity
 
 A browser-based platform that renders INCOIS ocean-model fields as an interactive 3D volume
 and overlays the in-situ instrument profiles that were measured in the same water, so a
@@ -306,7 +306,7 @@ Everything above the line is being built. Everything below it is deliberately, k
   India's glider programme, not the adapter.
 - A REST API over the pipeline, plus **OPeNDAP, CF-1.8 NetCDF and OGC WMS** served from the
   native Grids and never the Volume. ADR 0012.
-- A **guided tour** of 22 steps in 6 chapters, covering every one of the 47 explained
+- A **guided tour** of 23 steps in 6 chapters, covering every one of the 48 explained
   controls, because the guide panel explains what you touched and a
   first-time visitor does not know what to touch, plus a one-click **Hazard preset** that sets
   the whole scene up for a cyclone question.

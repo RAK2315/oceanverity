@@ -1,10 +1,10 @@
-# Stitch prompts for Samudra 3D
+# Stitch prompts for OceanVerity
 
 Prompts for Google Stitch, one per screen. Paste one at a time. The shared design system in
 part 0 goes at the top of every prompt, because Stitch does not carry style between generations.
 
 Everything described here already exists and works at
-**https://rak2315.github.io/samudra-sih26/** - these prompts are for exploring alternative
+**https://rak2315.github.io/oceanverity/** - these prompts are for exploring alternative
 layouts and polish, not for inventing features. Do not let Stitch add capabilities the product
 does not have.
 
@@ -13,7 +13,7 @@ does not have.
 ## 0. The design system - paste this before every prompt
 
 ```
-Design system for a scientific ocean visualisation tool called Samudra 3D.
+Design system for a scientific ocean visualisation tool called OceanVerity.
 Dark, technical, instrument-like. Think mission control console, not consumer app.
 
 Colours:
@@ -52,13 +52,13 @@ Rules:
 ```
 [paste the design system first]
 
-Design a landing page for Samudra 3D, a browser-based 3D ocean visualisation
+Design a landing page for OceanVerity, a browser-based 3D ocean visualisation
 platform built for the Indian National Centre for Ocean Information Services.
 
 Sections, in order:
 
 1. Sticky top nav, 62px tall, translucent with a hairline bottom border.
-   Left: wordmark "SAMUDRA.3D" in mono, with ".3D" in accent cyan.
+   Left: wordmark "OCEAN.VERITY" in mono, with ".VERITY" in accent cyan.
    Right: text links (The gap, How it works, Evidence, How it is built) and a
    primary button "Launch the platform".
 
@@ -119,7 +119,7 @@ instruments scattered across that region.
 Overlaid on the canvas:
 
 - Top bar, no background panel, just a soft dark gradient fading downward.
-  Left: wordmark "SAMUDRA.3D" in mono with a small grey subtitle beneath.
+  Left: wordmark "OCEAN.VERITY" in mono with a small grey subtitle beneath.
   Right: two stacked readouts, each a tiny uppercase mono label above a value
   ("ANALYSIS / 2026-07-30" and "FIELD / Sea Water Temperature"), then a primary
   button reading "Dive into the water".
@@ -232,7 +232,7 @@ Design two full-screen states for a dark scientific web application.
    a thin cyan arc, and beneath it one line of muted text reading
    "Reading INCOIS analysis and Argo profiles...".
 
-2. Error: centred, a 17px heading in primary text reading "Samudra 3D could not
+2. Error: centred, a 17px heading in primary text reading "OceanVerity could not
    start", a paragraph of muted body text at most 460px wide, and beneath it a
    fainter hint line containing an inline code snippet styled in cyan mono.
 

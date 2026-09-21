@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { cameraPresets, type CameraPreset } from "../camera";
 import { copyCurrentView } from "../deeplink";
 import { applyTheme, useStore } from "../store";
 
@@ -53,17 +54,33 @@ export function LoadingScreen() {
  * Drawn as 1.5 px strokes on a 24-unit grid, so they take the button's own `currentColor` and
  * change with the theme and the hover like every other mark in the frame.
  */
-function ThemeIcon({ dark }: { dark: boolean }) {
-  // The button offers the *other* theme, so the dark console shows a sun.
-  return dark ? (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 3v2.2M12 18.8V21M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M3 12h2.2M18.8 12H21M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M20.2 14.6A8.6 8.6 0 1 1 9.6 4a7 7 0 0 0 10.6 10.6z" />
-    </svg>
+/**
+ * The theme switch, as the pill every page now carries.
+ *
+ * The markup is the same the three static pages write by hand and the styling is the same file
+ * they link, `public/theme-pill.css` - so this is one component with two renderers rather than
+ * two components that agree by hand. See the header of that file for why a pill and not an icon.
+ */
+function ThemePill({ light, onFlip }: { light: boolean; onFlip: () => void }) {
+  return (
+    <button
+      type="button"
+      className="theme-pill"
+      role="switch"
+      aria-checked={light}
+      onClick={onFlip}
+      title={light ? "Switch to the dark console" : "Switch to the light console"}
+      aria-label="Switch between light and dark theme"
+    >
+      <svg className="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.6" />
+        <path d="M12 1.6v2.6M12 19.8v2.6M3.7 3.7l1.9 1.9M18.4 18.4l1.9 1.9M1.6 12h2.6M19.8 12h2.6M3.7 20.3l1.9-1.9M18.4 5.6l1.9-1.9" />
+      </svg>
+      <svg className="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+        <path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z" />
+      </svg>
+      <span className="theme-pill-knob" />
+    </button>
   );
 }
 
@@ -90,7 +107,14 @@ function CopyIcon({ state }: { state: "" | "copied" | "failed" }) {
   );
 }
 
-export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
+export function Chrome({
+  onDive,
+  onFrame,
+}: {
+  onDive: (into: boolean) => void;
+  /** Move the camera to a named view. Owned by `App`, which holds the scene. */
+  onFrame?: (preset: CameraPreset) => void;
+}) {
   const store = useStore();
   const { manifest, stage, morph, field, timestepIndex, theme, touched, set } = store;
   // What the copy button last did, so it can say so for a moment. A control that fires and
@@ -129,7 +153,7 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
           * of a caption, because that is what it is.
           */}
         <div className="brand">
-          <span className="brand-mark">SAMUDRA<span className="brand-dim">·3D</span></span>
+          <span className="brand-mark">OCEAN<span className="brand-dim">·VERITY</span></span>
           <span className="brand-sub">INCOIS</span>
         </div>
 
@@ -168,14 +192,7 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
           */}
         <div className="topbar-right">
           <div className="topbar-utilities">
-            <button
-              className="icon-button"
-              onClick={flipTheme}
-              title={theme === "dark" ? "Switch to light console" : "Switch to dark console"}
-              aria-label={theme === "dark" ? "Switch to light console" : "Switch to dark console"}
-            >
-              <ThemeIcon dark={theme === "dark"} />
-            </button>
+            <ThemePill light={theme === "light"} onFlip={flipTheme} />
             {/*
               * The link to what is on screen.
               *
@@ -197,6 +214,33 @@ export function Chrome({ onDive }: { onDive: (into: boolean) => void }) {
               <CopyIcon state={copied} />
             </button>
           </div>
+
+          {/*
+            * Three named views of the water, in the Volume View only.
+            *
+            * On the globe they would be a control that silently needs a dive first, which is
+            * the "hiding a control is not turning it off" rule in its other direction: better
+            * absent than present and inert. They move the camera and nothing else; see
+            * `camera.ts` for why the first one is framed on the EEZ and not on the baked box.
+            */}
+          {inVolume && onFrame && (
+            <div className="topbar-views" role="group" aria-label="Camera views">
+              {cameraPresets(manifest).map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="view-chip"
+                  title={preset.title}
+                  onClick={() => {
+                    set("touched", "views");
+                    onFrame(preset);
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="topbar-doors">
             {/* Offered on the top bar rather than buried, because the people it is for are the

@@ -20,9 +20,9 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from samudra.sources import copernicus
-from samudra.sources.base import BoundingBox
-from samudra.sources.copernicus import CopernicusCurrentsSource
+from oceanverity.sources import copernicus
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.copernicus import CopernicusCurrentsSource
 
 BOX = BoundingBox(south=0.0, north=2.0, west=60.0, east=62.0)
 WHEN = datetime(2026, 7, 30, tzinfo=timezone.utc)

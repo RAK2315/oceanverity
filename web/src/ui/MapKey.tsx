@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { biasColour } from "../palette";
+import { forget, remember, remembered } from "../remembered";
 import { useStore } from "../store";
 
 /** Remembered per browser, so a reader who folds it away keeps it folded. */
-const OPEN_KEY = "samudra.mapkey";
+const OPEN_KEY = "mapkey";
 /** And where they dragged it to, for the same reason. */
-const POS_KEY = "samudra.mapkey.pos";
+const POS_KEY = "mapkey.pos";
 
 /** How far clear of the control panel the key sits once it has to move. */
 const CLEARANCE = 12;
@@ -15,13 +16,13 @@ const MARGIN = 8;
 type Spot = { left: number; top: number };
 
 function readSpot(): Spot | null {
+  const raw = remembered(POS_KEY);
+  if (!raw) return null;
   try {
-    const raw = window.localStorage.getItem(POS_KEY);
-    if (!raw) return null;
     const parsed = JSON.parse(raw) as Spot;
     return Number.isFinite(parsed?.left) && Number.isFinite(parsed?.top) ? parsed : null;
   } catch {
-    return null;
+    return null; // something else wrote the key, or it was truncated
   }
 }
 
@@ -147,15 +148,11 @@ function usePlacement(inVolume: boolean, folded: boolean) {
       el.classList.remove("dragging");
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
-      try {
-        const landed = el.getBoundingClientRect();
-        window.localStorage.setItem(
-          POS_KEY,
-          JSON.stringify({ left: Math.round(landed.left), top: Math.round(landed.top) }),
-        );
-      } catch {
-        // Remembering is a convenience; failing to must never cost the drag.
-      }
+      const landed = el.getBoundingClientRect();
+      remember(
+        POS_KEY,
+        JSON.stringify({ left: Math.round(landed.left), top: Math.round(landed.top) }),
+      );
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", up);
@@ -165,11 +162,7 @@ function usePlacement(inVolume: boolean, folded: boolean) {
     setSpot(null);
     setShift(null);
     natural.current = null;
-    try {
-      window.localStorage.removeItem(POS_KEY);
-    } catch {
-      // As above.
-    }
+    forget(POS_KEY);
   };
 
   // A dragged key is pinned to the window, so it takes both axes and gives up `bottom`.
@@ -199,19 +192,13 @@ export function MapKey() {
   // readable the first time somebody sees the scene and it has to get out of the way after
   // that, and only the reader knows which of those they are doing.
   const [open, setOpen] = useState(() => {
-    try {
-      return window.localStorage.getItem(OPEN_KEY) !== "closed";
-    } catch {
-      return true; // a private window that refuses storage still gets a key
-    }
+    // A private window that refuses storage still gets a key: `remembered` returns null there,
+    // which is not "closed".
+    return remembered(OPEN_KEY) !== "closed";
   });
   const toggle = () => {
     setOpen((was) => {
-      try {
-        window.localStorage.setItem(OPEN_KEY, was ? "closed" : "open");
-      } catch {
-        // Storage is a convenience here; failing to remember must never cost the control.
-      }
+      remember(OPEN_KEY, was ? "closed" : "open");
       return !was;
     });
   };

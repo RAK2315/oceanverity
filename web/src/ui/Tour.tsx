@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { cameraPresets, type CameraPreset } from "../camera";
 import { GUIDE, guideFigures } from "../guide";
 import { useStore } from "../store";
 
@@ -89,7 +90,15 @@ function calm(): void {
   });
 }
 
-export function buildTour(dive: (into: boolean) => void): TourStep[] {
+export function buildTour(
+  dive: (into: boolean) => void,
+  /**
+   * Move the camera to a named view. Optional, because `tourCoverage()` and `probe-tour.mjs`
+   * both build the tour with no helpers at all in order to read its shape, and a step that
+   * cannot move the camera must still exist and still cover its control.
+   */
+  frame?: (preset: CameraPreset) => void,
+): TourStep[] {
   const inVolume = () => store.getState().morph > 0.5;
   const steps = () => store.getState().manifest?.timesteps.length ?? 1;
   // The window this build actually loaded, formatted by `guideFigures` rather than by a second
@@ -122,9 +131,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "The ocean, from above",
       title: "The instruments that were there",
       body:
-        "Dots are robot floats that were in this water on the date shown. Squares are buoys" +
-        " anchored to the sea floor. The lines behind them are where each float has drifted" +
-        " across this build's window - measured positions, not a model.",
+        "Dots are robot floats in this water on the date shown; squares are buoys anchored to the" +
+        " sea floor. The lines behind them are where each float actually drifted - measured" +
+        " positions, not a model.",
       covers: ["instruments", "floats", "moorings", "tracks", "chlorophyll"],
       enter: () => {
         calm();
@@ -169,6 +178,23 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
     },
     {
       chapter: "Inside the water",
+      title: "Go straight to a sea",
+      body:
+        "Three named views on the top bar put the camera on the water you want without an orbit" +
+        " and a zoom. They move the camera and change nothing else, so your variable and date" +
+        " survive the trip.",
+      covers: ["views"],
+      enter: () => {
+        calm();
+        store.setState({ touched: "views" });
+        // Built with no helpers by `tourCoverage()` and by the probe, which read the tour's
+        // shape rather than run it. The step still covers its control there.
+        const bay = cameraPresets(store.getState().manifest!).find((p) => p.id === "bay");
+        if (bay && frame) frame(bay);
+      },
+    },
+    {
+      chapter: "Inside the water",
       title: "Cut the block to a layer",
       body:
         "The depth slice hides everything outside a band, so you can look at one layer of the" +
@@ -184,9 +210,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Inside the water",
       title: "What the colours mean, and which water is drawn",
       body:
-        "The colourbar is the legend and a control at once. Narrowing its range does not just" +
-        " recolour: water outside the range stops being drawn, so you can isolate one body of" +
-        " water. The log scale bends the colours where a linear one wastes them.",
+        "The colourbar is legend and control at once: narrow the range and water outside it stops" +
+        " being drawn, so one body can be isolated. Type the two ends or press Auto, and use Log" +
+        " where a linear scale wastes its colours.",
       covers: ["palette", "window", "scale"],
       enter: () => {
         calm();
@@ -290,9 +316,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Every variable",
       title: "What changed, and against what",
       body:
-        "Two different questions. Temperature anomaly is departure from this bake's own four" +
-        " months - a seasonal swing. Temperature vs normal is departure from NOAA's 1991-2020" +
-        " average for the same month, which is the climate one.",
+        "Temperature anomaly is departure from this build's own window, which is a seasonal swing." +
+        " Temperature vs normal is departure from NOAA's 1991-2020 average for the same month," +
+        " which is the climate question.",
       covers: ["temperature_anomaly", "temperature_normal_anomaly"],
       enter: () => {
         calm();
@@ -305,9 +331,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Every variable",
       title: "The water under a fishing advisory",
       body:
-        "INCOIS build fishing advisories from surface fronts. Biology shows those fronts, then" +
-        " what is under them: plankton, oxygen, and the oxygen floor, the depth fish cannot go" +
-        " below. Fronts are the ingredient of an advisory, not a fishing zone.",
+        "INCOIS build fishing advisories from surface fronts, and Biology shows those fronts plus" +
+        " what is under them: plankton, oxygen, and the depth fish cannot go below. A front is" +
+        " the ingredient of an advisory, never a fishing zone.",
       covers: ["fronts", "oxygen", "oxygen_floor"],
       enter: () => {
         calm();
@@ -344,9 +370,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Cyclone mode",
       title: "One press sets up a cyclone question",
       body:
-        "This is not a variable button. It changes the variable, the date, the way the water is" +
-        " drawn and the rings, all at once, and swaps the list for the five things a cyclone" +
-        " forecaster asks for. A cyclone runs on stored heat, not on surface warmth.",
+        "One press changes the variable, the date, the way the water is drawn and the rings, and" +
+        " swaps the list for the five things a cyclone forecaster asks for. A cyclone runs on" +
+        " stored heat, not on surface warmth.",
       covers: ["hazardPreset", "heat_potential"],
       enter: () => {
         calm();
@@ -377,9 +403,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Model against instruments",
       title: "What the model said, against what was measured",
       body:
-        "This is the comparison that does not exist in any other tool. One line is what the" +
-        " float measured on its way up; the other is what INCOIS predicted at that exact spot" +
-        " and date. The shaded gap is the disagreement, and the number under it sizes it.",
+        "One line is what the float measured on its way up, the other what INCOIS predicted at" +
+        " that exact spot and date. The shaded gap is the disagreement, and the number under" +
+        " it sizes it.",
       covers: [],
       enter: () => {
         calm();
@@ -473,9 +499,9 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
       chapter: "Yours to drive",
       title: "That is the whole console",
       body:
-        "Every control has an explanation on the right the moment you touch it. Copy this view" +
-        " puts whatever is on screen into a link you can send to somebody. Explore is the same" +
-        " platform with the questions asked for you.",
+        "Every control explains itself on the right the moment you touch it, and Copy this view" +
+        " turns whatever is on screen into a link you can send. Explore is the same platform" +
+        " with the questions already asked for you.",
       covers: [],
       enter: () => {
         calm();
@@ -485,9 +511,15 @@ export function buildTour(dive: (into: boolean) => void): TourStep[] {
   ];
 }
 
-export function Tour({ onDive }: { onDive: (into: boolean) => void }) {
+export function Tour({
+  onDive,
+  onFrame,
+}: {
+  onDive: (into: boolean) => void;
+  onFrame?: (preset: CameraPreset) => void;
+}) {
   const { tourStep, cardPaused, manifest, set } = useStore();
-  const steps = buildTour(onDive);
+  const steps = buildTour(onDive, onFrame);
   const step = tourStep === null ? undefined : steps[tourStep];
 
   // Apply the step when it opens, and again when a paused step is continued. Never while paused:

@@ -1,7 +1,7 @@
-"""Rewrite the shipped manifest's `palettes` block from `samudra.palettes`, and nothing else.
+"""Rewrite the shipped manifest's `palettes` block from `oceanverity.palettes`, and nothing else.
 
 The colourbar switcher needs alternates that a bake produced before it existed does not carry.
-A full `python -m samudra.bake` would produce them, but it also re-fetches INCOIS, Argo and
+A full `python -m oceanverity.bake` would produce them, but it also re-fetches INCOIS, Argo and
 Copernicus - a network round trip, a credential, and a whole new set of numbers - to change a
 lookup table that is a pure function of `AVAILABLE`.
 
@@ -31,8 +31,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.bake import all_field_specs  # noqa: E402
-from samudra.palettes import AVAILABLE, DIVERGING_ALTERNATES, all_tables  # noqa: E402
+from oceanverity.bake import all_field_specs  # noqa: E402
+from oceanverity.palettes import AVAILABLE, DIVERGING_ALTERNATES, all_tables  # noqa: E402
 
 # Palettes a bake has to be re-run to move into or out of. See the docstring.
 NEEDS_A_BAKE = set(DIVERGING_ALTERNATES) | {"coverage"}

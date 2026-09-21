@@ -34,8 +34,8 @@ from wms import (  # noqa: E402
     service_exception,
 )
 
-from samudra.grid import Grid  # noqa: E402
-from samudra.palettes import lookup_table  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
+from oceanverity.palettes import lookup_table  # noqa: E402
 
 LEVELS = np.array([5.0, 50.0, 200.0])
 LATITUDES = np.arange(-9.5, 25.5, 1.0)

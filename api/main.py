@@ -1,7 +1,7 @@
-"""The Samudra 3D REST API.
+"""The OceanVerity REST API.
 
 The browser demo runs entirely on baked static files, deliberately - see the note at the top of
-`pipeline/samudra/bake.py`. So what is this for?
+`pipeline/oceanverity/bake.py`. So what is this for?
 
 It is the deployable half. The problem statement asks for "a lightweight REST/OPeNDAP API
 backend", and more importantly a Collocation is a *query*, not a fixture: a forecaster wants
@@ -34,15 +34,15 @@ sys.path.insert(0, str(ROOT / "pipeline"))
 # root does not put this directory on the path.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from samudra.collocation import collocate  # noqa: E402
-from samudra.grid import Grid  # noqa: E402
-from samudra.section import casts_near_line, section_along  # noqa: E402
-from samudra.sources.argo import ArgoErddapSource, BgcArgoSource, IncoisArgoSource  # noqa: E402
-from samudra.sources.copernicus import CopernicusCurrentsSource  # noqa: E402
-from samudra.sources.copernicus_bgc import CopernicusBgcSource  # noqa: E402
-from samudra.sources.glider import GliderSource  # noqa: E402
-from samudra.sources.incois import IncoisErddapSource, IncoisMcCrearySource  # noqa: E402
-from samudra.sources.osmc import OsmcSource  # noqa: E402
+from oceanverity.collocation import collocate  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
+from oceanverity.section import casts_near_line, section_along  # noqa: E402
+from oceanverity.sources.argo import ArgoErddapSource, BgcArgoSource, IncoisArgoSource  # noqa: E402
+from oceanverity.sources.copernicus import CopernicusCurrentsSource  # noqa: E402
+from oceanverity.sources.copernicus_bgc import CopernicusBgcSource  # noqa: E402
+from oceanverity.sources.glider import GliderSource  # noqa: E402
+from oceanverity.sources.incois import IncoisErddapSource, IncoisMcCrearySource  # noqa: E402
+from oceanverity.sources.osmc import OsmcSource  # noqa: E402
 
 import standards  # noqa: E402
 import upload  # noqa: E402
@@ -51,7 +51,7 @@ WEB_DATA = ROOT / "web" / "public" / "data"
 GRID_DATA = ROOT / "data" / "grids"
 
 app = FastAPI(
-    title="Samudra 3D API",
+    title="OceanVerity API",
     version="1.0.0",
     description="Ocean model fields and in-situ observations over India's EEZ (SIH 26067).",
 )
@@ -65,11 +65,11 @@ app = FastAPI(
 #:
 #: So reads keep the wildcard and writes get a list. CORS is a browser rule and nothing else, so
 #: this costs a script, a notebook and `curl` nothing at all: they send no `Origin` and are not
-#: checked. Override with `SAMUDRA_UPLOAD_ORIGINS`, comma separated, or `*` to go back.
+#: checked. Override with `OCEANVERITY_UPLOAD_ORIGINS`, comma separated, or `*` to go back.
 UPLOAD_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
-        "SAMUDRA_UPLOAD_ORIGINS",
+        "OCEANVERITY_UPLOAD_ORIGINS",
         "http://localhost:5173,http://127.0.0.1:5173,"
         "http://localhost:4173,http://127.0.0.1:4173,"
         "https://rak2315.github.io",
@@ -126,7 +126,7 @@ def _drop_caches_if_rebaked() -> None:
 def _manifest() -> dict:
     path = WEB_DATA / "manifest.json"
     if not path.exists():
-        raise HTTPException(503, "no baked data; run `python -m samudra.bake` in pipeline/")
+        raise HTTPException(503, "no baked data; run `python -m oceanverity.bake` in pipeline/")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -209,7 +209,7 @@ def health() -> dict:
 
 
 # The registry. Adding a provider means adding a class that satisfies the protocol in
-# `samudra/sources/base.py` and putting it in one of these lists. Nothing else in the system -
+# `oceanverity/sources/base.py` and putting it in one of these lists. Nothing else in the system -
 # renderer, API, UI - has ever heard of ERDDAP.
 # Eight registered here - three grid and five profile - and `/api/sources` answers with exactly
 # these, because the endpoint below reads the lists rather than restating them. Registering them
@@ -522,7 +522,7 @@ def _section_profiles() -> list:
     """Every baked cast as a `Profile`, for `casts_near_line`.
 
     `profiles()` caches plain dicts because that is what every other endpoint here wants;
-    `samudra.section` is pipeline code and speaks the pipeline's own type. Converting at the
+    `oceanverity.section` is pipeline code and speaks the pipeline's own type. Converting at the
     boundary keeps the science module free of this API's storage shape, which is the same
     division `sources/base.py` draws everywhere else.
 
@@ -531,7 +531,7 @@ def _section_profiles() -> list:
     platforms on the 36-step bake - and the answer only changes when the bake does.
     `_drop_caches_if_rebaked` clears it along with the rest.
     """
-    from samudra.sources.base import Profile
+    from oceanverity.sources.base import Profile
 
     out = []
     for platform, casts in profiles().items():
@@ -569,6 +569,6 @@ def _number(value):
 standards.register(app, manifest, native_grid)
 
 # Drop your own NetCDF file in. The parsing is a Source Adapter like every other provider's -
-# `samudra/sources/netcdf.py` - and this is the only endpoint on the service that accepts
+# `oceanverity/sources/netcdf.py` - and this is the only endpoint on the service that accepts
 # anything. The demo path never touches it.
 upload.register(app, manifest, UPLOAD_ORIGINS)

@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "api"))
 import cf  # noqa: E402
 import standards  # noqa: E402
 
-from samudra.bake import all_field_specs  # noqa: E402
+from oceanverity.bake import all_field_specs  # noqa: E402
 
 FIELD_KEYS = [spec.key for spec in all_field_specs()]
 

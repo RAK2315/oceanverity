@@ -36,7 +36,7 @@ a word the picture has not already shown.
 
 ## Setting up
 
-1. Open **https://rak2315.github.io/samudra-sih26/** - the landing page - and let the globe in its
+1. Open **https://rak2315.github.io/oceanverity/** - the landing page - and let the globe in its
    hero finish drawing. Open the platform once in a second tab so it is warm, and leave the
    landing page in front.
 2. Record the opening **with the address bar visible**, so the live link is on screen. Everything
@@ -132,6 +132,9 @@ a different tool.
 The data existed. What was missing was one place to see the two together, through the depth. So
 the question that matters has no tool behind it. Not "what does the model say". **Is the model
 right, here, at this depth, today?**
+
+Tools exist for each half. Argo portals show you the floats. Model portals show you the model, as
+a flat map. **None of them puts the two in one picture and tells you the difference.**
 
 ---
 
@@ -302,7 +305,10 @@ is one small class.
 Every variable in the build, the depth, the time, the instruments, the odd water it finds by
 itself, a guided tour and a screen for a public hall. One platform, one browser tab.
 
+A cyclone forecaster, a search and rescue planner, a fisheries desk, a climate group and a school
+class. Five people INCOIS already serves, one tool, and no new data collected for any of it.
+
 Everything in this video is running right now, at that link. Open it, click any float, and check
 our numbers yourself.
 
-Samudra 3D. Team Sigmoid.
+OceanVerity. Team Sigmoid.

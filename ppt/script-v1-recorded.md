@@ -5,6 +5,10 @@
 > assimilates Argo observations", "the seventeen moored buoys it did not use", "five and a half
 > times" (not like for like: buoys are compared to 500 m, floats to about 2000 m) - and the
 > counts are from an older bake. Do not copy from this file. Re-record from `script.md`.
+>
+> **The product name and the link in this file were updated on 2026-09-20 and the recording was
+> not.** The audio still speaks the old name in its closing line, and the old link 404s. That is
+> a second reason the video has to be re-recorded, not a transcription error here.
 
 **How to read this page.**
 
@@ -35,7 +39,7 @@ figure has moved, re-run `collect_facts.py` and correct the sentence before you 
 
 ## Before you press record
 
-1. Open **https://rak2315.github.io/samudra-sih26/app.html** and let it finish loading. It settles
+1. Open **https://rak2315.github.io/oceanverity/app.html** and let it finish loading. It settles
    on the spinning globe with India facing you.
 2. Press **F11** for full screen, so no browser chrome is in the recording.
 3. In the left panel, close every group except **Variable**.
@@ -243,7 +247,7 @@ We did not set out to make the ocean look beautiful.
 
 We set out to make it **answerable.**
 
-Samudra 3D. Team Sigmoid.
+OceanVerity. Team Sigmoid.
 
 ---
 

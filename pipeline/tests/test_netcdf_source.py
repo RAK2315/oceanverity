@@ -14,8 +14,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from samudra.sources.base import BoundingBox
-from samudra.sources.netcdf import (
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.netcdf import (
     NetcdfAxisError,
     NetcdfFileSource,
     data_variables,

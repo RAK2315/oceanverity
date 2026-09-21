@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.fronts import chlorophyll_fronts, front_share, thermal_fronts
+from oceanverity.fronts import chlorophyll_fronts, front_share, thermal_fronts
 
 RNG = np.random.default_rng(7)
 
@@ -127,7 +127,7 @@ def test_a_front_on_a_finer_grid_lands_in_the_coarser_pixel_that_contains_it():
     """Chlorophyll comes at 1/24 degree and temperature at 1/20. Every chlorophyll front pixel must
     reach the temperature pixel whose footprint holds it, or a thin edge could fall between the
     samples of a nearest-neighbour lookup and vanish."""
-    from samudra.fronts import onto_grid
+    from oceanverity.fronts import onto_grid
 
     fine_lats = np.arange(1 / 48, 1.0, 1 / 24)
     fine_lons = np.arange(60 + 1 / 48, 61.0, 1 / 24)
@@ -142,7 +142,7 @@ def test_a_front_on_a_finer_grid_lands_in_the_coarser_pixel_that_contains_it():
 
 
 def test_a_fine_pixel_outside_the_coarse_grid_is_dropped():
-    from samudra.fronts import onto_grid
+    from oceanverity.fronts import onto_grid
 
     out = onto_grid(np.ones((1, 1), bool), np.array([5.0]), np.array([60.0]), np.array([0.025]), np.array([60.025]))
     assert not out.any()

@@ -39,7 +39,7 @@ from typing import Iterable
 
 import numpy as np
 
-DATASET_NAME = "samudra"
+DATASET_NAME = "oceanverity"
 
 # DAP2 type names for the dtypes this project actually serves. Everything is float; a count of
 # casts is stored as a float because it is NaN over land, which an integer cannot express.

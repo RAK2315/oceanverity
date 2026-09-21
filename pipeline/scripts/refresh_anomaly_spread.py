@@ -26,9 +26,9 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.anomaly import spread_by_level  # noqa: E402
-from samudra.bake import _spread_block  # noqa: E402
-from samudra.grid import Grid  # noqa: E402
+from oceanverity.anomaly import spread_by_level  # noqa: E402
+from oceanverity.bake import _spread_block  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "web" / "public" / "data" / "manifest.json"

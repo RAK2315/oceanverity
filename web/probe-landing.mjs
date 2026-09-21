@@ -308,7 +308,7 @@ const TYPE = [
 const heroContrast = async (theme, width) => {
   const ctx = await browser.newContext({ viewport: { width, height: 1400 } });
   await ctx.addInitScript((t) => {
-    try { window.localStorage.setItem("samudra.theme", t); } catch { /* dark is the default */ }
+    try { window.localStorage.setItem("oceanverity.theme", t); } catch { /* dark is the default */ }
   }, theme);
   const p = await ctx.newPage();
   await p.goto(PAGE, { waitUntil: "load", timeout: 60000 });

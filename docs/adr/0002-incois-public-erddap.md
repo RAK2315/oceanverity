@@ -19,4 +19,4 @@ own error fields alongside it.
 
 One wart, recorded so nobody rediscovers it at 3 a.m.: their server sends only its leaf
 certificate and omits the GlobalSign intermediate. Browsers and curl paper over this; Python's
-ssl module does not. See pipeline/samudra/tls.py.
+ssl module does not. See pipeline/oceanverity/tls.py.

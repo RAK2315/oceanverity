@@ -114,7 +114,7 @@ the integration point.
 | --- | --- |
 | "Is this real INCOIS data?" | Yes - `erddap.incois.gov.in`, their 10-day gridded Argo analysis, current to 30 July 2026. Shown top-right. |
 | "Why not Cesium?" | It needs an ion token - an external dependency that can fail live - and compositing a ray-marched volume into its pipeline was the riskiest integration available. One Three.js scene makes the dive a real continuous motion. ADR 0001. |
-| "How would you add our internal data?" | One Source Adapter class. `pipeline/samudra/sources/base.py` is the whole interface. |
+| "How would you add our internal data?" | One Source Adapter class. `pipeline/oceanverity/sources/base.py` is the whole interface. |
 | "Is the depth axis to scale?" | No, and deliberately - it is warped so the top 300 m gets half the axis instead of 15%, because that is where the thermocline is. Stretched depth axes are standard in oceanography, and the profile chart uses the same warp so the two agree. ADR 0004. |
 | "Why is vertical exaggeration 1800×?" | The ocean is ~4000 times wider than it is deep. At true scale it is an invisible film. |
 | "What is the resolution?" | 1°, because that is what INCOIS publishes. We do not upsample - that would invent structure the instruments never measured. |

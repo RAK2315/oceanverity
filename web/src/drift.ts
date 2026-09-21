@@ -13,7 +13,7 @@
  * SARAT and this is not SARAT. What this shows is the drift the ocean analysis alone implies.
  *
  * **This is the project's one deliberate second implementation, and it is the checked kind.**
- * `pipeline/samudra/drift.py` is the same integrator, is the one under test, and is what bakes
+ * `pipeline/oceanverity/drift.py` is the same integrator, is the one under test, and is what bakes
  * the validated float comparisons. The rule this project keeps - one curve in one file - exists
  * because a second copy of the Scale silently disagreed with the first. So this copy is not
  * trusted: `web/probe-drift.mjs` runs it from the same start points as the baked trajectories
@@ -177,7 +177,7 @@ export type VelocityLookup = (lon: number, lat: number, timeMs: number) => [numb
  * One midpoint step, and the only place the step rule is written.
  *
  * Two things integrate the current field and they must not disagree: `integrateDrift` below,
- * which follows a dropped pin forward through time and is held against `pipeline/samudra/
+ * which follows a dropped pin forward through time and is held against `pipeline/oceanverity/
  * drift.py` by `web/probe-drift.mjs`; and `particles.ts`, which moves a few thousand dots
  * through one frozen analysis to draw the flow. The second is a picture and the first is a
  * measurement, so the temptation is to let the picture use a cheaper rule - which is exactly how

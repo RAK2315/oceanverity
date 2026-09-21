@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { positionAt } from "./floatTime";
+import { remember, remembered } from "./remembered";
 import {
   forgetUpload,
   timestepMapping,
@@ -108,23 +109,15 @@ function isoFloorFor(spec: FieldSpec, state: { isoValue: number; manifest: Manif
  * against, but a forecaster in a bright room needs the other one. Remembered per browser so a
  * choice survives a reload; a private window that refuses storage simply falls back to dark.
  */
-const THEME_KEY = "samudra.theme";
+const THEME_KEY = "theme";
 
 export function storedTheme(): Theme {
-  try {
-    return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
-  } catch {
-    return "dark";
-  }
+  return remembered(THEME_KEY) === "light" ? "light" : "dark";
 }
 
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme;
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-  } catch {
-    // A browser that blocks storage still gets the theme, just not the memory of it.
-  }
+  remember(THEME_KEY, theme);
 }
 
 interface State {
@@ -369,6 +362,42 @@ interface State {
    * The measurement the rendered overlay this replaced could not produce. Read from the float32
    * vector file - the Grid - and not from a Volume. ADR 0013.
    */
+  /**
+   * The Field's own value under the cursor, with the depth it was read at.
+   *
+   * Eleven of the nineteen Fields can answer this; see `OceanScene.pickValue` for which and
+   * why. `metres` is null for a Sheet or a Drape, which have no reading depth of their own -
+   * on a Sheet the value *is* a depth.
+   */
+  /**
+   * Whether each bay is folded away, so the water can be seen whole.
+   *
+   * Deliberately **not** kiosk mode. Kiosk hides the panels as a side effect, but it also mounts
+   * the Explore loop, scales the type and arms a reset a minute after the last visitor - so
+   * borrowing it to get a clean frame starts a slideshow, which is exactly how `capture.mjs`
+   * once shot the hero as the currents with a drift pin in it. This is a CSS state and nothing
+   * else, and the two bays fold independently because the questions they answer are different:
+   * the left one is the controls, the right one is the explanation.
+   *
+   * The depth ruler places its figures by measuring the left panel's **width**, which is zero
+   * when it is folded - and zero is the right answer here, because there is nothing to clear.
+   */
+  panelsHidden: { left: boolean; right: boolean };
+  hoverValue: {
+    value: number;
+    metres: number | null;
+    lon: number;
+    lat: number;
+  } | null;
+  /**
+   * True once the pointer has been over the water, which is what makes the Grid worth fetching.
+   *
+   * The float32 Grid is 194 KB a Field a Timestep and the readout is the only thing that needs
+   * it when no section line exists. Fetching it on every Field switch would cost 194 KB a press
+   * and 7 MB across one playthrough of the timeline; fetching it on first hover costs it once,
+   * for a reader who has shown they want a number.
+   */
+  hoverArmed: boolean;
   hoverCurrent: {
     speed: number;
     /** Where the water is going, clockwise from north. */
@@ -443,7 +472,7 @@ interface State {
    * A mode on the markers, not a Field: the water underneath is still whatever Variable is
    * selected, and the dots on top stop saying "here is an instrument" and start saying "here is
    * how wrong the analysis was here". It is the project's thesis as a picture - see
-   * `pipeline/samudra/residuals.py` for what is being coloured.
+   * `pipeline/oceanverity/residuals.py` for what is being coloured.
    */
   biasMode: boolean;
 
@@ -621,6 +650,9 @@ export const useStore = create<State>((setState, getState) => ({
   showFloats: true,
   showTracks: true,
   showAnomalies: true,
+  panelsHidden: { left: false, right: false },
+  hoverValue: null,
+  hoverArmed: false,
   hoverCurrent: null,
   tourStep: null,
   stormCase: null,

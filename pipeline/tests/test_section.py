@@ -12,14 +12,14 @@ at a coast. Both are pinned by hand-computable cases.
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
-from samudra.section import (
+from oceanverity.grid import Grid
+from oceanverity.section import (
     casts_near_line,
     great_circle_points,
     haversine_km,
     section_along,
 )
-from samudra.sources.base import Profile
+from oceanverity.sources.base import Profile
 
 from datetime import datetime, timezone
 

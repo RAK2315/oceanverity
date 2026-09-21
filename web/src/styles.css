@@ -1,5 +1,5 @@
 /*
- * Samudra 3D - an instrument, not a consumer app.
+ * OceanVerity - an instrument, not a consumer app.
  *
  * The design brief is a forecaster's console: panels that recede, numbers set in a monospace
  * face so a column of readings lines up and a changing digit does not shift the ones beside it,
@@ -16,6 +16,17 @@
  */
 
 /* ================================================================ tokens */
+
+/*
+ * The two bays' widths, as tokens.
+ *
+ * Declared before the palette because three rules read them: the panel, the narrow-screen
+ * override and the tab that folds the bay away and docks to its inner edge.
+ */
+:root {
+  --bay-left-width: 344px;
+  --bay-right-width: 348px;
+}
 
 :root {
   /* Layered surfaces, darkest first. Every panel picks a level rather than inventing a colour. */
@@ -478,6 +489,46 @@ body {
  * hairline between the halves, and the edge that used to separate them from the settings is now
  * the container's own. Measured: 34 px tall, the height every other control on this bar is.
  */
+/*
+ * The three named camera views.
+ *
+ * Quieter than the two doors beside them and much quieter than the dive button, because that is
+ * what they are: a move, not a destination. No fill, no accent, a hairline that only appears on
+ * hover - the same register the bar's settings sit in. They are the one group here that can
+ * afford to disappear at a narrow width, and they do, because the dive button is the way out of
+ * every one of them and it never disappears.
+ */
+.topbar-views {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 34px;
+}
+
+.view-chip {
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--on-surface-faint);
+  font-family: var(--sans);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s var(--ease), border-color 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.view-chip:hover {
+  border-color: var(--outline-variant);
+  background: var(--surface-low);
+  color: var(--on-surface);
+}
+
+.view-chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
 .topbar-doors {
   display: flex;
   align-items: stretch;
@@ -672,7 +723,10 @@ body {
    */
   top: var(--topbar-height, 59px);
   z-index: 5;
-  width: 344px;
+  /* One source for the bay's width. The panel itself, the narrow-screen override and the fold
+     tab that docks to its inner edge all read it; a fourth hand-typed copy is how the tab ends
+     up 44 px inside the panel at one width and outside it at another. */
+  width: var(--bay-left-width);
   overflow-x: hidden;
   /* The timeline is centred and its left end starts well to the right of the panel, so the panel
      never has to clear *it*. What the panel does have to clear is the source credits, which run
@@ -758,7 +812,7 @@ body {
    the glass. Without a bottom rule that reads as a block someone forgot to finish. */
 .panel-right {
   right: 0;
-  width: 348px;
+  width: var(--bay-right-width);
   border-left: 1px solid var(--frame-rule);
   border-bottom: 1px solid var(--frame-rule);
 }
@@ -960,6 +1014,53 @@ select:hover {
 .segmented button:hover {
   background: var(--surface-high);
   color: var(--on-surface);
+}
+
+/*
+ * A Field button carries three things: its name, its render kind and its unit.
+ *
+ * The name is the control; the other two are a readout about it, so they take secondary ink at
+ * a smaller size and never compete. They sit on one row under the name - the tag left, the unit
+ * right - which costs about 13 px a button and answers two questions a reader would otherwise
+ * have to press the button to find out: what shape will this be drawn as, and in what unit does
+ * it answer.
+ *
+ * `.on` has to re-state both colours. The active button fills with `--primary`, and secondary
+ * ink over that fill is the "readout over an accent ground" failure this project already fixed
+ * once in the chrome - measured against `--on-primary` it is the same family, so the meta takes
+ * `--on-primary` at reduced opacity rather than its own token.
+ */
+.segmented-fields button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  padding: 7px 8px;
+}
+
+.segmented-fields .field-name {
+  line-height: 1.2;
+}
+
+.segmented-fields .field-meta {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--on-surface-faint);
+}
+
+.segmented-fields .field-units {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.segmented-fields button.on .field-meta {
+  color: var(--on-primary);
+  opacity: 0.72;
 }
 
 /* An odd number of Fields would otherwise leave a hole in the bottom right. */
@@ -1192,6 +1293,116 @@ select:hover {
 .scale-toggle button.on {
   background: var(--primary);
   color: var(--on-primary);
+}
+
+/*
+ * The two range ends as typed boxes, with Auto.
+ *
+ * One row: two equal boxes and a button that takes only the width of its word, so the boxes get
+ * the space and the button is not a third peer. The input is mono and tabular, because it is a
+ * value; the label and the unit are the smallest secondary type in the panel, because they are
+ * not.
+ *
+ * `min-width: 0` on the boxes is load-bearing. An `<input>` carries a default intrinsic width of
+ * about 20 characters, so two of them in a grid refuse to shrink below roughly 320 px and push
+ * the Auto button out of a 291 px panel column.
+ */
+.range-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  align-items: end;
+  margin: 2px 0 10px;
+}
+
+.range-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "label label" "input units";
+  gap: 2px 4px;
+  min-width: 0;
+}
+
+.range-box-label {
+  grid-area: label;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--on-surface-faint);
+}
+
+.range-box input {
+  grid-area: input;
+  min-width: 0;
+  width: 100%;
+  padding: 5px 6px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 5px;
+  background: var(--surface-low);
+  color: var(--on-surface);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.range-box input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.range-box-units {
+  grid-area: units;
+  align-self: center;
+  font-size: 10px;
+  color: var(--on-surface-faint);
+  white-space: nowrap;
+}
+
+.range-auto {
+  padding: 6px 10px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 5px;
+  background: var(--surface-low);
+  color: var(--on-surface-variant);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.range-auto:hover:not(:disabled) {
+  background: var(--surface-high);
+  color: var(--on-surface);
+}
+
+/* Already the whole range: the press would do nothing, and a control that does nothing should
+   say so rather than accept the click. */
+.range-auto:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/*
+ * The console's half of the shared theme switch.
+ *
+ * The control itself is `public/theme-pill.css`, linked by `app.html` and by the three static
+ * pages, and it declares five tokens rather than reaching for either side's palette. This is
+ * the console's mapping. It is the *only* thing in this file that knows the pill exists.
+ *
+ * The knob is teal, and deliberately not `--primary`: the accent repaints between themes
+ * (#64d7e3 dark, #00666e light) and this is the one control that exists identically on both
+ * halves of the product, so it is the one control that may not change colour when a reader
+ * crosses from the landing page into the platform. Both halves name the same two teals.
+ */
+:root {
+  --theme-pill-track: rgba(134, 147, 148, 0.16);
+  --theme-pill-border: var(--outline-variant);
+  --theme-pill-knob: #14b8a6;
+  --theme-pill-icon-on: #04231f;
+}
+
+:root[data-theme="light"] {
+  --theme-pill-knob: #0f766e;
+  --theme-pill-icon-on: #ffffff;
 }
 
 /* A live figure read off the data, rather than a caption. Monospaced so it does not jitter. */
@@ -1527,9 +1738,20 @@ input[type="range"]::-moz-range-thumb {
    both panels at every one of them.
    Below 1180 px both panels narrow by 44 and 36 px, which the subtraction below does not need to
    know about - it is the more conservative of the two and stays right either way. */
+/*
+ * The section figure, sized by its own content.
+ *
+ * `top: auto` is the whole fix and it is not cosmetic. `.panel` sets `top: var(--topbar-height)`
+ * for the two bays, and this panel sets `bottom`, so an absolutely positioned box with both
+ * edges pinned stretches between them: measured at 1366x768, **606 x 633 px of panel around
+ * 36 px of content**, which is 597 px of blurred glass sitting over the water the section was
+ * cut from. Releasing the top edge lets the box be its content, and the figure below takes the
+ * height that is now worth giving it.
+ */
 .panel-section {
   position: absolute;
   left: 50%;
+  top: auto;
   transform: translateX(-50%);
   bottom: 84px;
   width: clamp(320px, calc(100vw - 760px), 720px);
@@ -1571,10 +1793,23 @@ input[type="range"]::-moz-range-thumb {
 
 .section-close:hover { color: var(--on-surface); }
 
+/*
+ * The figure itself, and the only thing in this panel worth vertical space.
+ *
+ * It was a flat 200 px for 2000 m of water on a linear depth axis, which puts the whole
+ * thermocline - the structure a section exists to show - in the top 20 px. It scales with the
+ * window now and is clamped at both ends: never under 200 px, so a short laptop still gets the
+ * figure it had, and never over 340 px, so the panel cannot grow back into the block it is
+ * floating over. Measured at 1366x768 it lands at 261 px, a third more depth axis than before
+ * on a panel that is nonetheless 300 px shorter overall.
+ *
+ * The canvas redraws from `clientHeight` on every state change, so a resized window repaints at
+ * the new height without a resize listener.
+ */
 .section-canvas {
   display: block;
   width: 100%;
-  height: 200px;
+  height: clamp(200px, 34vh, 340px);
   margin-top: 6px;
 }
 
@@ -1711,44 +1946,53 @@ input[type="range"]::-moz-range-thumb {
 .guide-kind.navigation,
 .guide-kind.view { color: var(--on-surface-faint); }
 
-/* The description's fold. The header is the control, the way the map key's is, and it uses the
-   same disclosure triangle so the two folds read as one idea. The kind badge inside keeps its
-   own colour and dot; the button only adds the triangle and a hover. */
-.guide-view-toggle {
+/*
+ * The description's fold, on the heading that names what folds.
+ *
+ * It was a 10 px caret in the "Current view" header - a second disclosure affordance six pixels
+ * from the tab that folds the whole bay away, with no label on it, and the smaller of the two.
+ * A reader had to guess which caret folded which thing, and the unlabelled one lost. The control
+ * is the heading row now: it says the words it folds, and it is a target you can hit.
+ */
+.guide-fold-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: -3px -4px;
-  padding: 3px 4px;
+  width: calc(100% - 28px);
+  margin: 12px 14px 0;
+  padding: 4px 0;
   border: none;
-  border-radius: 4px;
   background: none;
-  font: inherit;
-  color: var(--on-surface-faint);
-  cursor: pointer;
-  transition: color 0.16s var(--ease), background 0.16s var(--ease);
-}
-
-.guide-view-toggle:hover,
-.guide-view-toggle:focus-visible {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: left;
   color: var(--on-surface);
-  background: var(--surface-mid);
+  cursor: pointer;
 }
 
-.guide-fold {
-  width: 0;
-  height: 0;
-  flex: none;
-  border-left: 4px solid currentColor;
-  border-top: 3.5px solid transparent;
-  border-bottom: 3.5px solid transparent;
-  transform: rotate(90deg);
+.guide-fold-head:hover {
+  color: var(--primary);
+}
+
+.guide-fold-head:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The shared disclosure triangle, so this fold and the control groups' read as one idea. */
+.guide-fold-head .disclosure {
   transition: transform 0.18s var(--ease);
+}
+
+.guide-fold-head.open .disclosure {
+  transform: rotate(45deg);
 }
 
 /* Shut, the panel is its header row and nothing else, with the full radius so it does not read
    as a box with its body missing. */
-.guide.view-shut .guide-fold { transform: rotate(0deg); }
 .guide.view-shut .guide-head {
   border-bottom: none;
   border-radius: var(--radius);
@@ -1866,6 +2110,20 @@ input[type="range"]::-moz-range-thumb {
   background: var(--primary-wash);
   font-size: 12px;
   line-height: 1.55;
+  color: var(--on-surface);
+}
+
+/*
+ * The one line above the fold, naming the shape on screen.
+ *
+ * Full ink and a touch larger than the paragraph under it, because when the description is shut
+ * this is the whole panel and it has to read as a statement rather than as a caption. It is the
+ * only sentence in the right-hand panel that is always on screen.
+ */
+.guide-view-line {
+  margin: 12px 14px 8px;
+  font-size: 13.5px;
+  line-height: 1.5;
   color: var(--on-surface);
 }
 
@@ -2686,12 +2944,21 @@ input[type="range"]::-moz-range-thumb {
   bottom: 104px;
   transform: translateX(-50%);
   z-index: 7;
-  width: min(460px, calc(100vw - 760px));
+  /*
+   * 480 px and tighter than it was.
+   *
+   * The card sits over the water it is describing, so every pixel of it is a pixel of the thing
+   * the step just pointed at. It was 16/18/14 padding around a 17 px title and a 13.5 px body,
+   * and with every step now held to two sentences the box no longer needs the room: 12/14/12
+   * and a 6 px gap take about 16 px of height off a typical step without the type getting any
+   * smaller, which is the trade worth making - smaller type on a card read across a room is not.
+   */
+  width: min(480px, calc(100vw - 760px));
   min-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px 18px 14px;
+  gap: 6px;
+  padding: 12px 14px 12px;
   border: 1px solid var(--outline-variant);
   border-top: 2px solid var(--primary);
   border-radius: var(--radius);
@@ -2717,7 +2984,7 @@ input[type="range"]::-moz-range-thumb {
 
 .tour-title {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--on-surface);
@@ -3060,8 +3327,11 @@ input[type="range"]::-moz-range-thumb {
 /* ---------------------------------------------------------------- narrow screens */
 
 @media (max-width: 1180px) {
-  .panel-left { width: 300px; }
-  .panel-right { width: 312px; }
+  /* The tokens, not the rules, so the fold tabs move with the panels. */
+  :root { --bay-left-width: 300px; --bay-right-width: 312px; }
+  /* The first thing to go on a narrow bar. Every view they offer is reachable by dragging, and
+     the dive button is the way out of all of them. */
+  .topbar-views { display: none; }
   .mapkey.in-volume { left: 420px; }
   .timeline-track { width: 260px; }
 }
@@ -3301,9 +3571,19 @@ input[type="range"]::-moz-range-thumb {
   gap: 12px;
 }
 
+/*
+ * `height: 100%` plus `margin-top: auto` on the caveat is what evens the row up.
+ *
+ * `auto-fit` already stretches every card in a row to the tallest one, but the *contents* used
+ * to sit at the top of each, so a two-line question beside a four-line one left its caveat
+ * floating in the middle of a tall box while its neighbour's sat at the foot. Measured across
+ * the nine questions, the caveat's top edge varied by up to 47 px within one row. Pinning it to
+ * the bottom gives the row one baseline to read along.
+ */
 .explore-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   gap: 7px;
   padding: 18px 20px;
   border: 1px solid var(--outline-variant);
@@ -3334,39 +3614,27 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /*
- * The caveat, styled so it cannot be mistaken for more of the answer.
+ * The caveat: a line, not a box.
  *
- * It travels with the question rather than behind it. A reader who needs the question simplified
- * is exactly the reader who will not think to ask what the simplification cost.
- */
-/*
- * The stripe is gone; the caveat is not, and it may not become quieter than it was.
+ * It was a filled amber panel with a bold "Caveat" heading over it, which is three signals for
+ * one short sentence - a fill, a border and a label - and the fill made it the loudest object on
+ * a card whose *question* is supposed to be the loudest object. Nine cards each carrying a
+ * filled block also read as nine warnings, which is the opposite of the tone this door is for.
  *
- * Amber down the left edge was carrying "this is a limit, not more of the answer", which is the
- * one thing on this surface that must not be mistaken for the answer - the reader this door
- * exists for is exactly the reader who will not make the distinction unprompted. So it keeps the
- * amber and gains a word: a named label rather than a coloured tab, which survives being read
- * across a room and cannot be mistaken for decoration.
+ * What it may not become is quieter. The reader this surface exists for is exactly the reader
+ * who will not ask what a simplification cost, so the caveat still travels with the question and
+ * still has a mark of its own: a 2 px accent rule down its left edge, and secondary ink. One
+ * signal instead of three, and the rule is enough to say "this is a limit, not more of the
+ * answer" without shouting it. `probe-outreach.mjs` still fails if a question that simplifies a
+ * limit away carries no caveat at all, which is the check that actually matters.
  */
 .explore-caution {
-  margin-top: 6px;
-  padding: 7px 10px;
-  border: 1px solid var(--secondary-wash);
-  border-radius: var(--radius-sm);
-  background: var(--secondary-wash);
+  margin-top: auto;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--secondary);
   font-size: 12px;
   line-height: 1.5;
   color: var(--on-surface-variant);
-}
-
-.explore-caution::before {
-  content: "Caveat";
-  display: block;
-  margin-bottom: 3px;
-  font-family: var(--sans);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--secondary);
 }
 
 .explore-foot {
@@ -3407,6 +3675,107 @@ input[type="range"]::-moz-range-thumb {
  * the water and one caption at a size that reads from across a room. The panels are still
  * mounted - Escape puts the console back instantly, which is what a stall's operator needs.
  */
+/*
+ * Folding a bay away, and the tab that brings it back.
+ *
+ * `display: none` rather than a width transition: the bays are `position: absolute` against the
+ * frame and the depth ruler places its figures by measuring the left one's width, so a
+ * half-folded panel would drag the ruler across the screen for 300 ms on every press. A hidden
+ * element measures zero, which is the right answer - there is nothing left to clear.
+ *
+ * This is the whole of the feature. It mounts nothing and it is not kiosk mode, which also
+ * starts the Explore loop; see `BayToggle.tsx`.
+ */
+.bay-left-folded .panel-left,
+.bay-right-folded .panel-right,
+.bay-right-folded .panel-section,
+/* The globe's cue card lives in the right bay's column and is part of what that fold is for:
+   folding the explanation away and leaving a titled box floating over the water is the fold
+   doing half its job. */
+.bay-right-folded .cue {
+  display: none;
+}
+
+/*
+ * The tab sits on the frame's inner edge, level with the top of the bay.
+ *
+ * It keeps its place whether the panel is there or not, so it is never the control that
+ * disappeared along with the thing it hid. Folded it moves out to the frame edge, which is
+ * where the panel used to start.
+ */
+.bay-toggle {
+  position: absolute;
+  top: calc(var(--topbar-height, 51px) + 10px);
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--frame-rule);
+  background: var(--surface-low);
+  color: var(--on-surface-faint);
+  cursor: pointer;
+  transition: color 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.bay-toggle:hover {
+  background: var(--surface-high);
+  color: var(--on-surface);
+}
+
+.bay-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.bay-toggle svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.24s var(--ease);
+}
+
+.bay-left {
+  left: var(--bay-left-width);
+  border-radius: 0 5px 5px 0;
+  border-left: none;
+}
+
+.bay-right {
+  right: var(--bay-right-width);
+  border-radius: 5px 0 0 5px;
+  border-right: none;
+}
+
+.bay-right svg {
+  transform: rotate(180deg);
+}
+
+/* Folded: the tab takes the frame edge, and the chevron points the way the panel will come
+   back from. */
+.bay-left.folded {
+  left: 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.bay-left.folded svg {
+  transform: rotate(180deg);
+}
+
+.bay-right.folded {
+  right: 0;
+}
+
+.bay-right.folded svg {
+  transform: rotate(0deg);
+}
+
+/* The exhibition screen hides the panels itself, so a tab with nothing behind it would be the
+   one piece of console chrome left on a kiosk wall. */
+.app.kiosk .bay-toggle {
+  display: none;
+}
+
 .app.kiosk .panel-left,
 .app.kiosk .panel-right,
 .app.kiosk .topbar,

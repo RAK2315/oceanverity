@@ -3,7 +3,7 @@
  *
  * `web/src/section.ts` is the second implementation of a piece of science, like `drift.ts`, and
  * gets the same treatment: it is not trusted because it looks the same. The pipeline's
- * `samudra/section.py` is the one under test and is served at `/api/section`, and this runs the
+ * `oceanverity/section.py` is the one under test and is served at `/api/section`, and this runs the
  * shipped browser module along the same line and compares the two value by value.
  *
  * Four questions:

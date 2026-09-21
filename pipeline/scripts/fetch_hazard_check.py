@@ -27,14 +27,14 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.bake import DEMO_REGION  # noqa: E402
-from samudra.density import potential_density  # noqa: E402
-from samudra.hazard import depth_of_26, isothermal_layer_depth, mixed_layer_depth  # noqa: E402
-from samudra.hazard_check import INCOIS_THRESHOLD  # noqa: E402
-from samudra.plausibility import TEMPERATURE_BOUNDS, mask_implausible  # noqa: E402
-from samudra.sources.incois import IncoisErddapSource  # noqa: E402
-from samudra.sources.incois_vap import IncoisValueAddedSource  # noqa: E402
-from samudra.thermocline import isotherm_depth  # noqa: E402
+from oceanverity.bake import DEMO_REGION  # noqa: E402
+from oceanverity.density import potential_density  # noqa: E402
+from oceanverity.hazard import depth_of_26, isothermal_layer_depth, mixed_layer_depth  # noqa: E402
+from oceanverity.hazard_check import INCOIS_THRESHOLD  # noqa: E402
+from oceanverity.plausibility import TEMPERATURE_BOUNDS, mask_implausible  # noqa: E402
+from oceanverity.sources.incois import IncoisErddapSource  # noqa: E402
+from oceanverity.sources.incois_vap import IncoisValueAddedSource  # noqa: E402
+from oceanverity.thermocline import isotherm_depth  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "data" / "hazard_check"

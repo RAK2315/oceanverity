@@ -3,16 +3,18 @@ import {
   GUIDE,
   describeIsosurface,
   describePalette,
+  summariseView,
   describeView,
   fillFigures,
   guideFigures,
 } from "../guide";
 import { axisToDepth } from "../scene/geography";
+import { remember, remembered } from "../remembered";
 import { UPLOAD_GROUP, useStore } from "../store";
 import { isDiverging } from "../transfer";
 
 /** Remembered per browser, like the map key's fold, so a reader who shut it once is not asked again. */
-const VIEW_OPEN_KEY = "samudra.guide.view";
+const VIEW_OPEN_KEY = "guide.view";
 
 /**
  * The "what am I looking at" panel.
@@ -35,19 +37,18 @@ export function GuidePanel() {
   // of a control the reader just touched is the answer to a question they asked, and it keeps
   // its close button. Before the early returns, because a hook cannot be called conditionally.
   const [viewOpen, setViewOpen] = useState(() => {
-    try {
-      return window.localStorage.getItem(VIEW_OPEN_KEY) !== "closed";
-    } catch {
-      return true; // storage refused is not a reason to hide the description
-    }
+    // Shut by default, and the test is for "open" rather than against "closed".
+    //
+    // It used to open by default, which put a 70-word paragraph over the right-hand third of
+    // the water every time nothing was touched. The one-line summary and its bullets are above
+    // the fold now, so shut is not silent - it is the short version, and the long one is one
+    // click away. A returning reader who opened it keeps it open; `remembered` falls back to
+    // the pre-rename key, so the choice survived the rename too.
+    return remembered(VIEW_OPEN_KEY) === "open";
   });
   const toggleView = () => {
     setViewOpen((was) => {
-      try {
-        window.localStorage.setItem(VIEW_OPEN_KEY, was ? "closed" : "open");
-      } catch {
-        // Failing to remember must never cost the control.
-      }
+      remember(VIEW_OPEN_KEY, was ? "closed" : "open");
       return !was;
     });
   };
@@ -93,6 +94,22 @@ export function GuidePanel() {
     ? fillFigures(written, guideFigures({ manifest, anomalies: store.anomalies }))
     : undefined;
   const volume = manifest.volume;
+  // The short form of the view, from the same live state the paragraph below is handed. Built
+  // unconditionally rather than inside the branch, because a hook-free helper in a branch is
+  // fine but reading the same eight values twice is not.
+  const summary = summariseView({
+    fromDepth: axisToDepth(volume, store.depthFrom),
+    toDepth: axisToDepth(volume, store.depthTo),
+    exaggeration: store.exaggeration,
+    isoEnabled: store.isoEnabled,
+    isoValue: `${Math.abs(store.toValue(store.isoValue)).toFixed(1)} ${spec.units}`,
+    diverging: isDiverging(spec),
+    floatsDrawn: store.reportingByKind().floats,
+    mooringsDrawn: store.reportingByKind().moorings,
+    render: spec.render ?? "volume",
+    arrowDepth: axisToDepth(volume, morph > 0.55 ? store.depthFrom : store.surfaceLevel),
+    currentStyle: store.currentStyle,
+  });
 
   return (
     <aside className={`panel panel-right guide${!entry && !viewOpen ? " view-shut" : ""}`}>
@@ -135,21 +152,52 @@ export function GuidePanel() {
         </>
       ) : (
         <>
+          {/*
+            * A label, not a control.
+            *
+            * This header used to be a button with its own small fold caret, which made **two**
+            * disclosure affordances on one panel edge: this one and the tab that folds the whole
+            * bay away. Two carets six pixels apart, one folding a paragraph and one folding the
+            * panel that paragraph lives in, is a reader guessing which is which - and the small
+            * one was a 10 px dot with no label, so it lost the guess. The fold moved onto the
+            * "What you are looking at" heading below, which is the thing it actually folds.
+            */}
           <div className="guide-head">
-            <button
-              type="button"
-              className="guide-view-toggle"
-              aria-expanded={viewOpen}
-              onClick={toggleView}
-              title={viewOpen ? "Hide the description" : "Show the description"}
-            >
-              <span className="guide-fold" aria-hidden="true" />
-              <span className="guide-kind view">Current view</span>
-            </button>
+            <span className="guide-kind view">Current view</span>
           </div>
+          {/*
+            * Above the fold, always: the shape on screen and up to three live bullets.
+            *
+            * This is what makes shutting the description cheap. Shut, the panel still says what
+            * is drawn and what is on the water; open, it adds the paragraph that says where the
+            * numbers came from. Neither repeats the top bar's Field and date or the Depth slice
+            * group's range - a readout that already exists on the left belongs on the left.
+            */}
+          <p className="guide-view-line">{summary.line}</p>
+          <ul className="guide-points">
+            {summary.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+
+          {/*
+            * The heading is the fold, because the heading names what folds.
+            *
+            * A whole row with a word in it is also a target a reader can hit; the 10 px caret it
+            * replaces was not.
+            */}
+          <button
+            type="button"
+            className={`guide-fold-head${viewOpen ? " open" : ""}`}
+            aria-expanded={viewOpen}
+            onClick={toggleView}
+          >
+            <span className="disclosure" aria-hidden="true" />
+            What you are looking at
+          </button>
+
           {viewOpen && (
             <>
-              <h2 className="guide-title">What you are looking at</h2>
               <p className="guide-lede">
                 {describeView({
                   fieldKey: spec.key,

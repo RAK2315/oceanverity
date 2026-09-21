@@ -6,7 +6,7 @@ because a bake rewrites the manifest and this check is not part of a bake: it re
 and the bake reads the last year.
 
 Every figure the provenance page, the requirements page and `ppt/FACTS.md` quote about this
-check comes from that file. See `samudra/hazard_check.py` for why the two layer depths are
+check comes from that file. See `oceanverity/hazard_check.py` for why the two layer depths are
 reported twice.
 
     ../.venv/Scripts/python scripts/check_hazard_against_incois.py
@@ -23,9 +23,9 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.hazard_check import EXACT_METRES, INCOIS_THRESHOLD, agreement  # noqa: E402
-from samudra.hazard import TEMPERATURE_THRESHOLD, DENSITY_THRESHOLD  # noqa: E402
-from samudra.sources.incois_vap import DATASET  # noqa: E402
+from oceanverity.hazard_check import EXACT_METRES, INCOIS_THRESHOLD, agreement  # noqa: E402
+from oceanverity.hazard import TEMPERATURE_THRESHOLD, DENSITY_THRESHOLD  # noqa: E402
+from oceanverity.sources.incois_vap import DATASET  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "data" / "hazard_check"

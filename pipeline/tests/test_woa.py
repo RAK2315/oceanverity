@@ -15,8 +15,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from samudra.sources.base import BoundingBox
-from samudra.sources.woa import WoaClimatologySource
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.woa import WoaClimatologySource
 
 BOX = BoundingBox(south=-9.5, north=25.5, west=45.5, east=100.5)
 FILL = 9.96921e36

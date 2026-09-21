@@ -14,8 +14,8 @@ from datetime import datetime, timezone
 import numpy as np
 import pytest
 
-from samudra.section import EARTH_RADIUS_KM
-from samudra.storm import Fix, change_near_track, distance_to_track_km, read_best_track
+from oceanverity.section import EARTH_RADIUS_KM
+from oceanverity.storm import Fix, change_near_track, distance_to_track_km, read_best_track
 
 KM_PER_DEGREE = EARTH_RADIUS_KM * math.pi / 180.0
 

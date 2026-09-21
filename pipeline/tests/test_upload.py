@@ -208,9 +208,9 @@ def test_a_surface_only_file_is_drawn_as_a_skin_and_not_as_a_column(tmp_path):
             "lon": ("lon", LONS, {"units": "degrees_east"}),
         },
     )
-    from samudra.depth_warp import DepthWarp
-    from samudra.sources.base import BoundingBox
-    from samudra.sources.netcdf import NetcdfFileSource
+    from oceanverity.depth_warp import DepthWarp
+    from oceanverity.sources.base import BoundingBox
+    from oceanverity.sources.netcdf import NetcdfFileSource
 
     source = NetcdfFileSource(ds)
     grid = source.fetch_grid(

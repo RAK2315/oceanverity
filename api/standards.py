@@ -45,7 +45,7 @@ from fastapi.responses import Response
 import cf
 import dap
 import wms
-from samudra.palettes import lookup_table
+from oceanverity.palettes import lookup_table
 
 # Where each layer's numbers came from, in one sentence appended to its `<Abstract>`.
 #
@@ -161,7 +161,7 @@ def register(app, manifest, native_grid) -> None:
             field,
             datetime.fromisoformat(stamps[index]),
             extra_attributes={
-                "history": f"Served by Samudra 3D from the bake of {manifest()['generated']}"
+                "history": f"Served by OceanVerity from the bake of {manifest()['generated']}"
             },
         )
 
@@ -245,7 +245,7 @@ def register(app, manifest, native_grid) -> None:
         stamp = manifest()["timesteps"][index][:10]
         base = f"/opendap/{field}/{index}"
         body = f"""<!doctype html><meta charset="utf-8">
-<title>Samudra 3D - OPeNDAP</title>
+<title>OceanVerity - OPeNDAP</title>
 <style>
  body{{font:15px/1.65 system-ui,-apple-system,sans-serif;max-width:64ch;margin:44px auto;padding:0 20px;color:#16232a}}
  code,pre{{background:#eef3f3;border-radius:4px}} code{{padding:1px 5px}} pre{{padding:12px 14px;overflow-x:auto}}

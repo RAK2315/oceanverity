@@ -37,15 +37,15 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.bake import (  # noqa: E402
+from oceanverity.bake import (  # noqa: E402
     DENSITY_FIELD,
     _build_residuals,
     _collocate_cast,
 )
-from samudra.grid import Grid  # noqa: E402
-from samudra.sources.base import Profile  # noqa: E402
-from samudra.sources.incois import IncoisErddapSource  # noqa: E402
-from samudra.sources.osmc import reject_spikes  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
+from oceanverity.sources.base import Profile  # noqa: E402
+from oceanverity.sources.incois import IncoisErddapSource  # noqa: E402
+from oceanverity.sources.osmc import reject_spikes  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "web" / "public" / "data"

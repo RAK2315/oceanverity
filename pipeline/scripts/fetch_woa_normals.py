@@ -17,8 +17,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.sources.base import BoundingBox  # noqa: E402
-from samudra.sources.woa import WoaClimatologySource  # noqa: E402
+from oceanverity.sources.base import BoundingBox  # noqa: E402
+from oceanverity.sources.woa import WoaClimatologySource  # noqa: E402
 
 GRIDS = Path(__file__).resolve().parents[2] / "data" / "grids"
 

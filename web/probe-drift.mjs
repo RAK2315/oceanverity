@@ -5,7 +5,7 @@
  * science. The rule here is one curve in one file, and it exists because a second copy of the
  * Scale silently disagreed with the first and the log scale had to be cut. So this copy is not
  * trusted on the grounds that it looks the same: it is run from the same start points as the
- * baked trajectories `pipeline/samudra/drift.py` produced and the two are compared in
+ * baked trajectories `pipeline/oceanverity/drift.py` produced and the two are compared in
  * kilometres. A second implementation that is measured against the first is a different thing
  * from one that is assumed to match.
  *

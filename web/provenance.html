@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Samudra 3D - Data provenance</title>
+<title>OceanVerity - Data provenance</title>
 <meta name="description" content="Every figure on this page is read live from the build's own manifest, and every source is a public INCOIS or Argo endpoint you can query yourself.">
 <link rel="icon" type="image/png" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
+<!-- One copy of the theme switch, shared with app.html. Same origin; no external request. -->
+<link rel="stylesheet" href="./theme-pill.css">
 <!-- Served from this build, not from fonts.googleapis.com. -->
 <link rel="stylesheet" href="./fonts.css">
 <script>
@@ -16,7 +18,11 @@
   // or preferred.
   (function () {
     try {
-      if (localStorage.getItem("samudra.theme") === "light") {
+      var stored = localStorage.getItem("oceanverity.theme");
+      // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
+      // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
+      if (stored === null) stored = localStorage.getItem("samudra.theme");
+      if (stored === "light") {
         document.documentElement.dataset.theme = "light";
       }
     } catch (e) { /* storage blocked: dark is the default and still correct */ }
@@ -188,19 +194,6 @@
   @media (max-width: 860px) { .nav-links a:not(.pill-btn) { display: none; } }
 
   /* theme toggle: a ghost circle button holding a sun and moon glyph, crossfaded. */
-  .theme-toggle {
-    position: relative; width: 34px; height: 34px; flex: none;
-    border: 1px solid var(--color-ink); border-radius: 50%; background: transparent;
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background 0.35s cubic-bezier(.16,1,.3,1), transform 0.4s cubic-bezier(.16,1,.3,1);
-    padding: 0;
-  }
-  .theme-toggle:hover { background: rgba(var(--color-ink-rgb), 0.08); transform: rotate(-14deg); }
-  .theme-toggle svg { position: absolute; width: 16px; height: 16px; color: var(--color-ink); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.16,1,.3,1); }
-  .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.6); }
-  .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.6); }
 
   /* ---------------------------------------------------------- page header */
   header.head { padding: 168px 0 var(--sp-46); }
@@ -277,21 +270,36 @@
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
   .scroll-cue.hidden { opacity: 0; }
 
+
+  /* ------------------------------------------------- the shared theme pill
+   * `public/theme-pill.css` is the one copy of this control, used by all four pages. It
+   * declares five tokens and each host maps its own palette onto them; this is that block.
+   * Teal, deliberately, and the same teal the console's accent lands on - the switch is the
+   * one control that exists identically on both halves of the product, so it is the one
+   * control that may not change colour when you cross between them. */
+  :root {
+    --theme-pill-track: rgba(var(--color-ink-rgb), 0.10);
+    --theme-pill-border: rgba(var(--color-ink-rgb), 0.26);
+    --theme-pill-knob: #14b8a6;
+    --theme-pill-icon-on: #04231f;
+  }
+  :root[data-theme="light"] {
+    --theme-pill-knob: #0f766e;
+    --theme-pill-icon-on: #ffffff;
+  }
+
 </style>
 </head>
 <body>
 
 <nav id="nav">
   <div class="wrap">
-    <a class="brand" href="./index.html">SAMUDRA<i>&nbsp;&middot;&nbsp;3D</i></a>
+    <a class="brand" href="./index.html">OCEAN<i>&nbsp;&middot;&nbsp;VERITY</i></a>
     <div class="nav-links">
       <a href="./index.html">Overview</a>
       <a href="./provenance.html" class="current">Provenance</a>
       <a href="./requirements.html">Requirements</a>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between light and dark theme" title="Switch theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
-      </button>
+      <button class="theme-pill" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Switch between light and dark theme" title="Switch theme"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.6v2.6M12 19.8v2.6M3.7 3.7l1.9 1.9M18.4 18.4l1.9 1.9M1.6 12h2.6M19.8 12h2.6M3.7 20.3l1.9-1.9M18.4 5.6l1.9-1.9"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg><span class="theme-pill-knob"></span></button>
       <a class="pill-btn" href="./app.html"><span class="btn-label">Launch <span class="arrow">&rarr;</span></span></a>
     </div>
   </div>
@@ -314,7 +322,7 @@
 
   <section class="reveal">
     <h2>What the build contains <span class="tag live" id="live-tag">read live</span></h2>
-    <p>Written by <code>python -m samudra.bake</code>, which fetched it from the endpoints below.</p>
+    <p>Written by <code>python -m oceanverity.bake</code>, which fetched it from the endpoints below.</p>
     <dl class="grid" id="facts"></dl>
     <p class="err" id="error" hidden></p>
   </section>
@@ -340,7 +348,7 @@
     <p class="note">
       One upstream wart, in case you try it from a script: INCOIS's server sends its leaf
       certificate without the GlobalSign intermediate. Browsers and curl paper over it, Python's
-      <code>ssl</code> module does not. <code>pipeline/samudra/tls.py</code> supplies the missing
+      <code>ssl</code> module does not. <code>pipeline/oceanverity/tls.py</code> supplies the missing
       link rather than disabling verification.
     </p>
   </section>
@@ -475,7 +483,7 @@ python -m pytest -q
   <section class="reveal">
     <h2>Reproduce the whole build</h2>
     <pre>cd pipeline
-python -m samudra.bake</pre>
+python -m oceanverity.bake</pre>
     <p class="sub">
       About a minute. It refetches every timestep and every profile, rewrites the volumes, the
       floats and the collocations, and stamps the manifest with a new time. Reload this page and
@@ -485,7 +493,7 @@ python -m samudra.bake</pre>
 
   <footer>
     <p>
-      Samudra 3D &middot; Smart India Hackathon 2026 &middot; Problem Statement 26067 &middot;
+      OceanVerity &middot; Smart India Hackathon 2026 &middot; Problem Statement 26067 &middot;
       Ministry of Earth Sciences / INCOIS.
     </p>
     <p id="attrib"></p>
@@ -515,10 +523,13 @@ python -m samudra.bake</pre>
   // theme toggle: light is recorded as data-theme=light against a dark default, one shared key.
   var themeBtn = document.getElementById('themeToggle');
   var isLightTheme = function () { return document.documentElement.getAttribute('data-theme') === 'light'; };
+  themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
   themeBtn.addEventListener('click', function () {
     if (isLightTheme()) { document.documentElement.removeAttribute('data-theme'); }
     else { document.documentElement.setAttribute('data-theme', 'light'); }
-    try { localStorage.setItem('samudra.theme', isLightTheme() ? 'light' : 'dark'); } catch (e) { /* private mode */ }
+    try { localStorage.setItem('oceanverity.theme', isLightTheme() ? 'light' : 'dark'); localStorage.removeItem('samudra.theme'); } catch (e) { /* private mode */ }
+    // The pill is a switch, so its state is `aria-checked`, not its label.
+    themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
   });
 </script>
 
@@ -722,7 +733,7 @@ python -m samudra.bake</pre>
       })
     );
 
-    // The selector mirrors pipeline/samudra/sources/incois.py, built from the manifest so it
+    // The selector mirrors pipeline/oceanverity/sources/incois.py, built from the manifest so it
     // names the step this build actually holds.
     var last = steps[steps.length - 1];
     var stamp = new Date(last).toISOString().slice(0, 19) + "Z";
@@ -871,7 +882,7 @@ python -m samudra.bake</pre>
     problem.hidden = false;
     problem.textContent =
       "Could not read the baked manifest (" + error.message + "). " +
-      "Run python -m samudra.bake in pipeline/ to regenerate web/public/data.";
+      "Run python -m oceanverity.bake in pipeline/ to regenerate web/public/data.";
   });
 })();
 </script>

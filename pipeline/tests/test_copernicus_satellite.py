@@ -13,9 +13,9 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from samudra.sources import copernicus_satellite
-from samudra.sources.base import BoundingBox
-from samudra.sources.copernicus_satellite import CHL_DATASET, SST_DATASET, SatelliteFrontsSource
+from oceanverity.sources import copernicus_satellite
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.copernicus_satellite import CHL_DATASET, SST_DATASET, SatelliteFrontsSource
 
 BOX = BoundingBox(south=0.0, north=1.0, west=60.0, east=62.0)
 WHEN = datetime(2026, 7, 30, tzinfo=timezone.utc)

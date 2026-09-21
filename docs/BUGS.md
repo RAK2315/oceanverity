@@ -264,7 +264,7 @@ The ranking is the one this file has always used:
       bilinear corner at the comparison's own Timestep, so the bias map and every residual are
       clean. What read them is the tooltip, the section and CF, OPeNDAP and WMS.
 
-      **The user chose mask-and-count on 2026-09-11.** `samudra/plausibility.py` masks
+      **The user chose mask-and-count on 2026-09-11.** `oceanverity/plausibility.py` masks
       temperature outside **-2.5 to 38 degC** - below seawater's freezing point, and beyond
       37.6 degC, the verified in-situ record for the Persian Gulf - in both INCOIS analyses, at
       the door of the bake, so density, both anomalies, the spread and the hazard Fields inherit

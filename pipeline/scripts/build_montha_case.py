@@ -6,7 +6,7 @@ in `data/grids/`, the buoy comparisons in `collocations.json` and the float fixe
 `floats.json`. Nothing is fetched and nothing is typed into the frontend, which is the rule
 `guide.ts` already follows with its `{token}`s.
 
-See `samudra/storm.py` for the two things a storm case must not claim, and why every change near
+See `oceanverity/storm.py` for the two things a storm case must not claim, and why every change near
 the track is set beside the change far from it.
 
     ../.venv/Scripts/python scripts/build_montha_case.py
@@ -24,11 +24,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.grid import Grid  # noqa: E402
-from samudra.hazard import depth_of_26, heat_potential, mixed_layer_depth  # noqa: E402
-from samudra.drift import CurrentSeries, integrate_drift  # noqa: E402
-from samudra.section import haversine_km  # noqa: E402
-from samudra.storm import change_near_track, distance_to_track_km, read_best_track  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
+from oceanverity.hazard import depth_of_26, heat_potential, mixed_layer_depth  # noqa: E402
+from oceanverity.drift import CurrentSeries, integrate_drift  # noqa: E402
+from oceanverity.section import haversine_km  # noqa: E402
+from oceanverity.storm import change_near_track, distance_to_track_km, read_best_track  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "web" / "public" / "data"

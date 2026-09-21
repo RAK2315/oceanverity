@@ -12,9 +12,9 @@ from datetime import datetime, timezone
 
 import numpy as np
 
-from samudra.coverage import RADIUS_DEGREES, band_of, observation_coverage, slab_edges
-from samudra.depth_warp import DepthWarp
-from samudra.sources.base import Profile
+from oceanverity.coverage import RADIUS_DEGREES, band_of, observation_coverage, slab_edges
+from oceanverity.depth_warp import DepthWarp
+from oceanverity.sources.base import Profile
 
 WARP = DepthWarp(top=5.0, bottom=2000.0)
 SAMPLES = 24

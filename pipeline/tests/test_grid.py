@@ -10,7 +10,7 @@ above a shallow sea floor. A point outside the Grid is refused rather than clamp
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
+from oceanverity.grid import Grid
 
 LEVELS = np.array([5.0, 50.0, 200.0])
 LATS = np.array([10.0, 11.0, 12.0])

@@ -1,4 +1,4 @@
-/** Shapes the bake pipeline writes into `public/data`. Kept in step with `pipeline/samudra/bake.py`. */
+/** Shapes the bake pipeline writes into `public/data`. Kept in step with `pipeline/oceanverity/bake.py`. */
 
 export interface FieldSpec {
   key: string;

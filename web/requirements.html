@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Samudra 3D - Requirement coverage</title>
+<title>OceanVerity - Requirement coverage</title>
 <meta name="description" content="Every clause of Problem Statement 26067, word for word, against what answers it in the running software - with the measured number and a link that opens the platform with that control already set.">
 <link rel="icon" type="image/png" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
+<!-- One copy of the theme switch, shared with app.html. Same origin; no external request. -->
+<link rel="stylesheet" href="./theme-pill.css">
 <!-- Served from this build, not from fonts.googleapis.com. -->
 <link rel="stylesheet" href="./fonts.css">
 <script>
@@ -16,7 +18,11 @@
   // or preferred.
   (function () {
     try {
-      if (localStorage.getItem("samudra.theme") === "light") {
+      var stored = localStorage.getItem("oceanverity.theme");
+      // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
+      // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
+      if (stored === null) stored = localStorage.getItem("samudra.theme");
+      if (stored === "light") {
         document.documentElement.dataset.theme = "light";
       }
     } catch (e) { /* storage blocked: dark is the default and still correct */ }
@@ -165,19 +171,6 @@
   @media (max-width: 860px) { .nav-links a:not(.pill-btn) { display: none; } }
 
   /* theme toggle */
-  .theme-toggle {
-    position: relative; width: 34px; height: 34px; flex: none;
-    border: 1px solid var(--color-ink); border-radius: 50%; background: transparent;
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background 0.35s cubic-bezier(.16,1,.3,1), transform 0.4s cubic-bezier(.16,1,.3,1);
-    padding: 0;
-  }
-  .theme-toggle:hover { background: rgba(var(--color-ink-rgb), 0.08); transform: rotate(-14deg); }
-  .theme-toggle svg { position: absolute; width: 16px; height: 16px; color: var(--color-ink); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.16,1,.3,1); }
-  .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.6); }
-  .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.6); }
 
   /* ---------------------------------------------------------- page header */
   header.head { padding: 168px 0 var(--sp-46); }
@@ -333,21 +326,36 @@
     .measure { max-width: 100%; overflow-wrap: anywhere; }
     .open { max-width: 100%; overflow-wrap: anywhere; }
   }
+
+  /* ------------------------------------------------- the shared theme pill
+   * `public/theme-pill.css` is the one copy of this control, used by all four pages. It
+   * declares five tokens and each host maps its own palette onto them; this is that block.
+   * Teal, deliberately, and the same teal the console's accent lands on - the switch is the
+   * one control that exists identically on both halves of the product, so it is the one
+   * control that may not change colour when you cross between them. */
+  :root {
+    --theme-pill-track: rgba(var(--color-ink-rgb), 0.10);
+    --theme-pill-border: rgba(var(--color-ink-rgb), 0.26);
+    --theme-pill-knob: #14b8a6;
+    --theme-pill-icon-on: #04231f;
+  }
+  :root[data-theme="light"] {
+    --theme-pill-knob: #0f766e;
+    --theme-pill-icon-on: #ffffff;
+  }
+
 </style>
 </head>
 <body>
 
 <nav id="nav">
   <div class="wrap">
-    <a class="brand" href="./index.html">SAMUDRA<i>&nbsp;&middot;&nbsp;3D</i></a>
+    <a class="brand" href="./index.html">OCEAN<i>&nbsp;&middot;&nbsp;VERITY</i></a>
     <div class="nav-links">
       <a href="./index.html">Overview</a>
       <a href="./provenance.html">Provenance</a>
       <a href="./requirements.html" class="current">Requirements</a>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between light and dark theme" title="Switch theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
-      </button>
+      <button class="theme-pill" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Switch between light and dark theme" title="Switch theme"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.6v2.6M12 19.8v2.6M3.7 3.7l1.9 1.9M18.4 18.4l1.9 1.9M1.6 12h2.6M19.8 12h2.6M3.7 20.3l1.9-1.9M18.4 5.6l1.9-1.9"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg><span class="theme-pill-knob"></span></button>
       <a class="pill-btn" href="./app.html"><span class="btn-label">Launch <span class="arrow">&rarr;</span></span></a>
     </div>
   </div>
@@ -393,7 +401,7 @@
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;preset=hazard">Set up a cyclone question</a>
       <a class="open" href="./app.html?dive=1&amp;field=d26">Watch the 26 &deg;C surface</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/hazard.py">pipeline/samudra/hazard.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/hazard.py">pipeline/oceanverity/hazard.py</a>
     </div>
   </article>
   </section>
@@ -414,7 +422,7 @@
     <div class="measure" id="m-volume">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature">Open the volume</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/web/src/scene/volumeShader.ts">web/src/scene/volumeShader.ts</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/web/src/scene/volumeShader.ts">web/src/scene/volumeShader.ts</a>
     </div>
   </article>
   <article class="clause partly">
@@ -432,7 +440,7 @@
     <div class="measure" id="m-gliders">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;float=7902384">Open a float comparison</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/glider.py">pipeline/samudra/sources/glider.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/sources/glider.py">pipeline/oceanverity/sources/glider.py</a>
     </div>
   </article>
   <article class="clause">
@@ -465,7 +473,7 @@
     </ul>
     <div class="measure" id="m-sources">measuring&hellip;</div>
     <div class="clause-links">
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/base.py">pipeline/samudra/sources/base.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/sources/base.py">pipeline/oceanverity/sources/base.py</a>
     </div>
   </article>
   <article class="clause">
@@ -476,7 +484,7 @@
     <p class="lead">Every control explains itself, and a guided tour visits all of them.</p>
     <ul class="points">
       <li><b>Plain-language explanations.</b> Each one says whether the control changed the science or only the picture.</li>
-      <li><b>Guided tour.</b> <b>22 steps in six chapters</b>, covering all 47 explained controls. Each step moves the scene and opens the control and its explanation.</li>
+      <li><b>Guided tour.</b> <b>23 steps in six chapters</b>, covering all 48 explained controls. Each step moves the scene and opens the control and its explanation.</li>
       <li><b>One-press cyclone setup.</b> A single button arranges the whole scene for a cyclone question.</li>
     </ul>
     <div class="clause-links">
@@ -504,7 +512,7 @@
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;iso=1">Draw the 20 &deg;C isotherm</a>
       <a class="open" href="./app.html?dive=1&amp;field=current_speed&amp;flow=arrows">Open the currents</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/copernicus.py">pipeline/samudra/sources/copernicus.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/sources/copernicus.py">pipeline/oceanverity/sources/copernicus.py</a>
     </div>
   </article>
   <article class="clause">
@@ -524,7 +532,7 @@
     <div class="measure" id="m-bgc">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;float=7902384">Open a comparison</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/plan/03-requirement-gaps.md">docs/plan/03-requirement-gaps.md</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/docs/plan/03-requirement-gaps.md">docs/plan/03-requirement-gaps.md</a>
     </div>
   </article>
   <article class="clause">
@@ -548,8 +556,8 @@
     <p class="limit"><span>Limit</span> File upload needs the API running, like OPeNDAP and WMS. The demo itself runs without it.</p>
     <div class="measure" id="m-ingest">measuring&hellip;</div>
     <div class="clause-links">
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/sources/netcdf.py">samudra/sources/netcdf.py</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/upload.py">api/upload.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/sources/netcdf.py">oceanverity/sources/netcdf.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/api/upload.py">api/upload.py</a>
     </div>
   </article>
   <article class="clause">
@@ -569,7 +577,7 @@
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=heat_potential&amp;scale=log">Open with a log scale</a>
       <a class="open" href="./app.html?dive=1">Open the selector</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/web/src/transfer.ts">web/src/transfer.ts</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/web/src/transfer.ts">web/src/transfer.ts</a>
     </div>
   </article>
   <article class="clause">
@@ -585,7 +593,7 @@
       <li><b>Tested with a real client.</b> The test suite opens the OPeNDAP endpoint with pydap rather than checking our own bytes.</li>
     </ul>
     <div class="clause-links">
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0012-open-standards-from-the-grids.md">docs/adr/0012</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/docs/adr/0012-open-standards-from-the-grids.md">docs/adr/0012</a>
     </div>
   </article>
   <article class="clause partly">
@@ -641,7 +649,7 @@
     <div class="measure" id="m-normal">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature_normal_anomaly">Open the climatological anomaly</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0016-a-real-climatological-baseline.md">docs/adr/0016</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/docs/adr/0016-a-real-climatological-baseline.md">docs/adr/0016</a>
     </div>
   </article>
   <article class="clause">
@@ -658,7 +666,7 @@
     <div class="measure" id="m-drift">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=current_speed&amp;pin=51.5,9.5">Drop a pin in the Somali Current</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/docs/adr/0015-drift-that-scores-itself.md">docs/adr/0015</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/docs/adr/0015-drift-that-scores-itself.md">docs/adr/0015</a>
     </div>
   </article>
   <article class="clause">
@@ -675,7 +683,7 @@
     <div class="measure" id="m-bias">measuring&hellip;</div>
     <div class="clause-links">
       <a class="open" href="./app.html?dive=1&amp;field=temperature&amp;bias=1">Colour the instruments by disagreement</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/pipeline/samudra/residuals.py">samudra/residuals.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/pipeline/oceanverity/residuals.py">oceanverity/residuals.py</a>
     </div>
   </article>
   <article class="clause">
@@ -691,9 +699,9 @@
       <li><b>WCS, declined.</b> No pure-Python WCS server fits this API (THREDDS is Java, EOxServer runs on MapServer), and the same coverages are already on OPeNDAP.</li>
     </ul>
     <div class="clause-links">
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/standards.py">api/standards.py</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/wms.py">api/wms.py</a>
-      <a class="open code" href="https://github.com/RAK2315/samudra-sih26/blob/main/api/dap.py">api/dap.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/api/standards.py">api/standards.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/api/wms.py">api/wms.py</a>
+      <a class="open code" href="https://github.com/RAK2315/oceanverity/blob/main/api/dap.py">api/dap.py</a>
     </div>
   </article>
   <article class="clause partly">
@@ -703,7 +711,7 @@
     </div>
     <p class="lead">Easier ways in for students, the public and exhibitions, without adding anything to the expert control panel.</p>
     <ul class="points">
-      <li><b>Show me around.</b> A guided walk of 22 steps in six chapters that visits all 47 explained controls. A check fails if a control is ever added without a step.</li>
+      <li><b>Show me around.</b> A guided walk of 23 steps in six chapters that visits all 48 explained controls. A check fails if a control is ever added without a step.</li>
       <li><b>Explore.</b> The platform as nine questions. Each sets up its own answer and carries the caveat its simplification costs: the cyclone one says it is a map of conditions, not a forecast.</li>
       <li><b>Kiosk mode.</b> For exhibitions: panels hidden, larger type, questions on a loop, and a reset thirty seconds after the last visitor walks away.</li>
       <li><b>Copy this view.</b> Writes what is on screen into a link, ready for a teacher's worksheet.</li>
@@ -751,7 +759,7 @@
 
   <footer>
     <p>
-      Samudra 3D &middot; Smart India Hackathon 2026 &middot; Problem Statement 26067 &middot;
+      OceanVerity &middot; Smart India Hackathon 2026 &middot; Problem Statement 26067 &middot;
       Ministry of Earth Sciences / INCOIS.
     </p>
     <p id="attrib"></p>
@@ -790,10 +798,13 @@
   // theme toggle
   var themeBtn = document.getElementById('themeToggle');
   var isLightTheme = function () { return document.documentElement.getAttribute('data-theme') === 'light'; };
+  themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
   themeBtn.addEventListener('click', function () {
     if (isLightTheme()) { document.documentElement.removeAttribute('data-theme'); }
     else { document.documentElement.setAttribute('data-theme', 'light'); }
-    try { localStorage.setItem('samudra.theme', isLightTheme() ? 'light' : 'dark'); } catch (e) { /* private mode */ }
+    try { localStorage.setItem('oceanverity.theme', isLightTheme() ? 'light' : 'dark'); localStorage.removeItem('samudra.theme'); } catch (e) { /* private mode */ }
+    // The pill is a switch, so its state is `aria-checked`, not its label.
+    themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
   });
 </script>
 
@@ -972,7 +983,7 @@
       problem.hidden = false;
       problem.textContent =
         "Could not read the baked manifest (" + error.message + "). " +
-        "Run python -m samudra.bake in pipeline/ to regenerate web/public/data.";
+        "Run python -m oceanverity.bake in pipeline/ to regenerate web/public/data.";
     });
 })();
 </script>

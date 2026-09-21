@@ -1,0 +1,126 @@
+/*
+ * The theme switch, as one component shared by all four pages.
+ *
+ * There were two of them: a 34 px circle on the landing pages that rotated on hover and
+ * cross-faded a sun into a moon, and a plain icon button in the console's top bar. Same job,
+ * two shapes, two behaviours, and a reader crossing from the landing page into the platform met
+ * a different control for the same switch. This file is the one copy; `index.html`,
+ * `provenance.html`, `requirements.html` and `app.html` all link it, and `Chrome.tsx` renders
+ * the same markup the three static pages write by hand.
+ *
+ * **The icon rides the knob.** The first version put both marks on the track and slid a plain
+ * knob over one of them, which is the common pattern and was wrong at this size: a 13 px glyph
+ * under a filled 22 px circle has one colour that works against the track and a different one
+ * that works against the knob, so whichever mark the knob covered turned into a smudge. One
+ * mark, on the knob, saying what you have - and the position on the track saying it a second
+ * time - is legible at 26 px and needs no second colour.
+ *
+ * **The two halves of the product do not share a palette**, so the component declares its own
+ * four tokens and each host maps its own colours onto them in one small block. That seam is
+ * deliberate: it is the only thing either side has to know about the other.
+ *
+ * `role="switch"` with `aria-checked` rather than a button with a changing label, because that
+ * is what it is: one control with two states, not an action.
+ */
+
+.theme-pill {
+  /* Fallbacks are the console's dark values, so a host that forgets to map still gets a
+     working control rather than a transparent rectangle. */
+  --pill-track: var(--theme-pill-track, rgba(128, 140, 142, 0.18));
+  --pill-border: var(--theme-pill-border, rgba(128, 140, 142, 0.38));
+  --pill-knob: var(--theme-pill-knob, #1f9aa5);
+  --pill-icon-on: var(--theme-pill-icon-on, #04231f);
+
+  position: relative;
+  flex: none;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--pill-border);
+  border-radius: 999px;
+  background: var(--pill-track);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-pill:hover {
+  border-color: var(--pill-knob);
+}
+
+.theme-pill:focus-visible {
+  outline: 2px solid var(--pill-knob);
+  outline-offset: 2px;
+}
+
+/*
+ * The knob. 20 px inside a 26 px track leaves 2 px of ground all round and 20 px of travel,
+ * which is a full knob-width of movement - enough that the change reads from across a room.
+ */
+.theme-pill-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--pill-knob);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/*
+ * The mark, centred on the knob and travelling with it.
+ *
+ * `z-index` is load-bearing: both icons precede the knob in the markup, so without it the knob
+ * paints straight over the thing it is supposed to be carrying.
+ */
+.theme-pill svg {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  color: var(--pill-icon-on);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/*
+ * Light is the right-hand position, and light is the only state that is named.
+ *
+ * The console writes `data-theme="dark"` explicitly and the three static pages remove the
+ * attribute entirely for dark, so "dark" cannot be the selector both sides share. "Not light"
+ * can, and it is the default here - which means a page that has not decided yet also renders
+ * correctly rather than mid-travel.
+ */
+:root[data-theme="light"] .theme-pill-knob,
+:root[data-theme="light"] .theme-pill svg {
+  transform: translateX(20px);
+}
+
+/* One mark at a time: the knob shows the theme you are in, not the one you would get. */
+.theme-pill .icon-sun {
+  opacity: 0;
+}
+
+.theme-pill .icon-moon {
+  opacity: 1;
+}
+
+:root[data-theme="light"] .theme-pill .icon-sun {
+  opacity: 1;
+}
+
+:root[data-theme="light"] .theme-pill .icon-moon {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-pill-knob,
+  .theme-pill svg {
+    transition: none;
+  }
+}

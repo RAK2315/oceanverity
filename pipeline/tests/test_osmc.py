@@ -22,7 +22,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.sources.osmc import (
+from oceanverity.sources.osmc import (
     MIN_PROFILE_LEVELS,
     OsmcSource,
     parse_osmc,

@@ -11,8 +11,8 @@ nothing on it is a comparison that silently failed.
 import numpy as np
 import pytest
 
-from samudra.collocation import MIN_USEFUL_MATCHES, choose_cast, collocate
-from samudra.grid import Grid
+from oceanverity.collocation import MIN_USEFUL_MATCHES, choose_cast, collocate
+from oceanverity.grid import Grid
 
 LEVELS = np.array([0.0, 100.0, 200.0])
 LATS = np.array([10.0, 11.0])

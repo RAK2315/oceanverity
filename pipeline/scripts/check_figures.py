@@ -43,7 +43,7 @@ CURRENT = [
     "ppt/script.md",
     "web/index.html", "web/provenance.html", "web/requirements.html", "web/src", "scripts",
 ]
-HISTORY = ["CLAUDE.md", "pipeline/CLAUDE.md", "web/CLAUDE.md", "docs/adr", "docs/BUGS.md", "docs/plan", "pipeline/samudra"]
+HISTORY = ["CLAUDE.md", "pipeline/CLAUDE.md", "web/CLAUDE.md", "docs/adr", "docs/BUGS.md", "docs/plan", "pipeline/oceanverity"]
 LOCKED = ["ppt/script-v1-recorded.md"]
 SUFFIXES = {".md", ".html", ".ts", ".tsx", ".py", ".mjs"}
 

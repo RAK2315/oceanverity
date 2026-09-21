@@ -12,8 +12,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
-from samudra.hazard import (
+from oceanverity.grid import Grid
+from oceanverity.hazard import (
     CP_SEAWATER,
     RHO_SEAWATER,
     barrier_layer_thickness,

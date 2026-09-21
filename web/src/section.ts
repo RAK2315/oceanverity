@@ -13,7 +13,7 @@
  * as float32 on the model's own 24 Levels - `web/public/data/grids/` - which is why the section
  * works with the network unplugged and on the static deployment, where there is no API at all.
  *
- * `pipeline/samudra/section.py` is the same cut, is the one under test, and is served at
+ * `pipeline/oceanverity/section.py` is the same cut, is the one under test, and is served at
  * `/api/section`. `web/probe-section.mjs` runs this module against that endpoint and fails if
  * they disagree - the same arrangement `drift.ts` is held to, and for the same reason.
  */

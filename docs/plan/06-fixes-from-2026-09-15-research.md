@@ -61,8 +61,8 @@ Locations (from a grep on 15 Sep 2026; re-grep before editing):
 - `web/src/ui/Controls.tsx:466`, `:501-502`, `:533` (the live bias panel text)
 - `web/src/ui/ProfilePanel.tsx:250`, `:256`
 - `web/src/types.ts:365-366`
-- `pipeline/samudra/residuals.py:27-28`, `:178`, `:288`
-- `pipeline/samudra/bake.py:415`, `:1588-1589`
+- `pipeline/oceanverity/residuals.py:27-28`, `:178`, `:288`
+- `pipeline/oceanverity/bake.py:415`, `:1588-1589`
 - `pipeline/tests/test_residuals.py:406`, `:422` (docstrings)
 - `CLAUDE.md:390-391`, `PRODUCT.md:55`
 - `scripts/dossier.html:362`, `docs/demo/script.md:62-63`, `ppt/NOTES.md:100`, `ppt/PLAN.md:36`
@@ -92,8 +92,8 @@ free account; this build does not read it yet."*
 - `web/src/ui/ProfilePanel.tsx:327`, `:412`
 - `web/src/guide.ts:896`
 - `web/src/types.ts:444`
-- `pipeline/samudra/sources/argo.py:175-181` (oxygen count note), `:252` (docstring)
-- `pipeline/samudra/bake.py:370`, `:388`, `:1793`
+- `pipeline/oceanverity/sources/argo.py:175-181` (oxygen count note), `:252` (docstring)
+- `pipeline/oceanverity/bake.py:370`, `:388`, `:1793`
 - `pipeline/tests/test_residuals.py:116` (docstring only)
 - `docs/README-full.md:279`
 - ADR 0010 line 21 and `docs/plan/01-cut-features.md:41`: add a dated amendment, do not rewrite
@@ -116,13 +116,13 @@ free account; this build does not read it yet."*
 
 ## 3. Robustness fixes (code)
 
-1. **Argo position and time QC.** `pipeline/samudra/sources/argo.py` requests value flags only.
+1. **Argo position and time QC.** `pipeline/oceanverity/sources/argo.py` requests value flags only.
    Add `position_qc` and `time_qc` to `ProfileColumns.request()` and refuse a cast flagged 3, 4 or 9.
    TDD: a parser test with a flagged position. (In July 2026 every row was flagged 1, so no figure
    should move; check with `collect_facts.py`.)
 2. **No fallback for Ifremer `ArgoFloats`.** It went down for part of 15 Sep. Options: retry with
    backoff in `fetch_profiles`, or a fallback through `ArgoFloats-index` / the GDAC FTP index.
-3. **WOA23 OPeNDAP returns 503.** `pipeline/samudra/sources/woa.py` reads only OPeNDAP. Cache the
+3. **WOA23 OPeNDAP returns 503.** `pipeline/oceanverity/sources/woa.py` reads only OPeNDAP. Cache the
    12 monthly regional subsets under `data/` (server-side, like `data/glider/`) or fall back to the
    HTTPS file server (`www.ncei.noaa.gov/data/oceans/woa/WOA23/...`, 60.5 MB per month).
 

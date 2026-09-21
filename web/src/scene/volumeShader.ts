@@ -76,7 +76,7 @@ const int MAX_STEPS = 384;
  * position off it. A **surface** is different: it asserts "the value is exactly this, here", and
  * near the coast that assertion is made out of a neighbouring cell's number. Masked cells are
  * back-filled from their nearest real neighbour so that linear filtering stays physical - see
- * pipeline/samudra/volume.py - and the coverage channel is filtered too, so it ramps from ocean
+ * pipeline/oceanverity/volume.py - and the coverage channel is filtered too, so it ramps from ocean
  * to land over about one cell, which on this grid is 110 km. (No backticks in here: this whole
  * shader is a template literal, and one would end the string.)
  *

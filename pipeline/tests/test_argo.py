@@ -11,7 +11,7 @@ gravity-corrected formula at the cast's own latitude, never one decibar to one m
 import numpy as np
 import pytest
 
-from samudra.sources.argo import parse_profiles, pressure_to_depth
+from oceanverity.sources.argo import parse_profiles, pressure_to_depth
 
 CSV = """platform_number,time,latitude,longitude,pres_adjusted,temp_adjusted,psal_adjusted
 ,UTC,degrees_north,degrees_east,decibar,degree_Celsius,PSU

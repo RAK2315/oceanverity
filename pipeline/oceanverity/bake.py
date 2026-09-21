@@ -220,7 +220,7 @@ DERIVED_FIELDS = (DENSITY_FIELD, ANOMALY_FIELD)
 #
 # PS 26067's theme became Disaster Management in September 2026 and the platform had no Field a
 # cyclone forecaster would name. These five are the ones they would. All five come out of the
-# temperature and salinity already in the Grid - see `samudra/hazard.py` for the definitions and
+# temperature and salinity already in the Grid - see `oceanverity/hazard.py` for the definitions and
 # for the vertical-resolution limit each of them inherits.
 #
 # **None of them is a Volume**, and that is the point rather than a compromise. Three of them ARE
@@ -377,7 +377,7 @@ def all_field_specs() -> tuple[FieldSpec, ...]:
 
 
 # The isotherm an anomaly feature is explained against. 20 degC is the conventional proxy for
-# the bottom of the warm surface layer and is what INCOIS publishes; see samudra/thermocline.py
+# the bottom of the warm surface layer and is what INCOIS publishes; see oceanverity/thermocline.py
 # for the correlation that makes it an explanation rather than a decoration.
 ISOTHERM_VALUE = 20.0
 
@@ -584,7 +584,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     # ---- currents, as numbers --------------------------------------------------------------
     #
     # Supersedes the rendered-image overlay this platform used to carry. See ADR 0013 and
-    # `samudra/sources/copernicus.py`; the short version is that the numbers pass the same test
+    # `oceanverity/sources/copernicus.py`; the short version is that the numbers pass the same test
     # that killed our own derived geostrophic field. Not fatal either: Copernicus needs a
     # credential, and a bake on a machine without one keeps everything else.
     vectors = _fetch_currents(copernicus, grids, wanted, sample_axes=grids[("temperature", 0)])
@@ -626,7 +626,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         for field in volume_fields
     }
     # Except the diverging Fields, whose ranges have to be symmetric or the palette's midpoint
-    # stops meaning "no departure". See samudra/anomaly.py.
+    # stops meaning "no departure". See oceanverity/anomaly.py.
     ranges[ANOMALY_FIELD.key] = symmetric_encoding_range(anomalies)
     if normal_anomalies:
         ranges[NORMAL_ANOMALY_FIELD.key] = symmetric_encoding_range(normal_anomalies)
@@ -707,7 +707,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
     )
 
     # Gliders. PS 26067 names them three times, so the archive it names is read - and what comes
-    # back is the finding, not the casts. See samudra/sources/glider.py.
+    # back is the finding, not the casts. See oceanverity/sources/glider.py.
     _try_fetch("gliders", gliders, DEMO_REGION, start, end)
     glider_finding = gliders.last_finding
     if glider_finding:
@@ -1077,7 +1077,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
         # Where the model most disagrees with the instruments. A separate file because
         # collocations.json is 12.6 MB and is deliberately fetched after first paint, and this
         # is about 170 KB - so the bias map is on screen while the charts behind it are still
-        # arriving. See samudra/residuals.py.
+        # arriving. See oceanverity/residuals.py.
         "residuals": {
             "file": "residuals.json",
             "cellDegrees": RESIDUAL_CELL_DEGREES,
@@ -1259,7 +1259,7 @@ def _build_hazard_fields(grids, timesteps) -> dict[str, list[np.ndarray]]:
     """The five disaster-management Fields, one (lat, lon) array per Timestep each.
 
     Two dimensions, so they never reach the Volume encoder and are never depth-warped. See
-    `samudra/hazard.py` for what each one is and for the vertical-resolution limit they inherit
+    `oceanverity/hazard.py` for what each one is and for the vertical-resolution limit they inherit
     from the Levels.
     """
     out: dict[str, list[np.ndarray]] = {key: [] for key in HAZARD_FIELD_KEYS}
@@ -1749,7 +1749,7 @@ def _build_residuals(collocations, floats, fields, ranges) -> dict:
     deliberately fetched after first paint, and because a user should not have to click 266
     instruments to find the three the analysis struggled with.
 
-    See `samudra/residuals.py` for why the ranking is on a fraction of each Field's own range
+    See `oceanverity/residuals.py` for why the ranking is on a fraction of each Field's own range
     rather than on degrees and PSU side by side.
     """
     positions = positions_from(floats, collocations)

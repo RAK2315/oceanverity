@@ -33,7 +33,18 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
     const question = QUESTIONS[index];
     if (!question) return;
     // Closed first, so the scene the answer sets up is what the reader sees appear.
-    useStore.setState({ explore: false });
+    //
+    // **And whatever was already open is closed with it.** Explore is reachable from inside a
+    // walkthrough, so opening Cyclone Montha and then asking a question left the Montha card on
+    // screen over the new answer with IMD's track still drawn across it - two walkthroughs'
+    // worth of state claiming one scene. The two case cards already clear `tourStep` for exactly
+    // this reason; this is the same clearing in the other direction.
+    useStore.setState({
+      explore: false,
+      caseStep: null,
+      tourStep: null,
+      cardPaused: false,
+    });
     question.run(helpers);
   };
 
@@ -241,7 +252,7 @@ function Kiosk({ helpers }: { helpers: ExploreHelpers }) {
 
   return (
     <aside className="kiosk-caption" role="status" aria-live="polite">
-      <p className="kiosk-kicker">Samudra 3D &middot; INCOIS ocean model and Argo floats</p>
+      <p className="kiosk-kicker">OceanVerity &middot; INCOIS ocean model and Argo floats</p>
       <h1 className="kiosk-question">{question.question}</h1>
       <p className="kiosk-why">{question.why}</p>
       {question.caution && <p className="kiosk-caution">{question.caution}</p>}

@@ -65,7 +65,7 @@ the last section.
 ### Slide 6 - Research and references
 
 - Evidence caption 2: `Cyclone heat potential - computed here from INCOIS's Argo analysis` (drop "public series ends 2019").
-- Links: add `A real storm, step by step - rak2315.github.io/samudra-sih26/app.html?case=montha` **only after the build is deployed**. It does not exist on the live site yet.
+- Links: add `A real storm, step by step - rak2315.github.io/oceanverity/app.html?case=montha` **only after the build is deployed**. It does not exist on the live site yet.
 - References: add `India Meteorological Department (2026). RSMC New Delhi best track data, 1982-2026.`
 - `<your video link>` still to fill.
 

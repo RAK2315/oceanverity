@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.hazard_check import EXACT_METRES, agreement
+from oceanverity.hazard_check import EXACT_METRES, agreement
 
 
 def test_identical_surfaces_agree_completely():

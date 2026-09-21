@@ -5,7 +5,7 @@ import { pathToFileURL } from "url";
 
 const root = path.resolve("..");
 const src = pathToFileURL(path.join(root, "scripts", "dossier.html")).href;
-const out = path.join(root, "docs", "Samudra3D-Dossier.pdf");
+const out = path.join(root, "docs", "OceanVerity-Dossier.pdf");
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -24,7 +24,7 @@ await page.pdf({
   footerTemplate:
     '<div style="width:100%;font-size:7pt;font-family:monospace;color:#8fa2b0;' +
     'padding:0 16mm;display:flex;justify-content:space-between;">' +
-    "<span>Samudra 3D &middot; SIH 2026 &middot; PS 26067</span>" +
+    "<span>OceanVerity &middot; SIH 2026 &middot; PS 26067</span>" +
     '<span class="pageNumber"></span></div>',
   margin: { top: "17mm", bottom: "15mm", left: "16mm", right: "16mm" },
 });

@@ -1,13 +1,13 @@
 <div align="center">
 
-# Samudra 3D
+# OceanVerity
 
 **Fly into the Indian Ocean and see, in one picture, what the model predicted
 and what the instruments in the water actually measured.**
 
-[![Live platform](https://img.shields.io/badge/Live-Launch%20the%20platform-0f766e?style=for-the-badge&logo=googleearth&logoColor=white)](https://rak2315.github.io/samudra-sih26/app.html)
-[![Landing page](https://img.shields.io/badge/Landing-samudra--sih26-0891b2?style=for-the-badge)](https://rak2315.github.io/samudra-sih26/)
-[![Data provenance](https://img.shields.io/badge/Provenance-every%20figure%20live-155e75?style=for-the-badge)](https://rak2315.github.io/samudra-sih26/provenance.html)
+[![Live platform](https://img.shields.io/badge/Live-Launch%20the%20platform-0f766e?style=for-the-badge&logo=googleearth&logoColor=white)](https://rak2315.github.io/oceanverity/app.html)
+[![Landing page](https://img.shields.io/badge/Landing-oceanverity-0891b2?style=for-the-badge)](https://rak2315.github.io/oceanverity/)
+[![Data provenance](https://img.shields.io/badge/Provenance-every%20figure%20live-155e75?style=for-the-badge)](https://rak2315.github.io/oceanverity/provenance.html)
 
 [![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-ff9933)](https://sih.gov.in/)
 [![PS 26067](https://img.shields.io/badge/Problem%20Statement-26067-138808)](https://sih.gov.in/)
@@ -50,9 +50,9 @@ opens in a browser, needs no account, and works with the internet unplugged.
 Built for **Smart India Hackathon 2026**, Problem Statement **26067**
 (Ministry of Earth Sciences → INCOIS). Category: Software. Theme: Disaster Management.
 
-**Live:** [landing page](https://rak2315.github.io/samudra-sih26/) ·
-[the platform](https://rak2315.github.io/samudra-sih26/app.html) ·
-[data provenance](https://rak2315.github.io/samudra-sih26/provenance.html)
+**Live:** [landing page](https://rak2315.github.io/oceanverity/) ·
+[the platform](https://rak2315.github.io/oceanverity/app.html) ·
+[data provenance](https://rak2315.github.io/oceanverity/provenance.html)
 
 ## What it looks like
 
@@ -223,8 +223,8 @@ awareness campaigns, policymakers, outreach events, exhibitions and e-learning. 
 in six groups is the right toolkit for a forecaster and the wrong first minute for any of those.
 So there are two more ways in, and **the control panel gained nothing**.
 
-- **Show me around.** A guided walk in **six chapters and 22 steps** that visits **every one of
-  the 47 controls the platform explains**. Each step drives the scene, opens the group the
+- **Show me around.** A guided walk in **six chapters and 23 steps** that visits **every one of
+  the 48 controls the platform explains**. Each step drives the scene, opens the group the
   control lives in on the left, and opens its explanation on the right. `probe-tour.mjs` fails if
   a control ever has no step, so "it covers everything" is a measurement and not a promise.
 - **Explore.** The same platform as **nine questions**: *Where could a cyclone get stronger?
@@ -315,7 +315,7 @@ date that cannot share this timeline, or a judgement that building it badly woul
 leaving it.
 
 **The same table is served as a page you can click through**, at
-[`/requirements.html`](https://rak2315.github.io/samudra-sih26/requirements.html): every clause
+[`/requirements.html`](https://rak2315.github.io/oceanverity/requirements.html): every clause
 word for word, the measured figure read live from the build's own manifest, and a link beside
 each one that opens the platform with the control that answers it already set.
 
@@ -324,9 +324,9 @@ each one that opens the platform with the control that answers it already set.
 | Gap in the problem statement | Status | What we built, or what is missing | Where |
 | --- | --- | --- | --- |
 | Web-based, platform-independent 3D rendering with depth-resolved volumetric views | **Met** | GPU ray-marched water column, 5 m to 2000 m, in any WebGL2 browser. No install, no plugin | `web/src/scene/volumeShader.ts` |
-| Unified display of Argo **and Glider** profiles (lat, lon, depth, time, temperature, salinity, chlorophyll) alongside model fields | **Argo met, gliders answered** | Argo fully, including **chlorophyll** from 57 BGC floats, plus 17 moored buoys. **Gliders now have an adapter of their own**, reading the exact FTP archive the problem statement names. What it finds is the answer rather than an excuse: every one of the **824,641** lines of the global index was scanned and this box holds **1 glider, 2 deployments, 2,876 casts**, newest **2022-10-14**, and nothing at all since. The gap is India's glider programme | `pipeline/samudra/sources/glider.py` |
+| Unified display of Argo **and Glider** profiles (lat, lon, depth, time, temperature, salinity, chlorophyll) alongside model fields | **Argo met, gliders answered** | Argo fully, including **chlorophyll** from 57 BGC floats, plus 17 moored buoys. **Gliders now have an adapter of their own**, reading the exact FTP archive the problem statement names. What it finds is the answer rather than an excuse: every one of the **824,641** lines of the global index was scanned and this box holds **1 glider, 2 deployments, 2,876 casts**, newest **2022-10-14**, and nothing at all since. The gap is India's glider programme | `pipeline/oceanverity/sources/glider.py` |
 | Interactive controls: variable selection, depth-slice navigation, time-step animation, customisable colourbars | **Met** | All four, live | `web/src/ui/Controls.tsx`, `Timeline.tsx` |
-| Ingest new data streams or model variables without significant re-engineering | **Met** | One adapter class per provider. Proven rather than asserted, twice over: two Argo providers that disagree about every column name share one parser, and the September 2026 round added **four more providers** - INCOIS's second analysis, Copernicus Marine, the EGO glider archive and the World Ocean Atlas normal - touching no renderer, no API endpoint and no UI file | `pipeline/samudra/sources/base.py` |
+| Ingest new data streams or model variables without significant re-engineering | **Met** | One adapter class per provider. Proven rather than asserted, twice over: two Argo providers that disagree about every column name share one parser, and the September 2026 round added **four more providers** - INCOIS's second analysis, Copernicus Marine, the EGO glider archive and the World Ocean Atlas normal - touching no renderer, no API endpoint and no UI file | `pipeline/oceanverity/sources/base.py` |
 | Tools for intuitive, rapid understanding of 3D phenomena | **Met** | Every control explains itself in plain language, and says whether it changed the science or only the picture | `web/src/guide.ts` |
 
 ### The six core functional requirements
@@ -338,7 +338,7 @@ each one that opens the platform with the control that answers it already set.
 | ...with isosurface extraction | **Met** | Draws the surface at one chosen value, e.g. the 20 °C isotherm | `volumeShader.ts` |
 | ...with time-step animation | **Met** | Play button, 36 analyses over a year | `Timeline.tsx` |
 | ...using WebGL / Three.js or Cesium.js | **Met** | Three.js and WebGL2. Why not Cesium: `docs/adr/0001` | `OceanScene.ts` |
-| ...of **current vectors** | **Met** | Copernicus Marine's own analysis at 1/12 degree - twelve times finer than the INCOIS grid - read as **numbers** and baked as float32 on the model's own axes. Arrows sit on the depth you have sliced to, coloured by speed, with a real value under the cursor. This was a rendered image until a free Copernicus account was registered; the credential lives in the bake and never in the browser. Held to the same test that killed our own derived field and passing it: **2.94 m/s at 9.5 N, 51.5 E** on the last Timestep, which is the Somali Current core in the month it peaks, against 0.16 m/s in the wrong place from the derivation. `docs/adr/0013` | `pipeline/samudra/sources/copernicus.py` |
+| ...of **current vectors** | **Met** | Copernicus Marine's own analysis at 1/12 degree - twelve times finer than the INCOIS grid - read as **numbers** and baked as float32 on the model's own axes. Arrows sit on the depth you have sliced to, coloured by speed, with a real value under the cursor. This was a rendered image until a free Copernicus account was registered; the credential lives in the bake and never in the browser. Held to the same test that killed our own derived field and passing it: **2.94 m/s at 9.5 N, 51.5 E** on the last Timestep, which is the Somali Current core in the month it peaks, against 0.16 m/s in the wrong place from the derivation. `docs/adr/0013` | `pipeline/oceanverity/sources/copernicus.py` |
 | **Instrument overlay** with geospatially accurate markers | **Met** | Floats drawn at the position they held at the moment on screen, with drift tracks | `OceanScene.ts` |
 | ...click a float to inspect a depth-vs-variable profile chart with timestamps | **Met** | Observed against modelled on one axis, gap shaded, cast and analysis dates named | `ProfilePanel.tsx` |
 | ...of **Glider, CTD and BGC** data | **BGC met, gliders read, CTD refused** | **BGC is wired up**: chlorophyll from 57 Argo floats, live in this window. **Gliders now have an adapter** and it reads the archive the PS names; the newest cast in this box is 2022-10-14, so the finding ships rather than a 2022 instrument drawn at a 2026 analysis. Ship CTD stays out on a measurement: the newest GO-SHIP section here is Apr 2025 | `sources/glider.py`, `docs/plan/03-requirement-gaps.md` |
@@ -354,9 +354,9 @@ each one that opens the platform with the control that answers it already set.
 | ...**OPeNDAP** API backend | **Met** | DAP2 over the native grids: `.das`, `.dds`, `.dods` with constraint expressions. Verified by opening our own endpoint with `xarray` + `pydap` in the test suite. (ERDDAP's griddap *is* DAP2, so we always consumed OPeNDAP; what was missing was serving it) | `api/dap.py` |
 | **Deployable on INCOIS infrastructure with no client-side dependencies** | **Met** | Static site plus one Python service. No tokens, no accounts, no plugins | `web/`, `api/` |
 | **Extensible design** for CTDs, moorings, HF-radar, ADCP | **Met for moorings and gliders** | Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format (depth not pressure, one row per level, no quality flags) absorbed behind the same protocol - and the glider archive has its own adapter reading a 248 MB directory index. 17 moored buoys are in this build, and between 5 and 14 report at any one Timestep. HF-radar and ADCP stay unmet because INCOIS lists HF-radar data as registered access and moored-buoy currents as view-only, so using either needs a data request to INCOIS - a data-policy limit, not because the seam cannot carry them | `sources/osmc.py`, `sources/glider.py` |
-| **Vertical section** along a line you draw | **Met, and not asked for** | The standard figure of physical oceanography, cut live from the native grid along a great circle between two points you click, with every cast within a corridor of the line on the same axes and drawn to the depth it reached. Reads the model's own 24 levels, never the depth-warped rendering volume. The three collocated variables ship their full-precision grids in the build - 7.0 MB - so it works offline and on the static site, and `/api/section` serves the same cut to anything else. The browser's answer is checked against the pipeline's value by value: 1,102 values, worst gap **5.07e-5 °C** | `samudra/section.py`, `web/src/section.ts` |
-| **Search-and-rescue support**, named in the PS's own list of impeded mandates | **Built, and scored** | Drop a pin; the Copernicus current field is integrated forward from it at the depth you have sliced to. **Never labelled a search forecast**: a real one needs surface wind, Stokes drift and object-specific leeway, and this carries none of them, which is why INCOIS run SARAT. The reason it ships anyway is that it checks itself - an Argo track is measured drift at the parking depth, so the same integrator was run from **219** floats' own positions, over the days the current field actually covers, and the result published: median **40.9 km** out over one Argo cycle, 92.7 km at the ninetieth percentile across 6,246 cycles, and by 30 days the separation is the same size as the distance travelled, and larger than it after that. `docs/adr/0015` | `pipeline/samudra/drift.py` |
-| **Where the model disagrees**, found automatically | **Met, and not asked for** | Two scans, over two different questions. *Where did the field depart from its own average* is the Anomaly Features: 404 connected bodies across the thirty-six steps, each ringed and explained. *Where does the model depart from the instruments* is the bias map: every collocated instrument coloured by its gap and ranked worst first, with the region binned onto 5 degree boxes so a regional bias is distinguishable from scatter. **Neither is AI and neither is captioned as one** - there is no model, no training set and no confidence score, only the mean and the RMS of residuals already measured | `samudra/anomaly.py`, `samudra/residuals.py` |
+| **Vertical section** along a line you draw | **Met, and not asked for** | The standard figure of physical oceanography, cut live from the native grid along a great circle between two points you click, with every cast within a corridor of the line on the same axes and drawn to the depth it reached. Reads the model's own 24 levels, never the depth-warped rendering volume. The three collocated variables ship their full-precision grids in the build - 7.0 MB - so it works offline and on the static site, and `/api/section` serves the same cut to anything else. The browser's answer is checked against the pipeline's value by value: 1,102 values, worst gap **5.07e-5 °C** | `oceanverity/section.py`, `web/src/section.ts` |
+| **Search-and-rescue support**, named in the PS's own list of impeded mandates | **Built, and scored** | Drop a pin; the Copernicus current field is integrated forward from it at the depth you have sliced to. **Never labelled a search forecast**: a real one needs surface wind, Stokes drift and object-specific leeway, and this carries none of them, which is why INCOIS run SARAT. The reason it ships anyway is that it checks itself - an Argo track is measured drift at the parking depth, so the same integrator was run from **219** floats' own positions, over the days the current field actually covers, and the result published: median **40.9 km** out over one Argo cycle, 92.7 km at the ninetieth percentile across 6,246 cycles, and by 30 days the separation is the same size as the distance travelled, and larger than it after that. `docs/adr/0015` | `pipeline/oceanverity/drift.py` |
+| **Where the model disagrees**, found automatically | **Met, and not asked for** | Two scans, over two different questions. *Where did the field depart from its own average* is the Anomaly Features: 404 connected bodies across the thirty-six steps, each ringed and explained. *Where does the model depart from the instruments* is the bias map: every collocated instrument coloured by its gap and ranked worst first, with the region binned onto 5 degree boxes so a regional bias is distinguishable from scatter. **Neither is AI and neither is captioned as one** - there is no model, no training set and no confidence score, only the mean and the RMS of residuals already measured | `oceanverity/anomaly.py`, `oceanverity/residuals.py` |
 | ...and **machine-learning derived products** | **Not met** | Named as an extension point. Inventing one would be inventing a requirement | - |
 
 ### Standards and outreach
@@ -367,7 +367,7 @@ each one that opens the platform with the control that answers it already set.
 | **OGC WMS / WCS** | **Partly** | WMS 1.3.0 is served, with both axis orders handled and tested. It publishes the fields that exist nowhere else - density and the anomaly - because INCOIS's own ERDDAP already serves WMS for their temperature, so re-serving that is re-publishing. **WCS is not built**, deliberately: no maintained Python server, and the numbers are already on OPeNDAP |
 | **Interoperability with data portals** | **Partly** | We read **8** independent sources through open APIs - INCOIS ERDDAP twice, Ifremer Coriolis for Argo and for BGC, NOAA AOML's OSMC feed, Copernicus Marine, Ifremer's EGO glider archive and NOAA NCEI - each behind one adapter, plus a ninth that reads a NetCDF file a visitor supplies, and expose OPeNDAP, CF-1.8 NetCDF and WMS so another system can read us back. We are not listed in anybody's catalogue, which a prototype should not be |
 | **Climate monitoring**, named in the PS's own list of impeded mandates | **Met** | Two Change variables, and the difference between them is the point. The Temperature Anomaly is a departure from this bake's own year and says so. **Temperature vs Normal** is a departure from NOAA's World Ocean Atlas 2023 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual". Read anonymously over OPeNDAP at bake time - no account at any point. Measured across 1,049,076 cells: mean +0.074 °C, 95th percentile of the magnitude 2.050 °C. Below 1500 m the atlas has no normal and the field is blank rather than zero. `docs/adr/0016` |
-| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 22 steps that visits all **47** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as nine questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
+| **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 23 steps that visits all **48** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as nine questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
 
 ### The honest summary
 
@@ -437,7 +437,7 @@ python -m venv .venv
 cd web && npm install && cd ..
 
 # 2. get the data (a few minutes; INCOIS, Argo, BGC-Argo, NOAA's buoy feed and Copernicus)
-cd pipeline && ../.venv/Scripts/python -m samudra.bake && cd ..
+cd pipeline && ../.venv/Scripts/python -m oceanverity.bake && cd ..
 
 # 3. run the website
 cd web && npm run dev            # then open http://localhost:5173
@@ -477,7 +477,7 @@ real browser and measure what reaches the screen, because every bad bug in this 
 looked like a shader bug and was not. They check that the browser's drift integrator and vertical
 section agree with the pipeline's; that every control has an explanation and every figure in one
 came from the bake; that the moving flow is the drift model and puts no dot on land; that the
-guided walk visits all 47 controls and survives every step; that each Explore question sets up
+guided walk visits all 48 controls and survives every step; that each Explore question sets up
 its own answer and the exhibition screen advances with nobody standing at it; and that the
 landing page names no picture that is not there and keeps its headline readable in both themes.
 
@@ -520,7 +520,7 @@ A box diagram says two things are connected. These say what moves.
 
 | Layer | What it is responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 495 tests | `samudra/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
+| **`pipeline/`** &middot; Python | Reading every provider, quality-controlling every observation, computing every derived `Field`, and writing the bake. **All the tested logic in the project lives here** - 495 tests | `oceanverity/sources/base.py`. A provider is one class implementing `GridSource` or `ProfileSource`. Nothing above this file knows a provider exists |
 | **`api/`** &middot; FastAPI | Answering what a static folder cannot: a collocation for an instrument the bake did not precompute, an arbitrary column, an arbitrary section line, and a NetCDF file a visitor uploads. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS | `data/grids/*.npz`, the native `Grid` saved server-side. **Every endpoint reads the `Grid`. None of them can reach a `Volume`** |
 | **`web/`** &middot; React + TypeScript + Three.js | One WebGL scene for both the globe and the ray-marched block, every control, every panel, and the two pieces of science that have to run offline | `web/public/data/`, the bake. The browser reads files, not endpoints - the only exception is a file the user themselves drops on the page |
 
@@ -590,8 +590,8 @@ the user is - with the API off on stage, and on a static deployment that has no 
 
 | Written twice | Python | Browser | How the two are held together |
 | --- | --- | --- | --- |
-| The drift integrator | `pipeline/samudra/drift.py` | `web/src/drift.ts` | `web/probe-drift.mjs` runs the **shipped browser module** from the baked start points. Measured: median **0.331 km**, worst **1.573 km**, over 101 days |
-| The vertical section | `pipeline/samudra/section.py` | `web/src/section.ts` | `web/probe-section.mjs` runs the shipped module against `/api/section` value by value. Measured: **1,102** values, worst gap **5.07e-5 &deg;C** |
+| The drift integrator | `pipeline/oceanverity/drift.py` | `web/src/drift.ts` | `web/probe-drift.mjs` runs the **shipped browser module** from the baked start points. Measured: median **0.331 km**, worst **1.573 km**, over 101 days |
+| The vertical section | `pipeline/oceanverity/section.py` | `web/src/section.ts` | `web/probe-section.mjs` runs the shipped module against `/api/section` value by value. Measured: **1,102** values, worst gap **5.07e-5 &deg;C** |
 
 Do not add a third without the same harness. The current animation is *not* a third: it runs
 `midpointStep` and `sample` out of `drift.ts` itself, and `probe-particles.mjs` checks that a
@@ -632,18 +632,18 @@ leaving the building is still science.
 
 | Where | What |
 | --- | --- |
-| `pipeline/samudra/grid.py` | The scientific truth. Everything that reads a value goes through it |
-| `pipeline/samudra/sources/base.py` | The adapter seam. A new provider is one class here and nothing else |
-| `pipeline/samudra/bake.py` | The build step: `Grid` in, `web/public/data/` out |
+| `pipeline/oceanverity/grid.py` | The scientific truth. Everything that reads a value goes through it |
+| `pipeline/oceanverity/sources/base.py` | The adapter seam. A new provider is one class here and nothing else |
+| `pipeline/oceanverity/bake.py` | The build step: `Grid` in, `web/public/data/` out |
 | `api/main.py` | The REST half, and `GRID_SOURCES` / `PROFILE_SOURCES`, the adapter registry |
 | `api/standards.py` | OPeNDAP, CF-1.8 NetCDF and OGC WMS, all three off the native `Grid` |
 | `web/src/scene/OceanScene.ts` | The renderer: the volume, the sheets, the markers, the draw order |
 | `web/src/transfer.ts` | The colour Scale. One curve, one file, two languages |
 | `web/src/drift.ts` | The drift integrator, and the step rule the current animation shares with it |
 | `web/src/particles.ts` | The moving flow: 2,400 dots with fading trails, on the chosen depth |
-| `web/src/guide.ts` | Plain-language explanation of every control. 47 entries, and a probe fails if one is missing |
+| `web/src/guide.ts` | Plain-language explanation of every control. 48 entries, and a probe fails if one is missing |
 | `web/src/explore.ts` | The nine questions, and the depth landmarks the exhibition screen shows |
-| `web/src/ui/Tour.tsx` | The guided walk: 22 steps, 6 chapters, every control covered |
+| `web/src/ui/Tour.tsx` | The guided walk: 23 steps, 6 chapters, every control covered |
 
 The design decisions, including the ones that were hard-won, are written up in
 [`docs/adr/`](docs/adr/) - seventeen of them. The shared vocabulary and the deliberate scope
@@ -653,7 +653,7 @@ limits are in [`CONTEXT.md`](CONTEXT.md).
 
 | File | What it is |
 | --- | --- |
-| [`docs/Samudra3D-Dossier.pdf`](docs/Samudra3D-Dossier.pdf) | The full project dossier - problem, solution, every feature, feasibility, impact, and an anticipated-questions section written for non-specialist judges |
+| [`docs/OceanVerity-Dossier.pdf`](docs/OceanVerity-Dossier.pdf) | The full project dossier - problem, solution, every feature, feasibility, impact, and an anticipated-questions section written for non-specialist judges |
 | [`docs/demo/script.md`](docs/demo/script.md) | The demo script: 4 minutes of deck, 4 minutes of live demo |
 | [`docs/demo/technical-approach.md`](docs/demo/technical-approach.md) | The spoken version of the Technical Approach slide, about 70 seconds |
 | [`docs/research/operational-stakes.md`](docs/research/operational-stakes.md) | Sourced figures for the pitch: cyclones, upwelling, the Argo programme |

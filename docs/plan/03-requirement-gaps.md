@@ -297,7 +297,7 @@ in the same block. It is not a CTD *ingestion*, and calling it one would be the 
 this file exists to prevent. It is the parser this clause asks for, demonstrated on a stranger's
 own file in fifteen seconds.
 
-**Climate monitoring** is answered. `samudra/climatology.py` and `samudra/sources/woa.py` read
+**Climate monitoring** is answered. `oceanverity/climatology.py` and `oceanverity/sources/woa.py` read
 NOAA's World Ocean Atlas 2023 1991-2020 monthly normal over OPeNDAP, anonymously, and the
 Temperature vs Normal Field is the analysis minus that baseline. Measured across 1,049,076 cells:
 mean departure +0.07 degC, and 2.05 degC at the 95th percentile of the magnitude. ADR 0016

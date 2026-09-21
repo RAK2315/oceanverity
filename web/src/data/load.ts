@@ -54,7 +54,7 @@ export const loadAnomalies = () => getJson<AnomalyFeature[][]>("anomalies.json")
  * Every number in it is derived from that larger file, and it exists separately for exactly
  * that reason - the bias map is the answer to "so where is it wrong", and waiting on ten
  * megabytes of depth arrays to draw 266 coloured dots would be paying for the charts nobody has
- * opened yet. See `pipeline/samudra/residuals.py`.
+ * opened yet. See `pipeline/oceanverity/residuals.py`.
  */
 export const loadResiduals = () => getJson<Residuals>("residuals.json");
 
@@ -63,7 +63,7 @@ export const loadResiduals = () => getJson<Residuals>("residuals.json");
  *
  * 560 KB. It is the measurement that turns a drift toy into a validated one, and it is baked
  * rather than integrated live because the numbers on the panel have to be the ones
- * `pipeline/samudra/drift.py` produced and tests cover - see the note at the top of `drift.ts`.
+ * `pipeline/oceanverity/drift.py` produced and tests cover - see the note at the top of `drift.ts`.
  */
 export const loadDrift = () => getJson<BakedDrift>("drift.json");
 
@@ -103,7 +103,7 @@ export async function loadNativeGrid(
  * Linear filtering is deliberate on every channel. On the value channel it is what smooths a
  * 1-degree grid into something that reads as water; on the coverage channel it is what turns a
  * stair-stepped coastline into a clean edge. It is only safe because the bake back-fills masked
- * cells with a real neighbouring value - see the note in `pipeline/samudra/volume.py`.
+ * cells with a real neighbouring value - see the note in `pipeline/oceanverity/volume.py`.
  */
 export async function loadVolumeTexture(
   path: string,

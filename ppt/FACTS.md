@@ -1,6 +1,6 @@
 # Every figure the deck may use, read off the build
 
-**Generated 2026-09-15 by `pipeline/scripts/collect_facts.py`. Do not edit by
+**Generated 2026-09-20 by `pipeline/scripts/collect_facts.py`. Do not edit by
 hand.** Re-run it after a bake and diff this file: a figure that moved shows up as a line.
 
 `ppt/DECK.md` is written by a person and quotes these numbers. This file is the source it quotes

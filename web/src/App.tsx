@@ -21,6 +21,7 @@ import { useStore } from "./store";
 import { integrateDrift, type LoadedCurrents } from "./drift";
 import type { FieldResiduals, Manifest } from "./types";
 import { Chrome, LoadingScreen } from "./ui/Chrome";
+import { BayToggle } from "./ui/BayToggle";
 import { Controls } from "./ui/Controls";
 import { DepthRuler } from "./ui/DepthRuler";
 import { AnomalyPanel } from "./ui/AnomalyPanel";
@@ -481,7 +482,12 @@ export default function App() {
   // works on the static deployment and with the network unplugged.
   useEffect(() => {
     const { manifest, fieldKey, timestepIndex, sectionFrom, sectionTo, nativeGrids } = store;
-    if (!ready || !manifest || !sectionFrom || !sectionTo) return;
+    // Two readers now: the section, which needs the whole Grid to cut a line out of it, and the
+    // value under the cursor, which needs it because a measurement may not come from a Volume.
+    // `hoverArmed` is set the first time the pointer crosses the canvas, so a reader who never
+    // hovers and never draws a line still pays nothing.
+    if (!ready || !manifest) return;
+    if (!(sectionFrom && sectionTo) && !store.hoverArmed) return;
     const path = manifest.gridFiles?.[fieldKey]?.[timestepIndex];
     if (!path) return;
     const key = `${fieldKey}|${timestepIndex}`;
@@ -499,6 +505,7 @@ export default function App() {
     store.timestepIndex,
     store.sectionFrom,
     store.sectionTo,
+    store.hoverArmed,
     store.nativeGrids,
   ]);
 
@@ -560,6 +567,9 @@ export default function App() {
       paletteName: store.activePalette(),
       scale: store.scale,
       surface: store.surfaces[`${store.fieldKey}|${store.timestepIndex}`] ?? null,
+      // For the value under the cursor, which is a measurement and may not come out of a
+      // Volume. Null until it has been fetched, which is the first time somebody hovers.
+      nativeGrid: store.nativeGrids[`${store.fieldKey}|${store.timestepIndex}`] ?? null,
       vectors: store.vectors[store.timestepIndex] ?? null,
       currentStyle: store.currentStyle,
       anomalies: store.features(),
@@ -754,15 +764,32 @@ export default function App() {
     // "move the cursor over the water" rather than showing a stale number.
     const current = scene.pickCurrent(event.clientX, event.clientY);
     if (current !== useStore.getState().hoverCurrent) useStore.setState({ hoverCurrent: current });
+
+    // And the same question for every other Field that can answer it honestly. Separate from
+    // the currents, whose answer is a speed *and* a heading and reads as one sentence.
+    const value = scene.pickValue(event.clientX, event.clientY);
+    const was = useStore.getState().hoverValue;
+    // Compared field by field rather than by identity: `pickValue` builds a fresh object every
+    // move, so an identity test would setState on every mouse event and re-render the panel at
+    // pointer rate.
+    const same =
+      was !== null &&
+      value !== null &&
+      was.value === value.value &&
+      was.metres === value.metres &&
+      was.lon === value.lon &&
+      was.lat === value.lat;
+    if (!same) useStore.setState({ hoverValue: value });
+    if (!useStore.getState().hoverArmed) useStore.setState({ hoverArmed: true });
   }, []);
 
   if (store.loadError) {
     return (
       <div className="fatal">
-        <h1>Samudra 3D could not start</h1>
+        <h1>OceanVerity could not start</h1>
         <p>{store.loadError}</p>
         <p className="hint">
-          The baked data may be missing. Run <code>python -m samudra.bake</code> in{" "}
+          The baked data may be missing. Run <code>python -m oceanverity.bake</code> in{" "}
           <code>pipeline/</code>.
         </p>
       </div>
@@ -773,7 +800,11 @@ export default function App() {
     // Kiosk is a class on the root rather than a prop threaded through nine components: what it
     // does is hide chrome and scale type, which is entirely a styling question, and every panel
     // stays mounted so leaving the mode with Escape puts the console straight back.
-    <div className={`app${store.kiosk ? " kiosk" : ""}`}>
+    <div
+      className={`app${store.kiosk ? " kiosk" : ""}` +
+        `${store.panelsHidden.left ? " bay-left-folded" : ""}` +
+        `${store.panelsHidden.right ? " bay-right-folded" : ""}`}
+    >
       <div className="viewport">
         <canvas
           ref={canvasRef}
@@ -818,9 +849,18 @@ export default function App() {
 
       {store.manifest && (
         <>
-          <Chrome onDive={dive} />
+          <Chrome
+            onDive={dive}
+            /* `focusOn` rather than `panTo`: the reader pressed a button asking for a framing,
+               so they get the framing. See `camera.ts`. */
+            onFrame={(preset) => sceneRef.current?.focusOn(preset.lon, preset.lat, preset.distance)}
+          />
           <DepthRuler scene={sceneRef.current} />
           <MapKey />
+          {/* The two bays fold independently, and the tab that folds one stays on screen to
+              bring it back. A CSS state only: see `BayToggle.tsx` for why it is not kiosk. */}
+          <BayToggle side="left" />
+          <BayToggle side="right" />
           <Controls
             drift={driftPath}
             onFocus={(lon, lat) => sceneRef.current?.focusOn(lon, lat)}
@@ -834,7 +874,12 @@ export default function App() {
           <ProfilePanel onFocus={(lon, lat) => sceneRef.current?.focusOn(lon, lat)} />
           <SectionPanel />
           <Timeline />
-          <Tour onDive={dive} />
+          <Tour
+            onDive={dive}
+            onFrame={(preset) =>
+              sceneRef.current?.focusOn(preset.lon, preset.lat, preset.distance)
+            }
+          />
           <CaseCard helpers={helpers} onDive={dive} />
           <Explore helpers={helpers} />
         </>

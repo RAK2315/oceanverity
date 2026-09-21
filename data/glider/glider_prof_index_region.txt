@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------------------
-# REGIONAL EXTRACT, made on 2026-09-01 by pipeline/samudra/sources/glider.py's own scan.
+# REGIONAL EXTRACT, made on 2026-09-01 by pipeline/oceanverity/sources/glider.py's own scan.
 #
 # The complete EGO index is 248,440,873 bytes and 824,641 lines, of which 817,816 carry a
 # readable position and date. Every one was scanned against DEMO_REGION (45-100 E, 10 S-25 N)

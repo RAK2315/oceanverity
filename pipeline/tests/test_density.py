@@ -10,8 +10,8 @@ import gsw
 import numpy as np
 import pytest
 
-from samudra.density import potential_density, profile_density
-from samudra.grid import Grid
+from oceanverity.density import potential_density, profile_density
+from oceanverity.grid import Grid
 
 LEVELS = np.array([5.0, 100.0, 1000.0, 2000.0])
 LATITUDES = np.array([-5.0, 5.0, 15.0])

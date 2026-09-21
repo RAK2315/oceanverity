@@ -16,9 +16,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from samudra.coverage import BANDS, band_of
-from samudra.palettes import COVERAGE_BANDS, banded_table
-from samudra.volume import encode_volume
+from oceanverity.coverage import BANDS, band_of
+from oceanverity.palettes import COVERAGE_BANDS, banded_table
+from oceanverity.volume import encode_volume
 
 
 def band_read_back(count: int, vmin: float, vmax: float) -> int:

@@ -5,7 +5,7 @@
 Two halves, four minutes each. Practise them separately, then join them. The join is one
 sentence: *"Rather than describe it, let me show you."*
 
-> _Set up before you start: open **https://rak2315.github.io/samudra-sih26/**, click "Launch the
+> _Set up before you start: open **https://rak2315.github.io/oceanverity/**, click "Launch the
 > platform", let it finish loading, leave it on the globe. Full screen, F11. Have the deck on a
 > second window or a second machine. Rehearse the dive twice - it is the moment that lands._
 
@@ -21,7 +21,7 @@ sentence: *"Rather than describe it, let me show you."*
 
 ## A0:00 - Slide 1, title (15 seconds)
 
-"Samudra 3D. Problem statement 26067, for INCOIS.
+"OceanVerity. Problem statement 26067, for INCOIS.
 
 It is a working prototype and it is live on the internet right now, so everything I am about to
 claim, you can check yourself in a browser."
@@ -450,7 +450,7 @@ more than not having it.
 | "What are the white dots and the lines?" | Argo floats and their drift tracks. There is a key in the bottom-left corner. |
 | "Why does this graph look almost flat?" | Because for that float the model got it right. Click a different one to see a disagreement. |
 | "Why not Cesium?" | It needs an access token, which is a dependency that can fail live, and compositing a ray-marched volume into its pipeline was the riskiest integration available. One Three.js scene makes the dive genuinely continuous. ADR 0001. |
-| "How would you add our internal data?" | One source adapter class. `pipeline/samudra/sources/base.py` is the whole interface. |
+| "How would you add our internal data?" | One source adapter class. `pipeline/oceanverity/sources/base.py` is the whole interface. |
 | "Is the depth axis to scale?" | No, deliberately. The top 300 m gets half the axis instead of 15%, because that is where the thermocline is. Stretched depth axes are standard in oceanography, and the profile chart uses the same stretch so the two agree. ADR 0004. |
 | "Why 1800x vertical exaggeration?" | The region is about four thousand times wider than it is deep. At true scale it would be an invisible film. |
 | "What resolution is the data?" | One degree, because that is what INCOIS publishes. We do not upsample. That would invent structure the instruments never measured. |

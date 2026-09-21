@@ -16,7 +16,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.sources.argo import (
+from oceanverity.sources.argo import (
     BGC_COLUMNS,
     GDAC_COLUMNS,
     BgcArgoSource,

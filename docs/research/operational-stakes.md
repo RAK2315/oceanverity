@@ -1,6 +1,6 @@
 # Research: Operational Stakes, Upwelling, Freshwater and Argo
 
-Compiled 2026-08-23 for the Samudra 3D SIH pitch (PS 26067). Every entry below states the claim,
+Compiled 2026-08-23 for the OceanVerity SIH pitch (PS 26067). Every entry below states the claim,
 the number, the primary source, and a confidence note. "UNVERIFIED" is used explicitly where a
 figure could not be traced to a primary source. No em dashes; plain hyphens only.
 

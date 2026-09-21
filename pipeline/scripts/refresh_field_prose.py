@@ -31,7 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from samudra.bake import all_field_specs  # noqa: E402
+from oceanverity.bake import all_field_specs  # noqa: E402
 
 MANIFEST = Path(__file__).resolve().parents[2] / "web" / "public" / "data" / "manifest.json"
 

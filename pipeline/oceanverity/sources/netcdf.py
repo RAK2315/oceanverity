@@ -232,7 +232,7 @@ class NetcdfFileSource:
     """
 
     name = "Uploaded NetCDF"
-    attribution = "Supplied by the user. Samudra 3D neither stores nor redistributes it."
+    attribution = "Supplied by the user. OceanVerity neither stores nor redistributes it."
 
     def __init__(self, dataset, box: BoundingBox | None = None) -> None:
         self.dataset = dataset

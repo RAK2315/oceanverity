@@ -19,13 +19,13 @@ answer that looks entirely reasonable.
 import numpy as np
 import pytest
 
-from samudra.climatology import (
+from oceanverity.climatology import (
     AxisMismatch,
     climatological_anomaly,
     month_of,
     to_model_levels,
 )
-from samudra.grid import Grid
+from oceanverity.grid import Grid
 
 from datetime import datetime, timezone
 

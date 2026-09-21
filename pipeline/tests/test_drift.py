@@ -12,14 +12,14 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 import pytest
 
-from samudra.drift import (
+from oceanverity.drift import (
     CurrentSeries,
     METRES_PER_DEGREE,
     integrate_drift,
     separation_km,
     track_against_drift,
 )
-from samudra.grid import Grid
+from oceanverity.grid import Grid
 
 LEVELS = np.array([5.0, 100.0, 1000.0])
 LATITUDES = np.arange(-5.0, 25.0, 1.0)
@@ -271,7 +271,7 @@ def test_a_trajectory_never_ends_on_a_point_the_data_does_not_cover():
 
 
 def test_separation_is_a_great_circle_distance_in_kilometres():
-    from samudra.drift import DriftStep
+    from oceanverity.drift import DriftStep
 
     a = DriftStep(time=START, longitude=60.0, latitude=0.0)
     b = DriftStep(time=START, longitude=61.0, latitude=0.0)

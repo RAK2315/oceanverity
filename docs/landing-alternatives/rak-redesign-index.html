@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Samudra 3D - Ocean model and in-situ co-visualisation for INCOIS</title>
+<title>OceanVerity - Ocean model and in-situ co-visualisation for INCOIS</title>
 <meta name="description" content="A browser-native 3D ocean visualisation platform that renders INCOIS model fields as a ray-marched water column and overlays the Argo float profiles measured in the same water. Smart India Hackathon 2026, PS 26067.">
 <link rel="icon" type="image/png" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
@@ -13,7 +13,10 @@
   // Shared with the platform: one key, so a choice made on either side holds on both.
   (function () {
     try {
-      if (localStorage.getItem("samudra.theme") === "light") {
+      var stored = localStorage.getItem("oceanverity.theme");
+      // Renamed from a `samudra.` prefix on 2026-09-20; see web/src/remembered.ts.
+      if (stored === null) stored = localStorage.getItem("samudra.theme");
+      if (stored === "light") {
         document.documentElement.dataset.theme = "light";
       }
     } catch (e) { /* storage blocked: dark is the default and still correct */ }
@@ -665,7 +668,7 @@
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top">SAMUDRA<i>&middot;3D</i></a>
+    <a class="brand" href="#top">OCEAN<i>&middot;VERITY</i></a>
     <div class="nav-links">
       <a href="#problem">The gap</a>
       <a href="#features">What it does</a>
@@ -1326,7 +1329,7 @@
     <div class="hero-actions">
       <a class="cta big" href="./app.html">Launch the platform &rarr;</a>
       <a class="cta big ghost" href="./requirements.html">Every requirement, clause by clause</a>
-      <a class="cta big ghost" href="https://github.com/RAK2315/samudra-sih26">View the source</a>
+      <a class="cta big ghost" href="https://github.com/RAK2315/oceanverity">View the source</a>
     </div>
   </div>
 </section>
@@ -1350,7 +1353,7 @@
       <a href="./app.html">Launch the platform</a>
       <a href="./provenance.html">Data provenance</a>
       <a href="./requirements.html">Requirement coverage</a>
-      <a href="https://github.com/RAK2315/samudra-sih26">github.com/RAK2315/samudra-sih26</a>
+      <a href="https://github.com/RAK2315/oceanverity">github.com/RAK2315/oceanverity</a>
     </nav>
   </div>
 </footer>
@@ -1632,7 +1635,7 @@
       var next = isLight() ? "dark" : "light";
       if (next === "light") document.documentElement.dataset.theme = "light";
       else delete document.documentElement.dataset.theme;
-      try { localStorage.setItem("samudra.theme", next); } catch (e) { /* no memory, still applied */ }
+      try { localStorage.setItem("oceanverity.theme", next); localStorage.removeItem("samudra.theme"); } catch (e) { /* no memory, still applied */ }
       paint();
     });
 

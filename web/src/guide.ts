@@ -209,6 +209,24 @@ export const GUIDE: Record<string, GuideEntry> = {
     tryThis: "Press 'Set up a cyclone question' above the tabs.",
   },
 
+  views: {
+    title: "Camera views",
+    kind: "navigation",
+    does: "Moves the camera to one of three named bodies of water. It changes nothing else.",
+    means: [
+      "The variable, the date and the way the water is drawn all stay exactly as you set them.",
+      "Indian EEZ frames the water INCOIS forecast for. It is a view, not a boundary.",
+      "The build covers more ocean than that: 45 E to 100 E, and 10 S to 25 N.",
+      "Drag to orbit and scroll to zoom from wherever one of these puts you.",
+    ],
+    look: [
+      "The Bay of Bengal is where the cyclones this build is about form.",
+      "The Arabian Sea carries the Somali Current, the fastest water in the block.",
+      "Return to globe, on the right of the bar, is the way back out of any of them.",
+    ],
+    tryThis: "Press Arabian Sea with Current speed selected, in the southwest monsoon.",
+  },
+
   hazardPreset: {
     title: "Cyclone mode",
     kind: "navigation",
@@ -1140,6 +1158,83 @@ export function describeView(options: {
     ` were reporting near this date and are drawn where they actually were; click one to` +
     ` compare it against the model.`
   );
+}
+
+/**
+ * The same view, in one line and up to three bullets.
+ *
+ * `describeView` is a 70-word paragraph and it is the right thing to have, but it is the wrong
+ * thing to *lead* with: it is the only prose on a console whose every other panel is a readout,
+ * it says the same thing whenever the view is the same, and a reader who has read it once wants
+ * the water back. So it folds, shut by default, and this is what sits above the fold.
+ *
+ * The line names the **shape** on screen, which is the one fact about the picture that lives
+ * nowhere else - the top bar already carries the Field and the date, and the Depth slice group
+ * carries the range, so repeating either here would be the panel printing the left panel's own
+ * readout. The bullets are live state that is *conditional*: an isosurface, a stretched depth
+ * axis, the instruments actually on the water. A condition that does not hold takes its bullet
+ * away rather than printing "no isosurface", which is the same rule `guideFigures` applies to a
+ * token with nothing behind it.
+ */
+export function summariseView(options: {
+  fromDepth: number;
+  toDepth: number;
+  exaggeration: number;
+  isoEnabled: boolean;
+  isoValue: string;
+  floatsDrawn: number;
+  mooringsDrawn: number;
+  render?: "volume" | "depth" | "column" | "vector";
+  arrowDepth?: number;
+  currentStyle?: "particles" | "arrows";
+  diverging?: boolean;
+}): { line: string; points: string[] } {
+  const {
+    fromDepth,
+    toDepth,
+    exaggeration,
+    isoEnabled,
+    isoValue,
+    floatsDrawn,
+    mooringsDrawn,
+    render = "volume",
+    arrowDepth,
+    currentStyle = "particles",
+    diverging = false,
+  } = options;
+
+  const line =
+    render === "depth"
+      ? "A sheet inside the block, sitting at the depth it reports."
+      : render === "column"
+        ? "One number for the whole column, painted on the sea surface."
+        : render === "vector"
+          ? currentStyle === "arrows"
+            ? `Arrows at ${(arrowDepth ?? 5).toFixed(0)} m, pointing the way the water goes.`
+            : `Moving dots at ${(arrowDepth ?? 5).toFixed(0)} m, carried by the current itself.`
+          : fromDepth > 10 || toDepth < 1900
+            ? `A ray-marched block, cut to ${fromDepth.toFixed(0)}-${toDepth.toFixed(0)} m.`
+            : "A ray-marched block of water, 5 m down to 2000 m.";
+
+  const points: string[] = [];
+  if (isoEnabled && render === "volume") {
+    points.push(
+      diverging
+        ? `Two solid surfaces, enclosing what rose and fell by ${isoValue}.`
+        : `A solid surface where the water is exactly ${isoValue}.`,
+    );
+  }
+  if (exaggeration > 1.5) {
+    points.push(`Depth stretched ${exaggeration.toFixed(0)} times, so the column is readable.`);
+  }
+  points.push(
+    mooringsDrawn > 0
+      ? `${floatsDrawn} floats and ${mooringsDrawn} moored buoys, drawn where they were.`
+      : `${floatsDrawn} floats, drawn where they actually were.`,
+  );
+  // Three is the cap the guide entries already live under, and the instruments line is the one
+  // that always holds, so it is the one that survives a crowded view.
+  return { line, points: points.slice(-3) };
 }
 
 /**

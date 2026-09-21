@@ -8,8 +8,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
-from samudra.thermocline import isotherm_depth, swept_through
+from oceanverity.grid import Grid
+from oceanverity.thermocline import isotherm_depth, swept_through
 
 LEVELS = np.array([5.0, 20.0, 50.0, 100.0, 200.0, 500.0])
 LATS = np.array([0.0, 1.0])

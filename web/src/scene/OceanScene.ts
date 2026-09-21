@@ -30,6 +30,7 @@ import type {
   AnomalyFeature,
   FieldSpec,
   Manifest,
+  NativeGrid,
   OceanFloat,
   SurfaceField,
   VectorField,
@@ -77,6 +78,47 @@ export interface BiasMark {
   lat: number;
 }
 
+/**
+ * One cell's worth of bilinear interpolation on a float32 Grid, or null where it is Masked.
+ *
+ * Shared by every full-precision read, so there is one answer to "what does a Masked corner
+ * mean". It means the whole sample is Masked: a Mask cell is *absence of ocean*, never a value
+ * of zero, and near a coast the three corners that do have data are the open ocean, so falling
+ * back to them would report open-ocean water as if it were the water in the bay.
+ *
+ * `levelStride` walks a 3D Grid; pass level 0 for a 2D Sheet or Drape.
+ */
+function bilinear(
+  values: Float32Array,
+  width: number,
+  height: number,
+  level: number,
+  lon: number,
+  lat: number,
+  box: { west: number; east: number; south: number; north: number },
+): number | null {
+  const column = ((lon - box.west) / (box.east - box.west)) * (width - 1);
+  const row = ((lat - box.south) / (box.north - box.south)) * (height - 1);
+  if (!Number.isFinite(column) || !Number.isFinite(row)) return null;
+  if (column < 0 || row < 0 || column > width - 1 || row > height - 1) return null;
+  const c0 = Math.min(Math.floor(column), width - 2);
+  const r0 = Math.min(Math.floor(row), height - 2);
+  const fx = column - c0;
+  const fy = row - r0;
+  let total = 0;
+  for (const [dr, dc, weight] of [
+    [0, 0, (1 - fy) * (1 - fx)],
+    [0, 1, (1 - fy) * fx],
+    [1, 0, fy * (1 - fx)],
+    [1, 1, fy * fx],
+  ] as const) {
+    const cell = values[(level * height + (r0 + dr)) * width + (c0 + dc)];
+    if (cell === undefined || !Number.isFinite(cell)) return null;
+    total += cell * weight;
+  }
+  return total;
+}
+
 export interface ViewState {
   morph: number;
   timestepIndex: number;
@@ -119,6 +161,16 @@ export interface ViewState {
   scale: Scale;
   /** This Timestep's hazard Field, when one is selected. Not a Volume; float32 on the Grid. */
   surface: SurfaceField | null;
+  /**
+   * The float32 Grid for the Field on screen, once it has been fetched. Null otherwise.
+   *
+   * Only three Fields ship one - temperature, salinity and density - and it is 194 KB a
+   * Timestep, so it arrives lazily. It is here for exactly one reason: the value under the
+   * cursor is a measurement, and `CLAUDE.md`'s first rule is that a measurement never comes out
+   * of a Volume. The Volume beside it is byte-quantised and depth-warped and would answer the
+   * same question wrongly in a way nobody could see.
+   */
+  nativeGrid: NativeGrid | null;
   /** This Timestep's current components, when the Currents Field is selected. */
   vectors: VectorField | null;
   /** Moving dots or arrows. Two styles of one layer; see `store.ts`. */
@@ -2099,6 +2151,63 @@ export class OceanScene {
       lat,
       metres: levels[level] ?? volume.surfaceMetres,
     };
+  }
+
+  /**
+   * The Field's own value under the cursor, with the depth it was read at.
+   *
+   * Eleven of the nineteen Fields can answer this honestly and eight cannot, and the difference
+   * is simply whether the bake ships full precision for them: the three collocated Fields as a
+   * `NativeGrid`, the seven Sheet and Drape Fields as a `SurfaceField`, and the currents through
+   * `pickCurrent`, which stays separate because its answer is a speed *and* a heading. The other
+   * eight - the anomalies, coverage, cast count, error estimate, spread, chlorophyll and oxygen
+   * - exist only as Volumes, and a Volume is quantised to a byte and depth-warped. Returning a
+   * plausible number from one would be answering a scientific question from a rendering
+   * artefact in the one place nobody would check it, so this returns null for them and the
+   * panel says which Fields can be read rather than printing a number that looks fine.
+   *
+   * Bilinear on the four corners, and a Masked corner makes the whole answer Masked rather than
+   * falling back to the corners that do have data - the rule `Grid.column_at` follows in the
+   * pipeline, because near a coast the corners with data are the open ocean.
+   */
+  pickValue(
+    clientX: number,
+    clientY: number,
+  ): { value: number; metres: number | null; lon: number; lat: number } | null {
+    const state = this.state;
+    if (!state || state.morph <= 0.55) return null;
+    const render = state.field?.render ?? "volume";
+    if (render === "vector") return null; // pickCurrent answers for these, with a heading
+
+    const volume = this.manifest.volume;
+    const levels = volume.levelMetres ?? [];
+
+    // A Sheet or a Drape has one value per cell and no depth of its own to report - the value
+    // *is* a depth on a Sheet - so it is read at the surface and reports no reading depth.
+    if (render === "depth" || render === "column") {
+      const grid = state.surface;
+      if (!grid) return null;
+      const at = this.pickWater(clientX, clientY, volume.surfaceMetres);
+      if (!at) return null;
+      const value = bilinear(grid.values, grid.width, grid.height, 0, at.lon, at.lat, volume);
+      return value === null ? null : { value, metres: null, lon: at.lon, lat: at.lat };
+    }
+
+    const grid = state.nativeGrid;
+    if (!grid) return null;
+    // The top of the Depth slice is the water the reader is looking into, and it is the same
+    // number the Depth slice group prints. Snapped to the nearest Level, because that is where
+    // the model actually has a value; interpolating between Levels would invent one.
+    const metres = axisToDepth(volume, state.depthFrom);
+    let level = 0;
+    for (let i = 1; i < levels.length; i++) {
+      if (Math.abs((levels[i] ?? 0) - metres) < Math.abs((levels[level] ?? 0) - metres)) level = i;
+    }
+    const at = this.pickWater(clientX, clientY, levels[level] ?? volume.surfaceMetres);
+    if (!at) return null;
+    const value = bilinear(grid.values, grid.width, grid.height, level, at.lon, at.lat, volume);
+    if (value === null) return null;
+    return { value, metres: levels[level] ?? volume.surfaceMetres, lon: at.lon, lat: at.lat };
   }
 
   /** Nearest Float to a screen point, or null. See `morph.ts` for why this is done by hand. */

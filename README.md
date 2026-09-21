@@ -1,13 +1,13 @@
 <div align="center">
 
-# Samudra 3D
+# OceanVerity
 
 **Fly into the Indian Ocean and see, in one picture, what the model predicted
 and what the instruments in the water actually measured.**
 
-[![Launch the platform](https://img.shields.io/badge/Launch-the%20platform-0f766e?style=for-the-badge&logo=googleearth&logoColor=white)](https://rak2315.github.io/samudra-sih26/app.html)
-[![Landing page](https://img.shields.io/badge/Landing-page-0891b2?style=for-the-badge)](https://rak2315.github.io/samudra-sih26/)
-[![Provenance](https://img.shields.io/badge/Every%20figure-sourced-155e75?style=for-the-badge)](https://rak2315.github.io/samudra-sih26/provenance.html)
+[![Launch the platform](https://img.shields.io/badge/Launch-the%20platform-0f766e?style=for-the-badge&logo=googleearth&logoColor=white)](https://rak2315.github.io/oceanverity/app.html)
+[![Landing page](https://img.shields.io/badge/Landing-page-0891b2?style=for-the-badge)](https://rak2315.github.io/oceanverity/)
+[![Provenance](https://img.shields.io/badge/Every%20figure-sourced-155e75?style=for-the-badge)](https://rak2315.github.io/oceanverity/provenance.html)
 
 Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / INCOIS
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
@@ -53,9 +53,9 @@ venue network cannot kill it.
 
 | | |
 | --- | --- |
-| **Live** | [Landing page](https://rak2315.github.io/samudra-sih26/) &middot; [The platform](https://rak2315.github.io/samudra-sih26/app.html) |
-| **Every figure, sourced** | [provenance.html](https://rak2315.github.io/samudra-sih26/provenance.html) |
-| **Every PS clause, answered** | [requirements.html](https://rak2315.github.io/samudra-sih26/requirements.html) - each clause links straight to the control that answers it |
+| **Live** | [Landing page](https://rak2315.github.io/oceanverity/) &middot; [The platform](https://rak2315.github.io/oceanverity/app.html) |
+| **Every figure, sourced** | [provenance.html](https://rak2315.github.io/oceanverity/provenance.html) |
+| **Every PS clause, answered** | [requirements.html](https://rak2315.github.io/oceanverity/requirements.html) - each clause links straight to the control that answers it |
 | **Prototype video** | [Watch on Google Drive](https://drive.google.com/file/d/1LTY8K1G6kZmPgNEslfE59tnTUSqkIc29/view). Recorded before these were built, so they are not in it: the Cyclone Montha walkthrough, the cyclone fields checked against INCOIS's own archive, the redesigned requirements and provenance pages, the Biology variables (chlorophyll, dissolved oxygen, the oxygen floor and surface fronts) with their fishing walkthrough, and the tour pausing instead of closing when you touch a control. |
 
 ---
@@ -143,7 +143,7 @@ nothing joins them back up.
                                  │  NetCDF · CSV · FTP index
                                  │  subset at the server, not after download
                                  ▼
-  ┌─ 2 · ONE ADAPTER SEAM - samudra/sources/base.py ──────────────────────┐
+  ┌─ 2 · ONE ADAPTER SEAM - oceanverity/sources/base.py ──────────────────────┐
   │ GridSource / ProfileSource · eleven classes                           │
   │ the only code in the project that has heard of ERDDAP                 │
   │ quality control per channel · land masked, never filled               │
@@ -198,7 +198,7 @@ Each one public, each tested and dated in
 
 ### 2 · What the seam actually is
 
-[`samudra/sources/base.py`](pipeline/samudra/sources/base.py) declares `GridSource` and
+[`oceanverity/sources/base.py`](pipeline/oceanverity/sources/base.py) declares `GridSource` and
 `ProfileSource` and nothing else. Eleven classes implement them, and **they are the only code in
 the project that has ever heard of ERDDAP**, or of a column layout, or of an FTP index. Each
 subsets *at the server*, so one region and one window come down rather than a global archive.
@@ -244,7 +244,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Layer | Responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 495 tests. | `samudra/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
+| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 495 tests. | `oceanverity/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
 | **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the `Grid`. None can reach a `Volume`.** |
 | **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints** - the only exception is a file the user drops. |
 
@@ -291,7 +291,7 @@ works with no server behind it at all.
 No account, no API key, no database.
 
 ```bash
-git clone https://github.com/RAK2315/samudra-sih26 && cd samudra-sih26
+git clone https://github.com/RAK2315/oceanverity && cd oceanverity
 
 # 1. install
 python -m venv .venv
@@ -312,7 +312,7 @@ fresh clone. The two steps below are optional.
 
 # optional: rebuild the data from source (a few minutes; needs one free Copernicus account
 # for the current velocities, and nothing else)
-cd pipeline && ../.venv/Scripts/python -m samudra.bake
+cd pipeline && ../.venv/Scripts/python -m oceanverity.bake
 ```
 
 ### Check the claims yourself

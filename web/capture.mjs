@@ -63,8 +63,9 @@ const FORCE = args.includes("--force");
  */
 const TARGET = flag("target", "all");
 const URL = flag("url", process.env.SHOT_URL ?? "http://localhost:4173/app.html");
-/** The store's own key. `web/src/store.ts` reads this before React mounts. */
-const THEME_KEY = "samudra.theme";
+/** The store's own key. `web/src/remembered.ts` reads this before React mounts. Left
+ *  behind at a rename, a capture run sets a key nothing reads and shoots the wrong theme. */
+const THEME_KEY = "oceanverity.theme";
 /** High enough that the coastline stays crisp, low enough that seven of these are not a MB. */
 const JPEG_QUALITY = 82;
 
@@ -238,6 +239,10 @@ const INGEST = {
   "16-kiosk": "kiosk",
   "17-section": "section",
   "18-bias": "bias",
+  // Shot and ingested, but nothing publishes it yet: no document references a fronts
+  // picture. Add the PUBLISH_MAP rows the day one does, rather than leaving three
+  // entries printing MISSING on every publish.
+  "19-fronts": "fronts",
 };
 
 /**
@@ -502,6 +507,11 @@ for (const [name, key] of [
   ["11-d26-sheet", "d26"],
   ["12-currents", "current_speed"],
   ["13-analysis-spread", "analysis_spread"],
+  // The Biology round (ADR 0018). Fronts is a Drape painted on the sea surface - the ingredient
+  // INCOIS build a fishing advisory from, and never called a fishing zone. It is drawn in
+  // reversed `ice` since 2026-09-20 so the orange float tracks stay visible over it, which is
+  // why the shots in `shots/biology-2026-09-15/` cannot be reused: they are the old brown.
+  ["19-fronts", "fronts"],
 ]) {
   await page.evaluate((k) => window.__store.getState().selectField(k), key);
   // The anomaly shot is published under an alt text that promises "rings marking each departure

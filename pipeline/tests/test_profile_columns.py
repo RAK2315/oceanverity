@@ -9,7 +9,7 @@ worth a test rather than a hopeful comment.
 import numpy as np
 import pytest
 
-from samudra.sources.argo import GDAC_COLUMNS, INCOIS_COLUMNS, parse_profiles
+from oceanverity.sources.argo import GDAC_COLUMNS, INCOIS_COLUMNS, parse_profiles
 
 GDAC = """platform_number,time,latitude,longitude,pres_adjusted,temp_adjusted,psal_adjusted
 ,UTC,degrees_north,degrees_east,decibar,degree_Celsius,PSU

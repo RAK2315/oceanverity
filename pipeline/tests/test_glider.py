@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from samudra.sources.base import BoundingBox
-from samudra.sources.glider import (
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.glider import (
     GliderSource,
     deployments_in,
     parse_index,
@@ -158,7 +158,7 @@ def test_a_window_the_archive_cannot_reach_returns_nothing_and_says_so():
 def test_the_seam_carries_it():
     """The claim PS 26067 asks for - a new observational stream without re-engineering - is only
     worth anything if the new class satisfies the same Protocol as the existing four."""
-    from samudra.sources.base import ProfileSource
+    from oceanverity.sources.base import ProfileSource
 
     assert isinstance(GliderSource(index_lines=index(ARABIAN)), ProfileSource)
 
@@ -186,7 +186,7 @@ def one_cast_file(pressures, latitude=15.0) -> bytes:
 
 
 def entry_at(latitude: float):
-    from samudra.sources.glider import IndexEntry
+    from oceanverity.sources.glider import IndexEntry
 
     return IndexEntry(
         path="sea057/sea057_20220707/profiles/x.nc",
@@ -202,7 +202,7 @@ def entry_at(latitude: float):
 
 def test_a_cast_is_placed_at_its_depth_not_at_its_pressure():
     """1000 dbar at 15 N is about 993 m. Assigning decibars straight to metres puts it 7 m deep."""
-    from samudra.sources.argo import pressure_to_depth
+    from oceanverity.sources.argo import pressure_to_depth
 
     profile = GliderSource._parse(entry_at(15.0), one_cast_file([10.0, 500.0, 1000.0]))
     expected = pressure_to_depth([10.0, 500.0, 1000.0], 15.0)

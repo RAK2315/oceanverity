@@ -21,7 +21,7 @@ module-level constant, so nothing in this file touches the network.
 
 from __future__ import annotations
 
-from samudra.bake import (
+from oceanverity.bake import (
     ANOMALY_FIELD,
     COVERAGE_FIELD,
     DENSITY_FIELD,
@@ -30,11 +30,11 @@ from samudra.bake import (
     OXYGEN_FLOOR_FIELD,
     SPREAD_FIELD,
 )
-from samudra.sources.base import FieldSpec
-from samudra.sources.copernicus import CopernicusCurrentsSource
-from samudra.sources.copernicus_bgc import CopernicusBgcSource
-from samudra.sources.copernicus_satellite import SatelliteFrontsSource
-from samudra.sources.incois import IncoisErddapSource, IncoisMcCrearySource
+from oceanverity.sources.base import FieldSpec
+from oceanverity.sources.copernicus import CopernicusCurrentsSource
+from oceanverity.sources.copernicus_bgc import CopernicusBgcSource
+from oceanverity.sources.copernicus_satellite import SatelliteFrontsSource
+from oceanverity.sources.incois import IncoisErddapSource, IncoisMcCrearySource
 
 # Every Field whose isosurface is a real object, and what that object is called. Anything not
 # named here must refuse one. The names are the ones `web/src/guide.ts` prints, so a Field
@@ -113,7 +113,7 @@ def test_every_selectable_field_is_in_one_of_the_six_groups():
 def test_this_file_and_the_bake_agree_about_every_field():
     """`all_specs` here and `bake.all_field_specs` are two lists of one set. If they disagree, a
     Field is escaping one of the rules above."""
-    from samudra.bake import all_field_specs
+    from oceanverity.bake import all_field_specs
 
     assert {s.key for s in all_specs()} == {s.key for s in all_field_specs()}
 

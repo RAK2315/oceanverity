@@ -9,7 +9,7 @@ single gap against the problem statement's own list of what INCOIS does.
 
 Drop a pin in the water. The platform integrates the baked Copernicus current field forward from
 that point, at the depth the Depth slice is set to, and draws the trajectory the analysis
-implies. `pipeline/samudra/drift.py` is the integrator: midpoint (RK2), bilinear in space,
+implies. `pipeline/oceanverity/drift.py` is the integrator: midpoint (RK2), bilinear in space,
 linear in time between the ten-day analyses, nearest in depth.
 
 ## The three decisions

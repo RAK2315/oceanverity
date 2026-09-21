@@ -10,7 +10,7 @@
  * touched by the globe, the volume, the comparison or the tour, and the whole demo runs with the
  * API stopped. That property is the reason the bake exists and it is not being spent here.
  *
- * The parsing is `pipeline/samudra/sources/netcdf.py`, a Source Adapter behind the same protocol
+ * The parsing is `pipeline/oceanverity/sources/netcdf.py`, a Source Adapter behind the same protocol
  * as INCOIS, Argo, Copernicus and the rest - which is the claim being demonstrated rather than
  * asserted. `api/upload.py` is the plumbing.
  */

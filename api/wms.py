@@ -193,7 +193,7 @@ def capabilities(base_url: str, layers, timesteps, levels, bounds) -> str:
   xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd">
   <Service>
     <Name>WMS</Name>
-    <Title>Samudra 3D</Title>
+    <Title>OceanVerity</Title>
     <Abstract>Ocean model fields and derived quantities over India's exclusive economic zone.
 Temperature, salinity and INCOIS's own evidence channels are their published analysis, restated
 here; density, the two temperature anomalies, the spread between INCOIS's two analyses, current
@@ -228,7 +228,7 @@ Coverage, which is counted on that rendering lattice, is not offered here.</Abst
     </Request>
     <Exception><Format>XML</Format></Exception>
     <Layer>
-      <Title>Samudra 3D</Title>
+      <Title>OceanVerity</Title>
       <CRS>EPSG:4326</CRS>
       <CRS>CRS:84</CRS>
       <EX_GeographicBoundingBox>

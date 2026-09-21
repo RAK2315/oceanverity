@@ -1,5 +1,5 @@
 ---
-name: Samudra 3D
+name: OceanVerity
 description: A forecaster's console for the Indian Ocean - dark by default, monospaced where it counts, and honest about what it does not know.
 colors:
   surface: "#0f1415"
@@ -171,7 +171,7 @@ components:
     typography: "{typography.readout}"
 ---
 
-# Samudra 3D
+# OceanVerity
 
 ## Overview
 
@@ -422,7 +422,7 @@ the headings to the weight the table wants and check it moves.
 
 Prose is capped at 65-75ch. The guide panel is held tighter still by `probe-guide.mjs`: one
 sentence of definition plus bullets, **max 4 bullets, max 2 lines each**, median 113 words
-measured across all 47 entries.
+measured across all 48 entries.
 
 ## Elevation
 

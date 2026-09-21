@@ -9,7 +9,7 @@ import math
 
 import pytest
 
-from samudra.residuals import (
+from oceanverity.residuals import (
     BiasCell,
     ResidualEntry,
     bias_grid,
@@ -17,7 +17,7 @@ from samudra.residuals import (
     positions_from,
     rank_residuals,
 )
-from samudra.sources.base import BoundingBox
+from oceanverity.sources.base import BoundingBox
 
 # Two Fields whose raw numbers are not comparable: 27.4 degC against 3.6 PSU. That is the whole
 # reason `scaled_rms` exists, and it is why the fixtures below use both.

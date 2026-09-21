@@ -14,7 +14,7 @@ Both halves of the automatic scan now exist.
 | Question | Status |
 | --- | --- |
 | Where did the *field* depart from its own average? | **Done.** `find_anomaly_features()`, 404 features across the thirty-six Timesteps |
-| Where does the *model* most disagree with the *floats*? | **Done.** `pipeline/samudra/residuals.py` ranks and bins them; the "Model vs instruments" group in the left panel is the map and the list |
+| Where does the *model* most disagree with the *floats*? | **Done.** `pipeline/oceanverity/residuals.py` ranks and bins them; the "Model vs instruments" group in the left panel is the map and the list |
 | Fronts and sharp gradients | Not built. Already computed as the gradient channel in every Volume, so it is free. Idea A6 in [`05-coverage-audit-and-ideas.md`](05-coverage-audit-and-ideas.md) |
 | Unusual currents | Superseded. Currents are real numbers now - ADR 0013 - so this is reopenable, but nothing is built |
 

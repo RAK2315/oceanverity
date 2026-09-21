@@ -20,7 +20,7 @@ if (!container) throw new Error("missing #root");
 applyTheme(storedTheme());
 (window as unknown as Record<string, unknown>).__store = useStore;
 // The drift integrator, exposed for `probe-drift.mjs`. It is this project's one deliberate
-// second implementation of a piece of science - `pipeline/samudra/drift.py` is the tested one -
+// second implementation of a piece of science - `pipeline/oceanverity/drift.py` is the tested one -
 // so the probe runs THIS code from the same start points as the baked trajectories and fails if
 // they disagree. Exposing it is what makes the shipped module the thing measured, rather than a
 // copy of it written into the probe.

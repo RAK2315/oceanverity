@@ -57,7 +57,7 @@ product.
 
 ## The picture is deleted, not kept beside the numbers
 
-`pipeline/samudra/currents.py` and its tests are gone, and the WMTS overlay with them. Keeping
+`pipeline/oceanverity/currents.py` and its tests are gone, and the WMTS overlay with them. Keeping
 both would have left two renderings of the same quantity on screen, one of which says on its own
 panel that it cannot be measured. One truth per quantity. The tile arithmetic is recorded in the
 git history and the WMTS route is written up in `docs/plan/`, if an anonymous fallback is ever

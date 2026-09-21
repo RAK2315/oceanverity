@@ -13,10 +13,10 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from samudra.sources import copernicus_bgc
-from samudra.sources.base import BoundingBox
-from samudra.sources.copernicus import land_on_axes
-from samudra.sources.copernicus_bgc import CopernicusBgcSource
+from oceanverity.sources import copernicus_bgc
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.copernicus import land_on_axes
+from oceanverity.sources.copernicus_bgc import CopernicusBgcSource
 
 BOX = BoundingBox(south=0.0, north=2.0, west=60.0, east=62.0)
 WHEN = datetime(2026, 7, 30, tzinfo=timezone.utc)

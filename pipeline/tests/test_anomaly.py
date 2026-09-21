@@ -7,14 +7,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.anomaly import (
+from oceanverity.anomaly import (
     DEGREES_THRESHOLD,
     anomaly_series,
     find_anomaly_features,
     spread_by_level,
     symmetric_encoding_range,
 )
-from samudra.grid import Grid
+from oceanverity.grid import Grid
 
 # Big enough that a single absurd cell is a fraction of a percent of the block, which is what
 # it is in the real bake. A 2x2x2 fixture made one outlier 12% of the values and the percentile

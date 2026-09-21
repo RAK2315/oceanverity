@@ -223,7 +223,7 @@ Gray 1968, Monthly Weather Review 96, 669-700 (https://mountainscholar.org/bitst
 
 ### 23. de Boyer Montegut et al. 2004 - HOLDS
 
-SEANOE dataset for the climatology: "threshold value for the density of 0.03kg/m3", "surface reference depth fixed at 10m", citing de Boyer Montegut et al. 2004, JGR 109, C12003, doi:10.1029/2004JC002378. https://www.seanoe.org/data/00806/91774/ . The paper's abstract (403 today at Wiley) gives dT = 0.2 degC or d sigma-theta = 0.03 kg/m3 from 10 m. The code uses sigma-theta (pipeline/samudra/hazard.py:55), which matches.
+SEANOE dataset for the climatology: "threshold value for the density of 0.03kg/m3", "surface reference depth fixed at 10m", citing de Boyer Montegut et al. 2004, JGR 109, C12003, doi:10.1029/2004JC002378. https://www.seanoe.org/data/00806/91774/ . The paper's abstract (403 today at Wiley) gives dT = 0.2 degC or d sigma-theta = 0.03 kg/m3 from 10 m. The code uses sigma-theta (pipeline/oceanverity/hazard.py:55), which matches.
 
 ### 24. World Ocean Atlas 2023 - HOLDS
 
@@ -284,7 +284,7 @@ https://www.sih.gov.in/sih2026PS row for PS 26067: `<td>SIH26067</td> <td>4/500<
 ## Noticed in passing (internal, not counted)
 
 - guide.ts:931-932 (and README-full.md:255) says density is worked out "at each cell's own pressure", but
-  pipeline/samudra/density.py:16 and :89 compute `gsw.sigma0`, potential density referenced to the
+  pipeline/oceanverity/density.py:16 and :89 compute `gsw.sigma0`, potential density referenced to the
   surface. Suggested: "worked out here with TEOS-10 from INCOIS's temperature and salinity analyses
   for %d, as potential density referenced to the surface".
 

@@ -17,8 +17,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
-from samudra.plausibility import TEMPERATURE_BOUNDS, mask_implausible
+from oceanverity.grid import Grid
+from oceanverity.plausibility import TEMPERATURE_BOUNDS, mask_implausible
 
 LEVELS = np.array([5.0, 30.0])
 LATITUDES = np.array([24.5, 25.5])

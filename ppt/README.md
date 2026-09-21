@@ -3,7 +3,7 @@
 Six slides. **PS 26067** (MoES / INCOIS), theme **Disaster Management**, category **Software**,
 team **Sigmoid**.
 
-Five things in here:
+Six things in here:
 
 | | |
 | --- | --- |
@@ -11,6 +11,7 @@ Five things in here:
 | [`DECK.md`](DECK.md) | **The slide content.** What goes on each of the six slides, which screenshot goes with it, and prompts for the two diagrams if you want them. Suggested, not a script - say it better if you can. |
 | [`script.md`](script.md) | **The prototype video**, 4:30 to 5:30, narration beside the exact screen actions. It has to tell the same story as `DECK.md` in the same order - a deck and a demo that disagree is a named reason decks are rejected. |
 | [`FACTS.md`](FACTS.md) | **Every number the deck uses**, read off the build. Generated, so do not edit it. `cd pipeline && ../.venv/Scripts/python scripts/collect_facts.py` |
+| [`SUBMISSION-GUIDANCE.md`](SUBMISSION-GUIDANCE.md) | **Collected guidance, as a suggestion and not an instruction.** The owner's gathered checklists plus an evaluator rubric. Partly out of date, and **sih.gov.in wins wherever it disagrees**. Section 6 lists what this project deliberately did not take from it, so nobody re-applies it; section 7 is the competitor deck, for calibration. |
 | [`images/`](images/) | **Sixteen screenshots of the running software.** Nothing else. |
 
 ---

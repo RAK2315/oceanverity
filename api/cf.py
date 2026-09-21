@@ -139,11 +139,11 @@ _COMMENTS = {
         "depth of the 26 degree isotherm."
     ),
     "mixed_layer_depth": (
-        "By this platform's own sigma-theta criterion; see samudra/hazard.py for the threshold "
+        "By this platform's own sigma-theta criterion; see oceanverity/hazard.py for the threshold "
         "and for the vertical-resolution limit every crossing inherits."
     ),
     "isothermal_layer_depth": (
-        "By this platform's own temperature criterion; see samudra/hazard.py for the threshold "
+        "By this platform's own temperature criterion; see oceanverity/hazard.py for the threshold "
         "and for the vertical-resolution limit every crossing inherits."
     ),
     "barrier_layer": (
@@ -160,7 +160,7 @@ _COMMENTS = {
     ),
     "oxygen_floor": (
         "First crossing below 62.5 mmol m-3 (2 mg/L) from the surface down, in the Copernicus "
-        "biogeochemical model's oxygen. See samudra/habitat.py."
+        "biogeochemical model's oxygen. See oceanverity/habitat.py."
     ),
     "fronts": (
         "Percent of the cell's ocean pixels on a thermal front (Cayula and Cornillon) in OSTIA "
@@ -224,7 +224,7 @@ _SOURCES = {
     "current_speed": {
         "institution": "E.U. Copernicus Marine Service",
         "source": (
-            "Speed computed by Samudra 3D from the Global Ocean Physics Analysis and Forecast "
+            "Speed computed by OceanVerity from the Global Ocean Physics Analysis and Forecast "
             "(GLOBAL_ANALYSISFORECAST_PHY_001_024) horizontal current velocity at 1/12 degree, "
             "landed on the analysis grid by nearest node"
         ),
@@ -232,7 +232,7 @@ _SOURCES = {
     },
     "temperature_normal_anomaly": {
         "institution": (
-            "Samudra 3D, from INCOIS and NOAA National Centers for Environmental Information"
+            "OceanVerity, from INCOIS and NOAA National Centers for Environmental Information"
         ),
         "source": (
             "INCOIS ARGO 10-day gridded analysis (Variational Analysis Methodology) "
@@ -242,7 +242,7 @@ _SOURCES = {
         "references": "https://www.ncei.noaa.gov/products/world-ocean-atlas",
     },
     "analysis_spread": {
-        "institution": "Samudra 3D, from INCOIS",
+        "institution": "OceanVerity, from INCOIS",
         "source": (
             "Difference between INCOIS's two analyses of the same Argo profiles, "
             "incois_argo_10d_VAM minus incois_argo_10day_McCreary"
@@ -259,11 +259,11 @@ _SOURCES["chlorophyll"] = {
     "references": "https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_BGC_001_028/description",
 }
 _SOURCES["oxygen"] = _SOURCES["chlorophyll"]
-_SOURCES["oxygen_floor"] = {**_SOURCES["chlorophyll"], "institution": "Samudra 3D, from E.U. Copernicus Marine Service"}
+_SOURCES["oxygen_floor"] = {**_SOURCES["chlorophyll"], "institution": "OceanVerity, from E.U. Copernicus Marine Service"}
 _SOURCES["fronts"] = {
-    "institution": "Samudra 3D, from E.U. Copernicus Marine Service",
+    "institution": "OceanVerity, from E.U. Copernicus Marine Service",
     "source": (
-        "Fronts computed by Samudra 3D from OSTIA sea surface temperature "
+        "Fronts computed by OceanVerity from OSTIA sea surface temperature "
         "(SST_GLO_SST_L4_NRT_OBSERVATIONS_010_001) and GlobColour gap-free chlorophyll "
         "(OCEANCOLOUR_GLO_BGC_L4_MY_009_104)"
     ),
@@ -340,7 +340,7 @@ def as_dataset(grid, field: str, when: datetime, extra_attributes: dict | None =
         coords={"time": time, "depth": depth, "latitude": latitude, "longitude": longitude},
         attrs={
             "Conventions": CONVENTIONS,
-            "title": f"Samudra 3D - {_LONG_NAMES.get(field, field)}",
+            "title": f"OceanVerity - {_LONG_NAMES.get(field, field)}",
             **_SOURCES.get(field, _DEFAULT_SOURCE),
             "comment": (
                 "Served from the native Grid, never from the rendering Volume: the Volume is "

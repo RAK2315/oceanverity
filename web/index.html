@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Samudra 3D - Fly into the Indian Ocean</title>
+<title>OceanVerity - Fly into the Indian Ocean</title>
 <meta name="description" content="A browser-native 3D ocean visualisation platform that renders INCOIS model fields as a ray-marched water column and overlays the Argo float profiles measured in the same water. Smart India Hackathon 2026, PS 26067.">
 <link rel="icon" type="image/png" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
+<!-- One copy of the theme switch, shared with app.html. Same origin; no external request. -->
+<link rel="stylesheet" href="./theme-pill.css">
 <script>
   // Shared with the platform: one key, so a choice made on either side holds on both.
   // Dark is the default because the subject is an instrument console and the screenshots are
@@ -17,7 +19,11 @@
     // is the only thing that grants it. No JS, no class, and every block stays visible.
     document.documentElement.className += " js";
     try {
-      if (localStorage.getItem("samudra.theme") === "light") {
+      var stored = localStorage.getItem("oceanverity.theme");
+      // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
+      // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
+      if (stored === null) stored = localStorage.getItem("samudra.theme");
+      if (stored === "light") {
         document.documentElement.dataset.theme = "light";
       }
     } catch (e) { /* storage blocked: dark is the default and still correct */ }
@@ -244,19 +250,24 @@
 
   /* theme toggle: a ghost circle button holding a sun and moon glyph, crossfaded. Light is
      recorded as data-theme=light against a dark default, matching the rest of the platform. */
-  .theme-toggle {
-    position: relative; width: 34px; height: 34px; flex: none;
-    border: 1px solid var(--color-ink); border-radius: 50%; background: transparent;
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background 0.35s cubic-bezier(.16,1,.3,1), transform 0.4s cubic-bezier(.16,1,.3,1);
-    padding: 0;
+
+
+  /* ------------------------------------------------- the shared theme pill
+   * `public/theme-pill.css` is the one copy of this control, used by all four pages. It
+   * declares five tokens and each host maps its own palette onto them; this is that block.
+   * Teal, deliberately, and the same teal the console's accent lands on - the switch is the
+   * one control that exists identically on both halves of the product, so it is the one
+   * control that may not change colour when you cross between them. */
+  :root {
+    --theme-pill-track: rgba(var(--color-ink-rgb), 0.10);
+    --theme-pill-border: rgba(var(--color-ink-rgb), 0.26);
+    --theme-pill-knob: #14b8a6;
+    --theme-pill-icon-on: #04231f;
   }
-  .theme-toggle:hover { background: rgba(var(--color-ink-rgb), 0.08); transform: rotate(-14deg); }
-  .theme-toggle svg { position: absolute; width: 16px; height: 16px; color: var(--color-ink); transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.16,1,.3,1); }
-  .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.6); }
-  .theme-toggle .icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-  :root[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.6); }
+  :root[data-theme="light"] {
+    --theme-pill-knob: #0f766e;
+    --theme-pill-icon-on: #ffffff;
+  }
 
   /* ---------------------------------------------------------- hero */
   header.hero { position: relative; padding: 168px 0 96px; overflow: hidden; }
@@ -555,17 +566,14 @@
 
 <nav id="nav">
   <div class="wrap">
-    <a class="brand" href="#top">SAMUDRA<i>&nbsp;&middot;&nbsp;3D</i></a>
+    <a class="brand" href="#top">OCEAN<i>&nbsp;&middot;&nbsp;VERITY</i></a>
     <div class="nav-links">
       <a href="#problem">The gap</a>
       <a href="#how">How it works</a>
       <a href="#evidence">Evidence</a>
       <a href="#built">How it is built</a>
       <a href="./provenance.html">Provenance</a>
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between light and dark theme" title="Switch theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg>
-      </button>
+      <button class="theme-pill" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Switch between light and dark theme" title="Switch theme"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.6"/><path d="M12 1.6v2.6M12 19.8v2.6M3.7 3.7l1.9 1.9M18.4 18.4l1.9 1.9M1.6 12h2.6M19.8 12h2.6M3.7 20.3l1.9-1.9M18.4 5.6l1.9-1.9"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z"/></svg><span class="theme-pill-knob"></span></button>
       <a class="pill-btn" href="./app.html"><span class="btn-label">Launch <span class="arrow">&rarr;</span></span></a>
     </div>
   </div>
@@ -772,7 +780,7 @@
           </div>
         </button>
 
-        <button class="feature" type="button"
+        <button class="feature" type="button" id="f-drift"
           data-title="Where would something adrift go?"
           data-image="./images/drift.jpg"
           data-image-light="./images/light/drift.jpg"
@@ -804,7 +812,7 @@
           </div>
         </button>
 
-        <button class="feature" type="button"
+        <button class="feature" type="button" id="f-buoys"
           data-title="Every instrument at once"
           data-image="./images/bias.jpg"
           data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS's analysis is built from Argo floats, so a float largely shows the analysis agreeing with data it was made from; the seventeen moored buoys are not described as inputs, so they are the closer thing to an independent check, and the panel prints both rather than pooling them."
@@ -834,7 +842,7 @@
           </div>
         </button>
 
-        <button class="feature" type="button"
+        <button class="feature" type="button" id="f-normal"
           data-title="Has this ocean changed?"
           data-image="./images/normal.jpg"
           data-image-light="./images/light/normal.jpg"
@@ -850,7 +858,7 @@
           </div>
         </button>
 
-        <button class="feature" type="button"
+        <button class="feature" type="button" id="f-sources"
           data-title="Drop your own NetCDF file on it"
           data-image="./images/salinity.jpg"
           data-image-light="./images/light/salinity.jpg"
@@ -1039,6 +1047,15 @@
       demonstrated rather than asserted. They are grouped the way a forecaster thinks rather than
       the way the data arrived.
     </p>
+    <p class="section-lede reveal reveal-2">
+      The <strong>Biology</strong> four answer a question INCOIS already act on daily. Their
+      potential fishing zone advisories rest on <strong>surface fronts</strong>, the edges where
+      two bodies of water meet, found here in satellite temperature and chlorophyll by the
+      methods INCOIS name. Beside them is the water underneath one: the plankton, the dissolved
+      oxygen, and the <strong>oxygen floor</strong>, the depth below which there is too little
+      oxygen for most fish. A front is the ingredient of an advisory. It is never called a
+      fishing zone here, because that call is INCOIS's and this is the evidence under it.
+    </p>
     <div class="chips reveal reveal-2">
       <span class="chip"><small>Ocean state</small> Temperature</span>
       <span class="chip"><small>Ocean state</small> Salinity</span>
@@ -1055,6 +1072,10 @@
       <span class="chip"><small>Hazard</small> Mixed layer depth</span>
       <span class="chip"><small>Hazard</small> Isothermal layer depth</span>
       <span class="chip"><small>Hazard</small> Barrier layer thickness</span>
+      <span class="chip"><small>Biology</small> Surface fronts</span>
+      <span class="chip"><small>Biology</small> Chlorophyll</span>
+      <span class="chip"><small>Biology</small> Dissolved oxygen</span>
+      <span class="chip"><small>Biology</small> Oxygen floor</span>
       <span class="chip"><small>Yours</small> Anything in your own NetCDF file</span>
     </div>
   </div>
@@ -1149,7 +1170,7 @@
     <p class="reveal reveal-1">No install, no account, no plugin. It runs entirely in your browser on real INCOIS data.</p>
     <div class="hero-actions reveal reveal-2">
       <a class="pill-btn" href="./app.html"><span class="btn-label">Launch the platform <span class="arrow">&rarr;</span></span></a>
-      <a class="ghost-link" href="https://github.com/RAK2315/samudra-sih26">View the source <span class="arrow">&rarr;</span></a>
+      <a class="ghost-link" href="https://github.com/RAK2315/oceanverity">View the source <span class="arrow">&rarr;</span></a>
     </div>
   </div>
 </section>
@@ -1172,8 +1193,8 @@
       Earth.
     </p>
     <div class="foot-row">
-      <span class="brand" style="font-size: var(--text-caption);">SAMUDRA &nbsp;&middot;&nbsp; 3D</span>
-      <a href="https://github.com/RAK2315/samudra-sih26">github.com/RAK2315/samudra-sih26</a>
+      <span class="brand" style="font-size: var(--text-caption);">OCEAN &nbsp;&middot;&nbsp; VERITY</span>
+      <a href="https://github.com/RAK2315/oceanverity">github.com/RAK2315/oceanverity</a>
     </div>
   </div>
 </footer>
@@ -1258,12 +1279,19 @@
     }
   };
   window.__paintThemeImages = paintThemeImages;
+  // The pill is a switch, so its state is `aria-checked`, not its label. Set on every flip and
+  // once on load, because a visitor arriving already on light gets no click to hang it off.
+  var markPill = function () {
+    themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
+  };
   themeBtn.addEventListener('click', function () {
     if (isLightTheme()) { document.documentElement.removeAttribute('data-theme'); }
     else { document.documentElement.setAttribute('data-theme', 'light'); }
-    try { localStorage.setItem('samudra.theme', isLightTheme() ? 'light' : 'dark'); } catch (e) { /* private mode */ }
+    try { localStorage.setItem('oceanverity.theme', isLightTheme() ? 'light' : 'dark'); localStorage.removeItem('samudra.theme'); } catch (e) { /* private mode */ }
+    markPill();
     paintThemeImages();
   });
+  markPill();
   paintThemeImages();
 
 </script>
@@ -1292,6 +1320,21 @@
     function fixed(value, places) {
       return typeof value === "number" && isFinite(value) ? value.toFixed(places) : null;
     }
+    /*
+     * A feature card's measure line, rewritten from the bake.
+     *
+     * These were typed into `data-measure` and three had gone stale: the drift score (40.9 km
+     * over 6,246 cycles against a real 41.0 over 6,185), the normal's cell count (1,049,076
+     * against 1,049,066) and "Nine source adapters" against ten providers. A wrong number and a
+     * right number are the same shape - the rule that took typed figures out of the app's guide
+     * panel - and this page already fetches the same manifest, so it had no excuse. The dialog
+     * reads `dataset.measure` when a card is opened, so setting the attribute is the whole job,
+     * and a figure that does not resolve leaves the typed line alone rather than blanking it.
+     */
+    function measure(id, text) {
+      var card = document.getElementById(id);
+      if (card && text) card.setAttribute("data-measure", text);
+    }
 
     fetch(DATA + "manifest.json")
       .then(function (r) { return r.json(); })
@@ -1314,6 +1357,32 @@
           set("m-depth2", range);
         }
         if (volume.levelMetres) set("m-levels", String(volume.levelMetres.length));
+
+        var drift = m.drift && m.drift.cycle;
+        if (drift) {
+          measure(
+            "f-drift",
+            "Median " + fixed(drift.medianKm, 1) + " km out over one Argo cycle, " +
+              fixed(drift.p90Km, 1) + " km at the 90th percentile, " +
+              Number(drift.count).toLocaleString("en-GB") + " cycles"
+          );
+        }
+        var normal = m.normalAnomaly;
+        if (normal) {
+          measure(
+            "f-normal",
+            "Across " + Number(normal.cells).toLocaleString("en-GB") + " cells: mean +" +
+              fixed(normal.meanDegC, 2) + " degC, 95th percentile of the magnitude " +
+              fixed(normal.p95AbsDegC, 2) + " degC"
+          );
+        }
+        if (m.sources && m.sources.length) {
+          measure(
+            "f-sources",
+            m.sources.length + " source adapters behind two protocols, plus your own file;" +
+              " adding one touches no renderer"
+          );
+        }
         if (kinds && kinds.moorings) {
           set("m-buoys-label", "Against " + kinds.moorings + " moored buoys, \u00b0C");
         }
@@ -1336,6 +1405,19 @@
           .filter(function (v) { return typeof v === "number" && isFinite(v); })
           .sort(function (a, b) { return a - b; });
         if (rms.length) set("m-median", fixed(rms[Math.floor(rms.length / 2)], 2));
+
+        // The bias card's own two figures, from the same block. It said 249 floats against a
+        // real 246 compared, which is a count the bake moves every time.
+        var byKind = block.byKind || {};
+        if (byKind.float && byKind.mooring) {
+          measure(
+            "f-buoys",
+            "Typical temperature gap " + fixed(byKind.float.meanAbsBias, 2) + " degC across " +
+              byKind.float.count + " floats (compared to about 2000 m) and " +
+              fixed(byKind.mooring.meanAbsBias, 2) + " degC across " + byKind.mooring.count +
+              " buoys (to 500 m)"
+          );
+        }
       })
       .catch(function () {});
   })();

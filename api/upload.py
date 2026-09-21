@@ -7,7 +7,7 @@ re-engineering" as one of the five gaps it exists to close.
 
 Every team will claim that. This is the only version of the claim that can be **falsified in
 fifteen seconds, with a stranger's own file, in front of the panel**. The parsing itself is
-`pipeline/samudra/sources/netcdf.py` - a Source Adapter like every other one, behind the same
+`pipeline/oceanverity/sources/netcdf.py` - a Source Adapter like every other one, behind the same
 protocol - and this file is only the plumbing around it.
 
 Three things are worth knowing before changing anything here.
@@ -40,11 +40,11 @@ import numpy as np
 import xarray as xr
 from fastapi import HTTPException, Request, Response
 
-from samudra.depth_warp import DepthWarp
-from samudra.grid import Grid
-from samudra.sources.base import BoundingBox
-from samudra.sources.netcdf import NetcdfAxisError, NetcdfFileSource
-from samudra.volume import encode_volume
+from oceanverity.depth_warp import DepthWarp
+from oceanverity.grid import Grid
+from oceanverity.sources.base import BoundingBox
+from oceanverity.sources.netcdf import NetcdfAxisError, NetcdfFileSource
+from oceanverity.volume import encode_volume
 
 #: The largest file this will read. Big enough for a real regional model output, small enough
 #: that a mistake cannot fill the disk. Stated in the refusal so a user knows what to trim.
@@ -105,7 +105,7 @@ def register(app, manifest, allowed_origins=("*",)) -> None:
         raise HTTPException(
             403,
             f"`{origin}` may not upload to this service. Reading it is open to any origin;"
-            " writing is not. Set SAMUDRA_UPLOAD_ORIGINS to allow yours.",
+            " writing is not. Set OCEANVERITY_UPLOAD_ORIGINS to allow yours.",
         )
 
     @app.post("/api/netcdf")
@@ -122,7 +122,7 @@ def register(app, manifest, allowed_origins=("*",)) -> None:
             raise HTTPException(400, "Empty request body. POST the file's bytes as the body.")
 
         filename = request.headers.get("x-filename", "uploaded.nc")
-        directory = Path(tempfile.mkdtemp(prefix="samudra-upload-"))
+        directory = Path(tempfile.mkdtemp(prefix="oceanverity-upload-"))
         path = directory / "uploaded.nc"
         path.write_bytes(raw)
 

@@ -16,7 +16,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.sources.argo import (
+from oceanverity.sources.argo import (
     GDAC_COLUMNS,
     ArgoErddapSource,
     IncoisArgoSource,
@@ -224,7 +224,7 @@ class _Flaky:
 def test_a_transient_outage_is_retried_until_it_answers():
     import requests
 
-    from samudra.sources.argo import with_retries
+    from oceanverity.sources.argo import with_retries
 
     waits: list[float] = []
     flaky = _Flaky(2, requests.ConnectionError("down"))
@@ -238,7 +238,7 @@ def test_an_unknown_dataset_answer_is_treated_as_an_outage():
     came back later the same day. A 404 from a dataset that exists is a blink, not a verdict."""
     import requests
 
-    from samudra.sources.argo import with_retries
+    from oceanverity.sources.argo import with_retries
 
     response = requests.Response()
     response.status_code = 404
@@ -249,7 +249,7 @@ def test_an_unknown_dataset_answer_is_treated_as_an_outage():
 def test_it_gives_up_after_the_last_wait_and_says_why():
     import requests
 
-    from samudra.sources.argo import with_retries
+    from oceanverity.sources.argo import with_retries
 
     flaky = _Flaky(10, requests.Timeout("slow"))
     with pytest.raises(requests.Timeout):
@@ -261,7 +261,7 @@ def test_a_bad_request_is_not_retried():
     """A 400 is our fault. Waiting twenty minutes to be told the same thing helps nobody."""
     import requests
 
-    from samudra.sources.argo import with_retries
+    from oceanverity.sources.argo import with_retries
 
     response = requests.Response()
     response.status_code = 400
@@ -276,7 +276,7 @@ def test_a_query_that_matched_nothing_is_not_retried():
     not an outage, and waiting twenty minutes to hear it again helps nobody."""
     import requests
 
-    from samudra.sources.argo import with_retries
+    from oceanverity.sources.argo import with_retries
 
     response = requests.Response()
     response.status_code = 404

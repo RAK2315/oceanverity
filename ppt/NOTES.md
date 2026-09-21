@@ -3,6 +3,106 @@
 Collected from people who have judged SIH and from teams who won after being rejected. Simple
 points, no theory. Read this before touching [`DECK.md`](DECK.md) or [`script.md`](script.md).
 
+**This file holds decisions.** The raw material it was argued from is in
+[`SUBMISSION-GUIDANCE.md`](SUBMISSION-GUIDANCE.md) - an owner-collected checklist plus an
+evaluator rubric, **a suggestion rather than an instruction, and partly out of date**. Its
+section 6 lists what this project deliberately did *not* take from it, so nobody re-applies it.
+
+---
+
+## Honesty is the proof, not the product
+
+This is the failure this deck keeps drifting into, so it is written down.
+
+Everything good about this project is true *and checkable*, and that is rare enough that it is
+tempting to make checkability the pitch. It is not the pitch. **A judge is buying a capability
+and accepting the proof; they are not buying the proof.** "Honest about gaps" sitting in one of
+four innovation slots is a limitation occupying the place a reader looks for a reason to
+shortlist you.
+
+The shape that works, in every block:
+
+> **capability first, in the reader's language - then one hard clause of proof.**
+
+**And "the reader's language" means a recruiter, not an oceanographer.** The first screening is
+done by someone who has never opened an ocean tool. A card they cannot parse in four seconds
+scores nothing, however true it is. Test every line on slide 2 against that reader:
+
+| Too clever | What they read |
+| --- | --- |
+| "It answers machines as well as people" | "Works with their tools" |
+| "Zero network calls at demo time" | "It keeps running if the internet drops" |
+| "OPeNDAP, CF-1.8 NetCDF and OGC WMS" | "the standard ocean formats" - the acronyms live on slide 3 |
+| "matching INCOIS's published values in 97% of cells" | "matching INCOIS's own published values 97% of the time" |
+| "a GPU ray-marched water column" | "a solid block of water you dive into and turn" |
+
+**Acronyms are allowed on slide 3 and nowhere else.** A technical reader goes to the technical
+slide looking for them; on slide 2 they are a wall.
+
+| Drifted | Rewritten |
+| --- | --- |
+| "Checked against INCOIS's own" | "Cyclone fuel, mapped in 3D - matching INCOIS's own published values in **97% of cells**" |
+| "Honest about gaps" | "It shows where nobody has measured - which is where the next float is worth deploying" |
+| "The picture and the truth are kept apart" | "It answers machines as well as people: OPeNDAP, CF-1.8 and WMS out" |
+| "It refuses to invent" | "Nothing on this screen is guessed" |
+
+The limits are all still in the deck. Slide 4 is five risks and what was done about each, and
+slide 5 says a tenth of this ocean has no measurement behind it. **They belong there** - on the
+slides whose headings are feasibility and impact - and not in the innovation block.
+
+**A competitor deck will out-promise this one, every time.** Theirs can list crowdsourcing, SOS
+alerts and ML anomaly detection because none of it has to work yet. The answer is not to match
+the promise count; it is to be the only deck in the pile whose live link opens. Put the link
+where a judge sees it in the first ten seconds, and let the capabilities be concrete.
+
+---
+
+## The scoring, and what each fifth is actually asking
+
+Five criteria, **20% each**. A deck that is excellent at three and absent at two scores worse
+than one that is solid at all five, which is why the weakest slide is the one worth working on.
+
+| Criterion | What a judge is looking for | Where this deck answers it |
+| --- | --- | --- |
+| **Problem-solution fit** | Every feature traced to a clause of the PS. Named beneficiaries. A measurable outcome, not an adjective. | Slide 2's five-gap table, and the "who it is for" line under it. |
+| **Innovation and uniqueness** | A novel approach, and an honest comparison with what already exists. | Slide 2's four innovation points, and slide 6's related-work paragraph. |
+| **Technical depth** | An architecture diagram. Data flow in, processing, out. Realistic choices, justified. | Slide 3, which is one diagram and a justified stack. |
+| **Feasibility** | Buildable, resourced, scalable past a prototype, with risks named and mitigated. | Slide 4: three feasibility boxes, scale and demand, then five risks with what was done. |
+| **Presentation quality** | Visuals over paragraphs. Plain language. No errors. Ideas that connect. | Every picture is the real software. No stock photography, no picture of text. |
+
+**The advantage this project has, and must not waste:** four of those five are usually promises.
+Here they are demonstrable, because the thing exists and is on the internet. Put the link where a
+judge sees it in the first ten seconds.
+
+---
+
+## Mechanical eliminations - checked before anybody reads a word
+
+These are not judgements. They are filters, and every one of them is a rejection with no appeal.
+
+- **Wrong file format.** Export to PDF.
+- **More than six slides**, or the official template's structure modified. Six, in order.
+- **A missing mandatory field on slide 1**: PS ID, exact PS title, theme, category, Team ID, team
+  name, **college name and location**. The PS ID must match sih.gov.in character for character.
+- **The team name containing the college name.** It may not.
+- **Late.** The deadline is 30 September 2026.
+- **More than two problem statements** applied to, or no SPOC approval.
+- **A broken link.** Check the live URL and the video URL on a machine that is not yours.
+
+---
+
+## The content failures that get decks dropped
+
+- **A generic solution.** "Another dashboard." The fix is the narrow, defensible claim, not the
+  grand one - see slide 6's related-work paragraph.
+- **Unrealistic scope.** Promising what cannot be built. The opposite risk here: this deck can
+  *under*-claim, because everything on it is already running.
+- **No evidence.** "Trust us." Every figure on this deck is on a public provenance page.
+- **Buzzword overload.** No AI, no ML, no blockchain - and there is none in this project, which
+  is a point worth making out loud rather than hiding.
+- **Jargon with no explanation.** "Thermocline" gets three words of explanation the first time.
+- **A picture of text.** Only screenshots go in as images. If it is words, type the words.
+
 ---
 
 ## The one fact that shapes everything
@@ -121,7 +221,7 @@ teams lose here rather than in the code.**
 
 ---
 
-# SIH 2026 Idea-Submission PPT Audit Rubric - for "Samudra 3D" (PS SIH26067, INCOIS / Ministry of Earth Sciences)
+# SIH 2026 Idea-Submission PPT Audit Rubric - for "OceanVerity" (PS SIH26067, INCOIS / Ministry of Earth Sciences)
 
 ## TL;DR
 - The SIH idea PPT is judged by *reading*, not presenting: at the national screening stage nobody pitches and no demo is seen. Per SIH winner Zaid Sayyed, "Roughly five teams are shortlisted per problem statement nationally… On a popular statement that can mean 500 submissions competing for those five seats, decided entirely by your idea PPT with no jury to convince and no demo to save you." Clarity and PS-specificity beat cleverness.
@@ -177,9 +277,9 @@ Mapped to the official parameters. "Good" descriptions blend official language w
 - Formatting traps: placeholder text left in; wrong theme; duplicated slide (7 pages); title text running off the slide; a free-host demo link that sleeps and shows a blank page to the evaluator.
 - Missing female member; late submission; wrong track/category.
 
-### D. Slide-by-slide checklist for the 6 mandated slides (tailored to Samudra 3D / SIH26067)
+### D. Slide-by-slide checklist for the 6 mandated slides (tailored to OceanVerity / SIH26067)
 
-**Slide 1 - Title Page.** PS ID (SIH26067), exact PS title, Theme, PS Category (Software), Team ID, Team Name (as registered) - copied character-for-character from the portal. No placeholder text. Optional: one-line tagline ("Samudra 3D - browser-native 3D ocean visualization for INCOIS forecasters").
+**Slide 1 - Title Page.** PS ID (SIH26067), exact PS title, Theme, PS Category (Software), Team ID, Team Name (as registered) - copied character-for-character from the portal. No placeholder text. Optional: one-line tagline ("OceanVerity - browser-native 3D ocean visualization for INCOIS forecasters").
 
 **Slide 2 - Proposed Solution / Idea Title.** Name the specific INCOIS pain in the PS's own words: forecasters must "switch between multiple tools, slowing operational analysis," and cannot co-visualize model fields with instrument profiles. State your solution: browser-native interactive 3D ocean visualization integrating numerical model outputs (temperature, salinity, currents, chlorophyll) with Argo/Glider in-situ profiles across the full water column. State the differentiator and that a **working deployed prototype exists.** Test: if you could swap "ocean" for another domain and the slide still reads fine, it's too generic.
 
@@ -197,7 +297,7 @@ INCOIS's three existing public tools split the problem the PS wants unified:
 - **INCOIS ERDDAP** - data-access/download server with WMS 1.3.0 and basic 2D "Make A Graph"; **not a 3D environment.**
 - **Ocean Data and Information System (ODIS)** - 2D Web-GIS (OpenLayers/MapServer) for **in-situ** data, handled on a *separate* pipeline from gridded model data.
 
-The differentiation line for Slide 2/4: none of INCOIS's tools offers browser-native interactive 3D volumetric co-visualization of model fields *and* in-situ profiles together - this tri-partite fragmentation is the justification for Samudra 3D. On deployability, note government data-residency expectations (NDSAP 2012 governs MoES/INCOIS data release; MeitY MeghRaj/GI-Cloud implies in-India data centres), reinforcing a self-hostable, no-foreign-SaaS design.
+The differentiation line for Slide 2/4: none of INCOIS's tools offers browser-native interactive 3D volumetric co-visualization of model fields *and* in-situ profiles together - this tri-partite fragmentation is the justification for OceanVerity. On deployability, note government data-residency expectations (NDSAP 2012 governs MoES/INCOIS data release; MeitY MeghRaj/GI-Cloud implies in-India data centres), reinforcing a self-hostable, no-foreign-SaaS design.
 
 ### F. Timeline / logistics facts (flag edition)
 - **Editions:** SIH 2026 is the software/hardware national competition run by the Ministry of Education's Innovation Cell (MIC) with AICTE. Problem statements went live around late August 2026; grand finale expected December 2026 (nodal centres). (2026, but confirm exact dates on sih.gov.in.)

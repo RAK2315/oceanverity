@@ -1,4 +1,4 @@
-# Working on Samudra 3D
+# Working on OceanVerity
 
 Browser-native 3D ocean visualisation for INCOIS. Smart India Hackathon 2026, PS 26067.
 Category Software, **theme Disaster Management**, team Sigmoid. The theme changed in the
@@ -7,10 +7,10 @@ one of those was tested on 2026-09-01 and the results are in
 [`docs/plan/04-ps-update-2026-09.md`](docs/plan/04-ps-update-2026-09.md), which is the
 current work plan. **Read it before starting anything.**
 
-**Live:** https://rak2315.github.io/samudra-sih26/ (landing), `/app.html` (the platform),
+**Live:** https://rak2315.github.io/oceanverity/ (landing), `/app.html` (the platform),
 `/provenance.html` (where every figure came from) and `/requirements.html` (every clause of the
 PS against what answers it, with a link that opens the app on that control)
-**Repo:** https://github.com/RAK2315/samudra-sih26 - branch `main`, deploys on push
+**Repo:** https://github.com/RAK2315/oceanverity - branch `main`, deploys on push
 
 **Read [`CONTEXT.md`](CONTEXT.md) first.** It defines the domain vocabulary and the scope cut
 line, and its terms - Grid, Volume, Profile, Collocation, Depth Warp, Source Adapter - are used
@@ -37,7 +37,7 @@ the queries a static bundle cannot precompute.
 ### `pipeline/` - Python. Reads the data, does the science. All tested logic is here.
 
 File-by-file map in [`pipeline/CLAUDE.md`](pipeline/CLAUDE.md), loaded when you work there.
-The adapter seam is `samudra/sources/base.py`; the scientific truth is `samudra/grid.py`.
+The adapter seam is `oceanverity/sources/base.py`; the scientific truth is `oceanverity/grid.py`.
 
 ### `api/` - FastAPI. Answers what the static bundle cannot, and serves the open standards.
 
@@ -45,7 +45,7 @@ The adapter seam is `samudra/sources/base.py`; the scientific truth is `samudra/
 adapter registry. `api/standards.py` registers OPeNDAP, CF-1.8 NetCDF and OGC WMS, built on
 `api/cf.py` (Grid to CF dataset), `api/dap.py` (DAP2) and `api/wms.py` (WMS 1.3.0). ADR 0012.
 `api/upload.py` is the **only endpoint on the service that accepts anything**: a visitor's own
-NetCDF file, as the raw body, parsed by `samudra/sources/netcdf.py` and held in memory for the
+NetCDF file, as the raw body, parsed by `oceanverity/sources/netcdf.py` and held in memory for the
 life of the process. Nothing is stored and the platform stays read-only.
 
 **Every one of those reads the native Grid and none can reach a Volume.** This is the easiest
@@ -73,7 +73,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 | `README.md` | **The submittable one.** Problem, what makes it different, the numbers, the architecture as text rather than only a picture, how to run it. Kept short on purpose; anything that wants a page of its own goes in `docs/`. |
 | `docs/README-full.md` | The long-form README this replaced: every PS clause answered, every variable explained, the full requirement audit. Nothing was deleted, only moved. |
 | `docs/adr/00*.md` | Eighteen decision records. **0018 is the newest**: chlorophyll, oxygen, the oxygen floor and surface fronts, never called a fishing zone. Before it, 0017: the flow drawn as moving dots, which is the drift model's own integrator and is *not* the volumetric streamlines this project still refuses. Before it, 0015 (drift that publishes its own score) and 0016 (a real 1991-2020 climatological baseline). |
-| `docs/Samudra3D-Dossier.pdf` | Full project dossier including an anticipated-questions section. Regenerate with `web/render-dossier.mjs` from `scripts/dossier.html`. |
+| `docs/OceanVerity-Dossier.pdf` | Full project dossier including an anticipated-questions section. Regenerate with `web/render-dossier.mjs` from `scripts/dossier.html`. |
 | `docs/demo/script.md` | The demo script: what to say, what to do. |
 | `docs/plan/00-data-sources-verified.md` | Every endpoint tested, including the dead ones. |
 | `docs/plan/01-cut-features.md` | What was cut, what is worth adding back, known rough edges. |
@@ -95,7 +95,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 # tests - run before claiming anything works
 cd pipeline && ../.venv/Scripts/python -m pytest -q
 
-# refresh the manifest's palette tables from samudra/palettes.py, without a full bake
+# refresh the manifest's palette tables from oceanverity/palettes.py, without a full bake
 cd pipeline && ../.venv/Scripts/python scripts/refresh_palettes.py
 
 # refresh the manifest's Field label, units and description from the FieldSpecs in bake.py.
@@ -114,7 +114,7 @@ cd web && npm run typecheck && npx vite build
 # refresh the data from INCOIS and Argo. 36 steps, about 36 minutes, and it CLEARS volumes/,
 # currents/, surfaces/, grids/ and data/grids/*.npz before writing - so a smaller --timesteps
 # replaces the committed bake rather than sitting beside it. Read the memory note further down.
-cd pipeline && ../.venv/Scripts/python -m samudra.bake
+cd pipeline && ../.venv/Scripts/python -m oceanverity.bake
 
 # run
 cd web && npm run dev                                     # http://localhost:5173
@@ -246,7 +246,7 @@ eight Explore questions on a loop - so the hero came back as the *currents*, wit
 it, because two questions had run while the frame was being taken. Bare shots inject a
 stylesheet and touch nothing else.
 
-**No backticks inside a GLSL template literal.** A comment written with `pipeline/samudra/
+**No backticks inside a GLSL template literal.** A comment written with `pipeline/oceanverity/
 volume.py` in backticks ended the string, and TypeScript reported it as a missing comma two lines
 later. The shaders are template literals; markdown habits do not survive in them.
 
@@ -326,7 +326,7 @@ box back **in degrees** instead. **Before adding a probe, make it fail on purpos
 
 **"Show me around" walks every control, and that is a measurement.** It was five steps against 44
 explained controls - a demo, not a tour, and the four the user's teammates would present from were
-among the 38 it never visited. It is 22 steps in 6 chapters now, and every step declares the
+among the 38 it never visited. It is 23 steps in 6 chapters now, and every step declares the
 `GUIDE` keys it puts on screen. `probe-tour.mjs` fails if any entry in `GUIDE` is not named by
 some step, if a step ends the tour, or if a step changes nothing the scene reads. **Add a control,
 give it a guide entry as the rules already require, and the probe tells you the tour has stopped
@@ -480,6 +480,27 @@ extent. `window.__scene` and `window.__store` are exposed for this. Screenshot w
 **Transparent draw order is explicit.** See ADR 0006. Three.js sorts by centroid, meaningless
 for world-spanning geometry. Anything new and transparent needs a `renderOrder` from the `ORDER`
 table in `OceanScene.ts`.
+
+**A remembered key has six copies, and two of them are harnesses.** The project was renamed
+OceanVerity on 2026-09-20 and the four `localStorage` keys moved to an `oceanverity.` prefix.
+`web/src/remembered.ts` is the one module the app reads and writes them through, and it falls
+back to the old prefix once so a returning reader keeps their theme and their folds. But the
+three static pages each carry an inline twin, because they set `data-theme` before first paint
+and cannot wait for a module - and `capture.mjs` and `probe-landing.mjs` write the theme key
+**directly**, to force a theme. Leave those two behind at a rename and they set a key nothing
+reads, every page falls back to dark, and a `--theme light --publish` run writes dark pictures
+into the light targets while printing cheerful `published` lines. That is the silent-overwrite
+rule with a new way in. Verified after the move: all four pages read the old key, apply light,
+write the new key and drop the old one.
+
+**The rename is finished, package included.** `pipeline/oceanverity/` was the last piece and
+landed on 2026-09-21, a day after the rest: 84 files, every import, every
+`python -m oceanverity.bake`, and - the one that would have been silent - the `HISTORY` path list
+in `check_figures.py`, which classifies a stale figure by the directory it sits in and would have
+started reporting the entire pipeline as CURRENT if it had kept pointing at the old name.
+**The only `samudra` left in the repo is the legacy `localStorage` fallback** in
+`web/src/remembered.ts` and its three inline twins, which exist so a returning visitor keeps the
+theme they chose. A grep for anything else should return nothing.
 
 **The demo path makes zero network calls.** Everything the browser needs is in
 `web/public/data` and `web/public/fonts`. Keep it that way; a dead venue network must not be
@@ -756,7 +777,7 @@ five hazard ones, each of which is held to a hand-computable case because a wron
 produces a number that is finite, smooth and completely believable. Not to glue, UI or shaders. It also
 applies to anything we *serve* - the DAP2 and WMS endpoints are science leaving the building,
 and `test_dap.py` checks them by opening them with a real `pydap` client rather than by
-asserting on our own bytes. 409 tests currently, across 28 modules, and `pipeline/scripts/collect_tests.py`
+asserting on our own bytes. 495 tests currently, across 35 modules, and `pipeline/scripts/collect_tests.py`
 writes what `provenance.html` says about them - so the public page cannot claim a suite that no
 longer exists, which it did for a month: 11 modules, 123 tests, "67 passed", against 379 in 25.
 
@@ -790,7 +811,7 @@ measurement that it is fine.**
 ## Known upstream quirks
 
 - **INCOIS ERDDAP sends an incomplete certificate chain.** Browsers and curl hide it, Python
-  does not. `pipeline/samudra/tls.py` supplies the missing intermediate.
+  does not. `pipeline/oceanverity/tls.py` supplies the missing intermediate.
 - **`tds.hycom.org` and `coastwatch.pfeg.noaa.gov` are unreachable from this network.** Do not
   retry; see `docs/plan/00-data-sources-verified.md`.
 - **Real Argo floats fail, and quality control is two layers.** Argo's own `_qc` flags are

@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "api"))
 from cf import as_dataset  # noqa: E402
 from dap import ConstraintError, das, dds, dods, parse_constraint  # noqa: E402
 
-from samudra.grid import Grid  # noqa: E402
+from oceanverity.grid import Grid  # noqa: E402
 
 pydap_dap2 = pytest.importorskip("pydap.parsers.dds", reason="pydap is the DAP2 client")
 

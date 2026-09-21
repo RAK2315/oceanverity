@@ -9,7 +9,7 @@ leaves a gap a gap, and never extrapolates below the deepest value the model act
 import numpy as np
 import pytest
 
-from samudra.depth_warp import DepthWarp
+from oceanverity.depth_warp import DepthWarp
 
 # The real INCOIS ZAX axis: 24 uneven levels, clustered near the surface.
 INCOIS_LEVELS = np.array(

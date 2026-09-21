@@ -10,7 +10,7 @@ channel is zero where there is no water to have a gradient.
 import numpy as np
 import pytest
 
-from samudra.volume import LAND, OCEAN, encode_volume
+from oceanverity.volume import LAND, OCEAN, encode_volume
 
 
 def channels(encoded):

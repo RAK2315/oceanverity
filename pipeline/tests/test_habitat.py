@@ -9,8 +9,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from samudra.grid import Grid
-from samudra.habitat import OXYGEN_FLOOR_MMOL, oxygen_floor
+from oceanverity.grid import Grid
+from oceanverity.habitat import OXYGEN_FLOOR_MMOL, oxygen_floor
 
 LEVELS = np.array([5.0, 10.0, 20.0, 30.0, 50.0, 75.0, 100.0, 125.0, 150.0, 200.0])
 

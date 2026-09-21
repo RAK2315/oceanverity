@@ -16,6 +16,21 @@ import { useStore } from "../store";
 import { inverseTransfer, isDiverging, supportsLog } from "../transfer";
 import type { FieldSpec, Manifest } from "../types";
 
+/**
+ * The four shapes a Field takes on screen, in `CONTEXT.md`'s own words.
+ *
+ * ADR 0014. Not every Field is a body of water, and until a Field was drawn nothing on the
+ * selector said which of the four it would be - so pressing a depth Field looked like a broken
+ * Volume rather than a Sheet. The key is `FieldSpec.render`, so the tag cannot disagree with
+ * what `OceanScene` actually builds.
+ */
+const RENDER_KIND: Record<string, string> = {
+  volume: "Volume",
+  depth: "Sheet",
+  column: "Drape",
+  vector: "Arrows",
+};
+
 /** The Field the Anomaly Features were found in. They mean nothing drawn over any other. */
 const ANOMALY_FIELD = "temperature_anomaly";
 
@@ -111,7 +126,7 @@ function Group({
  * named quantities the platform does not carry, so picking "dense - Density" recoloured
  * temperature in the colours of density and printed a warning saying the colours meant nothing.
  * A presentation control was reading as a data control. The derivable ones became Variables and
- * the rest were deleted; see pipeline/samudra/palettes.py. Each Field now carries its own
+ * the rest were deleted; see pipeline/oceanverity/palettes.py. Each Field now carries its own
  * palette in its FieldSpec, so a Field and its colours cannot be separated and the warning has
  * nothing left to warn about.
  */
@@ -307,11 +322,118 @@ function Colourbar() {
         onChange={(v) => set("windowMax", v)}
       />
 
+      {/*
+        * The same two ends, typed.
+        *
+        * Auto is beside them because the boxes make it easy to narrow to nothing, and a reader
+        * who has done that needs one press to get the Field's whole range back - not a memory of
+        * what the two numbers were before they started. It restores 0 and 1, which is the
+        * encoded range end to end, the state `selectField` gives a Field when you first open it.
+        */}
+      <div className="range-boxes">
+        <RangeBox
+          label="Min"
+          value={toValue(windowMin)}
+          units={spec.units}
+          min={spec.range[0]}
+          max={toValue(Math.max(windowMax - 0.02, 0.02))}
+          onCommit={(v) => {
+            set("touched", "window");
+            set("windowMin", store.fromValue(v));
+          }}
+        />
+        <RangeBox
+          label="Max"
+          value={toValue(windowMax)}
+          units={spec.units}
+          min={toValue(Math.min(windowMin + 0.02, 0.98))}
+          max={spec.range[1]}
+          onCommit={(v) => {
+            set("touched", "window");
+            set("windowMax", store.fromValue(v));
+          }}
+        />
+        <button
+          type="button"
+          className="range-auto"
+          disabled={windowMin === 0 && windowMax === 1}
+          onClick={() => {
+            set("touched", "window");
+            set("windowMin", 0);
+            set("windowMax", 1);
+          }}
+        >
+          Auto
+        </button>
+      </div>
+
       {/* Per Field. There is no water mass in a count of casts, and none in a departure. */}
       <p className="note">
         {RANGE_NOTE[spec.key] ?? "Narrowing the range hides water outside it."}
       </p>
     </Group>
+  );
+}
+
+/**
+ * A range end you can type, beside the slider that drags it.
+ *
+ * A slider is right for exploring and wrong for asking a question. "Show me only water above
+ * 28 degC" is one number a forecaster already has, and on a 180 px track one step is about
+ * 0.1 degC of a 30 degC range - so hitting a round number is luck. The box and the slider are
+ * the same state, `windowMin`/`windowMax` as a 0..1 fraction of the Field's encoded range.
+ *
+ * Committed on blur and on Enter, never on every keystroke: typing "2" on the way to "28" would
+ * otherwise repaint the block at 2 degC and fight the next character. Escape puts the field
+ * back. A value outside the Field's own range is clamped rather than refused, because the
+ * encoded range is what the colourbar can express and a number beyond it has no colour to take.
+ */
+function RangeBox({
+  label,
+  value,
+  units,
+  min,
+  max,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  units: string;
+  min: number;
+  max: number;
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? value.toFixed(2);
+  const commit = () => {
+    if (draft === null) return;
+    const parsed = Number(draft);
+    setDraft(null);
+    if (!Number.isFinite(parsed)) return; // an unreadable entry reverts rather than zeroing
+    onCommit(Math.min(Math.max(parsed, min), max));
+  };
+  return (
+    <label className="range-box">
+      <span className="range-box-label">{label}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        value={shown}
+        aria-label={`${label} in ${units}`}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            commit();
+            (event.target as HTMLInputElement).blur();
+          } else if (event.key === "Escape") {
+            setDraft(null);
+            (event.target as HTMLInputElement).blur();
+          }
+        }}
+      />
+      <span className="range-box-units">{units}</span>
+    </label>
   );
 }
 
@@ -440,7 +562,7 @@ type Focus = (lon: number, lat: number) => void;
  * **It is not AI and must never be captioned as one.** There is no model here and no
  * confidence: every figure is a mean or an RMS of residuals `bake.py` already wrote, and the
  * ranking is on the RMS as a fraction of the Field's own range so a degree and a PSU can share
- * one list. See `pipeline/samudra/residuals.py`.
+ * one list. See `pipeline/oceanverity/residuals.py`.
  */
 function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
   const store = useStore();
@@ -1113,6 +1235,16 @@ export function Controls({
    * drape.
    */
   const drawsWater = spec.render !== "depth" && spec.render !== "column";
+  /**
+   * Whether this Field can answer "what is the value here" from full precision.
+   *
+   * Read off the manifest rather than listed here, because the answer is exactly "did the bake
+   * ship a Grid or a Surface for it" - and a list would go stale the first time a Field gained
+   * one. `OceanScene.pickValue` asks the same question of the same two maps.
+   */
+  const canReadValue = Boolean(
+    manifest.gridFiles?.[spec.key] || manifest.surfaceFiles?.[spec.key],
+  );
   // Where the current arrows sit: the top of the Depth slice inside the block, the painted Level
   // on the map. The scene reads exactly the same two numbers.
   const arrowDepth = axisToDepth(volume, inVolume ? store.depthFrom : store.surfaceLevel);
@@ -1196,7 +1328,20 @@ export function Controls({
           </div>
         )}
 
-        <div className="segmented">
+        {/*
+          * Each button carries its unit and its render kind, under the name.
+          *
+          * A selector of nineteen names asks a reader to already know two things the FieldSpec
+          * already holds. "Cyclone Heat Potential" does not say whether the answer comes back in
+          * metres or kJ/cm2, and nothing on screen said which of the four shapes of ADR 0014 a
+          * Field takes until it was drawn - so a reader pressed Depth of 26 degC expecting the
+          * block to recolour and got a sheet, with the Rendering group disappearing underneath
+          * them. Both facts are read off the spec, never typed: `units` and `render`.
+          *
+          * Deliberately one line of secondary type rather than two rows of chips. The tag is the
+          * left half and the unit the right, so the eye reads shape then unit down the column.
+          */}
+        <div className="segmented segmented-fields">
           {store.fieldsInGroup(store.hazardMode ? "hazard" : store.fieldGroupTab).map((f) => (
             <button
               key={f.key}
@@ -1208,10 +1353,57 @@ export function Controls({
                 store.selectField(f.key);
               }}
             >
-              {f.label.replace("Sea Water ", "")}
+              <span className="field-name">{f.label.replace("Sea Water ", "")}</span>
+              <span className="field-meta">
+                <span className="field-kind">{RENDER_KIND[f.render ?? "volume"]}</span>
+                {f.units ? <span className="field-units">{f.units}</span> : null}
+              </span>
             </button>
           ))}
         </div>
+
+        {/*
+          * The value under the cursor, for the Field on screen.
+          *
+          * The currents have had this since ADR 0013 and it is the single thing that turned
+          * that layer from a picture into a measurement. Every Field that ships full precision
+          * gets it now - the three collocated ones and the seven Sheet and Drape ones, eleven of
+          * nineteen - and the other eight say plainly that they cannot rather than printing a
+          * number read off a Volume. A Volume is byte-quantised and depth-warped, so it would
+          * answer with something finite, smooth and completely believable, which is exactly the
+          * failure this project has a rule against.
+          *
+          * The reading depth is printed beside the value because a Volume Field's answer is
+          * taken at the nearest Level to the top of the Depth slice, not at the surface and not
+          * at the cursor's apparent depth. A Sheet or a Drape has no reading depth to report -
+          * on a Sheet the value *is* a depth - so it prints none rather than a misleading "5 m".
+          */}
+        {/*
+          * Drawn only when it can answer. On the globe there is no water to hover, and eight of
+          * the nineteen Fields ship no full precision - in both cases the line was a permanent
+          * sentence in the panel explaining why the panel was not telling you anything, which is
+          * a caption apologising for itself. A control or readout that cannot act is better
+          * absent than present and inert, which is the rule this panel already follows for the
+          * isosurface and the depth slice.
+          */}
+        {spec.render !== "vector" && inVolume && canReadValue && (
+          <p className="readout-line">
+            {store.hoverValue ? (
+              <>
+                <strong>
+                  {store.hoverValue.value.toFixed(2)} {spec.units}
+                </strong>
+                {store.hoverValue.metres !== null && (
+                  <> at {store.hoverValue.metres.toFixed(0)} m</>
+                )}
+                , {Math.abs(store.hoverValue.lat).toFixed(1)}&deg;
+                {store.hoverValue.lat >= 0 ? "N" : "S"} {store.hoverValue.lon.toFixed(1)}&deg;E
+              </>
+            ) : (
+              "Move the cursor over the water for a value."
+            )}
+          </p>
+        )}
       </Group>
 
       <Colourbar />

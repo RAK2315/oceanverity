@@ -14,7 +14,7 @@ only way to have a value on every day of a monsoon, and it is also a limit worth
 drawn under a week of cloud is partly the provider's interpolation, not a clear-sky observation.
 
 What leaves this adapter is not the satellite field. It is the share of each platform cell on a
-front, computed by `samudra/fronts.py` - see there for the methods and why it is a share.
+front, computed by `oceanverity/fronts.py` - see there for the methods and why it is a share.
 """
 
 from __future__ import annotations
