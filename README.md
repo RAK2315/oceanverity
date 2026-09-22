@@ -12,7 +12,7 @@ and what the instruments in the water actually measured.**
 Smart India Hackathon 2026 &middot; Problem Statement **26067** &middot; MoES / INCOIS
 &middot; Software &middot; Disaster Management &middot; Team Sigmoid
 
-![Tests](https://img.shields.io/badge/tests-495%20passing-2ea043)
+![Tests](https://img.shields.io/badge/tests-511%20passing-2ea043)
 ![Probes](https://img.shields.io/badge/browser%20probes-16%20green-2ea043)
 ![Network calls at demo time](https://img.shields.io/badge/network%20calls%20at%20demo%20time-0-2ea043)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
@@ -103,7 +103,7 @@ hand.
 | Depth | **5 m to 2000 m** across 24 uneven levels |
 | Data shipped in the build | **223 MB**, committed, **0** network calls to run |
 | Source adapters | **11** - 10 providers, plus one for a file a visitor drops on the page |
-| Tests / browser probes | **495** / **16** |
+| Tests / browser probes | **511** / **16** |
 | Drift model, scored | median **41.0 km** out over one Argo cycle, across 6,185 cycles on 217 floats |
 | Plankton and oxygen, scored | Copernicus's model against **55** floats for chlorophyll and **40** for oxygen: oxygen reads **8.14 mmol/m³** high on average |
 
@@ -244,7 +244,7 @@ end**: it is written by the bake, read by the shader, and nothing reads a value 
 
 | Layer | Responsible for | The seam below it |
 | --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 495 tests. | `oceanverity/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
+| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 511 tests. | `oceanverity/sources/base.py`. A provider is one class. Nothing above this file knows a provider exists. |
 | **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the `Grid`. None can reach a `Volume`.** |
 | **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints** - the only exception is a file the user drops. |
 
@@ -280,7 +280,7 @@ works with no server behind it at all.
 | **Standards out** | OPeNDAP (DAP2), CF-1.8 NetCDF, OGC WMS 1.3.0 | So the analysis is readable by a Python client, a file, or a GIS - not only by this page. |
 | **Rendering** | Three.js on WebGL2, GLSL ray marching | The volume is a single ray-marched block, not a stack of images. Nothing else gets you inside the water. |
 | **Frontend** | React 18, TypeScript 5, Zustand, Vite | Zustand because every control is one flat store the scene reads once a frame; Vite for a four-page build with no config. |
-| **Verification** | pytest, Playwright | 495 tests on the science; 16 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
+| **Verification** | pytest, Playwright | 511 tests on the science; 16 Playwright probes that **measure the rendered page**, because every bad bug here looked like a shader bug and was not. |
 | **Fonts** | Chivo, IBM Plex Mono, Space Grotesk, Inter - all self-hosted | The demo makes zero network calls. A Google Fonts link is a build failure, not a style choice. |
 
 ---
@@ -320,7 +320,7 @@ cd pipeline && ../.venv/Scripts/python -m oceanverity.bake
 Nothing in this README is asserted without something that can fail:
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q         # 495 tests, ~35 s
+cd pipeline && ../.venv/Scripts/python -m pytest -q         # 511 tests, ~35 s
 cd web && npm run typecheck && npx vite build
 
 # the 16 browser probes measure the rendered page rather than trusting it.

@@ -193,6 +193,7 @@ LAYERS = [
         "abstract": "INCOIS analysis, restated",
         "units": "degree_Celsius",
         "ours": False,
+        "levels": LEVELS,
     },
     {
         "name": "density",
@@ -200,13 +201,14 @@ LAYERS = [
         "abstract": "Computed here with TEOS-10",
         "units": "kg m-3",
         "ours": True,
+        "levels": LEVELS,
     },
 ]
 
 
 def parsed_capabilities():
     return ET.fromstring(
-        capabilities("http://localhost:8000/wms", LAYERS, WHEN, LEVELS, (55.0, 100.0, -10.0, 25.0))
+        capabilities("http://localhost:8000/wms", LAYERS, WHEN, (55.0, 100.0, -10.0, 25.0))
     )
 
 

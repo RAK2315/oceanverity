@@ -75,3 +75,41 @@ minLon,minLat,maxLon,maxLat.
 Getting it backwards raises nothing. It serves the Arabian Sea rotated into the Southern Ocean,
 and the result still looks like an ocean. Both orders are supported, both are tested, and the
 capabilities document declares each CRS's bounding box in its own order.
+
+## Amended 2026-09-21: a Field with no depth goes out with no depth axis
+
+The rule above - everything here reads the native Grid - was written when every Field was a water
+column. Seven are not. Five hazard quantities are a depth or a column total, and the oxygen floor
+and the surface fronts joined them in September; `bake.py` writes all seven as float32 on the
+analysis lattice, and ADR 0014 explains why they are not Volumes.
+
+**This module did not know the class existed.** `servable_fields()` refused by one name, so
+`GetCapabilities` advertised eighteen layers and seven of them fell through `native_grid()` to a
+bare 404 - on WMS as JSON, out of an endpoint whose own capabilities document promises
+`<Exception>XML`. It was five of fourteen when `docs/BUGS.md` item 104 recorded it and seven of
+eighteen when it was fixed, because a list of names cannot notice a new member of its own class.
+`SURFACE_RENDER_KINDS` reads `FieldSpec.render` instead.
+
+**The decision is the shape, not whether to serve.** Item 104 framed refusing and serving as the
+two options, and said serving would mean "a one-Level depth axis that claims the value varies
+with depth". CF does not require that. A quantity with no depth is a
+`(time, latitude, longitude)` array with no vertical coordinate at all, and no
+`geospatial_vertical` attributes. So `oceanverity/grid.py` gained a `Surface` beside `Grid`,
+deliberately not a Grid with one Level, because the difference is what leaves the building: no
+depth coordinate over CF and OPeNDAP, and no elevation dimension over WMS. A depth axis on Depth
+of 26 degC, whose value *is* a depth, would have been well-formed, accepted by every client, and
+false - which is this project's whole failure mode, one protocol further out.
+
+`dap.py` needed no change at all. It was already generic over a dataset's dims, which is the
+argument for having written the protocol against xarray rather than against five named axes.
+
+**The rule, restated.** Everything here reads a native Grid or a native Surface, and neither is a
+Volume. A Surface *is* the analysis lattice at full float32 precision, which is exactly why it can
+be served; the Volume is a quantised, depth-warped picture of it, which is exactly why it cannot.
+
+Measured after, over HTTP: all 18 layers draw, 11 advertise an elevation dimension and the seven
+surfaces advertise none, `GetFeatureInfo` on a surface reports `"depth": null` rather than zero
+metres, and `elevation=5` against `elevation=500` is byte-identical on `d26` and different on
+`temperature`. Read back with other people's clients, per the rule above: `xarray` opens
+`/api/netcdf/d26/0` and `xarray` with `engine="pydap"` opens `/opendap/d26/0`, both giving
+80.711 m at 12.5 N 72.5 E, and the served array matches `d26_000.bin` exactly.

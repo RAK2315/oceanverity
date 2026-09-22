@@ -64,3 +64,31 @@ class Grid:
             )
         lower = int(np.clip(np.searchsorted(axis, value, side="right") - 1, 0, len(axis) - 2))
         return lower, float((value - axis[lower]) / (axis[lower + 1] - axis[lower]))
+
+
+@dataclass(frozen=True)
+class Surface:
+    """One Field at one Timestep that has no depth: values indexed [lat, lon].
+
+    Seven Fields are not a body of water. Five are a depth or a column total the platform
+    computes from the analysis, and two more came with the biology round. `bake.py` writes them
+    as float32 on these same axes rather than as a quantised Volume, for the reason the
+    `FieldSpec.render` note gives: a reader reads metres off a depth sheet and kJ/cm2 off a
+    drape, and byte-quantising them would put a rendering artefact where a measurement should
+    be.
+
+    Deliberately not a `Grid` with one Level. The difference is load-bearing in two places that
+    are outside this repository: CF would serve a one-element depth axis, which says the value
+    varies with depth, and WMS would advertise an elevation dimension a client can ask along.
+    For Depth of 26 degC, whose value *is* a depth, that is wrong twice. Absent the type, the
+    mistake is invisible - a one-Level Grid is well-formed and every client accepts it.
+    """
+
+    latitudes: np.ndarray
+    longitudes: np.ndarray
+    values: np.ndarray
+
+    def __post_init__(self) -> None:
+        expected = (len(self.latitudes), len(self.longitudes))
+        if self.values.shape != expected:
+            raise ValueError(f"values shape {self.values.shape} does not match axes {expected}")

@@ -1,13 +1,20 @@
 # Known defects and open suspicions
 
 **Worked through 2026-09-03, revisited four times on 2026-09-04, again on 2026-09-06, swept
-whole-repository on 2026-09-10 and fixed on 2026-09-11. Four items are open; 134 are fixed.**
-The open four are 44 and 101, which predate the sweep; 104, which the user deferred; and 134,
-which this round's measurements found. Items 104 to 133 came from a read-only audit of every
-surface on 2026-09-10 - `pipeline/`, `api/`, `web/src`, the four pages, the 15 probes, the tests,
-the Markdown and the decision records - and every one but 104 was closed the next day. **The header
-count has been wrong before**: it said "three items are open" over two, and the numbering had
-reached 103 while a handoff said 102. Count the `- [ ]` markers before trusting this line.
+whole-repository on 2026-09-10, fixed on 2026-09-11, and 104 and 134 closed on 2026-09-21. Two
+items are open; 136 are fixed.** The open two are 44 and 101, which both predate the
+2026-09-10 sweep and are both open on purpose: 44 is a judgement about prose that a probe would
+guess at worse than a person, and 101 is a flaky probe whose two proposed causes were each
+disproved by measurement. Items 104 to 133 came from a read-only audit of every surface on
+2026-09-10 - `pipeline/`, `api/`, `web/src`, the four pages, the probes, the tests, the Markdown
+and the decision records. **The header count has been wrong before**: it said "three items are
+open" over two, and the numbering had reached 103 while a handoff said 102. Count the `- [ ]`
+markers before trusting this line.
+
+**134 closed itself and nobody noticed for six days.** It said it would close "when that bake's
+`manifest.masked` says so", the 2026-09-15 bake ran the mask, and this file went on listing it
+as open. A defect whose close condition is somebody else's run needs checking after that run;
+see the entry.
 
 The fixed ones are summarised rather than listed, which is this file's own convention: a
 defect whose measurement has been folded into `CLAUDE.md`, an ADR or a probe does not need a
@@ -233,28 +240,55 @@ The ranking is the one this file has always used:
       reading, because a number in prose has nothing that can fail.
 
 
-- [ ] **104. OGC WMS advertises five layers the server cannot draw, and no other endpoint can
-      serve them either. Deferred by the user on 2026-09-11 - "we will come back to this".**
-      `api/standards.py`'s `servable_fields()` filters `manifest.fields` by
-      `NOT_ON_A_NATIVE_GRID = {"coverage"}` alone, so `GetCapabilities` publishes **14** layers
-      and only **9** have a native Grid on disk (`data/grids/index.json`). The five hazard Fields
-      ship as float32 surfaces (`bake.py:_write_surfaces`), not as `.npz` Grids, so a request for
-      `heat_potential`, `d26`, `mixed_layer_depth`, `isothermal_layer_depth` or `barrier_layer`
-      falls through `native_grid()` to a bare `HTTPException(404, "no grid for ...")` - on WMS
-      `GetMap` as a 404 rather than the `ServiceExceptionReport` a client can read, and on
-      `/api/netcdf/d26/0` and the OPeNDAP `.das`/`.dds`/`.dods`. **Observed over HTTP on
-      2026-09-11**: `/api/netcdf/heat_potential/0` returns a body `xarray` cannot open.
+- [x] **104. OGC WMS advertised seven layers the server could not draw, and no other endpoint
+      could serve them either. Fixed 2026-09-21, by serving them.** Deferred by the user on
+      2026-09-11 - "we will come back to this" - and it grew while it waited.
 
-      Two honest fixes, and they are different products. **Refuse them by name** the way
-      `coverage` is refused - about an hour, nothing new served. **Or serve them** - their Grids
-      can be recomputed offline from the temperature and salinity `.npz` already on disk, but
-      every one of these endpoints describes a Field with a depth axis, and a depth-of-isotherm
-      is one number per location, so it would go out with a one-Level depth axis that claims the
-      value varies with depth. The in-app feature is unaffected either way. Since 2026-09-11 the
-      five layers' `<Abstract>`s at least say correctly that they are computed here (item 105).
+      **It was five of fourteen when this entry was written and seven of eighteen when it was
+      fixed.** `oxygen_floor` and `fronts` arrived at the 2026-09-15 bake, and nothing was
+      watching the class, because the refusal was a list of names rather than a rule. Measured
+      over HTTP on 2026-09-21, before: `GetMap` on `d26` returned HTTP 404 with the body
+      `{"detail": "no grid for d26 at timestep 35"}` - JSON, from an endpoint whose own
+      capabilities document promises `<Exception>XML`, which a WMS client shows as nothing at
+      all.
 
-- [ ] **134. INCOIS's own temperature analysis holds cells no sea has ever held. The mask is
-      built and tested; the shipped data keeps them until the next bake.**
+      **They did not need recomputing.** This entry said their Grids "can be recomputed offline
+      from the temperature and salinity `.npz`". They were already on disk at full precision:
+      `web/public/data/surfaces/` holds 252 files of 2016 float32 values, and 2016 is exactly
+      the 56 x 36 analysis lattice. The bake never wrote a second copy because nothing had ever
+      asked for one. `native_surface()` in `api/main.py` reads the served file, which is
+      legitimate in a way reading a Volume would never be: a surface *is* the analysis lattice,
+      not a quantised depth-warped picture of it.
+
+      **The shape was the real decision.** This entry framed the alternative as refuse-or-serve
+      and noted that serving would mean "a one-Level depth axis that claims the value varies
+      with depth". CF does not require that: a quantity with no depth is a
+      `(time, latitude, longitude)` array with no vertical coordinate at all. So
+      `oceanverity/grid.py` gained a `Surface` beside `Grid` - deliberately not a Grid with one
+      Level, because the difference leaves the building - `cf.as_dataset` builds 3D from it,
+      `dap.py` needed nothing at all since it was already generic over dims, and `wms.py` got
+      `_plane()` and a per-layer elevation dimension in place of one list for the whole service.
+
+      **Measured after, over HTTP.** All 18 layers draw; 11 advertise an elevation dimension and
+      the seven surfaces advertise none; `GetFeatureInfo` on a surface reports `"depth": null`
+      rather than zero metres; `elevation=5` and `elevation=500` give byte-identical images on
+      `d26` and different ones on `temperature`. Read back with real clients, not our own bytes:
+      `xarray` opens `/api/netcdf/d26/0` and `xarray` with `engine="pydap"` opens
+      `/opendap/d26/0`, both giving 80.711 m at 12.5 N 72.5 E, and the served array matches
+      `d26_000.bin` exactly.
+
+      **And the other half, which was never in this entry.** `field_spec` raises
+      `HTTPException`, which FastAPI renders as JSON, and the `/wms` handler caught only
+      `wms.WmsError`. So even a genuinely wrong request came back unreadable. It returns a
+      `ServiceExceptionReport` now; checked with `layers=coverage`, which is the one Field still
+      refused and now says so in XML.
+
+      `test_surfaces_over_standards.py`, 16 tests, red first. The one that matters is
+      `test_every_field_is_either_served_or_refused_by_name`, which is this defect written as
+      the rule it broke rather than as the seven names it broke it on.
+
+- [x] **134. INCOIS's own temperature analysis holds cells no sea has ever held. Closed by the
+      2026-09-15 bake; confirmed 2026-09-21.**
       Found by measuring the Suspected entry about Temperature vs Normal: recovering the atlas
       value as analysis minus departure shows **the atlas is fine and the analysis is not** -
       4.84 degC at 20 m in the Persian Gulf in July, 45.17 degC at the same node in May, 48.66
@@ -276,12 +310,25 @@ The ranking is the one this file has always used:
       continuously from 35.8 to 48.7 with no gap, so 12 cells between 36 and 38 degC are kept
       as suspicious rather than masked.
 
-      **Why it is not applied to the shipped data now.** A bake takes the newest 36 analyses and
-      re-fetches Argo, so re-baking moves the window and every measured figure in the build.
-      Patching the shipped files instead would mean re-running six stages of the bake by hand -
-      the Grids, density, both anomalies, the spread, the hazard sheets, the Volumes and their
-      ranges - which is a partial re-bake that could quietly disagree with a real one. So the
-      next real bake applies it, and this item closes when that bake's `manifest.masked` says so.
+      **Why it was not applied to the shipped data at the time.** A bake takes the newest 36
+      analyses and re-fetches Argo, so re-baking moves the window and every measured figure in
+      the build. Patching the shipped files instead would mean re-running six stages of the bake
+      by hand - the Grids, density, both anomalies, the spread, the hazard sheets, the Volumes
+      and their ranges - which is a partial re-bake that could quietly disagree with a real one.
+      So the next real bake applies it, and this item closes when that bake's `manifest.masked`
+      says so.
+
+      **It said so, and nothing checked.** The 2026-09-15 bake ran the mask and this file went
+      on listing the item as open for six days. Confirmed on 2026-09-21 from the shipped build:
+      the manifest carries `masked` with 25 temperature cells against a `-2.5 to 38` bound and
+      0 in `mccreary_temperature`, which is exactly what this entry predicted; and the maximum
+      across all **144 shipped temperature Grids is 34.40 degC**, so the 45.17 and 48.66 degC
+      nodes are gone from the data a reader can reach.
+
+      **The lesson is about the close condition, not the mask.** "Closes when somebody else's
+      run says so" puts the check outside the session that can do it, and no bake runs a pass
+      over this file. A deferred item whose trigger is a bake needs re-reading after the next
+      bake, which is now a line in `docs/plan/06`'s order of work.
 
 **Closed 2026-09-11** - one line each; the measurement lives where the line says.
 

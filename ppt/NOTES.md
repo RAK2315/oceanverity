@@ -206,7 +206,7 @@ What we have that most teams do not, and should lead with:
 
 What we have to actively resist:
 
-- We have 19 variables and 16 probes and 495 tests. **That is feature-dump ammunition.** Mention
+- We have 19 variables and 16 probes and 511 tests. **That is feature-dump ammunition.** Mention
   them as evidence of rigour, once, and move on.
 - The rendering is impressive and it is the *least* important thing about the project. If the
   demo becomes a graphics showcase, the argument is lost.

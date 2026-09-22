@@ -273,23 +273,31 @@ _SOURCES["incois_rmse"] = _SOURCES["incois_casts"]
 
 
 def as_dataset(grid, field: str, when: datetime, extra_attributes: dict | None = None):
-    """One Grid at one Timestep as a CF-1.8 `xarray.Dataset`.
+    """One Grid or Surface at one Timestep as a CF-1.8 `xarray.Dataset`.
 
     Axes are named and attributed so a client can orient itself without being told: depth is
     positive down and carries `positive: "down"`, which is the attribute that stops a plotting
     library drawing the ocean upside down.
+
+    A `Surface` has no depth, and CF's answer for that is not a one-element vertical axis: it is
+    no vertical axis at all. So the variable comes out `(time, latitude, longitude)` and the
+    dataset makes no `geospatial_vertical` claim. The alternative was well-formed and false -
+    see the `Surface` note in `oceanverity/grid.py`, and `docs/BUGS.md` item 104.
     """
-    depth = xr.DataArray(
-        np.asarray(grid.levels, dtype="float32"),
-        dims="depth",
-        attrs={
-            "standard_name": "depth",
-            "long_name": "Depth below sea surface",
-            "units": "m",
-            "positive": "down",
-            "axis": "Z",
-        },
-    )
+    levels = getattr(grid, "levels", None)
+    depth = None
+    if levels is not None:
+        depth = xr.DataArray(
+            np.asarray(levels, dtype="float32"),
+            dims="depth",
+            attrs={
+                "standard_name": "depth",
+                "long_name": "Depth below sea surface",
+                "units": "m",
+                "positive": "down",
+                "axis": "Z",
+            },
+        )
     latitude = xr.DataArray(
         np.asarray(grid.latitudes, dtype="float32"),
         dims="latitude",
@@ -318,7 +326,9 @@ def as_dataset(grid, field: str, when: datetime, extra_attributes: dict | None =
 
     variable = xr.DataArray(
         np.asarray(grid.values, dtype="float32")[np.newaxis, ...],
-        dims=("time", "depth", "latitude", "longitude"),
+        dims=("time", "depth", "latitude", "longitude")
+        if depth is not None
+        else ("time", "latitude", "longitude"),
         attrs={
             key: value
             for key, value in {
@@ -335,9 +345,18 @@ def as_dataset(grid, field: str, when: datetime, extra_attributes: dict | None =
         },
     )
 
+    # Insertion order is the order `dap.dds` declares the axes in, so depth goes where it sits
+    # in the variable's own dims rather than on the end.
+    coords = {
+        "time": time,
+        **({"depth": depth} if depth is not None else {}),
+        "latitude": latitude,
+        "longitude": longitude,
+    }
+
     dataset = xr.Dataset(
         {field: variable},
-        coords={"time": time, "depth": depth, "latitude": latitude, "longitude": longitude},
+        coords=coords,
         attrs={
             "Conventions": CONVENTIONS,
             "title": f"OceanVerity - {_LONG_NAMES.get(field, field)}",
@@ -350,9 +369,15 @@ def as_dataset(grid, field: str, when: datetime, extra_attributes: dict | None =
             "geospatial_lat_max": float(np.max(grid.latitudes)),
             "geospatial_lon_min": float(np.min(grid.longitudes)),
             "geospatial_lon_max": float(np.max(grid.longitudes)),
-            "geospatial_vertical_min": float(np.min(grid.levels)),
-            "geospatial_vertical_max": float(np.max(grid.levels)),
-            "geospatial_vertical_positive": "down",
+            **(
+                {
+                    "geospatial_vertical_min": float(np.min(levels)),
+                    "geospatial_vertical_max": float(np.max(levels)),
+                    "geospatial_vertical_positive": "down",
+                }
+                if levels is not None
+                else {}
+            ),
             "time_coverage_start": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "time_coverage_end": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
         },

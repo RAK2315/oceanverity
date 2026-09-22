@@ -35,7 +35,7 @@ sys.path.insert(0, str(ROOT / "pipeline"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from oceanverity.collocation import collocate  # noqa: E402
-from oceanverity.grid import Grid  # noqa: E402
+from oceanverity.grid import Grid, Surface  # noqa: E402
 from oceanverity.section import casts_near_line, section_along  # noqa: E402
 from oceanverity.sources.argo import ArgoErddapSource, BgcArgoSource, IncoisArgoSource  # noqa: E402
 from oceanverity.sources.copernicus import CopernicusCurrentsSource  # noqa: E402
@@ -117,6 +117,8 @@ def _drop_caches_if_rebaked() -> None:
     _baked_at = stamp
     _manifest.cache_clear()
     native_grid.cache_clear()
+    native_surface.cache_clear()
+    _lattice.cache_clear()
     floats.cache_clear()
     profiles.cache_clear()
     _section_profiles.cache_clear()
@@ -152,6 +154,60 @@ def native_grid(field: str, index: int) -> Grid:
             longitudes=data["longitudes"],
             values=data["values"].astype(float),
         )
+
+
+@lru_cache(maxsize=1)
+def _lattice(index: int) -> tuple[np.ndarray, np.ndarray]:
+    """The analysis lattice: the latitudes and longitudes every Field shares.
+
+    Read off a native Grid on disk rather than rebuilt from the manifest's corners and counts.
+    Both would give the same numbers today, and one of them is a second copy of the lattice that
+    nothing would compare - the same argument `CLAUDE.md` makes about re-deriving the Depth Warp
+    in the frontend.
+
+    Temperature, because INCOIS's own temperature analysis is the spine of the bake: every other
+    Field is fetched, derived or landed onto the axes this one arrives on, so a bake without it
+    is not a bake. `index` is ignored beyond the file it reads - the lattice does not move
+    between Timesteps - and is a parameter so the cache is keyed on something that exists.
+    """
+    return native_grid("temperature", index).latitudes, native_grid("temperature", index).longitudes
+
+
+@lru_cache(maxsize=64)
+def native_surface(field: str, index: int) -> Surface:
+    """One Field that has no depth, at one Timestep, on the analysis lattice.
+
+    These ship as raw float32 in `web/public/data/surfaces/`, written by `bake.py`, and that is
+    the only copy: there is no `.npz` beside the Grids, because the bake never needed one. So
+    this reads the served file, which is legitimate in a way reading a Volume would never be -
+    a surface is the analysis lattice at full precision, not a quantised, depth-warped picture
+    of it. `docs/BUGS.md` item 104 says the values "can be recomputed offline"; they do not need
+    to be, and recomputing them would be a second answer to a question already answered.
+    """
+    files = manifest().get("surfaceFiles", {}).get(field)
+    if not files:
+        raise HTTPException(404, f"no surface for {field}")
+    if not 0 <= index < len(files):
+        raise HTTPException(404, f"no surface for {field} at timestep {index}")
+    path = WEB_DATA / files[index]
+    if not path.exists():
+        raise HTTPException(404, f"no surface for {field} at timestep {index}")
+
+    latitudes, longitudes = _lattice(index)
+    values = np.fromfile(path, dtype="<f4").astype(float)
+    expected = len(latitudes) * len(longitudes)
+    if values.size != expected:
+        # A bake half-written, or a lattice that moved under a file that did not. Refusing is
+        # the only honest answer: reshaped to the wrong axes this would draw a real map of
+        # nowhere, which is the failure class nobody spots from outside.
+        raise HTTPException(
+            500, f"{path.name} holds {values.size} values, not the {expected} the grid has"
+        )
+    return Surface(
+        latitudes=latitudes,
+        longitudes=longitudes,
+        values=values.reshape(len(latitudes), len(longitudes)),
+    )
 
 
 @lru_cache(maxsize=1)
@@ -566,7 +622,7 @@ def _number(value):
 # The open-standards half: OPeNDAP, CF NetCDF and OGC WMS, all over the same native Grids.
 # Registered last so it can borrow this module's cached loaders rather than opening the files
 # again - and so there is one place that decides where a Grid comes from.
-standards.register(app, manifest, native_grid)
+standards.register(app, manifest, native_grid, native_surface)
 
 # Drop your own NetCDF file in. The parsing is a Source Adapter like every other provider's -
 # `oceanverity/sources/netcdf.py` - and this is the only endpoint on the service that accepts

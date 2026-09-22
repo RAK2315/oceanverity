@@ -538,7 +538,7 @@ model right, here, at this depth, today" - which is the question the problem sta
   `github.com/RAK2315/oceanverity` &rarr; `docs/adr/`
 - **Every unmet clause of PS 26067**, researched with dates and row counts, with the decision
   taken on each. `docs/plan/03-requirement-gaps.md`
-- **495 automated tests** on the science and on what we serve, plus **16 browser probes**.
+- **511 automated tests** on the science and on what we serve, plus **16 browser probes**.
 
 > **Before you export, click every link on this slide.** All four DOIs were checked on
 > 4 September 2026 and resolve. Three references from an earlier draft were removed because they
@@ -621,7 +621,7 @@ than in an appendix.
 | Link | Where it goes | Why it earns its space |
 | --- | --- | --- |
 | **The live prototype** | https://rak2315.github.io/oceanverity/ | Nothing else on six slides proves execution as fast as a working link. It needs no install and no account, so a judge can open it while you are still talking. |
-| **The repository** | https://github.com/RAK2315/oceanverity | 495 tests, eighteen decision records and a public defect list are all claims until someone can open them. |
+| **The repository** | https://github.com/RAK2315/oceanverity | 511 tests, eighteen decision records and a public defect list are all claims until someone can open them. |
 | **The video** | the recording of [`script.md`](script.md) | The prototype walkthrough, guaranteed to run. A live demo can fail on the venue's network; this cannot. |
 
 Slide 1 carries the prototype link. Slide 6 carries all three, with the repository and the video

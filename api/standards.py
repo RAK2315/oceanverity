@@ -26,11 +26,27 @@ WCS stays unbuilt, and `docs/plan/03-requirement-gaps.md` records why: no pure-P
 server fits, the coverage encodings are a day's work for a checkbox, and the numbers are already
 served properly over OPeNDAP.
 
+Two shapes, because not every Field is a body of water
+------------------------------------------------------
+
+Seven Fields are one number per location: five computed hazard quantities and, since the
+biology round, the oxygen floor and the surface fronts. `bake.py` writes them as float32 on the
+analysis lattice, and for a round this module did not know they existed - `servable_fields()`
+filtered on one name, so `GetCapabilities` advertised eighteen layers and seven of them fell
+through to a bare 404. `SURFACE_RENDER_KINDS` is now the single place that question is answered,
+and `test_surfaces_over_standards.py` goes red if a new Field arrives with a render kind nothing
+here handles. `docs/BUGS.md` item 104.
+
+A surface is a `Surface`, never a `Grid` with one Level, and the difference leaves the building:
+no depth coordinate over CF and OPeNDAP, and no elevation dimension over WMS.
+
 The one rule
 ------------
-Every endpoint here reads `native_grid()`. None of them can reach a Volume. The Volume is
-quantised to 255 levels, depth-warped and back-filled across land for the GPU, and a consumer
-pulling it over a scientific protocol could not see that it had happened.
+Every endpoint here reads `native_grid()` or `native_surface()`. None of them can reach a
+Volume. The Volume is quantised to 255 levels, depth-warped and back-filled across land for the
+GPU, and a consumer pulling it over a scientific protocol could not see that it had happened.
+A Surface is not that: it is the analysis lattice at full float32 precision, which is exactly
+why it can be served.
 """
 
 from __future__ import annotations
@@ -148,16 +164,31 @@ OURS = {key for key, sentence in PROVENANCE.items() if sentence.startswith("Comp
 # that is missing by accident look the same from outside.
 NOT_ON_A_NATIVE_GRID = {"coverage"}
 
+#: Which `FieldSpec.render` kinds are one number per location rather than a water column.
+#:
+#: Read from the render kind and not from a list of names, because a list of names is what
+#: failed: the five hazard Fields were handled by name when item 104 was written, and
+#: `oxygen_floor` and `fronts` joined them at the September bake without anything noticing.
+#: A new Field declares how it is drawn as a matter of course, and that declaration is enough.
+SURFACE_RENDER_KINDS = {"depth", "column"}
 
-def register(app, manifest, native_grid) -> None:
-    """Attach the endpoints. `manifest` and `native_grid` are main.py's cached loaders."""
+
+def register(app, manifest, native_grid, native_surface) -> None:
+    """Attach the endpoints. The three loaders are main.py's cached ones."""
+
+    def is_surface(field: str) -> bool:
+        return field_spec(field).get("render") in SURFACE_RENDER_KINDS
+
+    def values_for(field: str, index: int):
+        """The Grid or the Surface, whichever this Field is."""
+        return (native_surface if is_surface(field) else native_grid)(field, index)
 
     def dataset_for(field: str, index: int):
         stamps = manifest()["timesteps"]
         if not 0 <= index < len(stamps):
             raise HTTPException(404, f"no analysis timestep {index}")
         return cf.as_dataset(
-            native_grid(field, index),
+            values_for(field, index),
             field,
             datetime.fromisoformat(stamps[index]),
             extra_attributes={
@@ -282,7 +313,6 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
         try:
             if operation == "getcapabilities":
                 region = manifest()["region"]
-                levels = [float(v) for v in native_grid(manifest()["fields"][0]["key"], 0).levels]
                 layers = [
                     {
                         "name": spec["key"],
@@ -292,6 +322,15 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                         + PROVENANCE.get(spec["key"], UNATTRIBUTED),
                         "units": spec["units"],
                         "ours": spec["key"] in OURS,
+                        # Per layer, and empty for a surface. Read off the layer's own Grid
+                        # rather than off whichever Field the manifest happens to list first:
+                        # that was one list for the whole service, and it advertised a depth
+                        # picker on seven layers that have no depth.
+                        "levels": (
+                            []
+                            if spec.get("render") in SURFACE_RENDER_KINDS
+                            else [float(v) for v in native_grid(spec["key"], 0).levels]
+                        ),
                     }
                     for spec in servable_fields()
                 ]
@@ -300,7 +339,6 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                         str(request.url.replace(query="")),
                         layers,
                         stamps,
-                        levels,
                         (region["west"], region["east"], region["south"], region["north"]),
                     ),
                     media_type="text/xml",
@@ -315,8 +353,13 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                     )
                 spec = field_spec(names[0])
                 index = wms.nearest_timestep(params.get("time"), stamps)
-                grid = native_grid(spec["key"], index)
-                level = wms.nearest_level(params.get("elevation"), grid.levels)
+                grid = values_for(spec["key"], index)
+                # None rather than 0 for a surface. `wms._plane` says why the default is unsafe.
+                level = (
+                    None
+                    if is_surface(spec["key"])
+                    else wms.nearest_level(params.get("elevation"), grid.levels)
+                )
                 bbox = wms.parse_bbox(params.get("bbox", ""), params.get("crs", "EPSG:4326"))
                 width = int(params.get("width", 256))
                 height = int(params.get("height", 256))
@@ -340,7 +383,9 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                             "units": spec["units"],
                             "latitude": round(latitude, 4),
                             "longitude": round(longitude, 4),
-                            "depth": float(grid.levels[level]),
+                            # Null, not zero, for a Field that has no depth. Zero metres is the
+                            # sea surface, which is a place, and this value is not read there.
+                            "depth": None if level is None else float(grid.levels[level]),
                             "time": manifest()["timesteps"][index],
                             # Read off the Grid, not sampled back out of the picture. Null over
                             # land, because that is absence of ocean rather than a value.
@@ -359,4 +404,16 @@ ds["{field}"].sel(latitude=12.5, longitude=72.5, method="nearest")</code></pre>
                 wms.service_exception(str(error), error.code),
                 media_type="text/xml",
                 status_code=400,
+            )
+        except HTTPException as error:
+            # The same rule, one level down. `field_spec` and the loaders raise HTTPException,
+            # which FastAPI renders as JSON - so a WMS request for a layer this server cannot
+            # draw came back as `{"detail": "no grid for d26 at timestep 35"}` with a 404, out
+            # of an endpoint whose own capabilities document promises `<Exception>XML`. A WMS
+            # client shows that as nothing at all. Item 104 was seven layers that should have
+            # been servable; this is the other half, for the requests that genuinely are wrong.
+            return Response(
+                wms.service_exception(str(error.detail), "LayerNotDefined"),
+                media_type="text/xml",
+                status_code=error.status_code,
             )

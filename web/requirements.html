@@ -696,6 +696,7 @@
       <li><b>Served.</b> <b>OGC WMS 1.3.0</b>, <b>DAP2 OPeNDAP</b> and <b>CF-1.8 NetCDF</b>, all from the native analysis grids, so a consumer gets the same numbers the platform reports.</li>
       <li><b>Axis order tested first.</b> WMS 1.3.0 reads EPSG:4326 latitude-first and CRS:84 longitude-first. A mix-up would silently draw the map flipped north to south.</li>
       <li><b>Real clients.</b> The OPeNDAP and WMS endpoints are tested with pydap and owslib, not against our own bytes.</li>
+      <li><b>Every advertised layer can be drawn.</b> Some variables are one number per location rather than a water column, like the depth of the 26 &deg;C isotherm. Those go out with no depth axis and no depth picker, because a depth axis on a variable whose value <em>is</em> a depth would be well-formed and false.</li>
       <li><b>WCS, declined.</b> No pure-Python WCS server fits this API (THREDDS is Java, EOxServer runs on MapServer), and the same coverages are already on OPeNDAP.</li>
     </ul>
     <div class="clause-links">

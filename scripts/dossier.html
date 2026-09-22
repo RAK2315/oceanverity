@@ -112,7 +112,7 @@
     <dt>Theme</dt><dd>Disaster Management</dd>
     <dt>Live prototype</dt><dd>rak2315.github.io/oceanverity</dd>
     <dt>Source</dt><dd>github.com/RAK2315/oceanverity</dd>
-    <dt>Status</dt><dd>Working prototype on live INCOIS data, 495 automated tests passing</dd>
+    <dt>Status</dt><dd>Working prototype on live INCOIS data, 511 automated tests passing</dd>
   </dl>
 
   <h2 style="margin-top:26pt">Contents</h2>
@@ -508,7 +508,7 @@
         <li>NumPy, SciPy - resampling and gradients</li>
         <li>cmocean - oceanographic colour scales</li>
         <li>FastAPI, Uvicorn - the REST API</li>
-        <li>pytest - 495 tests on the science</li>
+        <li>pytest - 511 tests on the science</li>
       </ul>
     </div>
     <div>
@@ -701,7 +701,7 @@
     <p>
       This project was built with AI assistance, and we would say so if asked. What matters is
       what was verified rather than assumed: every data endpoint was tested with real requests
-      before being relied on, the scientific logic carries 495 automated tests, rendering defects
+      before being relied on, the scientific logic carries 511 automated tests, rendering defects
       were diagnosed by measuring pixel extents and GPU state rather than by eye, and every
       number quoted in this document comes from the running system. Two findings in these pages -
       that INCOIS runs a public ERDDAP, and that a float in this region reports impossible
@@ -764,7 +764,7 @@
       <tr><td>Can it predict cyclones?</td><td>No, and it does not claim to. It shows the ocean conditions that determine how much energy a cyclone can draw on. Forecasting is a separate discipline; this makes one of its inputs visible.</td></tr>
       <tr><td>How much would this cost to run?</td><td>Effectively nothing. It currently runs on free static hosting, with no licences, no databases and no compute servers.</td></tr>
       <tr><td>What is the hardest part technically?</td><td>Making a monotonic field legible. Ocean temperature just decreases with depth, so a naive 3D render is an opaque warm lid over darkness. Weighting opacity by rate of change is what solves it, and it took several attempts.</td></tr>
-      <tr><td>How long did it take?</td><td>Built for this hackathon, with 495 automated tests and eighteen written decision records.</td></tr>
+      <tr><td>How long did it take?</td><td>Built for this hackathon, with 511 automated tests and eighteen written decision records.</td></tr>
       <tr><td>What would you do next?</td><td>Render geostrophic currents as 3D flow, add a bias map showing model error at every float across the whole EEZ, and connect the internal INCOIS archive.</td></tr>
     </tbody>
   </table>

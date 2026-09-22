@@ -1,5 +1,5 @@
 {
- "total": 495,
+ "total": 511,
  "modules": [
   {
    "module": "test_argo_qc.py",
@@ -75,6 +75,11 @@
    "module": "test_osmc.py",
    "tests": 16,
    "defends": "Moorings, from the real-time GTS feed."
+  },
+  {
+   "module": "test_surfaces_over_standards.py",
+   "tests": 16,
+   "defends": "A Field that is one number per location leaves the building as one number per location."
   },
   {
    "module": "test_argo.py",

@@ -84,7 +84,17 @@ def parse_bbox(raw: str, crs: str) -> tuple[float, float, float, float]:
     return west, east, south, north
 
 
-def _sample(grid, level: int, west, east, south, north, width, height) -> np.ndarray:
+def _plane(grid, level: int | None) -> np.ndarray:
+    """The 2D array to draw: one Level of a Grid, or the whole of a Surface.
+
+    `level` is None for a Field that has no depth. Not a default of 0, because a Surface's
+    `values` is already 2D and `values[0]` would quietly hand back its southernmost row of
+    latitudes as if it were a map - correct shape, correct dtype, entirely wrong picture.
+    """
+    return grid.values if level is None else grid.values[level]
+
+
+def _sample(grid, level: int | None, west, east, south, north, width, height) -> np.ndarray:
     """The Grid resampled onto the pixels a client asked for.
 
     Nearest neighbour, deliberately. The Grid is one degree and a WMS client is free to ask for
@@ -106,12 +116,12 @@ def _sample(grid, level: int, west, east, south, north, width, height) -> np.nda
     outside_x = (xs < grid.longitudes.min()) | (xs > grid.longitudes.max())
     outside_y = (ys < grid.latitudes.min()) | (ys > grid.latitudes.max())
 
-    values = grid.values[level][np.ix_(rows, columns)]
+    values = _plane(grid, level)[np.ix_(rows, columns)]
     values = np.where(outside_y[:, None] | outside_x[None, :], np.nan, values)
     return values
 
 
-def render(grid, level: int, palette, vmin: float, vmax: float, bbox, width: int, height: int):
+def render(grid, level: int | None, palette, vmin: float, vmax: float, bbox, width: int, height: int):
     """One GetMap image. Masked and out-of-range cells are transparent, never a colour."""
     if not (0 < width <= MAX_PIXELS and 0 < height <= MAX_PIXELS):
         raise WmsError(f"WIDTH and HEIGHT must be between 1 and {MAX_PIXELS}")
@@ -136,7 +146,7 @@ def render(grid, level: int, palette, vmin: float, vmax: float, bbox, width: int
     return buffer.getvalue()
 
 
-def feature_info(grid, level: int, latitude: float, longitude: float) -> float:
+def feature_info(grid, level: int | None, latitude: float, longitude: float) -> float:
     """The value under a point, read off the native Grid.
 
     Legitimate in a way GetMap is not: this is `Grid.column_at`'s neighbourhood, the scientific
@@ -145,23 +155,41 @@ def feature_info(grid, level: int, latitude: float, longitude: float) -> float:
     """
     row = int(np.abs(np.asarray(grid.latitudes) - latitude).argmin())
     column = int(np.abs(np.asarray(grid.longitudes) - longitude).argmin())
-    return float(grid.values[level][row, column])
+    return float(_plane(grid, level)[row, column])
 
 
 # ----------------------------------------------------------------- capabilities
 
 
-def capabilities(base_url: str, layers, timesteps, levels, bounds) -> str:
+def capabilities(base_url: str, layers, timesteps, bounds) -> str:
     """A WMS 1.3.0 GetCapabilities document.
 
-    `layers` is a sequence of dicts with `name`, `title`, `abstract`, `units` and `ours`.
+    `layers` is a sequence of dicts with `name`, `title`, `abstract`, `units`, `ours` and
+    `levels`.
+
+    `levels` is per layer and may be empty, which is the whole point of it being per layer.
+    Seven Fields are one number per location, and an elevation dimension on those is not a
+    harmless extra: a client offers the reader a depth picker, sends `ELEVATION=`, and gets back
+    the same picture whatever they choose. It used to be one list for the whole service, taken
+    off whichever Field happened to be first in the manifest.
     """
     west, east, south, north = bounds
     times = ",".join(t.strftime("%Y-%m-%dT%H:%M:%SZ") for t in timesteps)
-    elevations = ",".join(f"{level:g}" for level in levels)
 
     entries = []
     for layer in layers:
+        # `list(...)` and an explicit None, not `or []`: a caller with a numpy array of levels
+        # gets "truth value of an array is ambiguous" out of the falsy test, which is a
+        # ValueError from inside a document builder and reads like nothing to do with levels.
+        declared = layer.get("levels")
+        levels = [] if declared is None else list(declared)
+        elevation = (
+            f"""
+        <Dimension name="elevation" units="m" unitSymbol="m" default="{levels[0]:g}">"""
+            f"""{",".join(f"{level:g}" for level in levels)}</Dimension>"""
+            if levels
+            else ""
+        )
         entries.append(
             f"""      <Layer queryable="1">
         <Name>{escape(layer['name'])}</Name>
@@ -177,8 +205,7 @@ def capabilities(base_url: str, layers, timesteps, levels, bounds) -> str:
         </EX_GeographicBoundingBox>
         <BoundingBox CRS="EPSG:4326" minx="{south}" miny="{west}" maxx="{north}" maxy="{east}"/>
         <BoundingBox CRS="CRS:84" minx="{west}" miny="{south}" maxx="{east}" maxy="{north}"/>
-        <Dimension name="time" units="ISO8601" default="{times.split(',')[-1]}">{times}</Dimension>
-        <Dimension name="elevation" units="m" unitSymbol="m" default="{levels[0]:g}">{elevations}</Dimension>
+        <Dimension name="time" units="ISO8601" default="{times.split(',')[-1]}">{times}</Dimension>{elevation}
         <Style>
           <Name>default</Name>
           <Title>{escape(layer['title'])} ({escape(layer['units'])})</Title>

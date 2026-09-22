@@ -183,7 +183,11 @@ window.
 4. Fishing water column: plankton and oxygen Fields, collocation against BGC floats, oxygen floor
    sheet; fronts Field from satellite SST and chlorophyll. Then **one** bake.
 5. Explore question, walkthrough, guide entries, tour steps for everything new.
-6. After the bake: `collect_facts.py`, `check_figures.py`, screenshots, deck figures, README line updated.
+6. After the bake: `collect_facts.py`, `check_figures.py`, screenshots, deck figures, README line
+   updated, **and re-read `docs/BUGS.md` for any item whose close condition was "the next bake".**
+   Added 2026-09-21: item 134 said it would close when a bake's `manifest.masked` said so, the
+   15 September bake said so, and the file went on listing it as open for six days because no
+   bake runs a pass over that file and nobody else was looking.
 7. Later: PFZ harvester, marine heatwaves below the surface, forecast scorecard, wind and waves in drift.
 
 ## Done, 2026-09-15 (committed 2026-09-19)

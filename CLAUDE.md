@@ -711,6 +711,24 @@ optimisation.** A reader reads *metres* off a depth sheet and kJ/cm2 off a drape
 and depth-warping them would look identical on screen and would be answering a scientific
 question from a rendering artefact, in the one place nobody would ever check. 8 KB a file.
 
+**And that Field leaves the building as a `Surface`, never as a `Grid` with one Level.** The
+API did not know the class existed: `servable_fields()` refused by a list of names, so
+`GetCapabilities` advertised eighteen layers and the seven that are one number per location fell
+through to `{"detail": "no grid for d26 at timestep 35"}` - JSON, with a 404, out of an endpoint
+whose own capabilities document promises `<Exception>XML`. It was five of fourteen when
+`docs/BUGS.md` item 104 was written and seven of eighteen when it was fixed, because
+`oxygen_floor` and `fronts` joined the class at the September bake and a list of names cannot
+notice that. `SURFACE_RENDER_KINDS` reads `FieldSpec.render` instead, and
+`test_surfaces_over_standards.py` goes red on a render kind nothing handles. **Serving them
+needed no recompute**: `web/public/data/surfaces/` already holds 252 files of 2016 float32
+values, and 2016 is exactly the 56 x 36 analysis lattice, so `native_surface()` reads the file
+the browser reads. The shape is the part worth getting right - CF's answer for a quantity with
+no depth is no vertical coordinate at all, not a one-element one, and a depth axis on Depth of
+26 degC, whose value *is* a depth, would be well-formed and false. Measured after: 18 layers
+draw, 11 advertise an elevation dimension and the seven surfaces advertise none,
+`GetFeatureInfo` reports `"depth": null`, and `elevation=5` against `elevation=500` is
+byte-identical on `d26` and different on `temperature`.
+
 **The scale has exactly one curve, in `web/src/transfer.ts`.** A TypeScript function and the
 identical GLSL as a string, inlined by the ray marcher. The log scale was cut once because the
 shader bent the water while the colourbar stayed straight - that was a bug, and a second copy is
@@ -778,7 +796,7 @@ five hazard ones, each of which is held to a hand-computable case because a wron
 produces a number that is finite, smooth and completely believable. Not to glue, UI or shaders. It also
 applies to anything we *serve* - the DAP2 and WMS endpoints are science leaving the building,
 and `test_dap.py` checks them by opening them with a real `pydap` client rather than by
-asserting on our own bytes. 495 tests currently, across 35 modules, and `pipeline/scripts/collect_tests.py`
+asserting on our own bytes. 511 tests currently, across 36 modules, and `pipeline/scripts/collect_tests.py`
 writes what `provenance.html` says about them - so the public page cannot claim a suite that no
 longer exists, which it did for a month: 11 modules, 123 tests, "67 passed", against 379 in 25.
 
