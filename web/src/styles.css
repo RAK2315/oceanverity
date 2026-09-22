@@ -46,14 +46,32 @@
   /* The shadow a scrollable panel shows at an edge it has content beyond. */
   --scroll-cue: rgba(0, 0, 0, 0.55);
 
-  /* Cyan is the accent and carries interaction. Amber marks the one number that matters.
-     Coral only ever marks a problem, green only ever marks something resolved. */
-  --primary: #64d7e3;
-  --primary-strong: #3fb8c4;
-  --on-primary: #00363b;
-  --primary-hover: #86e5ef;
-  --primary-wash: rgba(100, 215, 227, 0.1);
-  --primary-edge: rgba(100, 215, 227, 0.34);
+  /*
+   * Interaction is ink. Amber marks the one number that matters, coral only ever marks a
+   * problem, green only ever marks something resolved.
+   *
+   * It was cyan, and the reason it is not any more is the landing page. That page carries no
+   * chroma at all - black type on a warm grey ground, and a primary button that is an ink
+   * outline inverting to an ink fill - so a reader crossing into the console met teal on every
+   * tab, every selected Field and the one big filled button, and the two halves read as two
+   * products. `.dive`'s own comment claimed it matched the landing page's fill while the
+   * landing page had no fill.
+   *
+   * This is the second half of the rule three paragraphs up in `CLAUDE.md`: one signal fired
+   * uniformly stops being a signal. That pass made a readout ink and left the chrome accented.
+   * The accent now survives only where it marks live data - the colourbar, the chart curves,
+   * the section line, the drift line - because those are measurements and a measurement earns
+   * a colour. A button does not.
+   *
+   * Yellow was considered and refused: `--secondary` already carries it in eleven places and
+   * it means a middling disagreement or a caution, and `--swatch-track` is the float tracks.
+   * One colour with two jobs is what got the `turbid` fronts palette thrown out.
+   */
+  --primary: #dee3e4;
+  --on-primary: #0f1415;
+  --primary-hover: #ffffff;
+  --primary-wash: rgba(222, 227, 228, 0.1);
+  --primary-edge: rgba(222, 227, 228, 0.34);
 
   --secondary: #fabc45;
   --secondary-wash: rgba(250, 188, 69, 0.1);
@@ -68,6 +86,15 @@
   --observed: #64d7e3;
   --model: #bcc9ca;
   --ribbon: rgba(255, 158, 139, 0.2);
+  /*
+   * The two ends of a diverging readout: "the model reads low" against "the model reads high".
+   * A pair, so it is named as a pair rather than borrowing the accent for one end and the
+   * problem colour for the other, which is what it did - and which meant taking the accent out
+   * of the chrome would have turned one half of a diverging encoding into plain ink while the
+   * other half stayed coral. Same two colours as before, now with the meaning attached.
+   */
+  --readout-low: #64d7e3;
+  --readout-high: #ff9e8b;
   /* Chlorophyll gets its own role rather than borrowing --good, which means "resolved"
      everywhere else. It is plant life, it never shares an axis with the comparison curves,
      and green is the one colour a non-specialist reads correctly for it without a legend. */
@@ -147,12 +174,13 @@
   --outline-variant: #c8d2d2;
   --scroll-cue: rgba(19, 26, 27, 0.22);
 
-  --primary: #00666e;
-  --primary-strong: #00838d;
+  --primary: #131a1b;
   --on-primary: #ffffff;
-  --primary-hover: #00858f;
-  --primary-wash: rgba(0, 102, 110, 0.09);
-  --primary-edge: rgba(0, 102, 110, 0.3);
+  /* Darker on hover, because a near-black fill cannot get more emphatic by lightening. The dark
+     theme goes the other way for the same reason. */
+  --primary-hover: #000000;
+  --primary-wash: rgba(19, 26, 27, 0.08);
+  --primary-edge: rgba(19, 26, 27, 0.28);
 
   --secondary: #8a5c00;
   --secondary-wash: rgba(138, 92, 0, 0.1);
@@ -166,6 +194,8 @@
   --observed: #00666e;
   --model: #5f6d6e;
   --ribbon: rgba(178, 58, 34, 0.18);
+  --readout-low: #00666e;
+  --readout-high: #b23a22;
   --chlorophyll: #17703f;
 
   --panel-bg: rgba(248, 252, 252, 0.98);
@@ -612,8 +642,14 @@ body {
 }
 
 /*
- * The primary action, matching the landing page: a solid accent fill rather than a soft wash
- * inside an outline. The arrow moves on hover instead of the whole button lifting.
+ * The primary action. One filled thing on the bar is what makes it read as the primary action,
+ * so it stays filled - and the fill is ink, which is what the landing page's own Launch button
+ * inverts to on hover. This comment used to say "matching the landing page: a solid accent
+ * fill", written when that page had one; by 2026-09-22 it had no fill and no chroma at all, so
+ * the sentence had been false for two rounds and the button was the largest teal object a
+ * reader met on crossing over.
+ *
+ * The arrow moves on hover instead of the whole button lifting.
  */
 .dive {
   display: inline-flex;
@@ -1025,10 +1061,10 @@ select:hover {
  * have to press the button to find out: what shape will this be drawn as, and in what unit does
  * it answer.
  *
- * `.on` has to re-state both colours. The active button fills with `--primary`, and secondary
- * ink over that fill is the "readout over an accent ground" failure this project already fixed
- * once in the chrome - measured against `--on-primary` it is the same family, so the meta takes
- * `--on-primary` at reduced opacity rather than its own token.
+ * The selected button used to fill with `--primary`, which forced the meta onto `--on-primary`
+ * at reduced opacity so a readout was not sitting on an accent ground. The selected state is a
+ * raised surface now, so the meta goes back to ordinary secondary ink and the special case is
+ * gone with the fill that needed it.
  */
 .segmented-fields button {
   display: flex;
@@ -1058,20 +1094,34 @@ select:hover {
   white-space: nowrap;
 }
 
-.segmented-fields button.on .field-meta {
-  color: var(--on-primary);
-  opacity: 0.72;
-}
-
 /* An odd number of Fields would otherwise leave a hole in the bottom right. */
 .segmented button:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
+/*
+ * Selected, not primary.
+ *
+ * It was a solid `--primary` fill, which made it the same weight as the dive button. Picking a
+ * Field is a *state*, and diving is the one action on the bar, so two things carrying the same
+ * emphasis meant neither did. Invisible while the fill was teal, because it read as "the
+ * accented thing"; obvious the moment the accent became ink and the selected Field turned into
+ * the brightest block in the panel on dark and the darkest on light.
+ *
+ * A raised surface, a full-ink label and a left rule instead. Three cues rather than one, so it
+ * survives at a glance without borrowing the primary fill, and the surface ramp is what every
+ * other selected thing in the panel already uses.
+ */
 .segmented button.on {
-  background: var(--primary);
-  color: var(--on-primary);
-  font-weight: 500;
+  background: var(--surface-highest);
+  color: var(--on-surface);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--primary);
+}
+
+.segmented-fields button.on .field-meta {
+  color: var(--on-surface-variant);
+  opacity: 1;
 }
 
 /*
@@ -1385,24 +1435,28 @@ select:hover {
  * The console's half of the shared theme switch.
  *
  * The control itself is `public/theme-pill.css`, linked by `app.html` and by the three static
- * pages, and it declares five tokens rather than reaching for either side's palette. This is
+ * pages, and it declares four tokens rather than reaching for either side's palette. This is
  * the console's mapping. It is the *only* thing in this file that knows the pill exists.
  *
- * The knob is teal, and deliberately not `--primary`: the accent repaints between themes
- * (#64d7e3 dark, #00666e light) and this is the one control that exists identically on both
- * halves of the product, so it is the one control that may not change colour when a reader
- * crosses from the landing page into the platform. Both halves name the same two teals.
+ * The knob is ink. It was two named teals, and the reason given was sound - this is the one
+ * control that exists identically on both halves of the product, so it may not change colour
+ * when a reader crosses from the landing page into the platform - but the colour chosen was
+ * wrong for the page it had to survive on. The landing page carries no chroma at all, so a teal
+ * knob was the single hued thing on it and read as a foreign object beside an ink-outlined
+ * Launch. Both halves now name their own ink, which keeps the rule and loses the hue: each side
+ * resolves to its own near-black on light and its own near-white on dark, and the glyph riding
+ * the knob takes that side's ground.
  */
 :root {
   --theme-pill-track: rgba(134, 147, 148, 0.16);
   --theme-pill-border: var(--outline-variant);
-  --theme-pill-knob: #14b8a6;
-  --theme-pill-icon-on: #04231f;
+  --theme-pill-knob: var(--on-surface);
+  --theme-pill-icon-on: var(--surface);
 }
 
 :root[data-theme="light"] {
-  --theme-pill-knob: #0f766e;
-  --theme-pill-icon-on: #ffffff;
+  --theme-pill-knob: var(--on-surface);
+  --theme-pill-icon-on: var(--surface-lowest);
 }
 
 /* A live figure read off the data, rather than a caption. Monospaced so it does not jitter. */
@@ -2780,8 +2834,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Named for what the model did, not for a temperature the number may not be about. */
-.stat-value.model-high { color: var(--tertiary); }
-.stat-value.model-low { color: var(--primary); }
+.stat-value.model-high { color: var(--readout-high); }
+.stat-value.model-low { color: var(--readout-low); }
 
 .stat-label {
   font-family: var(--sans);

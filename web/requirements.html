@@ -330,18 +330,21 @@
   /* ------------------------------------------------- the shared theme pill
    * `public/theme-pill.css` is the one copy of this control, used by all four pages. It
    * declares five tokens and each host maps its own palette onto them; this is that block.
-   * Teal, deliberately, and the same teal the console's accent lands on - the switch is the
-   * one control that exists identically on both halves of the product, so it is the one
-   * control that may not change colour when you cross between them. */
+   * Ink, and the same rule as before with a different colour in it - the switch is the one
+   * control that exists identically on both halves of the product, so it is the one control
+   * that may not change colour when you cross between them. It was two named teals, which kept
+   * the rule and put the only hue on this page inside it. */
   :root {
     --theme-pill-track: rgba(var(--color-ink-rgb), 0.10);
     --theme-pill-border: rgba(var(--color-ink-rgb), 0.26);
-    --theme-pill-knob: #14b8a6;
-    --theme-pill-icon-on: #04231f;
+    /* Ink, not teal. This page carries no other chroma, so a coloured knob was the one
+       thing on it with a hue and read as a foreign object beside an ink-outlined Launch. */
+    --theme-pill-knob: var(--color-ink);
+    --theme-pill-icon-on: var(--color-parchment);
   }
   :root[data-theme="light"] {
-    --theme-pill-knob: #0f766e;
-    --theme-pill-icon-on: #ffffff;
+    --theme-pill-knob: var(--color-ink);
+    --theme-pill-icon-on: var(--color-parchment);
   }
 
 </style>

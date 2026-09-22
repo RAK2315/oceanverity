@@ -685,6 +685,42 @@ is the one place letterspaced caps are still the point. Accent went the same way
 active tab, the active Field button, every readout, every caret and the mode switch at once, so
 it had stopped marking interaction and become the colour scheme. A readout is ink now.
 
+**And the second half of that, finished on 2026-09-22: the chrome has no accent at all.** The
+first pass took the accent off readouts and left it on the tabs, the selected Field, the mode
+switch and the dive button, which is where the owner found it - "the blue buttons don't make
+sense simply because the landing page doesn't follow the theme". That is the right diagnosis
+and it is not about the hue: **the landing page carries no chroma whatsoever**, black type on a
+warm grey ground with a primary button that is an ink outline inverting to an ink fill, so any
+accent in the console makes the two halves read as two products. `.dive`'s own comment claimed
+it matched the landing page's fill while the landing page had no fill. `--primary` is ink now in
+both themes, and **the accent survives only where it marks live data** - the colourbar, the two
+chart curves, the section line, the drift line - because a measurement earns a colour and a
+button does not. Measured by `probe-chrome.mjs`, all 22 roles clean in both themes and
+`.dive` went up to 15.85:1 on light and 13.18:1 on dark.
+
+**Yellow was asked for and refused, and the reason is the one-role rule.** `--secondary` is
+already amber in eleven places and means a middling disagreement or a caution, and
+`--swatch-track` is the float tracks. An accent in the same family would give one colour two
+jobs, which is what got the `turbid` fronts palette thrown out for hiding those tracks. Also
+worth knowing: **there is no yellow on the landing page to borrow.** The coloured letters a
+reader sees in its eyebrow line are subpixel antialiasing, not paint - the only hue on that
+page was the theme pill's knob, and that is ink now too.
+
+**Taking the accent out exposed a hierarchy error it had been hiding.** The selected Field
+button filled with `--primary`, which made it exactly as heavy as the dive button - and picking
+a Field is a *state* while diving is the one action on the bar. While the fill was teal it read
+as "the accented thing"; the moment it became ink it was the brightest block in the panel on
+dark and the darkest on light. It is `--surface-highest`, a full-ink label at 600 and a 2 px
+inset rule now: three cues instead of one, and the primary fill belongs to the dive button
+alone. The `.field-meta` override that existed only to survive an accent ground went with it.
+
+**A diverging pair must be named as a pair, or half of it moves when the accent does.**
+`.stat-value.model-low` borrowed `--primary` and `.model-high` borrowed `--tertiary`, so "the
+model reads low against high" was one accent and one problem colour rather than two ends of one
+scale. Repointing the accent would have turned one end into plain ink and left the other coral.
+They are `--readout-low` and `--readout-high` now, with the same two colours they always had
+and the meaning attached to them.
+
 **Hiding a control is not turning it off, and `selectField` is the only place that can.** The
 same leak, one field along: `isoEnabled` was not reset, so switching from Temperature with the
 isosurface on to Observation Coverage, INCOIS Cast Count or Current Speed left the shader

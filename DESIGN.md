@@ -13,15 +13,16 @@ colors:
   on-surface-faint: "#869394"
   outline: "#4b5859"
   outline-variant: "#2c3536"
-  primary: "#64d7e3"
-  primary-strong: "#3fb8c4"
-  primary-hover: "#86e5ef"
-  on-primary: "#00363b"
+  primary: "#dee3e4"
+  primary-hover: "#ffffff"
+  on-primary: "#0f1415"
   secondary: "#fabc45"
   tertiary: "#ff9e8b"
   good: "#5fd68a"
   observed: "#64d7e3"
   model: "#bcc9ca"
+  readout-low: "#64d7e3"
+  readout-high: "#ff9e8b"
   chlorophyll: "#7ddc9f"
   surface-light: "#f4f9f9"
   surface-lowest-light: "#ffffff"
@@ -34,15 +35,16 @@ colors:
   on-surface-faint-light: "#5f6d6e"
   outline-light: "#97a4a5"
   outline-variant-light: "#c8d2d2"
-  primary-light: "#00666e"
-  primary-strong-light: "#00838d"
-  primary-hover-light: "#00858f"
+  primary-light: "#131a1b"
+  primary-hover-light: "#000000"
   on-primary-light: "#ffffff"
   secondary-light: "#8a5c00"
   tertiary-light: "#b23a22"
   good-light: "#1d7a45"
   observed-light: "#00666e"
   model-light: "#5f6d6e"
+  readout-low-light: "#00666e"
+  readout-high-light: "#b23a22"
   chlorophyll-light: "#17703f"
   frame: "#0d1213"
   frame-rule: "#313b3c"
@@ -244,8 +246,16 @@ than asserting it.
 
 ## Colors
 
-Strategy: **restrained**. Tinted neutrals carry the surface; one accent carries interaction.
-Everything else is a named role that appears only when its condition is true.
+Strategy: **restrained**. Tinted neutrals carry the surface; **interaction is ink**, and colour
+is reserved for data. Everything else is a named role that appears only when its condition is
+true.
+
+**Amended 2026-09-22.** One accent used to carry interaction, and it was cyan on dark and deep
+teal on light. It came off, because the landing page carries no chroma at all - black type on a
+warm grey ground, a primary button that is an ink outline inverting to an ink fill - so accent
+anywhere in the console made the two halves of the product read as two products. The accent now
+survives only where it marks live data: the colourbar, the two chart curves, the section line
+and the drift line. A measurement earns a colour; a button does not.
 
 Six surface levels rather than shadows do most of the work. Every panel picks a level rather than
 inventing a colour.
@@ -257,16 +267,19 @@ inventing a colour.
 | `--on-surface-variant` | `#bcc9ca` | `#3b4849` | Secondary ink: labels, slider heads, bullet text. |
 | `--on-surface-faint` | `#869394` | `#5f6d6e` | Tertiary ink: notes, units, disabled. The one to watch for contrast. |
 | `--outline` / `--outline-variant` | `#4b5859` / `#2c3536` | `#97a4a5` / `#c8d2d2` | Hairlines. Variant is a divider, plain is a border you should see. |
-| `--primary` | `#64d7e3` cyan | `#00666e` deep teal | **Interaction, and only interaction.** Selected, focused, pressable, live. |
+| `--primary` | `#dee3e4` pale ink | `#131a1b` near-black | **Interaction, and only interaction.** Selected, focused, pressable, live. Ink since 2026-09-22; it was cyan and deep teal. |
 | `--secondary` | `#fabc45` amber | `#8a5c00` | The one number that matters, and a caveat. Never decoration. |
 | `--tertiary` | `#ff9e8b` coral | `#b23a22` | A problem, only. |
 | `--good` | `#5fd68a` | `#1d7a45` | Something resolved, only. |
-| `--observed` / `--model` | cyan / grey | teal / grey | Chart-only roles so the two curves keep their identity across themes. The model curve is also dashed, so the pair does not rely on hue. |
+| `--observed` / `--model` | cyan / grey | teal / grey | Chart-only roles so the two curves keep their identity across themes. The model curve is also dashed, so the pair does not rely on hue. **This is where the cyan went**, and it kept its values when the chrome lost its accent. |
+| `--readout-low` / `--readout-high` | cyan / coral | teal / rust | The two ends of a diverging readout: the model reads low against high. A **pair**, named as one, because it used to borrow the accent for one end and the problem colour for the other - so repointing the accent would have turned half a diverging encoding into plain ink. |
 | `--chlorophyll` | `#7ddc9f` | `#17703f` | Its own role rather than borrowing `--good`, which means "resolved" everywhere else. |
 
-The accent inverts in lightness between themes (`#64d7e3` → `#00666e`) rather than being reused,
-because a pale cyan on white is unreadable and a deep teal on near-black is invisible. Anything
-new must do the same.
+Every role inverts in lightness between themes rather than being reused, because a pale tint on
+white is unreadable and a deep one on near-black is invisible. Anything new must do the same.
+That now goes for ink as well: `--primary` is `#dee3e4` on dark and `#131a1b` on light, and
+`--primary-hover` goes *brighter* on dark and *darker* on light, since a near-black fill cannot
+become more emphatic by lightening.
 
 **The data palettes are the reader's to *look* at differently, and nobody's to rename.** Each
 Field still owns its palette and `selectField` still resets to it. What the Colourbar group adds
@@ -494,7 +507,7 @@ Shape vocabulary: `12px` for a panel, `8px` for a button or a callout, `6px` for
 `4px` for a segment, `999px` for a pill, `50%` for an icon button. Focus is always
 `2px solid var(--primary)` at `2px` offset, globally, never per component.
 
-- **Primary button** (`.dive`) - solid accent fill, `on-primary` ink, 8px radius, 34px tall on
+- **Primary button** (`.dive`) - solid **ink** fill, `on-primary` ink, 8px radius, 34px tall on
   the top bar. The arrow moves on hover; the button does not lift. Disabled is `opacity: 0.45`
   with the cursor reset, never a colour change.
 - **Ghost button** - `surface-low` fill, `outline` border, same 34px height. Every control on the
@@ -514,7 +527,9 @@ Shape vocabulary: `12px` for a panel, `8px` for a button or a callout, `6px` for
   the Variable selector decides what the water is and is not one row of ten.
 - **Segmented control** - a wrapping 2-column grid whose 1px gaps over a coloured ground draw the
   dividers, so it wraps to any number of items with no last-child rule to get wrong. The active
-  segment is **filled**, not tinted, so it reads at a glance.
+  segment is `--surface-highest` with a full-ink label at 600 and a 2px inset rule: **three cues,
+  not a fill**. It used to take the primary fill, which made choosing a Field exactly as heavy as
+  the one action on the bar - invisible while that fill was teal, obvious the moment it was ink.
 - **Slider** - 3px track, 14px accent thumb with a `--primary-wash` halo that grows on hover.
   Label left, live value right in mono, on a shared baseline.
 - **Readout** - mono, `--primary`, sits on the group header so a closed group still reports its
