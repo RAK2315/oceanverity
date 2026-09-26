@@ -139,12 +139,11 @@ function applyDeepLink(manifest: Manifest): { dive: boolean } {
       useStore.setState({ paletteOverride: palette === spec?.palette ? null : palette });
     }
   }
-  if (query.get("tour") === "1") useStore.setState({ tourStep: 0 });
-  // The two walkthroughs. An unknown name is ignored, never guessed.
+  if (query.get("tour") === "1") useStore.getState().startTour();
+  // The two walkthroughs. An unknown name is ignored, never guessed. A link carrying both
+  // lands on the walkthrough, because this runs second and each action closes the other.
   const walk = query.get("case");
-  if (walk === "montha" || walk === "fishing") {
-    useStore.setState({ caseStep: 0, walkthrough: walk, tourStep: null });
-  }
+  if (walk === "montha" || walk === "fishing") useStore.getState().startWalkthrough(walk);
   if (query.get("float")) useStore.setState({ selectedFloatId: query.get("float") });
   if (query.get("flow") === "arrows") useStore.setState({ currentStyle: "arrows" });
   if (query.get("explore") === "1") useStore.setState({ explore: true });

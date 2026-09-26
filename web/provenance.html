@@ -22,10 +22,16 @@
       // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
       // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
       if (stored === null) stored = localStorage.getItem("samudra.theme");
-      if (stored === "light") {
+      // Light unless the reader chose dark. Owner's call on 2026-09-26; the test is against
+      // "dark" so a first visit and a truncated value both land on light.
+      if (stored !== "dark") {
         document.documentElement.dataset.theme = "light";
       }
-    } catch (e) { /* storage blocked: dark is the default and still correct */ }
+    } catch (e) {
+      // Storage blocked. Light is the default now, so set it rather than falling through to the
+      // dark tokens on `:root`.
+      document.documentElement.dataset.theme = "light";
+    }
   })();
 </script>
 <style>
@@ -382,7 +388,7 @@
     </p>
     <pre>netcdf incois_argo_10d_VAM {
 dimensions:
-        time = 12 ;          // 10-day analysis steps
+        time = <span id="cdlSteps">&hellip;</span> ;          // 10-day analysis steps
         ZAX  = 24 ;          // depth levels, 5 m .. 2000 m, UNEVENLY spaced
         latitude  = 36 ;     // 1 degree, 10 S .. 25 N
         longitude = 56 ;     // 1 degree, 45 E .. 100 E
@@ -523,7 +529,7 @@ python -m oceanverity.bake</pre>
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
-  // theme toggle: light is recorded as data-theme=light against a dark default, one shared key.
+  // theme toggle: light is data-theme=light and is the default; dark is the attribute's absence.
   var themeBtn = document.getElementById('themeToggle');
   var isLightTheme = function () { return document.documentElement.getAttribute('data-theme') === 'light'; };
   themeBtn.setAttribute('aria-checked', isLightTheme() ? 'true' : 'false');
@@ -624,6 +630,13 @@ python -m oceanverity.bake</pre>
     var cadence = steps.length > 1
       ? Math.round((new Date(steps[1]) - new Date(steps[0])) / 86400000) + "-day"
       : "single step";
+
+    // The CDL sketch above is what this platform fetched, so its `time` is the bake's own step
+    // count. It was typed as 12 and stayed there through a bake that tripled it, under a banner
+    // saying every figure on this page is live - three of its four dimensions were and one
+    // was not.
+    var cdlSteps = el("cdlSteps");
+    if (cdlSteps) cdlSteps.textContent = String(steps.length);
 
     var cellSize = (volume.east - volume.west) / (volume.width - 1);
     // Argo floats only. `floats` now carries moored buoys too, and a buoy reports several

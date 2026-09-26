@@ -37,8 +37,8 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
     // **And whatever was already open is closed with it.** Explore is reachable from inside a
     // walkthrough, so opening Cyclone Montha and then asking a question left the Montha card on
     // screen over the new answer with IMD's track still drawn across it - two walkthroughs'
-    // worth of state claiming one scene. The two case cards already clear `tourStep` for exactly
-    // this reason; this is the same clearing in the other direction.
+    // worth of state claiming one scene. `startTour` and `startWalkthrough` hold the same rule
+    // for the two guided flows; this is it once more, for a question.
     useStore.setState({
       explore: false,
       caseStep: null,
@@ -68,15 +68,10 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
           <div className="explore-grid">
             <button
               className="explore-card explore-case"
-              onClick={() =>
-                useStore.setState({
-                  explore: false,
-                  tourStep: null,
-                  caseStep: 0,
-                  walkthrough: "montha",
-                  cardPaused: false,
-                })
-              }
+              onClick={() => {
+                useStore.setState({ explore: false });
+                useStore.getState().startWalkthrough("montha");
+              }}
             >
               <span className="explore-question">
                 What did Cyclone {store.stormCase.name} do to the ocean?
@@ -97,15 +92,10 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
           <div className="explore-grid">
             <button
               className="explore-card explore-case"
-              onClick={() =>
-                useStore.setState({
-                  explore: false,
-                  tourStep: null,
-                  caseStep: 0,
-                  walkthrough: "fishing",
-                  cardPaused: false,
-                })
-              }
+              onClick={() => {
+                useStore.setState({ explore: false });
+                useStore.getState().startWalkthrough("fishing");
+              }}
             >
               <span className="explore-question">What is under a fishing advisory?</span>
               <span className="explore-why">
@@ -140,7 +130,10 @@ export function Explore({ helpers }: { helpers: ExploreHelpers }) {
         <footer className="explore-foot">
           <button
             className="primary"
-            onClick={() => useStore.setState({ explore: false, tourStep: 0, cardPaused: false })}
+            onClick={() => {
+              useStore.setState({ explore: false });
+              useStore.getState().startTour();
+            }}
           >
             Show me every control instead
           </button>

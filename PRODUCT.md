@@ -25,7 +25,7 @@ Four audiences, and the problem statement names three of them by hand.
   front of them - often 1366x768. They will open the landing page, press one thing, and decide
   whether this is a visualisation or an instrument. The first screen has to answer that.
 - **School and college students, and the general public**, at an outreach event or an exhibition
-  screen. Fifteen variables in five groups is the right toolkit for a forecaster and the wrong
+  screen. Nineteen variables in six groups is the right toolkit for a forecaster and the wrong
   first minute for anybody else, which is why `Explore` and kiosk mode exist as a second door.
 - **A policymaker**, who needs the answer and the caveat in the same sentence.
 

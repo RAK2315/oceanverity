@@ -93,7 +93,7 @@ const read = await page.evaluate(() => {
     groups: (store.manifest.fieldGroups ?? []).map((g) => g.key),
     selected: store.fieldKey,
     volumeUrl: store.manifest.volumeFiles[store.upload.fields[0].key]?.[store.timestepIndex],
-    // The mapping from this platform's twelve Timesteps onto the file's own instants.
+    // The mapping from this platform's own Timesteps onto the file's instants.
     mapping: store.uploadSteps,
   };
 });

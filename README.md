@@ -127,12 +127,12 @@ hand.
 **It is a fork, not a pipeline.** That is the one thing worth understanding, and it exists to
 enforce the rule above.
 
-**Eleven providers → one adapter seam → one Grid → four ways out.** The fork is at step 3, and
+**Eleven adapters → one seam → one Grid → four ways out.** The fork is at step 3, and
 it is the whole of the rule above: the Grid keeps the numbers, the Volume gets the pixels, and
 nothing joins them back up.
 
 ```
-  ┌─ 1 · ELEVEN PROVIDERS - public, dated, re-fetchable ──────────────────┐
+  ┌─ 1 · ELEVEN ADAPTERS - ten public providers, plus your file ──────────┐
   │ INCOIS ERDDAP · VAM           Argo GDAC · Ifremer                     │
   │ INCOIS ERDDAP · McCreary      Argo BGC · chlorophyll, oxygen          │
   │ NOAA OSMC · moored buoys      Copernicus Marine · uo, vo              │

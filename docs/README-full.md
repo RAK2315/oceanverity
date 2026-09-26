@@ -68,7 +68,7 @@ them is edited; the copies in `docs/`, `web/public/` and `ppt/` are published fr
 | <img src="docs/images/isosurface.jpg" alt="A shaded three-dimensional surface showing the undulating 17.7 degree Celsius isotherm inside the water."> | <img src="docs/images/density.jpg" alt="The ocean block drawn in the density palette, pale at the surface and deep purple below."> |
 | **Isosurface.** A surface of one constant value, visibly doming. The depth of an isotherm like this is what drives cyclone-intensity forecasts. | **Density**, computed here from temperature and salinity via TEOS-10. Across the year the Bay of Bengal is 3.0 kg/m³ *lighter* than the Arabian Sea while its temperature swings from cooler to warmer by season, because the rivers make it fresher. |
 | <img src="docs/images/salinity.jpg" alt="The ocean block in the salinity palette, with the fresh Bay of Bengal in dark blue against the salty Arabian Sea in yellow."> | <img src="docs/images/bias.jpg" alt="Instrument markers recoloured by how far the analysis sat from each one, with a ranked list of the worst beside them."> |
-| **Salinity.** The reason for that density: the Ganges and Brahmaputra make the northern Bay 3.7 PSU fresher than the Arabian Sea, averaged across the year. | **The bias map.** Every dot stops meaning "an instrument" and starts meaning "how wrong the analysis was here", ranked worst first. INCOIS's analysis is built from Argo floats, so the **17 moored buoys are the closer thing to an independent check: 1.01 °C typical gap against 0.18 °C across 249 floats.** |
+| **Salinity.** The reason for that density: the Ganges and Brahmaputra make the northern Bay 3.7 PSU fresher than the Arabian Sea, averaged across the year. | **The bias map.** Every dot stops meaning "an instrument" and starts meaning "how wrong the analysis was here", ranked worst first. INCOIS's analysis is built from Argo floats, so the **17 moored buoys are the closer thing to an independent check: 0.88 °C typical gap against 0.18 °C across 246 floats.** |
 | <img src="docs/images/coverage.jpg" alt="The ocean block drawn as observation coverage, in four flat colour bands from grey through red and amber to green."> | <img src="docs/images/anomaly.jpg" alt="The ocean block as a temperature anomaly, red and blue, with rings marking each body of water that departed."> |
 | **Observation coverage.** Not the model - the *evidence* for it. **10.2%** of the block has no Argo cast behind it, and the picture shows exactly where. | **Anomaly features.** Every body of water that departed from its own average gets a ring. Click one and it tells you why it is there, and whether anything measured it. |
 | <img src="docs/images/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones."> | <img src="docs/images/hazard.jpg" alt="Cyclone heat potential draped on the sea surface, deep red over the Bay of Bengal."> |
@@ -150,7 +150,7 @@ That third step is the thing that does not exist today.
    them. What it does have is a score. An Argo float's track *is* measured drift at 1000 m, so
    the same maths was run from **219** drifting floats' own positions, over the days the
    current field actually covers: from a position known one Argo cycle ago it lands a median
-   **41 km** from where the float went, 93 km at the ninetieth percentile, across 6,246 cycles.
+   **41 km** from where the float went, 93 km at the ninetieth percentile, across 6,185 cycles.
    No other drift demo tells you that, because
    none of them has the observations in the same file.
 
@@ -189,7 +189,7 @@ That third step is the thing that does not exist today.
    question. INCOIS's gridded analysis is **built from Argo floats**, so a float's residual is
    largely the analysis agreeing with data it was made from; the seventeen moored buoys are not
    described as inputs, which makes them the closer thing to an independent check. Measured: the
-   typical temperature gap is **0.18 degC** across 249 floats and **1.01 degC** across the 17
+   typical temperature gap is **0.18 degC** across 246 floats and **0.88 degC** across the 17
    buoys, and pooled into one number the buoys disappear.
 
 12. **You switch to Currents.** A few thousand dots stream across the basin, carried by the
@@ -344,7 +344,7 @@ each one that opens the platform with the control that answers it already set.
 | ...of **Glider, CTD and BGC** data | **BGC met, gliders read, CTD refused** | **BGC is wired up**: chlorophyll from 57 Argo floats, live in this window. **Gliders now have an adapter** and it reads the archive the PS names; the newest cast in this box is 2022-10-14, so the finding ships rather than a 2022 instrument drawn at a 2026 analysis. Ship CTD stays out on a measurement: the newest GO-SHIP section here is Apr 2025 | `sources/glider.py`, `docs/plan/03-requirement-gaps.md` |
 | **Multi-format ingestion**: NetCDF via xarray backend | **Met, and demonstrable** | `xarray` + `netCDF4`; PyNIO is deprecated upstream and xarray is its sanctioned replacement. Beyond reading providers' NetCDF, **a visitor can drop their own file on the page** and see its variables in the same selector: `POST /api/netcdf` reads it through `sources/netcdf.py`, a Source Adapter behind the same protocol as every provider. The refusals are the point - a missing longitude, a sigma coordinate, an ensemble dimension or an ocean elsewhere in the world are each refused **by name**, with nothing drawn | `sources/netcdf.py`, `api/upload.py` |
 | ...and delimited text formats | **Met** | The Argo CSV parser, with the column layout stored as data rather than code | `sources/argo.py` |
-| ...modular, new sources with minimal code change | **Met** | See the gap table above. Nine adapters now, and the ninth reads a file that did not exist when the code was written | `sources/base.py` |
+| ...modular, new sources with minimal code change | **Met** | See the gap table above. Eleven adapters now, and the eleventh reads a file that did not exist when the code was written | `sources/base.py` |
 | **Colourbar editor**: palette, min/max range, log/linear | **Met** | Both range handles, and the range is analytical rather than cosmetic - water outside it is not drawn at all. **The log/linear toggle now works**: it was cut because the shader bent the water while the colourbar stayed straight, which was a bug rather than a reason. There is now exactly one curve, in one file, exported as a function for the colourbar and as the identical GLSL for the ray marcher. Still no palette chooser: each variable carries the cmocean scale designed for its quantity, because a chooser let you put an oxygen scale on temperature. `docs/adr/0010` | `web/src/transfer.ts` |
 | **Variable selector** | **Met** | **15**, in five groups the way a forecaster thinks rather than the way the data arrived: **Ocean state** 3 &middot; **Change** 2 &middot; **Evidence** 4 &middot; **Circulation** 1 &middot; **Hazard** 5, plus a **Yours** tab whenever a visitor has dropped a file in. INCOIS publish two of them; the rest are computed here or read from a second provider, which is the extensibility claim made visible rather than argued | `Controls.tsx` |
 | **Layer opacity control** | **Met** | Water opacity, plus a feature-emphasis slider | `Controls.tsx` |
@@ -355,7 +355,7 @@ each one that opens the platform with the control that answers it already set.
 | **Deployable on INCOIS infrastructure with no client-side dependencies** | **Met** | Static site plus one Python service. No tokens, no accounts, no plugins | `web/`, `api/` |
 | **Extensible design** for CTDs, moorings, HF-radar, ADCP | **Met for moorings and gliders** | Moored buoys are wired up through NOAA's public GTS feed - a genuinely different format (depth not pressure, one row per level, no quality flags) absorbed behind the same protocol - and the glider archive has its own adapter reading a 248 MB directory index. 17 moored buoys are in this build, and between 5 and 14 report at any one Timestep. HF-radar and ADCP stay unmet because INCOIS lists HF-radar data as registered access and moored-buoy currents as view-only, so using either needs a data request to INCOIS - a data-policy limit, not because the seam cannot carry them | `sources/osmc.py`, `sources/glider.py` |
 | **Vertical section** along a line you draw | **Met, and not asked for** | The standard figure of physical oceanography, cut live from the native grid along a great circle between two points you click, with every cast within a corridor of the line on the same axes and drawn to the depth it reached. Reads the model's own 24 levels, never the depth-warped rendering volume. The three collocated variables ship their full-precision grids in the build - 7.0 MB - so it works offline and on the static site, and `/api/section` serves the same cut to anything else. The browser's answer is checked against the pipeline's value by value: 1,102 values, worst gap **5.07e-5 °C** | `oceanverity/section.py`, `web/src/section.ts` |
-| **Search-and-rescue support**, named in the PS's own list of impeded mandates | **Built, and scored** | Drop a pin; the Copernicus current field is integrated forward from it at the depth you have sliced to. **Never labelled a search forecast**: a real one needs surface wind, Stokes drift and object-specific leeway, and this carries none of them, which is why INCOIS run SARAT. The reason it ships anyway is that it checks itself - an Argo track is measured drift at the parking depth, so the same integrator was run from **219** floats' own positions, over the days the current field actually covers, and the result published: median **40.9 km** out over one Argo cycle, 92.7 km at the ninetieth percentile across 6,246 cycles, and by 30 days the separation is the same size as the distance travelled, and larger than it after that. `docs/adr/0015` | `pipeline/oceanverity/drift.py` |
+| **Search-and-rescue support**, named in the PS's own list of impeded mandates | **Built, and scored** | Drop a pin; the Copernicus current field is integrated forward from it at the depth you have sliced to. **Never labelled a search forecast**: a real one needs surface wind, Stokes drift and object-specific leeway, and this carries none of them, which is why INCOIS run SARAT. The reason it ships anyway is that it checks itself - an Argo track is measured drift at the parking depth, so the same integrator was run from **217** floats' own positions, over the days the current field actually covers, and the result published: median **41.0 km** out over one Argo cycle, 92.8 km at the ninetieth percentile across 6,185 cycles, and by 30 days the separation is the same size as the distance travelled, and larger than it after that. `docs/adr/0015` | `pipeline/oceanverity/drift.py` |
 | **Where the model disagrees**, found automatically | **Met, and not asked for** | Two scans, over two different questions. *Where did the field depart from its own average* is the Anomaly Features: 404 connected bodies across the thirty-six steps, each ringed and explained. *Where does the model depart from the instruments* is the bias map: every collocated instrument coloured by its gap and ranked worst first, with the region binned onto 5 degree boxes so a regional bias is distinguishable from scatter. **Neither is AI and neither is captioned as one** - there is no model, no training set and no confidence score, only the mean and the RMS of residuals already measured | `oceanverity/anomaly.py`, `oceanverity/residuals.py` |
 | ...and **machine-learning derived products** | **Not met** | Named as an extension point. Inventing one would be inventing a requirement | - |
 
@@ -365,7 +365,7 @@ each one that opens the platform with the control that answers it already set.
 | --- | --- | --- |
 | **CF Conventions for NetCDF** | **Met** | We read INCOIS's CF-1.6 and now write CF-1.8: `/api/netcdf/{field}/{index}` serves a self-describing file with real standard names. Fields with no standard name - the anomaly, coverage - carry a `long_name` and no invented one |
 | **OGC WMS / WCS** | **Partly** | WMS 1.3.0 is served, with both axis orders handled and tested. It publishes the fields that exist nowhere else - density and the anomaly - because INCOIS's own ERDDAP already serves WMS for their temperature, so re-serving that is re-publishing. **WCS is not built**, deliberately: no maintained Python server, and the numbers are already on OPeNDAP |
-| **Interoperability with data portals** | **Partly** | We read **8** independent sources through open APIs - INCOIS ERDDAP twice, Ifremer Coriolis for Argo and for BGC, NOAA AOML's OSMC feed, Copernicus Marine, Ifremer's EGO glider archive and NOAA NCEI - each behind one adapter, plus a ninth that reads a NetCDF file a visitor supplies, and expose OPeNDAP, CF-1.8 NetCDF and WMS so another system can read us back. We are not listed in anybody's catalogue, which a prototype should not be |
+| **Interoperability with data portals** | **Partly** | We read **10** independent sources through open APIs - INCOIS ERDDAP twice, Ifremer Coriolis for Argo and for BGC, NOAA AOML's OSMC feed, Copernicus Marine three times (currents, biogeochemistry and satellite), Ifremer's EGO glider archive and NOAA NCEI - each behind one adapter, plus an eleventh that reads a NetCDF file a visitor supplies, and expose OPeNDAP, CF-1.8 NetCDF and WMS so another system can read us back. We are not listed in anybody's catalogue, which a prototype should not be |
 | **Climate monitoring**, named in the PS's own list of impeded mandates | **Met** | Two Change variables, and the difference between them is the point. The Temperature Anomaly is a departure from this bake's own year and says so. **Temperature vs Normal** is a departure from NOAA's World Ocean Atlas 2023 1991-2020 mean for the same calendar month, which is what a forecaster means by "warmer than usual". Read anonymously over OPeNDAP at bake time - no account at any point. Measured across 1,049,076 cells: mean +0.074 °C, 95th percentile of the magnitude 2.050 °C. Below 1500 m the atlas has no normal and the field is blank rather than zero. `docs/adr/0016` |
 | **Public outreach and science communication** | **Partly** | The problem statement gives this its own section and names five audiences and three settings. Against them: **Show me around**, a guided walk in six chapters and 23 steps that visits all **48** explained controls, with a probe that fails if one is ever missed; **Explore**, the platform as nine questions each of which sets the whole scene up and each of which carries the caveat its simplification costs; **`?kiosk=1`**, an exhibition screen with no panels, the questions on a loop and a reset 30 seconds after the last visitor leaves; and **copy this view**, which writes what is on screen into a link a teacher can put on a slide. Still **Partly**, for two stated reasons: there is no printable one-page brief for the policymaker row, and the app has one media query, at 1180 px, so laptops are fine and phones are not |
 
@@ -483,7 +483,7 @@ landing page names no picture that is not there and keeps its headline readable 
 
 ## 5. Architecture
 
-<img src="docs/images/architecture.png" width="900" alt="The architecture as a fork. Left to right: eight providers plus a NetCDF file a visitor drops on the page, one source-adapter seam in Python, then the Grid - float64 on the provider's own axes, the scientific truth - and four ways out. The Volume hangs below the Grid as a dashed box and its single arrow, labelled pixels only, never a reading, goes to the screen; a separate arrow labelled numbers, unchanged goes from the Grid to the API and the open standards.">
+<img src="docs/images/architecture.png" width="900" alt="The architecture as a fork. Left to right: ten providers plus a NetCDF file a visitor drops on the page, one source-adapter seam in Python, then the Grid - float64 on the provider's own axes, the scientific truth - and four ways out. The Volume hangs below the Grid as a dashed box and its single arrow, labelled pixels only, never a reading, goes to the screen; a separate arrow labelled numbers, unchanged goes from the Grid to the API and the open standards.">
 
 *Rendered from [`scripts/ppt_diagrams.html`](scripts/ppt_diagrams.html) by
 `cd web && node render-diagrams.mjs`. It is drawn rather than generated because every label in it
@@ -492,7 +492,7 @@ at the right box.*
 
 ### The shape of it: a fork, not a pipeline
 
-Nine adapters read nine formats and hand back one thing: a **`Grid`**. Everything after that point
+Eleven adapters read eleven formats and hand back one thing: a **`Grid`**. Everything after that point
 is written against the `Grid` and has never heard of ERDDAP, of FTP, or of NetCDF. That is the
 whole of the left half of the picture.
 
@@ -509,7 +509,7 @@ A box diagram says two things are connected. These say what moves.
 
 | From | To | What actually crosses |
 | --- | --- | --- |
-| Eight providers, plus a file a visitor drops | The adapter seam | Gridded NetCDF, delimited text and one FTP directory index, **subset at the server** so we pull one region and one window rather than a global file |
+| Ten providers, plus a file a visitor drops | The adapter seam | Gridded NetCDF, delimited text and one FTP directory index, **subset at the server** so we pull one region and one window rather than a global file |
 | The adapter seam | The `Grid` | `Grid` and `Profile` objects on the provider's own axes, land already masked to `NaN`, quality flags already read per channel |
 | The `Grid` | The `Volume` | The **bake**: quantise to 4 bytes a voxel - value, coverage, gradient, spare - and warp 24 uneven levels onto 48 even ones |
 | The `Grid` | The API, the standards, the panels | **Numbers, unchanged.** float64 server-side, float32 for the three native grids that ship in the build |
@@ -553,7 +553,7 @@ behind it at all.
    and quantised to four bytes a voxel, because a GPU 3D texture cannot have uneven levels. A
    `Field` whose value *is* a depth, or a total for the whole column, ships as **float32 on the
    `Grid`'s own axes** instead, because a reader reads metres and kJ/cm&sup2; off those. Total,
-   **192 MB**, committed to the repository.
+   **223 MB**, committed to the repository.
 6. **Browser.** `fetch` the manifest, then the files. Build GPU textures. Ray-march the
    `Volume`. Draw the instruments where they actually were. **Zero network calls to anything
    outside the build**, including the fonts, and CI fails the push if that stops being true.
@@ -617,13 +617,13 @@ leaving the building is still science.
 
 | | |
 | --- | --- |
-| Source Adapters | **9** - 8 providers, plus one that reads a file a visitor drops on the page |
+| Source Adapters | **11** - 10 providers, plus one that reads a file a visitor drops on the page |
 | `Field`s | **15**, in 5 groups, plus a **Yours** tab when a file is dropped |
 | Render kinds | **4** - a `Volume`, a depth `Sheet`, a column `Drape`, a `vector` field |
 | Analyses baked | **12** Timesteps, 10 days apart, 2026-04-10 to 2026-07-30 |
 | Volume lattice | **56 x 36 x 48**, 4 bytes a voxel |
 | Instruments | **276** - 259 Argo floats and 17 moored buoys, 57 of them carrying chlorophyll |
-| Static bake | **192 MB**, committed, **0** network calls to run |
+| Static bake | **223 MB**, committed, **0** network calls to run |
 | HTTP routes on the API | **21** - 15 REST and 6 that speak an open standard |
 | Tests | **409**, all on the science and on what we serve |
 | Browser probes | **13**, measuring what actually reaches the screen |

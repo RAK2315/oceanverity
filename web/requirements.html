@@ -22,10 +22,16 @@
       // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
       // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
       if (stored === null) stored = localStorage.getItem("samudra.theme");
-      if (stored === "light") {
+      // Light unless the reader chose dark. Owner's call on 2026-09-26; the test is against
+      // "dark" so a first visit and a truncated value both land on light.
+      if (stored !== "dark") {
         document.documentElement.dataset.theme = "light";
       }
-    } catch (e) { /* storage blocked: dark is the default and still correct */ }
+    } catch (e) {
+      // Storage blocked. Light is the default now, so set it rather than falling through to the
+      // dark tokens on `:root`.
+      document.documentElement.dataset.theme = "light";
+    }
   })();
 </script>
 <style>

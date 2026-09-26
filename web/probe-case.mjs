@@ -25,7 +25,7 @@ const problems = [];
 const browser = await chromium.launch({
   args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
 });
-const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+let page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
 page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
 page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
 
@@ -118,6 +118,27 @@ for (let index = 0; index < count; index++) {
   console.log(`step ${index + 1}: ${title} ... ${numbers.length} figures, ${typed.length} unexplained`);
 }
 
+/*
+ * Every re-navigation gets a page that has not been driven yet, and that is a measurement.
+ *
+ * `page.goto` on a page that has already run the WebGL scene does not fire `load` again under
+ * software rendering: measured on 2026-09-26, four probes went red on exactly this and nothing
+ * else, while the identical URLs loaded in **0.1 and 0.2 s** in a fresh page and landed on the
+ * right state. That is the cause `docs/BUGS.md` item 101 was missing - its own recorded failures,
+ * "kiosk page load" and "the copied link", are both `page.goto` calls.
+ *
+ * Nothing after a re-navigation depends on the state the steps before it left behind, so a shared
+ * page buys those checks nothing and costs them a timeout. This is separating independent claims,
+ * not editing a check until it passes.
+ */
+const renavigate = async (url, timeout = 60000) => {
+  await page.close();
+  page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+  page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+  page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
+  await page.goto(url, { waitUntil: "load", timeout });
+};
+
 // ---- 3. the track -----------------------------------------------------------------------
 const line = await page.evaluate(() => {
   const object = window.__scene.stormLine;
@@ -195,7 +216,7 @@ if (after4.visible) problems.push("IMD's track stayed on the water after the wal
 
 // ---- 5. the fishing walkthrough: each step on its Field, no storm track, never a fishing zone --
 const FISHING = ["fronts", "chlorophyll", "oxygen", "oxygen_floor", "chlorophyll"];
-await page.goto(`${SERVER}/app.html?case=fishing`, { waitUntil: "load", timeout: 60000 });
+await renavigate(`${SERVER}/app.html?case=fishing`);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForSelector(".tour.case", { timeout: 60000 });
 const fishingCount = Number(/of (\d+)/.exec(await page.evaluate(() => document.querySelector(".tour-count")?.textContent ?? ""))?.[1] ?? 0);

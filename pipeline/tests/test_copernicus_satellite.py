@@ -15,7 +15,7 @@ import xarray as xr
 
 from oceanverity.sources import copernicus_satellite
 from oceanverity.sources.base import BoundingBox
-from oceanverity.sources.copernicus_satellite import CHL_DATASET, SST_DATASET, SatelliteFrontsSource
+from oceanverity.sources.copernicus_satellite import SST_DATASET, SatelliteFrontsSource
 
 BOX = BoundingBox(south=0.0, north=1.0, west=60.0, east=62.0)
 WHEN = datetime(2026, 7, 30, tzinfo=timezone.utc)

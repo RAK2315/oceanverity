@@ -7,10 +7,11 @@
  * the isosurface kept drawing after the control that turned it on had gone.
  *
  * So this walks every Field and reports, per Field: whether each control is on screen, what the
- * shader is actually doing, and what the panel says it is doing. The two must agree.
+ * shader is actually doing, and what the panel says it is doing. The two must agree, on five
+ * rules checked below.
  *
  * It also **fails** when they do not. For a round it built the `broken` list below, printed it,
- * and exited 0 - so six checked rules could all have been violated and the run was still green.
+ * and exited 0 - so every checked rule could have been violated and the run was still green.
  *
  *   node probe-controls.mjs        (needs a preview server on 4173)
  */
@@ -122,15 +123,57 @@ for (const r of rows) {
     broken.push(`${r.key}: diverging isosurface readout "${r.iso.readout}" has no plus-or-minus`);
   }
   // 5. The log toggle is offered only where the range starts at zero and the palette can bend.
+  //
+  // All three conditions in one rule, deliberately. There used to be a sixth rule below - "a
+  // banded Field must never be offered one, whatever its range says" - and because `shouldLog`
+  // already requires `!banded`, it could never fire on its own: every state that tripped it had
+  // already tripped this one. A check that can only ever be the second line of a failure is a
+  // rule the file counts and the run cannot fail on.
   const span = r.range[1] - r.range[0];
   const shouldLog = r.range[0] >= 0 && !r.scale.banded && span > 0 && r.range[0] <= 0.05 * span;
   if (r.scale.toggleOnScreen !== shouldLog) {
-    broken.push(`${r.key}: log toggle on screen = ${r.scale.toggleOnScreen}, should be ${shouldLog}`);
+    broken.push(
+      `${r.key}: log toggle on screen = ${r.scale.toggleOnScreen}, should be ${shouldLog}` +
+        (r.scale.banded ? " (banded palette: a gradient would repaint its bands)" : ""),
+    );
   }
-  // 6. A banded Field must never be offered one, whatever its range says.
-  if (r.scale.banded && r.scale.toggleOnScreen) {
-    broken.push(`${r.key}: banded palette is offering a log scale`);
-  }
+}
+
+// ---- a control nobody can see may not be left switched off -------------------------------------
+//
+// The same class as rule 1, one Field along. "Mark them in the water" is drawn on the anomaly
+// Field alone, and `hazardPreset()` - which "Set up a cyclone question" and several Explore
+// questions call - switched the rings off from a Field where the checkbox does not exist. So a
+// reader who had been anywhere near cyclone mode arrived at Anomaly Features with the marks off
+// and nothing on screen saying why. Reported by the owner, `docs/BUGS.md` item 141. `selectField`
+// resets it now, like every other render hint, and `hazardPreset` no longer sets it at all.
+//
+// Checked through the store's own two actions, in the order the reader takes them.
+await page.evaluate(() => {
+  window.__store.getState().hazardPreset();
+});
+await page.waitForTimeout(1200);
+await page.evaluate(() => {
+  const s = window.__store.getState();
+  s.selectField("temperature_anomaly");
+  s.set("openGroups", { ...s.openGroups, anomalyFeatures: true });
+});
+await page.waitForTimeout(2000);
+const marks = await page.evaluate(() => {
+  const label = [...document.querySelectorAll("label")].find((l) =>
+    l.textContent.includes("Mark them in the water"),
+  );
+  return {
+    store: window.__store.getState().showAnomalies,
+    checkbox: label ? label.querySelector("input").checked : null,
+  };
+});
+console.log(`after the cyclone preset, Anomaly Features: ${JSON.stringify(marks)}`);
+if (marks.store !== true || marks.checkbox !== true) {
+  broken.push(
+    `the anomaly marks are off after the cyclone preset: ${JSON.stringify(marks)} - a control ` +
+      `that is not on screen was switched off from a Field that does not draw it`,
+  );
 }
 
 console.log("FIELDS", JSON.stringify(rows, null, 1));

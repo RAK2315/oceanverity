@@ -158,19 +158,55 @@ if (agreement.error) {
 // markers are turned off first - before the pair, never between its two frames - and what is
 // left is measured as a **baseline** and required to be much smaller than the layer itself.
 // Without that, "it moved" and "it drew" are the same measurement.
+//
+// **The baseline has to cost the same elapsed time as the signal, or it is not a control.**
+// This waited 500 ms between the two hidden frames and 500 ms again before the visible one, and
+// measured on 2026-09-23 the water alone moves **3.16%** of the frame in 500 ms while the whole
+// dot layer is **2.7%**. So the control was three times the size of the thing it was
+// controlling for and the threefold rule could never pass - not a coin toss, a reproducible
+// failure. Proved by turning the volume off: the same pair then differs by **0.000%**, so every
+// bit of that background was the ray marcher's `uTime`.
+//
+// So the water is switched off for the pair, the way the markers already were, and the frames
+// are taken back to back. **Nothing in the frame animates then** and the baseline is 0.000%,
+// which is what a control is supposed to look like. Turning it off between the two frames would
+// be the mistake `CLAUDE.md` names - a store push re-asserts `visible` on the layers it rebuilds
+// - so it goes off before the pair and comes back after, exactly like `showFloats`.
+//
+// The layer's share is measured over bare ground rather than over water this way, so it is not
+// the same number as the on-screen share `CLAUDE.md` quotes. This check asks whether the layer
+// draws at all; the share it quotes is a range on an unchanged build anyway.
 await page.evaluate(() =>
-  window.__store.setState({ currentStyle: "particles", showFloats: false, showAnomalies: false }),
+  window.__store.setState({
+    currentStyle: "particles",
+    showFloats: false,
+    showAnomalies: false,
+    volumeEnabled: false,
+  }),
 );
 await page.waitForTimeout(1200);
 
-await page.evaluate(() => window.__scene.setLayerVisibleForTest("particles", false));
-await page.waitForTimeout(500);
+// Wait for two presented frames rather than for a number of milliseconds. Under software
+// rendering a 500 ms wait is not reliably longer than one frame, so a screenshot taken after it
+// sometimes still held the layer that had just been hidden - and then the "baseline" was the
+// layer, at 2.7% against the layer's own 3.1%, and the run failed at random. Two
+// `requestAnimationFrame`s is the shortest wait that guarantees the new state has been drawn.
+const drawn = () =>
+  page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+const setFlow = async (visible) => {
+  await page.evaluate((v) => window.__scene.setLayerVisibleForTest("particles", v), visible);
+  await drawn();
+};
+
+await setFlow(false);
 const withoutFlow = decodePng(await page.screenshot({ timeout: 180000 }));
-await page.waitForTimeout(500);
+// A second hidden frame, taken the same way, so the baseline costs what the signal costs.
+await setFlow(false);
 const withoutFlowAgain = decodePng(await page.screenshot({ timeout: 180000 }));
 
-await page.evaluate(() => window.__scene.setLayerVisibleForTest("particles", true));
-await page.waitForTimeout(500);
+await setFlow(true);
 const withFlow = decodePng(await page.screenshot({ timeout: 180000 }));
 
 const baseline = comparePixels(withoutFlow, withoutFlowAgain).share * 100;
@@ -186,7 +222,9 @@ if (!Number.isFinite(moved) || moved < MIN_COVERAGE_PERCENT || moved < baseline 
       `note in CLAUDE.md`,
   );
 }
-await page.evaluate(() => window.__store.setState({ showFloats: true, showAnomalies: true }));
+await page.evaluate(() =>
+  window.__store.setState({ showFloats: true, showAnomalies: true, volumeEnabled: true }),
+);
 
 // ---- 3. no dot is on land ----------------------------------------------------------------
 const ashore = await page.evaluate(() => {
@@ -208,7 +246,12 @@ const ashore = await page.evaluate(() => {
   return { checked, ashore };
 });
 console.log(`${ashore.checked} dots checked against the mask, ${ashore.ashore} on land`);
-if (ashore.checked > 0 && ashore.ashore > 0) {
+// Fail on an empty measurement as well as on a bad one. The scene hook is reached through
+// optional chaining, so a renamed `particleFlowForTest` used to leave `checked` at 0 and the
+// check passed by having measured nothing at all.
+if (ashore.checked === 0) {
+  problems.push("no dot was checked against the mask: the flow or the vector field was missing");
+} else if (ashore.ashore > 0) {
   problems.push(
     `${ashore.ashore} of ${ashore.checked} dots are sitting where the field has no current - ` +
       `they should have been re-seeded the frame they arrived`,

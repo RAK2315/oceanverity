@@ -173,8 +173,8 @@
     <span class="label">The state of it</span>
     <p>
       This is not a concept. It is a working prototype, deployed and publicly reachable, running
-      on live data from INCOIS's own public server, current to 30 July 2026. It carries 377
-      automated tests over the scientific logic and sixteen written architecture decision records.
+      on live data from INCOIS's own public server, current to 30 July 2026. It carries 511
+      automated tests over the scientific logic and eighteen written architecture decision records.
     </p>
   </div>
 
@@ -359,7 +359,7 @@
       <tr><td>Collocation</td><td><em>The contribution.</em> Pairs an observed profile with the model interpolated to that profile's exact position and time. Comparison happens at the observation's depths, not the model's, so fine vertical structure is not smoothed away.</td></tr>
       <tr><td>Residual statistics</td><td><em>Science.</em> Depths compared, average gap (signed, so direction is meaningful) and typical gap. A plain-language verdict interprets them.</td></tr>
       <tr><td>Guide panel</td><td><em>Comprehension.</em> Explains whatever control was last touched, and otherwise describes the current view in plain language. 44 entries, one per control, and an automated browser check fails the build if a control is ever added without one.</td></tr>
-      <tr><td>Bias map</td><td><em>The contribution, at basin scale.</em> Every instrument recoloured by how far the analysis sat from it, with a ranked list of the worst. Split by instrument kind, because INCOIS's gridded analysis is built from Argo floats and the moored buoys are not described as inputs: measured, the typical temperature gap is 0.18 &deg;C across 249 floats against 1.01 &deg;C across the seventeen moored buoys, and pooling the two hides the honest number.</td></tr>
+      <tr><td>Bias map</td><td><em>The contribution, at basin scale.</em> Every instrument recoloured by how far the analysis sat from it, with a ranked list of the worst. Split by instrument kind, because INCOIS's gridded analysis is built from Argo floats and the moored buoys are not described as inputs: measured, the typical temperature gap is 0.18 &deg;C across 246 floats against 0.88 &deg;C across the seventeen moored buoys, and pooling the two hides the honest number.</td></tr>
       <tr><td>Vertical section</td><td><em>Science.</em> Draw a line and the model is cut open along it, depth down and distance across, with every cast within 150 km on the same axes. Cut from the model's own grid rather than the rendered block, and checked value by value against the API: 1,102 values, worst gap 5&times;10<sup>-5</sup> &deg;C.</td></tr>
       <tr><td>Drift</td><td><em>Search and rescue.</em> Drop a pin and the analysed current carries it forward. The same integrator was run from 217 real floats' own positions, so it ships with a measured error rather than an assumed one: median 41.0 km over one Argo cycle, 92.8 km at the ninetieth percentile, across 6,185 cycles.</td></tr>
     </tbody>
@@ -668,7 +668,7 @@
   <h2>Decisions and why</h2>
 
   <p>
-    Nine architecture decision records are kept in the repository. The ones most likely to be
+    Eighteen architecture decision records are kept in the repository. The ones most likely to be
     asked about are summarised here.
   </p>
 
@@ -736,7 +736,7 @@
       <tr><td>What is an Argo float?</td><td>A robot instrument about the size of a person. It sinks to 2000 m, drifts for ten days, then rises to the surface measuring temperature and salinity all the way up, transmits by satellite, and repeats. There are around 4000 worldwide.</td></tr>
       <tr><td>Who owns this data?</td><td>The gridded analysis is INCOIS's, part of the Ministry of Earth Sciences. Argo data is made freely available by the international Argo programme. Both are openly published and we credit both.</td></tr>
       <tr><td>Why only temperature and salinity?</td><td>Those are what this INCOIS product publishes with full depth resolution. Density and the temperature anomaly are computed from them here, and chlorophyll now comes from the 49 Argo floats that carry a fluorometer. Adding a variable is configuration, not new code.</td></tr>
-      <tr><td>Are all the instruments Argo floats?</td><td>No. Nine are moored buoys - four of them India's own OMNI network, three from the joint MoES-NOAA RAMA array - reaching us through the public global weather feed. They are anchored, so they have no drift track, and because they never move their comparison follows the timeline: you watch one patch of ocean through the whole season.</td></tr>
+      <tr><td>Are all the instruments Argo floats?</td><td>No. Seventeen are moored buoys - five of them India's own OMNI network, ten flagged to the United States including the joint MoES-NOAA RAMA array, and two the feed does not name an operator for - reaching us through the public global weather feed. They are anchored, so they have no drift track, and because they never move their comparison follows the timeline: you watch one patch of ocean through the whole season.</td></tr>
       <tr><td>Can we get the data out of it?</td><td>Yes, three ways: OPeNDAP, CF-1.8 NetCDF and OGC WMS 1.3.0, all served from the analysis on its native grid rather than from the volume used for rendering. You can open our OPeNDAP URL in xarray on your own machine.</td></tr>
       <tr><td>Why stop at 2000 m? The ocean is deeper.</td><td>Because Argo floats profile to 2000 m, so that is the depth range the analysis covers. Below that there are very few measurements anywhere in the world.</td></tr>
     </tbody>
@@ -747,7 +747,7 @@
     <tbody>
       <tr><td>If they disagree, is the model wrong?</td><td>Not necessarily, and this is the right question to ask. A disagreement means one of three things: the model missed something real, the instrument is faulty, or they are not measuring quite the same thing - the model is a 1&deg; average while the float is a single point. The tool's job is to surface the disagreement so a human can decide which.</td></tr>
       <tr><td>How do you know the float is not the wrong one?</td><td>We do not, from one comparison alone. That is why we apply quality control, show the number of depths compared, and report the pattern across all floats. An isolated large residual is suspicious; a consistent regional pattern, like the Oman upwelling case, is physical.</td></tr>
-      <tr><td>Is 0.5 a good number or a bad one?</td><td>Good. Across 84 floats the median typical gap is 0.46&nbsp;&deg;C, which is reasonable for an objective analysis. The application states this in words rather than leaving you to judge a bare number.</td></tr>
+      <tr><td>Is 0.5 a good number or a bad one?</td><td>Good. Across 246 floats the median typical gap is 0.47&nbsp;&deg;C, which is reasonable for an objective analysis. The application states this in words rather than leaving you to judge a bare number.</td></tr>
       <tr><td>Why compare at the float's depths rather than the model's?</td><td>Because resampling the observation to suit the model would smooth away exactly the fine vertical structure that makes the comparison worth doing.</td></tr>
       <tr><td>What if the float moved between the measurement and the analysis?</td><td>Each float is paired with the analysis step nearest in time to its cast, and the panel states both dates. If you scrub the timeline away from that step it warns you.</td></tr>
     </tbody>

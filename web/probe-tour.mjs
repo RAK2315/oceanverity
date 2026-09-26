@@ -167,6 +167,100 @@ await page.waitForTimeout(500);
 const ended = await page.evaluate(() => ({ tourStep: window.__store.getState().tourStep, card: !!document.querySelector(".tour") }));
 if (ended.tourStep !== null || ended.card) problems.push(`End did not close the paused tour: ${JSON.stringify(ended)}`);
 
+// ---- 5. one guided flow at a time ---------------------------------------------------------
+//
+// `tourStep` and `caseStep` are independent, both draw a card at the foot of the screen, and
+// nothing made them exclusive - so opening Cyclone Montha from Explore and then pressing "Show
+// me around" stacked two cards 21 px apart, the second reading out from behind the first, with
+// IMD's storm track still on the water under a tour that explains no such thing. Reported by the
+// owner on 2026-09-24; `docs/BUGS.md` item 140. Neither this probe nor `probe-case.mjs` had ever
+// constructed the state where both are open.
+//
+// Driven by pressing the buttons rather than by calling the store, both ways round, because the
+// rule has to hold for the reader's path and not only for the action it lives in. Then once more
+// through the deep link, because `?tour=1&case=montha` can arrive in one URL.
+const flows = () =>
+  page.evaluate(() => {
+    const s = window.__store.getState();
+    return {
+      tourStep: s.tourStep,
+      caseStep: s.caseStep,
+      cards: document.querySelectorAll("aside.tour").length,
+      // The storm track is drawn under exactly this condition, and `MapKey` names it under the
+      // same one - so a track outliving its walkthrough would be an unnamed mark on the water.
+      track: s.caseStep !== null && s.walkthrough === "montha",
+    };
+  });
+const openMontha = async () => {
+  await page.evaluate(() => window.__store.getState().set("explore", true));
+  await page.waitForSelector(".explore-case", { timeout: 30000 });
+  // `.first()` because two cards carry this class - the storm and the fishing walkthrough - and
+  // `dispatchEvent` rather than `click()` because the card's own handler closes Explore, so the
+  // element is detached while Playwright is still waiting for it to settle after the press. That
+  // hung for the full 30 s one run in two. The event still goes through React's handler, which
+  // is the path being tested; what is skipped is only the post-click actionability wait.
+  await page.locator(".explore-case").first().dispatchEvent("click");
+  await page.waitForTimeout(2500);
+};
+const openTour = async () => {
+  await page.click("button.tour-start");
+  await page.waitForTimeout(2500);
+};
+
+for (const [label, first, second] of [
+  ["Montha, then Show me around", openMontha, openTour],
+  ["Show me around, then Montha", openTour, openMontha],
+]) {
+  await page.evaluate(() => window.__store.setState({ tourStep: null, caseStep: null }));
+  await page.waitForTimeout(500);
+  await first();
+  await second();
+  const both = await flows();
+  console.log(`${label}: ${JSON.stringify(both)}`);
+  if (both.cards !== 1) problems.push(`${label}: ${both.cards} cards on screen, not 1`);
+  if (both.tourStep !== null && both.caseStep !== null) {
+    problems.push(`${label}: both guided flows are open - ${JSON.stringify(both)}`);
+  }
+  if (both.tourStep !== null && both.track) {
+    problems.push(`${label}: the tour is running with the storm track still on the water`);
+  }
+}
+
+/*
+ * The deep link gets a page of its own, and that is not a workaround.
+ *
+ * Re-navigating the page that has just driven 23 tour steps times out at 60 s, reproducibly -
+ * the shape `docs/BUGS.md` item 101 documents for `probe-outreach.mjs`. Measured on 2026-09-26:
+ * the identical URL loads in **0.1 s** in a fresh page and lands on the right state, so it is
+ * the reused page carrying four minutes of WebGL and not the link. This case depends on nothing
+ * the steps above leave behind, so a shared page buys it nothing and costs it a timeout.
+ *
+ * **The old page is closed first, and that is not tidiness.** Opened beside it, the two pages
+ * fetch and decode the same 223 MB of baked data at once under software rendering, and the
+ * second one's manifest never arrived inside 120 s - a fresh page is only fresh if it is also
+ * alone. Nothing below reads `page`, so closing it here costs nothing.
+ */
+await page.close();
+const fresh = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+fresh.on("pageerror", (e) => problems.push(`deep link pageerror: ${e.message}`));
+await fresh.goto(`${SERVER}/app.html?tour=1&case=montha`, { waitUntil: "load", timeout: 60000 });
+await fresh.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
+await fresh.waitForTimeout(3000);
+const linked = await fresh.evaluate(() => {
+  const s = window.__store.getState();
+  return {
+    tourStep: s.tourStep,
+    caseStep: s.caseStep,
+    cards: document.querySelectorAll("aside.tour").length,
+    track: s.caseStep !== null && s.walkthrough === "montha",
+  };
+});
+await fresh.close();
+console.log(`?tour=1&case=montha: ${JSON.stringify(linked)}`);
+if (linked.cards > 1 || (linked.tourStep !== null && linked.caseStep !== null)) {
+  problems.push(`a link carrying both opened both: ${JSON.stringify(linked)}`);
+}
+
 console.log(problems.length ? `PROBLEMS: ${problems.join(" | ")}` : "clean");
 await browser.close();
 process.exit(problems.length ? 1 : 0);

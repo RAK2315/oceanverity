@@ -16,8 +16,9 @@ What makes it worth shipping anyway is the second half, and it is a thing no oth
 shape can do: **an Argo float's track is measured drift at its parking depth.** So the same
 integrator can be run from a float's own first Fix and the answer laid beside where the float
 actually went. The result is not a claim; it is a measurement of how far the current field alone
-gets you, on 219 floats over a year of this water on the bake that ships (`manifest.drift`
-carries the count, so no figure here has to be kept in step with it). `track_against_drift` is that.
+gets you, over a year of this water on the bake that ships. **The float count is not written
+here**: `manifest.drift` carries it, this sentence said 219 against a real 217, and a docstring
+that promises not to keep a figure in step should not then quote one. `track_against_drift` is that.
 
 Numerically it is a midpoint (RK2) scheme on a field bilinear in space, linear in time between
 the ten-day analyses, and nearest in depth. Nearest in depth is the same rule the adapter used

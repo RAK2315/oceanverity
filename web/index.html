@@ -23,10 +23,16 @@
       // Renamed from a `samudra.` prefix on 2026-09-20. Falling back once keeps a returning
       // reader's choice; see web/src/remembered.ts, which this is the inline twin of.
       if (stored === null) stored = localStorage.getItem("samudra.theme");
-      if (stored === "light") {
+      // Light unless the reader chose dark. Owner's call on 2026-09-26; the test is against
+      // "dark" so a first visit and a truncated value both land on light.
+      if (stored !== "dark") {
         document.documentElement.dataset.theme = "light";
       }
-    } catch (e) { /* storage blocked: dark is the default and still correct */ }
+    } catch (e) {
+      // Storage blocked. Light is the default now, so set it rather than falling through to the
+      // dark tokens on `:root`.
+      document.documentElement.dataset.theme = "light";
+    }
   })();
 </script>
 <style>
@@ -249,7 +255,7 @@
   @media (max-width: 860px) { .nav-links a:not(.pill-btn) { display: none; } }
 
   /* theme toggle: a ghost circle button holding a sun and moon glyph, crossfaded. Light is
-     recorded as data-theme=light against a dark default, matching the rest of the platform. */
+     recorded as data-theme=light, which is now the default, matching the rest of the platform. */
 
 
   /* ------------------------------------------------- the shared theme pill
@@ -788,7 +794,7 @@
           data-image="./images/drift.jpg"
           data-image-light="./images/light/drift.jpg"
           data-body="Drop a pin and the analysed current carries it forward. What makes it worth having is the second half: an Argo float's track is measured drift at 1000 m, so the same maths was run from 217 real floats' own positions and the error published rather than assumed. The panel's first line says what it is not, because a real search needs wind, waves and the object's own leeway."
-          data-measure="Median 40.9 km out over one Argo cycle, 93 km at the 90th percentile, 6,246 cycles"
+          data-measure="How far the current field alone lands from where the float actually went, over one Argo cycle"
           data-link="./app.html?dive=1&amp;field=current_speed&amp;pin=51.5,9.5">
           <img src="./images/drift.jpg" data-light="./images/light/drift.jpg" alt="A pin dropped in the Arabian Sea with the purple track the analysed currents imply running away from it, over the moving current flow, and the panel beside it reporting the distance, the bearing and the method's own measured error.">
           <div class="feature-body">
@@ -819,7 +825,7 @@
           data-title="Every instrument at once"
           data-image="./images/bias.jpg"
           data-body="Turn on the bias map and every dot stops meaning 'here is an instrument' and starts meaning 'here is how wrong the analysis was here'. A ranked list names the worst. INCOIS's analysis is built from Argo floats, so a float largely shows the analysis agreeing with data it was made from; the seventeen moored buoys are not described as inputs, so they are the closer thing to an independent check, and the panel prints both rather than pooling them."
-          data-measure="Typical temperature gap 0.18 degC across 249 floats (compared to about 2000 m) and 0.88 degC across 17 buoys (to 500 m)"
+          data-measure="The typical temperature gap for floats and for moored buoys, reported apart rather than pooled"
           data-link="./app.html?dive=1&amp;bias=1">
           <img src="./images/bias.jpg" alt="Instrument markers recoloured by how far the model sat from each measurement.">
           <div class="feature-body">
@@ -850,7 +856,7 @@
           data-image="./images/normal.jpg"
           data-image-light="./images/light/normal.jpg"
           data-body="Two variables answer this and the difference between them is the point. One is a departure from this build's own year of analyses, which is a seasonal swing and says so. The other is a departure from NOAA's World Ocean Atlas 1991-2020 mean for the same calendar month, which is what a forecaster means by 'warmer than usual'."
-          data-measure="Across 1,049,076 cells: mean +0.07 degC, 95th percentile of the magnitude 2.05 degC"
+          data-measure="Mean and 95th-percentile departure from the 1991-2020 normal, across every ocean cell"
           data-link="./app.html?dive=1&amp;field=temperature_normal_anomaly">
           <img src="./images/normal.jpg" data-light="./images/light/normal.jpg" alt="Departure from the thirty-year normal drawn through the water column, with warm red patches and cool blue ones in the same block.">
           <div class="feature-body">
@@ -863,12 +869,12 @@
 
         <button class="feature" type="button" id="f-sources"
           data-title="Drop your own NetCDF file on it"
-          data-image="./images/salinity.jpg"
-          data-image-light="./images/light/salinity.jpg"
+          data-image="./images/upload.jpg"
+          data-image-light="./images/light/upload.jpg"
           data-body="Drag a CF-conventions NetCDF file onto the panel and its variables appear in the selector under a tab of their own, behaving exactly like the built-in ones: same colourbar, same depth slice, same isosurface, same 3D water. A file it cannot read is refused by name, with the axis it could not find, rather than drawing something wrong."
-          data-measure="Nine source adapters behind two protocols; adding one touches no renderer"
+          data-measure="One adapter class per provider, behind two protocols; adding one touches no renderer"
           data-link="./app.html?dive=1">
-          <img src="./images/salinity.jpg" data-light="./images/light/salinity.jpg" alt="The ocean block drawn in the salinity palette.">
+          <img src="./images/upload.jpg" data-light="./images/light/upload.jpg" alt="A file a visitor dropped on the page drawn as a block of water, with its own tab in the variable list and the panel naming the file, the axes it read and that nothing was stored.">
           <div class="feature-body">
             <span class="kind">Extensibility</span>
             <h3>Bring your own data</h3>
@@ -880,10 +886,11 @@
         <button class="feature" type="button"
           data-title="An exhibition screen that repairs itself"
           data-image="./images/kiosk.jpg"
+          data-image-light="./images/light/kiosk.jpg"
           data-body="A screen at a stall has nobody standing at it. Kiosk mode hides every panel, scales the type up for reading across a room, plays the questions on a loop, and resets to the start thirty seconds after the last visitor walks away, so the next one does not arrive at a broken view. The depth ruler grows a second line there: 1000 m becomes 'a sperm whale hunting'."
           data-measure="Tested by standing in front of it for 22 seconds and checking it moved on"
           data-link="./app.html?kiosk=1">
-          <img src="./images/kiosk.jpg" alt="The exhibition screen: no panels, one large caption over the water.">
+          <img src="./images/kiosk.jpg" data-light="./images/light/kiosk.jpg" alt="The exhibition screen: no panels, one large caption over the water.">
           <div class="feature-body">
             <span class="kind">Outreach</span>
             <h3>Kiosk mode</h3>
@@ -936,7 +943,7 @@
         <div>
           <h3>Start on the globe</h3>
           <p>India's exclusive economic zone, coloured with INCOIS's own gridded analysis.
-            Every marker is an Argo float that reported in the last 60 days.</p>
+            Every marker is an instrument that reported within five days of the analysis on screen.</p>
         </div>
       </div>
       <div class="step reveal reveal-1">
@@ -990,8 +997,8 @@
     <h2 class="heading reveal reveal-1">The problem statement asks for a science communication tool. So there are two doors.</h2>
     <p class="section-lede reveal reveal-2">
       It names school and college students, the general public at awareness campaigns, and
-      policymakers, and three settings: outreach events, exhibitions and e-learning. Fifteen
-      variables in five groups is the right toolkit for a forecaster and the wrong first minute
+      policymakers, and three settings: outreach events, exhibitions and e-learning. Nineteen
+      variables in six groups is the right toolkit for a forecaster and the wrong first minute
       for any of those. So the same platform has a second way in, and the console gained nothing.
     </p>
 
@@ -1257,7 +1264,7 @@
     });
   })();
 
-  // theme toggle: light is recorded as data-theme=light against a dark default, one shared key.
+  // theme toggle: light is data-theme=light and is the default; dark is the attribute's absence.
   // The toggle swaps tokens on <html>; it could not swap the *screenshots*, because an `<img src>`
   // is not a CSS property. Every picture with a light twin carries it in data-light and this
   // rewrites src on each toggle - and on load, so a reader who arrives already-light does not see
@@ -1326,13 +1333,17 @@
     /*
      * A feature card's measure line, rewritten from the bake.
      *
-     * These were typed into `data-measure` and three had gone stale: the drift score (40.9 km
-     * over 6,246 cycles against a real 41.0 over 6,185), the normal's cell count (1,049,076
-     * against 1,049,066) and "Nine source adapters" against ten providers. A wrong number and a
-     * right number are the same shape - the rule that took typed figures out of the app's guide
-     * panel - and this page already fetches the same manifest, so it had no excuse. The dialog
-     * reads `dataset.measure` when a card is opened, so setting the attribute is the whole job,
-     * and a figure that does not resolve leaves the typed line alone rather than blanking it.
+     * These were typed into `data-measure` and three had gone stale: the drift score, the
+     * normal's cell count and the adapter count. A wrong number and a right number are the same
+     * shape - the rule that took typed figures out of the app's guide panel - and this page
+     * already fetches the same manifest, so it had no excuse. The dialog reads `dataset.measure`
+     * when a card is opened, so setting the attribute is the whole job, and a figure that does
+     * not resolve leaves the typed line alone rather than blanking it.
+     *
+     * So the typed line now carries **no figure at all**: it names what the card measures and
+     * leaves the number to the fetch. The stale values survived a round behind a rewrite that
+     * hid them, which means nothing could notice them and a failed fetch would have printed
+     * them. A fallback that cannot be wrong is better than one nobody ever sees.
      */
     function measure(id, text) {
       var card = document.getElementById(id);

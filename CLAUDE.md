@@ -59,7 +59,7 @@ The scene lives in `src/scene/OceanScene.ts`; every control is explained in `src
 
 ### Generated data - do not hand-edit
 
-- `web/public/data/` - manifest, volumes (`.bin`), `surfaces/*.bin` (the hazard Fields, float32 on the Grid), `currents/vectors_*.bin` (float32 u and v on the Grid), **`grids/*.bin`** (the native float32 Grid for the three collocated Fields, which is what the vertical section is cut from), `floats.json`, `collocations.json`, **`residuals.json`** (the bias map), **`drift.json`** (the drift check), `anomalies.json`, **`tests.json`** (what the provenance page says about the test suite, written by `pipeline/scripts/collect_tests.py` rather than by the bake) and coastlines. Written by `bake.py`. 192 MB across 36 Timesteps.
+- `web/public/data/` - manifest, volumes (`.bin`), `surfaces/*.bin` (the hazard Fields, float32 on the Grid), `currents/vectors_*.bin` (float32 u and v on the Grid), **`grids/*.bin`** (the native float32 Grid for the three collocated Fields, which is what the vertical section is cut from), `floats.json`, `collocations.json`, **`residuals.json`** (the bias map), **`drift.json`** (the drift check), `anomalies.json`, **`tests.json`** (what the provenance page says about the test suite, written by `pipeline/scripts/collect_tests.py` rather than by the bake) and coastlines. Written by `bake.py`. 223 MB across 36 Timesteps.
 - `web/public/fonts/` and `web/public/fonts.css` - the two typefaces, served from the build. Written by `scripts/fetch_fonts.py`. Do not replace with a Google Fonts link; that is the zero-network-calls rule.
 - `data/grids/` - native Grids as `.npz` for the API. Server-side only.
 - `data/woa/` - the World Ocean Atlas 2023 normal for this region, twelve months as `.npz`, 3.2 MB. Written by `pipeline/scripts/fetch_woa_normals.py` (and by any bake that had to fetch a month). Committed, because NOAA's OPeNDAP server was down on 2026-09-14 and 15. Server-side only.
@@ -215,7 +215,7 @@ far down it reaches, how far the wind has stirred, that same boundary measured w
 instead, and the gap between the last two - so **the first bullet of each now names its neighbour
 and says what it asks instead**. Nothing measured was cut to make room: barrier layer's level
 spacing moved from `means` into `look`, which is where a limitation of the picture belongs.
-Measured by `probe-guide.mjs`: median **113 words** on the panel, unmoved; longest 150; no list
+Measured by `probe-guide.mjs`: median **118 words** on the panel, unmoved; longest 151; no list
 over 4 bullets; longest bullet 20 words against a limit of 24.
 
 **A surface asserts a position; haze does not, and they cannot share a coverage floor.** The ray
@@ -243,7 +243,7 @@ a reader pressed the question and the comparison panel is on screen to read.
 
 **Kiosk mode is not a CSS state, so nothing may borrow it for a screenshot.** `capture.mjs` hid
 the panels for its hero shot by turning kiosk on, which also mounts the component that plays the
-eight Explore questions on a loop - so the hero came back as the *currents*, with a drift pin in
+nine Explore questions on a loop - so the hero came back as the *currents*, with a drift pin in
 it, because two questions had run while the frame was being taken. Bare shots inject a
 stylesheet and touch nothing else.
 
@@ -266,7 +266,11 @@ inking it, so narrowing the range stays analytical.
 **That share is a range and it was written down as a point.** `particles.ts` seeds its 2,400
 dots with `Math.random()`, so where they happen to be when a probe takes its frame is not the
 same twice - measured **1.83%** on 2026-09-04 and **2.47%** on a re-run the same evening, on an
-unchanged build. `probe-particles.mjs` was always right about this: it asserts a *floor* and that
+unchanged build. **And the probe's printed share is no longer the on-water share at all**: since
+2026-09-23 it takes its frame pair with the water switched off, so the figure it prints (2.0 to
+2.6% over four runs) is the layer over bare ground. Quote the probe for "does it draw", never
+for "how much of the screen is it". `probe-particles.mjs` was always right about this: it
+asserts a *floor* and that
 the layer beats its own hidden baseline threefold, not an exact figure. Anything quoting the
 share has to quote both ends, and **the pre-ink 1.33% is one sample of the old layer against one
 sample of the new one**, so it sizes the change loosely and not to two decimal places. If a
@@ -289,7 +293,7 @@ argument that would have given it its own advection code. It runs `midpointStep`
 refactored onto the same step in the same change so there is one copy and not two. Measured by
 `probe-particles.mjs`: a particle and a drift pin from the same start point over the same elapsed
 ocean time end **0.002 km apart after 724 km of travel**. That equivalence is the entire claim -
-an animation whose error is published, median 40.9 km over an Argo cycle - and an unchecked claim
+an animation whose error is published, median 41.0 km over an Argo cycle - and an unchecked claim
 is decoration. ADR 0017.
 
 **A dot on a Level is not a streamline through the block, and the difference is `w`.**
@@ -325,13 +329,13 @@ pixel test could never have caught the mirrored clip anyway - the camera compres
 latitude into about 3 px a degree, so the 8-degree bug moves the water 27 px. It reads the clip
 box back **in degrees** instead. **Before adding a probe, make it fail on purpose once.**
 
-**"Show me around" walks every control, and that is a measurement.** It was five steps against 44
-explained controls - a demo, not a tour, and the four the user's teammates would present from were
-among the 38 it never visited. It is 23 steps in 6 chapters now, and every step declares the
-`GUIDE` keys it puts on screen. `probe-tour.mjs` fails if any entry in `GUIDE` is not named by
-some step, if a step ends the tour, or if a step changes nothing the scene reads. **Add a control,
-give it a guide entry as the rules already require, and the probe tells you the tour has stopped
-being complete.**
+**"Show me around" walks every control, and that is a measurement.** It was five steps against
+every control the guide explains - a demo, not a tour, and the four the user's teammates would
+present from were among the ones it never visited. It is 23 steps in 6 chapters now, and every
+step declares the `GUIDE` keys it puts on screen. `probe-tour.mjs` fails if any entry in `GUIDE`
+is not named by some step, if a step ends the tour, or if a step changes nothing the scene
+reads. **Add a control, give it a guide entry as the rules already require, and the probe tells
+you the tour has stopped being complete.**
 
 **A touch pauses a tour or walkthrough; it does not close it.** Closing lost the reader's place:
 one slider tried mid-tour, and the tour was gone (owner report, 2026-09-15). `set("touched")` and
@@ -368,6 +372,38 @@ permanently, on the panel a judge looks at first. `both-edges` fixes it and - me
 Variable open, 722 px with Variable and Colourbar, identical under either value. What it costs is
 11 px of content width, which nothing in the panel needed.
 
+**A tab that folds a bay the reader cannot see is not a control.** `BayToggle` mounted
+unconditionally, and on the globe nothing is in the right bay until a control is touched - so the
+right tab docked to an edge that was not there: measured at 1400x800, a 22x34 square at 1030,61
+beside the cue card's 320x149 box at 1062,88, detached by 32 px and sitting 27 px above it. It
+reads as that card's close button and it half is one, because the fold rule covers `.cue` as
+well. A tab is drawn now only where its bay holds a panel, and the question there is **presence,
+not width**: a folded panel is `display: none` and measures zero, which is exactly the state the
+tab exists to undo. That is the `getBoundingClientRect()` rule two paragraphs up, read the other
+way round, and which of the two you want depends on what you are asking.
+
+**Two pieces of state that each draw a card have to be made exclusive in one place.** `tourStep`
+and `caseStep` are independent, both render at the foot of the screen, and six places opened one
+of them while only three closed the other - so Explore, Cyclone Montha, then "Show me around"
+stacked two cards **21 px apart** with the second reading out from behind the first, and left
+IMD's storm track on the water under a tour that explains no such thing. Owner report,
+2026-09-24. `startTour()` and `startWalkthrough()` are the rule, and every opener including the
+deep link goes through them. **The track goes with its walkthrough**, deliberately: `MapKey`
+names it under exactly the condition that draws it, so a track outliving the flow that drew it
+would be an unnamed mark on the water.
+
+**A band you clear is cleared in both axes, or the thing clearing it follows the band around.**
+`DepthRuler`'s caption keeps above the time axis and the map key by reading their top edges every
+frame, which is right for a fixed band along the foot and wrong for a legend the reader can drag.
+Measured at 1400x800: the key dragged from y 570 to y 214 took the caption from y 547 to **y
+215**, and parking the key in the top right corner - out of the caption's column entirely, with
+nothing in its way - still pulled the caption to **y 30**. A band is in the way only where it
+overlaps the caption's column *and* reaches down to where the caption is going, and the bands are
+folded lowest-first, because clearing the time axis can otherwise walk the caption into a key
+parked just above it. What did not change: where the column's foot runs past the time axis the
+caption is pushed into the figures and overlaps one - *300 m* by 14 px of box before, *2000 m* by
+8 px now.
+
 **Two modules are deliberately implemented twice, and both copies are measured against each
 other.** The standing rule is one curve in one file - `transfer.ts` exists because a second copy
 of the Scale silently disagreed with the first. Drift and the vertical section break it once
@@ -400,12 +436,16 @@ the analysis agreeing with data it was made from.** The seventeen moored buoys a
 as inputs to that analysis, which makes them the closer thing to an independent check. Do not
 write "INCOIS assimilate": the VAM analysis is gridding, not data assimilation into a model, and
 whether it excludes buoys is unverified (INCOIS-GODAS, a different product, does assimilate RAMA
-and NIOT moorings; `docs/plan/06`, 2026-09-15). Measured they disagree 5.5x more on temperature - 1.010 degC against 0.183 - 7.7x on salinity
-and 5.4x on density. Pooled into one basin-wide number the seventeen of them vanish into 249
-floats and the headline becomes a statement about self-consistency. At twelve Timesteps it was
-nine buoys at 4.5x; a full year roughly doubled the evidence and the ratio went **up**, not down.
-`residuals.field_bias` takes a `kind` and the panel prints both. Any new sentence about "how far the model sits from the observations"
-has to say which observations.
+and NIOT moorings; `docs/plan/06`, 2026-09-15). Measured on 2026-09-23 they disagree **4.8x**
+more on temperature - 0.884 degC against 0.184 - **7.8x** on salinity and **6.8x** on density.
+Pooled into one basin-wide number the seventeen of them vanish into 246 floats and the headline
+becomes a statement about self-consistency. At twelve Timesteps it was nine buoys at 4.5x; a
+full year roughly doubled the evidence and the buoys still disagree more on all three Fields.
+**Read the three ratios off `residuals.json`'s `byKind` blocks and never from this paragraph**:
+they said 5.5x, 7.7x and 5.4x for a round after the bake moved - here, in `residuals.py`'s own
+docstring, which named the 36-step bake while quoting the twelve-step one, and in
+`docs/plan/02`. `residuals.field_bias` takes a `kind` and the panel prints both. Any new
+sentence about "how far the model sits from the observations" has to say which observations.
 
 **A score may only be measured on the days the data covers.** `CurrentSeries._bracket_time`
 holds the first analysis rather than extrapolating before it, which is right for drawing a line
@@ -413,7 +453,7 @@ and silent inside a number. Measured at twelve Timesteps: the earliest Fix was 2
 a first analysis of 2026-04-10, and 199 of 202 baked drift comparisons started inside that 19-day
 hole. `CurrentSeries.covers` refuses them - the same refusal `choose_cast` and the Float markers
 already make - and the score moved from 39 km to 38 km over one cycle, on 195 floats rather than
-202. The window is a year now and the score is 41 km over 6,246 cycles on 219 floats.
+202. The window is a year now and the score is 41 km over 6,185 cycles on 217 floats.
 **Anything drawn is separate from anything scored**, and the browser's integrator is unchanged:
 a dropped pin always starts inside the window.
 
@@ -462,15 +502,36 @@ two steps - reported as a bug. At the newest analysis 92% of them do not move at
 reads as the dots changing colour. The markers are still pinned to their casts; only the date the
 mode opens on changed.
 
-**A frame pair must differ by exactly one thing, and a store change is never that thing.**
-`updateArrows` and `updateSheet` set their mesh's `visible` back to true on every `push(state)`,
-so a probe that changes the store between the "geometry on" frame and the "geometry off" frame
-gets two identical frames and reports that the Field draws nothing. It happened: the current
+**A frame pair must differ by exactly one thing, and neither a store change nor a fixed wait is
+ever that thing.** `updateArrows` and `updateSheet` set their mesh's `visible` back to true on
+every `push(state)`, so a probe that changes the store between the "geometry on" frame and the
+"geometry off" frame gets two identical frames and reports that the Field draws nothing.
+
+**The second half of that rule cost two reproducible failures on 2026-09-23.**
+`probe-particles.mjs` waited 500 ms between its frames and called the difference a baseline for
+background motion - and the ray marcher's `uTime` moves **3.16%** of the frame in 500 ms, against
+a whole dot layer of 2.7%, so its control was bigger than its signal and the check could not
+pass. Switching the volume off for the pair took the baseline to **0.000%**, which proved the
+water was all of it. Then it failed again, one run in two, with the baseline at 2.67%: **500 ms
+is not reliably longer than one swiftshader frame**, so the screenshot after the hide sometimes
+still held the layer that had just been hidden, and the control became the signal. Wait on two
+`requestAnimationFrame`s, never on a duration, and switch off anything that animates **before**
+the pair rather than between its frames. It happened: the current
 arrows were measured as hidden under the water at 0.007% of the frame, and correctly paired they
 are 0.54% with the water on against 0.59% with it off - not hidden at all. The render loop is
 continuous, so moving `visible` alone is enough. **And never diff PNG bytes for a magnitude**:
 compressed bytes shift wholesale from a handful of changed pixels, which is why the same frames
 read as "99.4% different" and as "0.5% different" depending only on which was counted.
+
+**A world position is not a clickable pixel, because the two bays sit over the glass.** The new
+cursor check in `probe-hazard.mjs` projected the fastest water in the block to canvas
+coordinates and moved a real mouse there - and the fastest water in this basin is the Somali
+Current at about **51.5 E**, which is behind the left panel. The move landed on the panel,
+`onCanvasMove` never fired, and the probe correctly reported that the scene answers
+**2.937 m/s** while the store holds `null`. That reads as a broken readout and is a probe aiming
+at a covered pixel. Ask `document.elementFromPoint` what is on top before driving a real pointer
+at a projected position; `scene.pickCurrent` answers for covered pixels quite happily, which is
+exactly why the two halves of that check fail for different reasons and both are worth making.
 
 **Verify rendering by measuring, not by looking.** The worst bugs here all looked like shader
 bugs and were not: invisible deep water, a "thin sliver" volume, a half-cell field offset,
@@ -579,7 +640,8 @@ for it.
 
 **A log scale needs a real zero and a gradient to bend, and neither was being checked.**
 `supportsLog` asked only whether the range went below zero, so the toggle appeared on 11 of the
-14 Fields and meant something on 3 - there are 15 Fields now, and the rule is what decides, not the count. Two separate failures came out of that. On **Observation
+14 Fields and meant something on 3 - there are 19 Fields now, and the rule is what decides,
+not the count. Two separate failures came out of that. On **Observation
 Coverage** the palette is four flat bands whose edges sit at whole cast counts, and bending the
 position along a palette moves every edge while the key beside it cannot move: measured, every
 cell with **1, 2 or 3 casts painted as "4 or more casts"**, under a legend still saying
@@ -626,21 +688,23 @@ Copernicus and NOAA is a licence obligation; every full attribution string is on
 At 1366x768 the left bay has **663 px**, measured as the panel's own `clientHeight` at its cap
 rather than read off `max-height`, which is a `calc()` and comes back unresolved - identical in
 both themes. It was 635 with the credits band and 615 before that band was folded; the 636 this
-file carried for a round was arithmetic rather than a measurement. The content heights below
-were measured on 2026-09-07, in **both themes, which agree to the pixel**, before and after the
-alternates were folded. Removing the credits changed the bay and not the panel's content (its
-full scroll height measured the same before and after), so the right-hand column is those
-measured heights against the re-measured bay:
+file carried for a round was arithmetic rather than a measurement.
 
-| Panel state | Before | After | Against a 663 px bay |
+**The table below was re-measured on 2026-09-23** against the shipped build, as the panel's own
+`scrollHeight`, in both themes, which still agree to the pixel. The bay did not move and the
+377 px floor did not move. **Everything else did**, by 99 to 204 px, because a Field button
+gained a unit and a render-kind line under its name and the Field count went from 14 to 19 - a
+change `web/CLAUDE.md` records without re-measuring the table beside it. The 2026-09-07 column
+is kept because the difference is the point:
+
+| Panel state | 2026-09-07 | 2026-09-23 | Against the 663 px bay |
 | --- | --- | --- | --- |
-| all groups closed | 377 px | 377 px | fits |
-| Variable alone | 477 px | 477 px | fits |
-| **Colourbar alone** | **680 px** | **572 px** | was 45 over, now fits |
-| Variable + Colourbar | 780 px | **672 px** | over by 9 |
-| Colourbar + Rendering | 806 px | **698 px** | over by 35 |
-| bias | 918 px | 918 px | over by 255 |
-| everything open | 2,115 px | 2,007 px | over by 1,344 |
+| all groups closed | 377 px | **377 px** | fits, unmoved |
+| Variable alone | 477 px | **576 px** | fits |
+| Colourbar alone | 572 px | **621 px** | fits, 42 px to spare |
+| Variable + Colourbar | 672 px | **819 px** | over by 156, was 9 |
+| bias | 918 px | **974 px** | over by 311 |
+| everything open | 2,007 px | **2,211 px** | over by 1,548 |
 
 **The colourbar switcher cost the Colourbar group 139 px and 108 of them are back.** Five labelled
 swatches in a vertical list were 132 px; folded behind a row that carries the chip and the name of
@@ -654,21 +718,30 @@ lines** - three double-height rows are barely shorter than five single ones. The
 labels.
 
 **The Colourbar group was the one group too tall to open on its own** - 333 px against 258 px of
-room once the 377 px floor was paid in a 635 px bay - and that was the sharper way to say it than
-"the Variable pair is 144 over". It now opens alone with 91 px to spare in the 663 px bay.
+room once the 377 px floor was paid in a 635 px bay. It opens alone with 42 px to spare now,
+which is the one conclusion in this block that survived the re-measurement.
 
 **What is left is older than the switcher and structural.** The floor is 377 px of group headers
 before a single control is drawn, which leaves 286 px for whatever is open in the 663 px bay.
-Measured open on their own: Variable 137, Colourbar 225, Depth slice 115, Rendering 156,
-Quality 102, Isosurface 67, Instruments 141, Model vs instruments 571, Drift 261, Vertical
-section 88, Your own data 105. Opened one at a time beside Variable and measured rather than
-added up - **the arithmetic got Rendering wrong**, calling it 62 px over where the panel fits it
-with 32 to spare - **7 of the 10 fit and 3 do not** in the 635 px bay they were measured
-against: Colourbar by 37, Drift by 73 and the bias map by 383 - 9, 45 and 355 in the 663 px bay.
-The bias group has never fitted on its own; it is 571 px of measurements, and a readout may not
-be approximated for layout. Closing the last 9 px (37 before the credits went) needs either a
-control removed or the 30 px group header cut to 26, which is a design token and a click target
-at the WCAG floor, so neither was done unilaterally.
+Opened one at a time **beside Variable** and measured rather than added up, on 2026-09-23,
+against that 663 px bay - **5 of the 10 fit and 5 do not**, where in 2026-09-07's measurement it
+was 7 and 3:
+
+| Group, open beside Variable | Over the bay by |
+| --- | --- |
+| Colourbar | **+156** (was +9) |
+| Drift | **+143** (was +45) |
+| Model vs instruments, the bias map | **+510** (was +355) |
+| Rendering | **+39** (fitted with 32 px to spare) |
+| Instruments | **+23** (was not a problem) |
+| Depth slice, Quality, Isosurface, Vertical section, Your own data | fit, by 2 to 50 px |
+
+**Two of those five are new, and one of them is the row this file had already corrected once.**
+The 2026-09-07 note said *"the arithmetic got Rendering wrong, calling it 62 px over where the
+panel fits it with 32 to spare"* - and Rendering is 39 px over now. The bias group has never
+fitted on its own; it is 597 px of measurements, and a readout may not be approximated for
+layout. Closing Colourbar's 156 px is no longer a 30 px group header away, so nothing here is a
+token tweak: it needs a control moved out of the group or the group split.
 
 **Every one of those numbers moved three times during one session**, twice because a fix
 elsewhere took height away: lifting the timeline off the credits cost the panel 50 px, and
@@ -728,11 +801,18 @@ drawing slabs and vertical columns with **no control on screen to turn them off*
 declare `isosurface: false`, which correctly hides the checkbox and did nothing else. Anything a
 `FieldSpec` can forbid must be reset by `selectField` when it forbids it, not merely hidden by
 the panel. `pipeline/tests/test_field_specs.py` holds which Fields may offer one and why.
+**And a third time, on 2026-09-24**: `hazardPreset()` set `showAnomalies: false`, and the
+rings are drawn on the anomaly Field alone - so the line did nothing on heat potential, which
+is the Field it was written for, and everything on the next Field the reader chose. A reader
+who had been anywhere near cyclone mode reached Anomaly Features with the marks off and no
+control on screen that had turned them off. `selectField` resets it now and `hazardPreset`
+does not set it; `cases.ts`'s `calm()` dropped it too, where every step selects a Field
+immediately afterwards and it could never have taken effect. `docs/BUGS.md` item 141.
 
-**An instrument is not always an Argo float, and a number about them is not always 249.**
+**An instrument is not always an Argo float, and a number about them is not always the total.**
 There are Floats and there are moorings, `reportingByKind()` splits them, and the count on
-screen is the count *drawn at the Timestep on screen* - measured across the thirty-six steps, 192
-to 221 Floats and 5 to 14 buoys, against a bake of 259 and 17. Anything that says "Argo floats"
+screen is the count *drawn at the Timestep on screen* - measured across the thirty-six steps, 190
+to 219 Floats and 5 to 14 buoys, against a bake of 257 and 17. Anything that says "Argo floats"
 and means "instruments" is wrong twice.
 
 **Not every Field is a Volume, and drawing one as a Volume is drawing the wrong thing.**

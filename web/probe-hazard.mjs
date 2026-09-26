@@ -305,27 +305,97 @@ const currents = await page.evaluate(() => {
 });
 console.log("CURRENTS", JSON.stringify(currents));
 
+// This block and the one below printed their measurements and asserted on none of them for a
+// round, which is the "a probe that collects, prints and exits 0 is a log, not a check" rule
+// surviving in one corner after the four-probe sweep that closed it everywhere else.
+if (currents.error) {
+  problems.push(`the current field could not be read at all: ${currents.error}`);
+} else if (!(currents.fastest > 0.05)) {
+  // The Somali Current runs past 1.5 m/s in the monsoon and the basin-wide maximum has never
+  // been near zero in this bake. A field of zeros draws arrows of no length and looks calm.
+  problems.push(`the fastest water in the block is ${currents.fastest} m/s, which is not a field`);
+}
+
 // The speed under the cursor, aimed at the fastest arrow in the block. Asked of the scene
 // directly as well as through a real mouse move, because the first is the measurement and the
-// second is the wiring, and they fail for completely different reasons.
-const box = await page.locator("canvas").boundingBox();
-const aimed = await page.evaluate(
-  ({ lon, lat }) => {
-    const scene = window.__scene;
-    const at = scene.projectPoint(lon, 0, -lat);
-    return { at, picked: scene.pickCurrent(at.x, at.y) };
-  },
-  { lon: currents.lon, lat: currents.lat },
-);
-await page.mouse.move(box.x + aimed.at.x, box.y + aimed.at.y);
-await page.waitForTimeout(600);
-console.log(
-  "CURSOR",
-  JSON.stringify({
-    picked: aimed.picked,
-    stored: await page.evaluate(() => window.__store.getState().hoverCurrent),
-  }),
-);
+// second is the wiring, and they fail for completely different reasons - so both are compared
+// against the Grid value the arrow was drawn from, and against each other.
+if (!currents.error) {
+  const box = await page.locator("canvas").boundingBox();
+
+  // The measurement: ask the scene at the fastest cell's own centre. Bilinear at a node returns
+  // that node's value, so this has to come back as the fastest speed in the file.
+  const aimed = await page.evaluate(
+    ({ lon, lat }) => {
+      const scene = window.__scene;
+      const at = scene.projectPoint(lon, 0, -lat);
+      return { at, picked: scene.pickCurrent(at.x, at.y) };
+    },
+    { lon: currents.lon, lat: currents.lat },
+  );
+  if (!aimed.picked) {
+    problems.push("the scene answered no speed at the fastest cell in its own field");
+  } else {
+    const gap = Math.abs(aimed.picked.speed - currents.fastest);
+    console.log(
+      `picked ${aimed.picked.speed.toFixed(4)} against the Grid's ${currents.fastest.toFixed(4)} m/s`,
+    );
+    if (gap > 0.05) {
+      problems.push(
+        `the readout says ${aimed.picked.speed.toFixed(3)} m/s where the Grid says ` +
+          `${currents.fastest.toFixed(3)} at the same cell`,
+      );
+    }
+  }
+
+  // The wiring: a real mouse move has to store what the scene answers at the same point. A
+  // different point, because the two bays sit **over** the glass and the fastest water in this
+  // basin is the Somali Current at about 51.5 E, which is behind the left panel - the move lands
+  // on the panel and `onCanvasMove` never fires. Measured: the scene answers 2.937 m/s there and
+  // the store holds null, which reads as a broken readout and is a probe aiming at a covered
+  // pixel. So the point is chosen by asking the document what is actually on top of it.
+  const target = await page.evaluate(() => {
+    const canvas = document.querySelector("canvas");
+    const rect = canvas.getBoundingClientRect();
+    // A grid rather than one line: the horizontal midline crosses India, and `pickCurrent`
+    // answers null over land and outside the block, so a single sweep found nothing at all.
+    // The first pixel that is both uncovered and over water wins.
+    const tried = [];
+    for (let fy = 0.25; fy <= 0.8; fy += 0.1) {
+      for (let fx = 0.25; fx <= 0.8; fx += 0.05) {
+        const x = rect.left + rect.width * fx;
+        const y = rect.top + rect.height * fy;
+        const on = document.elementFromPoint(x, y);
+        if (on !== canvas) {
+          tried.push(`covered by ${on?.className || on?.tagName}`);
+          continue;
+        }
+        const picked = window.__scene.pickCurrent(x, y);
+        if (picked) return { x, y, picked };
+        tried.push("no current there");
+      }
+    }
+    return { failed: tried.slice(0, 6) };
+  });
+  if (!target || target.failed) {
+    problems.push(
+      `no uncovered pixel over the canvas answers a current speed: ${JSON.stringify(target?.failed)}`,
+    );
+  } else {
+    await page.mouse.move(target.x, target.y);
+    await page.waitForTimeout(600);
+    const stored = await page.evaluate(() => window.__store.getState().hoverCurrent);
+    console.log("CURSOR", JSON.stringify({ at: [target.x, target.y], picked: target.picked, stored }));
+    if (!stored) {
+      problems.push("a real mouse move over uncovered water stored no speed");
+    } else if (Math.abs(stored.speed - target.picked.speed) > 0.05) {
+      problems.push(
+        `the mouse move stored ${stored.speed.toFixed(3)} m/s where the scene answers ` +
+          `${target.picked.speed.toFixed(3)}: the wiring and the measurement disagree`,
+      );
+    }
+  }
+}
 
 // ---- the log scale bends the water and the bar together --------------------------------------
 //

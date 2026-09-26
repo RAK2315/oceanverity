@@ -72,6 +72,24 @@ for (const theme of ["dark", "light"]) {
     document.documentElement.dataset.theme = t;
     window.__store.getState().set("theme", t);
   }, theme);
+  // ---- a bay tab exists only where there is a bay --------------------------------------------
+  //
+  // On the globe, nothing is mounted in the right bay until the reader touches a control, so the
+  // right tab docked to an edge that was not there: measured at 1400x800, a 22x34 square at
+  // 1030,61 beside a cue card at 1062,88. It reads as that card's close button, and pressing it
+  // does hide the card, because the fold rule covers `.cue` too. Reported by the owner,
+  // `docs/BUGS.md` item 139. Checked before the dive, which is the only state it happens in.
+  const bays = await page.evaluate(() => ({
+    left: !!document.querySelector(".bay-left"),
+    right: !!document.querySelector(".bay-right"),
+    leftPanel: !!document.querySelector("aside.panel-left"),
+    rightPanel: !!document.querySelector(".panel-right, .panel-section"),
+  }));
+  console.log(`  globe view, bays: ${JSON.stringify(bays)}`);
+  if (bays.right !== bays.rightPanel || bays.left !== bays.leftPanel) {
+    problems.push(`${theme}: a bay tab is drawn beside a bay that holds nothing: ${JSON.stringify(bays)}`);
+  }
+
   await page.evaluate(() => document.querySelector("button.dive").click());
   await page.waitForFunction(() => window.__store.getState().morph > 0.9, null, { timeout: 120000 });
   await page
@@ -179,6 +197,108 @@ for (const theme of ["dark", "light"]) {
         `${row.px}px/${row.weight} a=${row.alpha}  ${row.selector}`,
     );
   }
+
+  // ---- the map key names the colour that is actually drawn -----------------------------------
+  //
+  // Six colours are written twice: in `SCENE_COLOURS`, which is what the WebGL geometry uses,
+  // and in `styles.css`, which is the swatch in the map key beside the word for it. Nothing
+  // compared them, and a legend that names a colour not on screen is the same failure class as
+  // a colourbar that does not bend with its water - the pair that got the log scale cut once
+  // for having two copies of one curve. A synthetic element is used rather than the real
+  // swatch, so the check holds whether or not the reader has the map key open.
+  const swatches = await page.evaluate(() => {
+    const scene = window.__scene.themeColoursForTest();
+    const pairs = [
+      ["swatch float", "float", "background"],
+      ["swatch track", "track", "background"],
+      ["swatch coast", "coast", "background"],
+      ["swatch drift", "drift", "background"],
+      ["swatch section", "section", "background"],
+      ["swatch storm", "storm", "background"],
+      ["swatch float hollow", "biasOutline", "background"],
+    ];
+    const hex = (rgb) => {
+      const parts = rgb.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+      if (parts.length < 3) return rgb;
+      return "#" + parts.map((n) => Math.round(n).toString(16).padStart(2, "0")).join("");
+    };
+    const host = document.createElement("div");
+    host.style.position = "fixed";
+    host.style.left = "-9999px";
+    document.body.appendChild(host);
+    const out = pairs.map(([className, key]) => {
+      const span = document.createElement("span");
+      span.className = className;
+      host.appendChild(span);
+      const drawn = hex(getComputedStyle(span).backgroundColor);
+      return { className, key, css: drawn, scene: scene[key] ?? null };
+    });
+    host.remove();
+    return out;
+  });
+  for (const row of swatches) {
+    const agree = row.scene !== null && row.css.toLowerCase() === row.scene.toLowerCase();
+    console.log(`  ${agree ? "ok  " : "FAIL"} .${row.className.replace(/ /g, ".")}  key ${row.css} / scene ${row.scene}`);
+    if (!agree) {
+      problems.push(
+        `${theme}: the map key draws .${row.className.replace(/ /g, ".")} as ${row.css} and the ` +
+          `scene draws ${row.key} as ${row.scene}: the legend names a colour not on screen`,
+      );
+    }
+  }
+
+  // ---- the depth ruler's caption stays where it is when the map key is dragged ---------------
+  //
+  // The caption reads the map key's box every frame to find a floor it must stay above, which is
+  // right for the time axis and wrong for a legend the reader can drag anywhere: measured at
+  // 1400x800, moving the key from y 570 to y 214 moved the caption from y 547 to y 215, and
+  // parking it in the top right corner - clear of the caption's column, with nothing to avoid -
+  // still pulled the caption up to y 30. Reported by the owner, `docs/BUGS.md` item 142. It is a
+  // band only where it overlaps the caption's column and reaches down to it.
+  //
+  // Both toggles are put back first, because the caption is placed against the left panel's
+  // width and the right bay is folded nowhere in this run - but a check that depends on a state
+  // an earlier block set is a check that moves when that block does.
+  const rulerBefore = await page.evaluate(() => {
+    const note = document.querySelector(".ruler-note")?.getBoundingClientRect();
+    return note ? { x: Math.round(note.left), y: Math.round(note.top) } : null;
+  });
+  const key = await page.$(".mapkey");
+  const keyBox = key ? await key.boundingBox() : null;
+  if (!rulerBefore || !keyBox) {
+    problems.push(`${theme}: no depth ruler caption or no map key to drag against it`);
+  } else {
+    for (const [tag, toX, toY] of [
+      ["top right", 1000, 150],
+      ["over the column, high", 300, 260],
+    ]) {
+      const from = await (await page.$(".mapkey")).boundingBox();
+      await page.mouse.move(from.x + 140, from.y + from.height - 10);
+      await page.mouse.down();
+      await page.mouse.move(toX, toY, { steps: 12 });
+      await page.mouse.up();
+      await page.waitForTimeout(700);
+      const after = await page.evaluate(() => {
+        const note = document.querySelector(".ruler-note")?.getBoundingClientRect();
+        const k = document.querySelector(".mapkey")?.getBoundingClientRect();
+        return {
+          note: note ? { x: Math.round(note.left), y: Math.round(note.top) } : null,
+          moved: k ? Math.round(k.top) : null,
+        };
+      });
+      console.log(
+        `  map key dragged ${tag} to y ${after.moved}: caption ${JSON.stringify(after.note)} ` +
+          `(was ${JSON.stringify(rulerBefore)})`,
+      );
+      if (!after.note || after.note.y !== rulerBefore.y || after.note.x !== rulerBefore.x) {
+        problems.push(
+          `${theme}: dragging the map key ${tag} moved the depth ruler's caption from ` +
+            `${JSON.stringify(rulerBefore)} to ${JSON.stringify(after.note)}`,
+        );
+      }
+    }
+  }
+
   await context.close();
 }
 

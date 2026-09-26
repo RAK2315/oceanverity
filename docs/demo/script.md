@@ -96,7 +96,7 @@ cyclone fields we compute from INCOIS's Argo analysis."
 
 > _Point at the green status strip. Slow down for this line._
 
-"Status: working prototype, on live INCOIS data. **430 automated
+"Status: working prototype, on live INCOIS data. **511 automated
 tests** on the science, and 16 browser probes that drive the built application and measure
 what actually reaches the screen. **Zero network calls at demo time** - the data is baked into
 the build, so a dead venue network cannot kill this."
@@ -325,7 +325,7 @@ SARAT. What this shows is the drift the ocean analysis alone implies.
 What makes it worth having is that we can score it. An Argo float's track **is** measured drift at
 its parking depth, so we ran the same maths from 217 floats' own positions. Over one Argo cycle the
 current field alone lands a median 40.9 kilometres from where the float actually went, 92.7 at
-the ninetieth percentile across 6,246 cycles. By thirty days the gap is the same size as the distance travelled. No other
+the ninetieth percentile across 6,185 cycles. By thirty days the gap is the same size as the distance travelled. No other
 drift demo will tell you that number, because none of them has the observations in the same file."
 
 ### "Can it read our data?"
@@ -456,7 +456,7 @@ more than not having it.
 | "What resolution is the data?" | One degree, because that is what INCOIS publishes. We do not upsample. That would invent structure the instruments never measured. |
 | "Does it work offline?" | Yes. That is why it is baked. |
 | "Did you generate or simulate any of this?" | No. Every number comes from INCOIS's server or the Argo programme. |
-| "What is the accuracy?" | Across 249 floats the median RMS gap between model and instrument is 0.47 °C. That is the analysis's own accuracy, which is what we are measuring. Be careful with the word "typical": RMS is the quadratic mean, always at least the mean absolute deviation. |
+| "What is the accuracy?" | Across 246 floats the median RMS gap between model and instrument is 0.47 °C. That is the analysis's own accuracy, which is what we are measuring. Be careful with the word "typical": RMS is the quadratic mean, always at least the mean absolute deviation. |
 | "Doesn't the analysis already use Argo? Aren't you comparing it with itself?" | Partly, and that is the operational question rather than a flaw - did the analysis reproduce the observation it was given, here, at this depth? It does not always: the disagreement runs from 0.00 to 1.98 °C. The panel says this on screen so you do not have to. |
 | "Where do the currents come from?" | Copernicus Marine's own global analysis, at one twelfth of a degree - twelve times finer than the INCOIS grid. We read the actual eastward and northward velocity, not a picture of it, so there is a real speed under the cursor wherever you point. It needs a free Copernicus account **to rebuild the data**, and none at all to view or use the platform; the credential never leaves the machine that bakes. It was a picture until that account existed, and the change is written up in ADR 0013. |
 | "Are those all Argo floats?" | No. Nine are moored buoys - four from India's own OMNI network, three from RAMA. They are drawn as squares, they have no drift track because they are anchored, and their comparison follows the timeline. |

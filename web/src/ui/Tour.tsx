@@ -11,9 +11,9 @@ import { useStore } from "../store";
  * for, and useless for the audience PS 26067 names in its own words - schools, exhibitions,
  * policymakers, e-learning. A first-time visitor does not know what to touch.
  *
- * It used to be five steps. Five is a demo, not a tour: it showed the thesis and left 38 of the
- * 44 explained controls undiscovered, including the ones a teammate presenting this has to be
- * able to find. So it is now **chapters** - six of them - and every step does three things at
+ * It used to be five steps. Five is a demo, not a tour: it showed the thesis and left all but
+ * a handful of the explained controls undiscovered, including the ones a teammate presenting
+ * this has to be able to find. So it is now **chapters** - six of them - and every step does three things at
  * once:
  *
  *   1. **Drives the scene**, so the control is doing something visible.

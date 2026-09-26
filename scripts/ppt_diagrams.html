@@ -250,7 +250,7 @@
 
 <div class="board" id="arch">
   <h3 class="bt">Architecture</h3>
-  <p class="bs">Nine providers &rarr; one adapter per source &rarr; one Grid &rarr; four ways out</p>
+  <p class="bs">Ten providers &rarr; one adapter per source &rarr; one Grid &rarr; four ways out</p>
 
   <div class="az">
 
@@ -264,9 +264,11 @@
         <div class="node src"><b>Argo BGC</b><span>Ifremer &middot; synthetic</span></div>
         <div class="node src"><b>NOAA OSMC</b><span>GTS &middot; moored buoys</span></div>
         <div class="node src"><b>Copernicus Marine</b><span>uo, vo &middot; 1/12&deg;</span></div>
+        <div class="node src"><b>Copernicus Marine BGC</b><span>chlorophyll, oxygen</span></div>
+        <div class="node src"><b>Copernicus satellite</b><span>SST, chlorophyll &middot; fronts</span></div>
         <div class="node src"><b>EGO glider GDAC</b><span>ftp.ifremer.fr</span></div>
         <div class="node src"><b>World Ocean Atlas 23</b><span>NOAA NCEI &middot; OPeNDAP</span></div>
-        <div class="node src" style="grid-column:1 / -1"><b>Your own NetCDF file, dropped on the page</b><span>the ninth adapter &middot; POST /api/netcdf</span></div>
+        <div class="node src" style="grid-column:1 / -1"><b>Your own NetCDF file, dropped on the page</b><span>the eleventh adapter &middot; POST /api/netcdf</span></div>
       </div>
     </div>
 
@@ -329,7 +331,7 @@
     <div class="zone">
       <div class="zh"><span>4</span> &nbsp;Four ways out</div>
       <div class="nodes">
-        <div class="node out"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>192 MB committed &middot; 0 network calls</span></div>
+        <div class="node out"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>223 MB committed &middot; 0 network calls</span></div>
         <div class="node out"><b>Browser &nbsp;&larr;&nbsp; both</b><span>Three.js &middot; WebGL2 &middot; GLSL ES 3.00</span></div>
         <div class="node out"><b>REST API &nbsp;&larr;&nbsp; Grid</b><span>FastAPI &middot; 21 routes</span></div>
         <div class="node out"><b>Open standards &nbsp;&larr;&nbsp; Grid</b><span>OPeNDAP DAP2 &middot; CF-1.8 &middot; WMS 1.3.0</span></div>
@@ -351,8 +353,8 @@
 </div>
 
 <!--
-  Slide 3 of the SIH deck. Every label is checked against the repository: the nine adapters are
-  the files in oceanverity/sources/ plus the second one each of incois.py and argo.py carry, the route
+  Slide 3 of the SIH deck. Every label is checked against the repository: the eleven adapters are
+  the classes in oceanverity/sources/ that a bake or the upload endpoint reads, the route
   counts come from api/*.py, and the stack rows come from package.json and requirements.txt.
   Nothing is named here that is not installed.
 -->
@@ -360,7 +362,7 @@
 
   <div class="head">
     <h3>Technical approach</h3>
-    <div class="sub">Nine providers &middot; one seam &middot; one Grid &middot; four ways out</div>
+    <div class="sub">Ten providers &middot; one seam &middot; one Grid &middot; four ways out</div>
     <div class="team">Team Sigmoid &middot; PS 26067</div>
   </div>
 
@@ -377,9 +379,11 @@
             <div class="node"><b>Argo BGC</b><span>Ifremer &middot; synthetic</span></div>
             <div class="node"><b>NOAA OSMC</b><span>GTS &middot; moored buoys</span></div>
             <div class="node"><b>Copernicus Marine</b><span>uo, vo &middot; 1/12&deg;</span></div>
+            <div class="node"><b>Copernicus Marine BGC</b><span>chlorophyll, oxygen</span></div>
+            <div class="node"><b>Copernicus satellite</b><span>SST, chlorophyll &middot; fronts</span></div>
             <div class="node"><b>EGO glider GDAC</b><span>ftp.ifremer.fr</span></div>
             <div class="node"><b>World Ocean Atlas</b><span>2023 &middot; NOAA NCEI</span></div>
-            <div class="node wide"><b>Your own NetCDF file, dropped on the page</b><span>the ninth adapter &middot; same interface &middot; no new renderer, no new endpoint</span></div>
+            <div class="node wide"><b>Your own NetCDF file, dropped on the page</b><span>the eleventh adapter &middot; same interface &middot; no new renderer, no new endpoint</span></div>
           </div>
         </div>
 
@@ -438,7 +442,7 @@
 
       <div class="zh2"><span>4</span> &nbsp;Four ways out</div>
       <div class="outrow">
-        <div class="node"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>192 MB in the build &middot; 0 network calls</span><em>What the demo actually runs on.</em></div>
+        <div class="node"><b>Static bake &nbsp;&larr;&nbsp; both</b><span>223 MB in the build &middot; 0 network calls</span><em>What the demo actually runs on.</em></div>
         <div class="node pixels"><b>Browser &nbsp;&larr;&nbsp; the bake</b><span>Three.js &middot; WebGL2</span><em>The deployed site has no server behind it.</em></div>
         <div class="node"><b>REST API &nbsp;&larr;&nbsp; Grid</b><span>FastAPI &middot; 21 routes</span><em>Answers what a static bundle cannot precompute.</em></div>
         <div class="node"><b>Open standards &nbsp;&larr;&nbsp; Grid</b><span>OPeNDAP &middot; CF-1.8 &middot; WMS 1.3.0</span><em>Opens in xarray, QGIS or Panoply.</em></div>

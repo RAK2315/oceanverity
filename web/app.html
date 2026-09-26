@@ -12,6 +12,29 @@
     <!-- The theme switch, the one control that exists identically on all four pages. One copy,
          in public/theme-pill.css; same origin, so the zero-external-calls rule still holds. -->
     <link rel="stylesheet" href="./theme-pill.css" />
+    <script>
+      /*
+       * The theme, before first paint. The fourth inline twin of `src/remembered.ts`.
+       *
+       * The console did not have one: `main.tsx` calls `applyTheme(storedTheme())` when the module
+       * runs, which is after first paint, so the page showed the default and then corrected
+       * itself. That was survivable while the default was dark and most readers were dark. With
+       * light the default it would flash dark on every first visit, which is the loudest possible
+       * version of the same bug, so the console gets the twin the three static pages already have.
+       */
+      (function () {
+        try {
+          var stored = localStorage.getItem("oceanverity.theme");
+          // Renamed from a `samudra.` prefix on 2026-09-20; falling back once keeps a returning
+          // reader's choice.
+          if (stored === null) stored = localStorage.getItem("samudra.theme");
+          if (stored !== "dark") document.documentElement.dataset.theme = "light";
+        } catch (e) {
+          // Storage blocked. Light is the default, so apply it rather than falling through.
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -168,10 +168,15 @@ const PUBLISH_MAP = [
   // dark screenshots that read as holes in it. It could not have been fixed before now for a
   // duller reason: there was no light copy of the site set to swap *to*.
   //
-  // Two pictures deliberately have no twin and must not gain one. **The hero** is a dark band
-  // in both themes by design - `.hero` re-declares the dark palette for everything inside it,
-  // and `probe-landing.mjs` asserts the two themes measure identically there. **Kiosk** is a
-  // photograph of a dark screen; the darkness is the subject, not the theme.
+  // **The hero** deliberately has no twin and must not gain one: it is a dark band in both
+  // themes by design - `.hero` re-declares the dark palette for everything inside it, and
+  // `probe-landing.mjs` asserts the two themes measure identically there.
+  //
+  // **Kiosk used to be the second one**, on the reasoning that it is a photograph of a dark
+  // screen and the darkness is the subject rather than the theme. That stopped being true on
+  // 2026-09-26, when light became the default: an exhibition screen is now light unless a
+  // visitor chooses otherwise, so it follows the theme like every other picture. Owner's call,
+  // "light for light, dark for dark".
   ["globe", "web/public/images/light/globe.jpg", "light"],
   ["volume", "web/public/images/light/volume.jpg", "light"],
   ["collocation", "web/public/images/light/collocation.jpg", "light"],
@@ -183,6 +188,18 @@ const PUBLISH_MAP = [
   ["flow", "web/public/images/light/flow.jpg", "light"],
   ["drift", "web/public/images/light/drift.jpg", "light"],
   ["section", "web/public/images/light/section.jpg", "light"],
+  ["kiosk", "web/public/images/light/kiosk.jpg", "light"],
+
+  // ---- the card that says "drop your own NetCDF file on it" ------------------------
+  //
+  // It showed the salinity block until 2026-09-26, under alt text describing a salinity
+  // palette. Every check in `probe-landing.mjs` passed: the file existed, it decoded, it
+  // had a light twin. Only the picture was of the wrong thing, which is `docs/BUGS.md`
+  // item 44 exactly - nothing checks that a picture still matches the words beside it.
+  ["upload", "web/public/images/upload.jpg", "light"],
+  ["upload", "web/public/images/light/upload.jpg", "light"],
+  ["upload", "docs/images/upload.jpg"],
+  ["upload", "ppt/images/spare-upload.jpg"],
 
   // ---- the submission deck, light, because the SIH template is a white page --------------
   // A dark screenshot on it reads as a hole. The four `S*` names are placed by `ppt/DECK.md`;
@@ -275,7 +292,11 @@ const documentOf = (target) =>
 const WANTS_THEME = {
   docs: "light", // A README reads light, on GitHub's light page.
   ppt: "light", // The SIH template is a white page; a dark screenshot on it reads as a hole.
-  site: "dark", // The landing page is dark by default and is where the water looks best.
+  // The landing page defaulted to dark until 2026-09-26 and now opens light, so this no
+  // longer names what a first-time visitor sees. It still decides the right thing: the
+  // light twins are published separately into `images/light/` and the page swaps `<img
+  // src>` between the two sets, so this is the set a reader who chooses dark gets.
+  site: "dark",
 };
 
 const ROOT = resolve(process.cwd(), "..");
@@ -416,7 +437,7 @@ await shot("01-globe");
  * with a stylesheet and nothing else.
  *
  * **It must not borrow kiosk mode**, which was the obvious way to do this and was wrong: kiosk
- * is not a CSS state, it mounts a component that plays the eight Explore questions on a loop.
+ * is not a CSS state, it mounts a component that plays the Explore questions on a loop.
  * The first hero shot came back as the *currents* with a drift pin in it, because the loop had
  * started and applied its first two questions while the shot was being taken.
  *

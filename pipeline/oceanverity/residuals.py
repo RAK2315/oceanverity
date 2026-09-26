@@ -7,7 +7,7 @@ the one the whole project is actually about: **where does the *model* most disag
 
 Every number here is already computed. `bake._collocate_cast` writes a mean and an RMS residual
 per instrument per Field into `collocations.json`, and nothing has ever sorted them. So a user
-who wanted to know where the analysis is weakest had to click 266 instruments one at a time.
+who wanted to know where the analysis is weakest had to click every instrument one at a time.
 
 Three things happen here, and they are separate because they answer three different questions.
 
@@ -28,10 +28,12 @@ tautology. INCOIS's gridded analysis is built from Argo floats, so a float's res
 the analysis agreeing with data it was made from. The seventeen moored buoys are not described as
 inputs to it, which makes them the closer thing to an independent check. (It is gridding, not data
 assimilation into a model, and whether it excludes buoys is unverified.)
-Measured on the 36-step bake, off `residuals.json`'s own `byKind` blocks, the moorings disagree
-5.5x more on temperature (1.010 degC against 0.183), 7.7x on salinity and 5.4x on density, and
-pooled into one basin-wide figure they vanish into 249 floats. At twelve steps it was nine buoys
-at 4.5x; a year roughly doubled the evidence and the temperature ratio went up, not down. The
+Read the ratios off `residuals.json`'s `byKind` blocks, never off this docstring. It named the
+36-step bake while quoting the twelve-step one for a round - 5.5x, 1.010 degC, 249 floats - and
+a figure with a bake named beside it is the last one anybody re-checks. On the bake that ships,
+measured 2026-09-23: the moorings disagree 4.8x more on temperature (0.884 degC against 0.184),
+7.8x on salinity and 6.8x on density, and pooled into one basin-wide figure they vanish into
+246 floats. At twelve steps it was nine buoys at 4.5x. The
 number a forecaster wants - how far the analysis sits from water nobody told it about - is the
 mooring one, and it is reported beside the pooled one rather than instead of it, because 17
 instruments is still a small sample and saying so is part of the answer.

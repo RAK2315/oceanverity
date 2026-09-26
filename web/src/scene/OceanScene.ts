@@ -2020,6 +2020,30 @@ export class OceanScene {
     if (mesh) mesh.visible = visible;
   }
 
+  /**
+   * The active theme's scene colours as hex, so the map key can be checked against them.
+   *
+   * Six of these are written twice: once here, which is what is drawn, and once in
+   * `styles.css`, which is the swatch that names it in the map key. A legend and the line it
+   * labels are the same class of pair as the colourbar and the water - and that pair is why
+   * the log scale was cut once, for having two copies of one curve. Nothing compared these,
+   * so `probe-chrome.mjs` does; a mismatch means the key names a colour not on screen.
+   */
+  themeColoursForTest(): Record<string, string> {
+    const set = SCENE_COLOURS[this.lastTheme ?? "dark"];
+    const hex = (colour: Color) => `#${colour.getHexString()}`;
+    return {
+      float: hex(set.float),
+      outline: hex(set.outline),
+      biasOutline: hex(set.biasOutline),
+      track: hex(set.track),
+      coast: hex(set.coast),
+      drift: hex(set.drift),
+      section: hex(set.section),
+      storm: hex(set.storm),
+    };
+  }
+
   /** Nearest Anomaly Feature to a screen point, as an index into this Timestep's list. */
   pickAnomaly(clientX: number, clientY: number, radiusPixels = 20): number | null {
     const state = this.state;

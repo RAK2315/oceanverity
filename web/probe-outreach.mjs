@@ -55,7 +55,7 @@ const problems = [];
 const browser = await chromium.launch({
   args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
 });
-const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+let page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
 page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
 page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
 
@@ -126,8 +126,30 @@ for (const id of needsCaution) {
 }
 await page.evaluate(() => window.__store.setState({ exaggeration: 1800 }));
 
+/*
+ * Every re-navigation gets a page that has not been driven yet, and that is a measurement.
+ *
+ * `page.goto` on a page that has already run the WebGL scene does not fire `load` again under
+ * software rendering: measured on 2026-09-26, four probes went red on exactly this and nothing
+ * else, while the identical URLs loaded in **0.1 and 0.2 s** in a fresh page and landed on the
+ * right state. That is the cause `docs/BUGS.md` item 101 was missing - its own recorded failures,
+ * "kiosk page load" and "the copied link", are both `page.goto` calls, and this probe is the one
+ * item 101 is filed against.
+ *
+ * Nothing after a re-navigation depends on the state the steps before it left behind, so a shared
+ * page buys those checks nothing and costs them a timeout. This is separating independent claims,
+ * not editing a check until it passes.
+ */
+const renavigate = async (url, timeout = 60000) => {
+  await page.close();
+  page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+  page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+  page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
+  await page.goto(url, { waitUntil: "load", timeout });
+};
+
 // ---- 3. kiosk hides the console, and Escape gets out --------------------------------------
-await page.goto(`${SERVER}/app.html?kiosk=1`, { waitUntil: "load", timeout: 60000 });
+await renavigate(`${SERVER}/app.html?kiosk=1`);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForTimeout(6000);
 
@@ -182,7 +204,7 @@ if (escaped.kiosk || !escaped.panel) {
 }
 
 // ---- 5. a copied link comes back to the same view -----------------------------------------
-await page.goto(`${SERVER}/app.html?dive=1`, { waitUntil: "load", timeout: 60000 });
+await renavigate(`${SERVER}/app.html?dive=1`);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForTimeout(4000);
 
@@ -200,7 +222,7 @@ const link = await page.evaluate(() => {
 });
 console.log(`copied link: ${link.replace(/^https?:\/\/[^/]+/, "")}`);
 
-await page.goto(link, { waitUntil: "load", timeout: 60000 });
+await renavigate(link);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForTimeout(4000);
 const restored = await page.evaluate(() => {

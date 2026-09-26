@@ -3,7 +3,10 @@
 Assessed against what the data can actually support. Both have a version that is honest and a
 version that is not, and the difference is recorded here because it is the part that gets lost.
 
-Last reconciled against the tree: 2026-08-25.
+Last reconciled against the tree: **2026-09-23**. Section 1's tables were re-read off
+`residuals.json` on that date; section 2 is unbuilt and unchanged. The figures here had been
+2026-08-25's through three bakes, and the wording under the second table broke the rule
+`CLAUDE.md` now states outright - see the note there.
 
 ---
 
@@ -34,19 +37,22 @@ Field. Every ranked row now prints the depths behind it.
 
 | Field | Instruments | Mean bias | Typical gap | 5 degree boxes with 3+ instruments |
 | --- | --- | --- | --- | --- |
-| Temperature | 266 | -0.006 degC | 0.236 degC | 38 |
-| Salinity | 251 | -0.016 PSU | 0.043 PSU | 36 |
-| Density | 251 | -0.005 kg/m3 | 0.053 kg/m3 | 36 |
+| Temperature | 263 | +0.009 degC | 0.229 degC | 38 |
+| Salinity | 248 | -0.015 PSU | 0.043 PSU | 36 |
+| Density | 248 | -0.008 kg/m3 | 0.056 kg/m3 | 36 |
 
-**The pooled figure is largely the model agreeing with itself.** INCOIS assimilate Argo, so a
-float's residual measures the analysis against an observation it was fed. The seventeen moored buoys
-are not assimilated, and split out they disagree several times as much:
+**The pooled figure is largely the model agreeing with itself.** INCOIS's gridded Argo analysis
+is built from these floats, so a float's residual measures the analysis against data it was made
+from. The seventeen moored buoys are not described as inputs to it, and split out they disagree
+several times as much. Do not write "INCOIS assimilate" - this paragraph did, for a round after
+`docs/plan/06` established that the VAM analysis is gridding rather than assimilation into a
+model, and after `CLAUDE.md` made it a rule:
 
-| Field | 17 moorings | Floats | ratio |
+| Field | Moorings | Floats | ratio |
 | --- | --- | --- | --- |
-| Temperature | **1.010 degC** | 0.183 degC (249) | 5.5x |
-| Salinity | **0.238 PSU** | 0.031 PSU (236) | 7.7x |
-| Density | **0.227 kg/m3** | 0.042 kg/m3 (236) | 5.4x |
+| Temperature | **0.884 degC** (17) | 0.184 degC (246) | 4.8x |
+| Salinity | **0.238 PSU** (15) | 0.030 PSU (233) | 7.8x |
+| Density | **0.283 kg/m3** (15) | 0.042 kg/m3 (233) | 6.8x |
 
 The panel prints both, and the second is the number a forecaster wants: how far the analysis
 sits from water nobody told it about.
@@ -61,15 +67,17 @@ either of them.
 
 ### Still not built: a Collocation per Timestep
 
-Every Float's chart is the comparison for its **latest** cast, and 81 of 88 of those sit at step
-10 or 11 of 12. The panel says so plainly rather than letting a scrubbed timeline imply a chart
-that moved, so it is no longer a defect - but it is still a missing feature.
+Every Float's chart is the comparison for its **latest** cast, and most of those sit at the last
+two steps of the window. The panel says so plainly rather than letting a scrubbed timeline imply
+a chart that moved, so it is no longer a defect - but it is still a missing feature.
 
-Doing it properly was measured rather than estimated, and it is not cheap:
+Doing it properly was measured rather than estimated on the twelve-step bake, and it was not
+cheap. The window is a year now, so the three rows below scale by three; the shape of the
+argument does not change:
 
-| Approach | Size of `collocations.json` |
+| Approach, measured at twelve steps | Size of `collocations.json` |
 | --- | --- |
-| Today: the latest cast only | 4.8 MB |
+| Today: the latest cast only | 4.8 MB, and 15.1 MB at thirty-six |
 | Every cast, chart series capped at 150 depths | **14.1 MB** |
 | Every cast, full resolution | **63.6 MB** |
 

@@ -9,11 +9,13 @@ a day once `cf.py` already exists, and one measurement changes the argument for 
 26 KB with layers for SAL, TERR and SERR. So re-serving *their* temperature would be
 re-publishing, and would be worth nothing to anybody.
 
-What this platform has that theirs does not is the Fields computed here: density and the
-temperature anomaly. Those are the layers worth putting on an open standard, because there is
-nowhere else to get them. Temperature and salinity are served too, for completeness and because
-a client wants one endpoint - but the capabilities document says plainly which layers are ours
-and which are INCOIS's, restated.
+What this platform has that theirs does not is the Fields computed here. Those are the layers
+worth putting on an open standard, because there is nowhere else to get them. Temperature,
+salinity and INCOIS's own evidence channels are served too, for completeness and because a
+client wants one endpoint - but the capabilities document says plainly which layers are ours and
+which are INCOIS's, restated, and the `<Service><Abstract>` further down this file is the one
+place that list is written out. It said "density and the temperature anomaly" here for four
+rounds after that stopped being the whole of it.
 
 Observation Coverage is *not* served, and its absence is stated rather than left to be noticed:
 it is counted on the Volume's warped lattice rather than on the analysis grid, so publishing it
@@ -150,8 +152,13 @@ def feature_info(grid, level: int | None, latitude: float, longitude: float) -> 
     """The value under a point, read off the native Grid.
 
     Legitimate in a way GetMap is not: this is `Grid.column_at`'s neighbourhood, the scientific
-    truth, not a colour picked back out of a picture. It refuses to answer over land for the same
-    reason `column_at` does.
+    truth, not a colour picked back out of a picture.
+
+    Over land it returns **NaN** rather than raising, which is the one place this differs from
+    `Grid.column_at`: the caller in `standards.py` turns a non-finite value into JSON `null`,
+    because absence of ocean is not a value and a WMS client reads `null`. This docstring said
+    it "refuses to answer" for a round, which describes `column_at`'s mechanism and not this
+    one, and the next person to move the code would have looked for a raise that is not here.
     """
     row = int(np.abs(np.asarray(grid.latitudes) - latitude).argmin())
     column = int(np.abs(np.asarray(grid.longitudes) - longitude).argmin())

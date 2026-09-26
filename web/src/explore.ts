@@ -7,8 +7,8 @@
  * > marine environmental conditions. INCOIS can use the platform for outreach events,
  * > exhibitions, and e-learning initiatives."*
  *
- * Three audiences and three channels, named in the problem statement's own words. Fifteen
- * variables in five groups is the right toolkit for a forecaster and the wrong first minute for
+ * Three audiences and three channels, named in the problem statement's own words. Nineteen
+ * variables in six groups is the right toolkit for a forecaster and the wrong first minute for
  * everybody else: it asks a visitor to know what an isosurface is before it will show them
  * anything. So the same platform gets a second door, and behind it are **questions** rather than
  * controls. Nothing here is a new capability. Every one of these is a thing a user could set up
@@ -78,7 +78,11 @@ function calm(): void {
     depthFrom: 0,
     depthTo: 1,
     touched: null,
+    // Both guided flows, not just the tour. `Explore.tsx` clears the pair before it runs a
+    // question, but the exhibition loop calls `run` directly, so `?kiosk=1&case=montha` would
+    // have left a walkthrough card over every question it played. Same rule as `startTour`.
     tourStep: null,
+    caseStep: null,
     cardPaused: false,
   });
 }
@@ -197,6 +201,13 @@ export const QUESTIONS: Question[] = [
       // to +3.04 across the year, so it changes sign. This said "0.8 degC warmer" as a fact
       // beside a view of one Timestep, and at the last one it measures +0.42. The boxes were not
       // written down, which is why that could not be checked; they are now.
+      //
+      // Re-verified 2026-09-23, exactly: -3.03, -3.68 and +0.82, ranges unchanged. These are the
+      // only figures on an Explore card that are not read from the bake at runtime - the guide
+      // panel's are `{token}`s and the storm walkthrough's all come from `montha.json` - so they
+      // are the ones to re-run after a bake. `np.nanmean` over level 0 of
+      // `data/grids/{density,salinity,temperature}_NNN.npz` inside each box, differenced,
+      // averaged over every step; that is the whole method.
       "Across the year the Bay of Bengal is 3.0 kg/m³ lighter than the Arabian Sea, because the" +
       " Ganges and Brahmaputra make it 3.7 PSU fresher. Temperature cannot explain it: the Bay" +
       " swings from cooler to warmer by season. No temperature map shows it.",
@@ -265,7 +276,11 @@ export const QUESTIONS: Question[] = [
  */
 let trueScaleFrame: number | null = null;
 
-export function trueScale(seconds = 9): void {
+export function trueScale(): void {
+  // Nine seconds, not a parameter. It had one, defaulted, and the single call site never passed
+  // anything - and the duration is not free to change: the exhibition screen holds a question
+  // for five seconds, which is what the cancellation below exists for.
+  const seconds = 9;
   const from = 1800;
   const settle = 1;
   const start = performance.now();

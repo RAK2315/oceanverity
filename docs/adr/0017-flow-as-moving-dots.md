@@ -49,9 +49,12 @@ animation and the scored drift model share their arithmetic:
 - `midpointStep()` in `drift.ts` is the step rule, and it is now the **only** place that rule is
   written. `integrateDrift` was refactored onto it in the same change.
 
-So every dot on screen is running the integrator whose error is published: median **40.9 km**
-over one Argo cycle across 219 floats, 6,246 cycles, at 1000 m. No other build of this shape can
-say that about its animation, because none of them has the observations sitting in the same file.
+So every dot on screen is running the integrator whose error is published: a median of about
+**41 km** over one Argo cycle, at 1000 m, over every drifting float in the bake. `manifest.drift`
+carries the exact figures and this sentence deliberately does not - it said 40.9 km over 6,246
+cycles on 219 floats for three weeks after the bake made all three wrong. No other build of this
+shape can say that about its animation, because none of them has the observations sitting in the
+same file.
 
 **Measured, `web/probe-particles.mjs`:** a particle advanced 60 frames and an `integrateDrift`
 path over the same elapsed ocean time from the same start point end up **0.002 km apart after

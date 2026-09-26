@@ -112,7 +112,10 @@ function isoFloorFor(spec: FieldSpec, state: { isoValue: number; manifest: Manif
 const THEME_KEY = "theme";
 
 export function storedTheme(): Theme {
-  return remembered(THEME_KEY) === "light" ? "light" : "dark";
+  // Light unless the reader chose dark, rather than the other way round. Owner's call on
+  // 2026-09-26. The test is against "dark" and not against "light", so a first visit, a blocked
+  // localStorage and a truncated value all land on the same answer: light.
+  return remembered(THEME_KEY) === "dark" ? "dark" : "light";
 }
 
 export function applyTheme(theme: Theme): void {
@@ -495,6 +498,23 @@ interface State {
   showDriftCheck: boolean;
 
   set: <K extends keyof State>(key: K, value: State[K]) => void;
+  /**
+   * Open the guided tour, and close whatever guided flow was open.
+   *
+   * `tourStep` and `caseStep` are independent and both draw a card at the foot of the screen, so
+   * starting one on top of the other stacked two cards 21 px apart with the second reading out
+   * from behind the first - reported by the owner from Explore, Cyclone Montha, then "Show me
+   * around". The two walkthrough buttons already cleared `tourStep`; nothing cleared `caseStep`,
+   * because the three places that open the tour each wrote the field directly.
+   *
+   * So the rule lives in one action rather than in every opener: **one guided flow at a time.**
+   * The storm track goes with the walkthrough that drew it, deliberately - it is drawn only
+   * while `caseStep` is a Montha step, and `MapKey` names it under exactly the same condition,
+   * so a track left behind would be an unnamed mark on the water.
+   */
+  startTour: (step?: number) => void;
+  /** Open one of the two walkthroughs, and close the tour. Same rule, other direction. */
+  startWalkthrough: (which: "montha" | "fishing") => void;
   /** One click that sets the scene up for a cyclone question. See the implementation. */
   hazardPreset: () => void;
   /**
@@ -689,6 +709,12 @@ export const useStore = create<State>((setState, getState) => ({
       return { [key]: value } as never;
     }),
 
+  // One guided flow at a time. Both of these close the other one, and both clear the pause: a
+  // reader who presses "Show me around" is asking for the tour to start, not to resume paused.
+  startTour: (step = 0) => setState({ tourStep: step, caseStep: null, cardPaused: false }),
+  startWalkthrough: (which) =>
+    setState({ caseStep: 0, walkthrough: which, tourStep: null, cardPaused: false }),
+
   selectField: (key) => {
     const spec = getState().manifest?.fields.find((f) => f.key === key);
     if (!spec) return;
@@ -757,6 +783,13 @@ export const useStore = create<State>((setState, getState) => ({
       // no sense once a different Field is on screen.
       selectedAnomaly: null,
       isolateAnomaly: false,
+      // And the rings themselves go back on. Same leak as the render hints above, one field
+      // along: the checkbox is drawn only on the anomaly Field, so anything that switched the
+      // rings off elsewhere switched off a control the reader could not see. `hazardPreset`
+      // did exactly that, and a reader who had been anywhere near cyclone mode arrived at
+      // Anomaly Features with the marks off and nothing saying why. The rings draw on that one
+      // Field and nowhere else, so this is free everywhere except where it is the fix.
+      showAnomalies: true,
       // A section line is geographic, so it deliberately survives a switch between the three
       // Fields that ship a Grid - cutting the same line through temperature and then salinity
       // is a real thing to want, and the panel heading names the Field it is showing. It cannot
@@ -873,7 +906,9 @@ export const useStore = create<State>((setState, getState) => ({
     setState({
       timestepIndex: steps - 1,
       playing: false,
-      showAnomalies: false,
+      // No `showAnomalies: false` here. The rings are drawn on the anomaly Field alone, so it
+      // did nothing on this one and everything on the next one the reader chose - see
+      // `selectField`.
       touched: "hazardPreset",
       // A reader pressing it mid-tour pauses the tour, like any other control. A tour step that
       // presses it on the reader's behalf clears the pause again in `Tour.tsx`.

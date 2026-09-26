@@ -381,7 +381,7 @@ export interface FieldResiduals {
    * INCOIS's gridded analysis is **built from Argo floats**, so a float's residual is largely the
    * analysis agreeing with data it was made from; the moored buoys are not described as inputs. Measured over this
    * bake the moorings disagree several times as much, and pooled into one basin-wide figure the
-   * seventeen of them disappear into 249 floats. Absent on a bake made before the split existed.
+   * seventeen of them disappear into 246 floats. Absent on a bake made before the split existed.
    */
   byKind?: Record<string, KindBias>;
   /** Worst first, by mean absolute bias. */

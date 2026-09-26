@@ -1,6 +1,6 @@
 # Every figure the deck may use, read off the build
 
-**Generated 2026-09-20 by `pipeline/scripts/collect_facts.py`. Do not edit by
+**Generated 2026-09-23 by `pipeline/scripts/collect_facts.py`. Do not edit by
 hand.** Re-run it after a bake and diff this file: a figure that moved shows up as a line.
 
 `ppt/DECK.md` is written by a person and quotes these numbers. This file is the source it quotes
@@ -24,7 +24,7 @@ not a point - see `CLAUDE.md`.
 | Depth range | 5 m to 2000 m over 24 uneven levels | `manifest.volume.levelMetres` |
 | Static bake | **223.0 MB**, committed, **0** network calls to run | `du web/public/data` |
 | HTTP routes on the API | **21** | `api/*.py` |
-| Tests | **495** | `web/public/data/tests.json` |
+| Tests | **511** | `web/public/data/tests.json` |
 | Browser probes | **16** | the allowlist in `.gitignore` |
 
 ## Instruments

@@ -89,7 +89,6 @@ function calm(): void {
     showDriftCheck: false,
     playing: false,
     isoEnabled: false,
-    showAnomalies: false,
     touched: null,
   });
 }

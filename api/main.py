@@ -266,20 +266,25 @@ def health() -> dict:
 
 # The registry. Adding a provider means adding a class that satisfies the protocol in
 # `oceanverity/sources/base.py` and putting it in one of these lists. Nothing else in the system -
-# renderer, API, UI - has ever heard of ERDDAP.
-# Eight registered here - three grid and five profile - and `/api/sources` answers with exactly
-# these, because the endpoint below reads the lists rather than restating them. Registering them
-# here rather than only in the bake is what keeps it an honest answer to "can this ingest a new
-# stream": every one satisfies the same Protocol.
+# renderer, API, UI - has ever heard of ERDDAP. `/api/sources` answers with exactly the two lists
+# below, because the endpoint reads them rather than restating them. Registering them here rather
+# than only in the bake is what keeps it an honest answer to "can this ingest a new stream":
+# every one satisfies the same Protocol.
 #
-# This is not the same eight `CONTEXT.md` counts, and the difference is deliberate on one side
-# and not on the other. `IncoisArgoSource` is here and not in the bake: INCOIS's own archive ends
-# 2025-04-23 (ADR 0009), so it is registered to prove the seam and read by nothing. The World
-# Ocean Atlas adapter is in the bake and not here, because it is not a `GridSource` - its
-# `fetch_grid` takes a calendar month rather than an instant and it has no timesteps, which is
-# what makes it a baseline rather than a value (ADR 0016). Forcing it into this list would make
-# `/api/sources` claim it can be asked for a date. The uploaded-file adapter is the ninth and
-# lives behind `api/upload.py`. This comment said "seven" over eight for a round.
+# **No count in this comment.** It said "seven" over eight for a round, then "eight - three grid
+# and five profile" over nine when `CopernicusBgcSource` joined the grid list, which is the same
+# defect twice and `docs/BUGS.md` item 125 closing on the first of them. A count written beside a
+# list the reader can see is a second copy of the list, and it is the copy that goes wrong.
+#
+# What is worth writing down is why these two lists are not the set `CONTEXT.md` counts, because
+# that is deliberate on one side and not on the other. `IncoisArgoSource` is here and not in the
+# bake: INCOIS's own archive ends 2025-04-23 (ADR 0009), so it is registered to prove the seam
+# and read by nothing. The World Ocean Atlas adapter and the satellite fronts adapter are in the
+# bake and not here, because neither is a `GridSource` - WOA's `fetch_grid` takes a calendar
+# month rather than an instant and it has no timesteps, which is what makes it a baseline rather
+# than a value (ADR 0016), and the fronts adapter returns a share per cell rather than a Grid.
+# Forcing either into this list would make `/api/sources` claim it can be asked for a date. The
+# uploaded-file adapter is not here either; it lives behind `api/upload.py`.
 GRID_SOURCES = [
     IncoisErddapSource(),
     IncoisMcCrearySource(),
@@ -583,8 +588,8 @@ def _section_profiles() -> list:
     division `sources/base.py` draws everywhere else.
 
     Cached for the same reason `native_grid` is: this built every baked cast as a `Profile` on
-    every single `/api/section` request - 3,077 when the comment was written, 8,460 from 259
-    platforms on the 36-step bake - and the answer only changes when the bake does.
+    every single `/api/section` request - 3,077 when the comment was written, 8,394 from 257
+    platforms on the bake that ships - and the answer only changes when the bake does.
     `_drop_caches_if_rebaked` clears it along with the rest.
     """
     from oceanverity.sources.base import Profile

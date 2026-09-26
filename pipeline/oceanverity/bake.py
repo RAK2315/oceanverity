@@ -469,7 +469,7 @@ DRIFT_HORIZON_DAYS = (10.0, 30.0, 60.0, 90.0)
 # measures and what the section offers.
 #
 # 24 levels x 36 x 56 x 4 bytes is 194 KB a file, about 21 MB for three Fields across the
-# 36-step bake, against 192 MB of baked data in all (it was 6.97 MB against 58.8 at twelve
+# 36-step bake, against 223 MB of baked data in all (it was 6.97 MB against 58.8 at twelve
 # steps, and the share has barely moved). That is the price of the section working **on the
 # static deployment and with the network unplugged**, rather than only when somebody remembers
 # to start uvicorn - and the live site at rak2315.github.io has no API at all.
@@ -936,7 +936,7 @@ def bake(output_dir: Path, timesteps: int, profile_days: int, grid_dir: Path | N
             else []
         ),
         # Order here is the order of the Variable selector, within each group. `group` is what
-        # splits it: fifteen Fields cannot be a flat list of buttons, and a forecaster looks for
+        # splits it: nineteen Fields cannot be a flat list of buttons, and a forecaster looks for
         # a hazard quantity under HAZARD rather than under "the fourth one along".
         "fields": [
             asdict(f) | {"range": list(ranges[f.key])}
@@ -1768,7 +1768,7 @@ def _build_residuals(collocations, floats, fields, ranges) -> dict:
         # Split by kind, because the two kinds are answering different questions. INCOIS's
         # analysis is built from Argo floats: a float's residual is largely the analysis agreeing
         # with data it was made from, and the moored buoys, not described as inputs, are the
-        # closest thing to an independent check in the bake. Pooled, the seventeen of them disappear into 249 floats and the headline becomes a
+        # closest thing to an independent check in the bake. Pooled, the seventeen of them disappear into 246 floats and the headline becomes a
         # statement about self-consistency. See `residuals.py`.
         by_kind = {
             kind: field_bias(entries, field.key, kind=kind)

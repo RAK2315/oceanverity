@@ -1,0 +1,202 @@
+OceanVerity is a web platform that puts India's ocean model and the real measurements taken in that same water on the same screen, in three dimensions, and checks one against the other. It is already built and running. You can open it at https://rak2315.github.io/oceanverity/app.html, see the landing page at https://rak2315.github.io/oceanverity/, see where every figure in it comes from at https://rak2315.github.io/oceanverity/provenance.html, see every clause of the problem statement answered at https://rak2315.github.io/oceanverity/requirements.html with each clause linking straight to the control that answers it, and read the source at https://github.com/RAK2315/oceanverity
+
+
+THE PROBLEM
+
+India already has both halves of the answer.
+
+INCOIS runs an ocean model. That is a computed picture of temperature and saltiness through the whole depth of the ocean, refreshed every ten days. India also has robot floats and anchored buoys drifting in that same water, taking real measurements from the surface down to two kilometres.
+
+The two are never shown together. The model lives in one desktop tool or portal. The float measurements live in a different archive with a different interface. Both of them draw flat maps, one depth at a time. To ask whether the model was right at a particular place and depth on a particular day, a scientist has to open two systems, find the same spot twice, match up the depth by hand, and compare the numbers on paper.
+
+So the question a cyclone forecaster actually wants answered has no tool behind it: is the model right here, at this depth, today?
+
+There is a second problem underneath the first. The ocean is not flat. The temperature at the sea surface is the least interesting thing about a cyclone's fuel supply. What matters is how deep the warm water runs, and that is a property of a whole column of water, not of a dot on a map. A flat map cannot show it. A stack of flat maps cannot show it either, because the reader has to assemble the stack in their head.
+
+The problem statement asks for a web-based interactive 3D platform that brings numerical ocean model output and in-situ observations together. We read the word "together" as the whole of the brief. The picture is not the deliverable. The comparison is.
+
+
+WHAT WE BUILT
+
+A website that draws the Indian Ocean as a solid block of water you fly inside, from the surface down to two kilometres, with the instruments sitting in it exactly where they were on the date on screen.
+
+Click any instrument and the platform shows you, on one chart against one depth scale: what that float or buoy actually measured going down through the water, what the model predicted in the same place on the same day, the gap between the two lines, and a plain verdict on how close they were, whichever way it comes out.
+
+It opens in an ordinary browser. There is nothing to install, no account to create, no licence fee, no specialist mapping software and no database. It also makes no internet requests at all while it is running, because the data travels with the page. A dead venue network cannot stop a demonstration, and the public version needs no server behind it at all.
+
+The build covers the Arabian Sea, the Bay of Bengal and the equatorial Indian Ocean. It holds a full year of INCOIS analyses spaced ten days apart, carries 19 ocean variables, reaches from the surface to two kilometres down, and places more than 270 real instruments in the water where they actually were on each date. All of it is read from eleven data sources, ten of them public archives and the eleventh being an ocean data file a visitor drops onto the page themselves.
+
+
+IT PUBLISHES ITS OWN ERROR
+
+Most visualisation platforms show you the model and stop. This one compares the model against every instrument in the water and prints the answer, including where the answer is unflattering.
+
+Taken across all of them, the model usually sits within about a quarter of a degree of what was actually measured. We deliberately refuse to leave it at that sentence, because it is exactly the kind of sentence that flatters a project.
+
+INCOIS build their model partly from these floats. So a float agreeing with the model is, to a large extent, the model agreeing with data it was made from. The anchored buoys are a different network and are not described as going into that model, which makes them the harder and fairer test. The model does visibly worse against the buoys than against the floats, and we say so.
+
+We then refuse to turn that into a single headline comparison, because it would be misleading in the other direction: the floats are compared much deeper than the buoys, and deep water is easy to match, so the two are not measuring the same difficulty. The platform reports each network separately, labelled, with the depth range each was measured over. Averaging them together would produce one number that is technically true and practically dishonest.
+
+That is the project in miniature. The interesting engineering here is not the rendering. It is refusing to state a number that would make us look good.
+
+
+NO SCIENTIFIC QUESTION IS EVER ANSWERED FROM THE PICTURE
+
+The block on screen is not the data. To be drawn smoothly at sixty frames a second, it is a compressed copy: the values are squeezed down to a fraction of their precision, the depth scale is stretched so the upper ocean gets more of the screen, and the edges near land are smoothed so the rendering does not tear along the coastline. Every one of those four steps is something a renderer needs and a scientist must never be handed.
+
+So the system keeps two copies and keeps them strictly apart. The full-precision numbers answer every question anybody asks, whether that is the value under the cursor, the comparison chart, a vertical slice, or a file requested by another program. The compressed copy goes to the screen and nowhere else, and nothing ever reads a value back out of it.
+
+This matters most where the platform hands data to other software, because somebody pulling a file over the network cannot see which of the two copies they were given. It is the easiest rule in the whole project to break silently, which is why the architecture is shaped to enforce it rather than trusting anyone to remember.
+
+
+A GAP IS DRAWN AS A GAP
+
+Where nobody has measured, we say so rather than colouring it in.
+
+About a tenth of the block has no real observation behind it. A cell only counts as observed if a genuine measurement was taken reasonably close to it in both space and time. One of the 19 variables exists for no other purpose than to show the reader where the evidence is thin, which is also, directly, a map of where the next float would be worth deploying.
+
+An interpolated field will cheerfully give you a smooth, confident and completely unsupported number in the middle of an ocean nobody has visited. Showing that emptiness is more useful than hiding it, and it is the opposite of what a visualisation is usually tuned to do.
+
+
+IT HAS A SECOND DOOR
+
+Nineteen variables is the right toolkit for a forecaster and the wrong first minute for anybody else. The problem statement names school and college students, the general public at awareness campaigns, and policymakers, across outreach events, exhibitions and e-learning. So the platform has a second entrance.
+
+"Explore" turns the whole thing into nine plain questions: where could a cyclone get stronger, what did a real cyclone do to the ocean, where is the model most wrong, where would something adrift go. Each question is a preset over controls that already exist, so it is the same platform set up for you rather than a separate simplified app. And each question that simplifies a limit away carries its caveat immediately beside it, never after it, because a map of conditions is not a forecast and the reader this door exists for is exactly the reader who will not add that distinction themselves.
+
+An exhibition mode hides the controls entirely, enlarges the text so it can be read across a room, plays the questions on a loop, and resets itself a minute after the last visitor walks away. There is also a guided tour that walks a first-time user through every single control in the platform, in six chapters, which pauses rather than closing if you touch something yourself and then offers to continue where you left off.
+
+
+DISASTER MANAGEMENT: CYCLONES
+
+The theme of this problem statement is disaster management, and the ocean's contribution to a cyclone is not at its surface.
+
+One press sets the whole scene up for a cyclone question, bringing in the five things a forecaster asks of the water. They are one chain of reasoning rather than five unrelated fields: how much heat energy is stored in the column, how far down that warm water reaches, how far the wind has already stirred the top of the ocean, that same boundary measured a second way, and the gap between the two, which is the layer that resists cooling.
+
+Three of those are a depth, so the platform draws them as a curved sheet sitting at that depth inside the block. Two are a total for the whole column, so it drapes them over the sea surface. Neither is drawn as a solid volume, because neither one is.
+
+Why this matters: where the warm layer runs deeper, a storm has a deeper supply of warm water and finds it harder to cool itself by dragging colder water up from below. On a flat map that is a table of numbers. Here it is a shape inside the ocean that you can turn around and look at.
+
+We did not simply invent those calculations. A wrong constant in an ocean formula produces a number that is smooth, plausible and completely wrong, which is the most dangerous kind of failure available to a project like this. So we checked against the only reference that settles it. INCOIS published these same products for fifteen years up to 2019. We ran our own code across that archive and compared the results cell by cell against theirs.
+
+Our answer matches INCOIS's own published values in about 97 per cent of cells, and where the two differ, they differ by a small amount.
+
+One of those comparisons produced a finding we chose to publish rather than smooth over. On the older rule INCOIS use, two of the five quantities come out identical to each other on every single date in the archive. Our default uses the modern standard definition instead, which gives a different and physically distinct answer. We report both and label which is which, rather than quietly adopting whichever one matched better.
+
+
+A REAL STORM, WALKED THROUGH
+
+Cyclone Montha crossed the Bay of Bengal in late October 2025 and made landfall near Narsapur. It is drawn on the India Meteorological Department's own official track, using their published positions rather than a line we drew.
+
+The platform walks a reader through it in seven steps, on the dates it actually happened, with every figure on every card computed from the data rather than typed in by hand. The story it tells is simple and visible: within about 150 kilometres of the track, the heat available to a storm fell over ten days, while in the same bay several hundred kilometres away from the track it rose over those same ten days. That is the cold wake a cyclone leaves behind, shown rather than asserted.
+
+We also publish what the case does not show. The analyses are ten days apart, so this is the period the storm crossed rather than the storm alone, and the card says so. In one place the change a forecaster would expect did not appear at all, and the walkthrough states that null result instead of leaving it out. The anchored buoys that felt the storm were hundreds of kilometres from the track, not underneath it, and each card says exactly how far. Leaving any of that out would have been the easier and less honest choice.
+
+
+DISASTER MANAGEMENT: SEARCH AND RESCUE
+
+If something is adrift after a storm, the question is where it could have gone.
+
+Drop a pin anywhere in the water and the platform carries it forward through the ocean currents and draws the path it could take. It runs inside the browser, so it works with the network unplugged and on the public version where there is no server at all.
+
+The part that matters is that it publishes its own accuracy rather than assuming it is right. We tested it against the one thing that settles it: real floats. A float surfaces, reports where it is, sinks, drifts at a known depth, and surfaces again, so its true movement is known. Over a ten-day cycle, our predicted position is typically about 41 kilometres away from where the float actually turned up. Over longer stretches the error keeps growing until it exceeds the distance the float travelled at all, which means ocean currents alone stop telling you much about a particular object after roughly a month.
+
+Saying that out loud is the feature. A search radius you can trust for ten days and a straight line you cannot trust for three months are different products, and a tool that does not tell you which one you are holding is worse than no tool.
+
+This uses ocean currents only, with no wind and no allowance for how an object sits in the water. It is therefore not a rescue forecast, and the platform says so on the panel rather than hiding it in a footnote.
+
+
+FISHERIES
+
+INCOIS issue fishing advisories, and one of the ingredients is a front, which is a boundary in the sea where different bodies of water meet and where fish tend to gather. The platform finds those fronts from satellite temperature and satellite plankton data, using the same detection method INCOIS name for that purpose, and draws them on the sea surface.
+
+Under the surface it shows plankton in three dimensions, dissolved oxygen, and the depth below which oxygen falls too low for many fish to stay comfortable.
+
+Two things matter here. First, the same comparison engine runs on these variables too: the plankton and oxygen models are scored against the floats that carry those particular sensors, and where the model reads consistently high we print that. The comparison is not a special case built for temperature. Second, we never use the words "fishing zone". These are the ingredients an advisory is built from. The advisory itself is INCOIS's responsibility and stays theirs.
+
+
+CLIMATE
+
+The platform compares this year's ocean against the thirty-year average for the same month, taken from an international reference atlas, at every depth rather than only at the surface. It also finds coherent bodies of unusually warm or cool water automatically, and will only mark one if the departure is large enough and unusual enough to be a real event, so it does not label the ocean's ordinary seasonal breathing as something remarkable.
+
+
+FOR THE WORKING SCIENTIST
+
+Draw a line anywhere on the map and the platform cuts a vertical slice of the ocean along it, from the surface down to the sea floor, with the real instrument measurements that fall near that line drawn on top of it. It only draws measurements actually taken during the period on screen, because a measurement drawn on a figure is a claim about the water in that figure.
+
+The slice is computed from the underlying numbers rather than sampled from the picture on screen, and its depth scale is honest metres rather than the stretched scale the renderer uses, because this is a chart somebody will measure off.
+
+Beyond the browser, the platform serves the same analysis in the standard formats that ocean data portals and GIS software already read, plus a small programming interface for the questions a packaged file cannot answer in advance. That is what makes this a platform other tools can use rather than a page you can only look at.
+
+A visitor can also drop their own ocean data file onto the page. It is read, its axes are matched against the platform's own, and its variables appear in the variable list under a group of their own, drawn by the same renderer with the same colour scales and the same controls. It is held in memory only and stored nowhere. That is the plug-in claim demonstrated rather than argued.
+
+
+HOW IT IS BUILT
+
+Every data source is one small piece of code sitting behind a single common interface. There are eleven. Ten are public archives: two ocean analyses from INCOIS, the global Argo float archive, the biological float archive, anchored buoy reports from NOAA, ocean currents and biology and satellite data from the European Copernicus service, the underwater glider archive the problem statement specifically names, and a thirty-year reference atlas from NOAA. The eleventh is a file a visitor drops on the page.
+
+Those eleven pieces are the only code in the entire project that knows anything about where data comes from or what shape it arrives in. Each one asks the provider for just the region and the time window we need, rather than downloading a global archive and throwing most of it away.
+
+That is easy to claim, so it was actually tested. A later development round added four entirely new data sources and did not touch the renderer, the interface, or any screen in the platform.
+
+Everything a source returns is converted into one common form. That common form is the scientific truth, and it is what every comparison, every tooltip, every vertical slice and every file served to another program reads from. A separate compressed copy is then made for the graphics card, and that copy is a dead end: written once, drawn on screen, and never read back for a number.
+
+On the technology itself: the browser side is React and TypeScript with Three.js drawing the ocean directly on the graphics card, because a solid block of water you can fly inside is not something a normal charting library can do. The data side is Python with the standard scientific libraries, including the international standard formula for seawater density, so our calculated values are the ones an oceanographer would compute. Colour scales are a published scientific set designed specifically for ocean data, because a rainbow colour scale invents boundaries that are not in the data. Every font is packaged with the site, because loading one from the internet would break the promise that the platform makes no network requests.
+
+
+WHY YOU CAN BELIEVE THE NUMBERS
+
+There are over 500 automated tests covering the science, and every calculated ocean variable is checked against a case worked out by hand, for the reason given earlier: a wrong constant produces a believable number.
+
+There are also 16 automated browser checks that measure what the page actually drew, rather than trusting that it drew it. That is not belt and braces, it is the lesson of this project's own history. The worst bugs we hit all looked like graphics bugs and were not. A layer went completely missing because of a single reserved word in the graphics code. A highlight box appeared on the wrong side of the equator because of one flipped axis. None of those are visible to a normal code check, and several looked perfectly plausible on screen.
+
+Two pieces of the science had to be written twice, once in Python and once in the browser, because the browser copy has to work with the network unplugged. Both copies are continuously run against each other and the build fails if they ever disagree.
+
+Every figure on the public provenance page is read live from the build, so that page cannot claim a number the platform does not actually hold. A separate script scans every document in the repository for figures typed into prose and fails if one has drifted away from reality, which it has caught more than once. And the list of known defects is public, in the repository, including the ones still open.
+
+
+FEASIBILITY AND VIABILITY
+
+Technically it is standard web technology and standard ocean data formats throughout, and it is running publicly right now from ordinary static hosting. Financially there are no licence fees, no special hardware and no dedicated server, so ordinary web hosting is enough. Operationally it needs only a reasonably modern browser, there is nothing to install, and it speaks the formats ocean data tools already read.
+
+On adoption, it can sit on INCOIS's own servers, it reads data INCOIS already publish, and users install nothing. It is sustainable because there is no vendor and no subscription, and keeping it current is one scheduled job. It grows because each new data source is one small piece of code behind the common interface, so new variables and new regions arrive without rebuilding the viewer.
+
+
+RISKS, AND WHAT WE DID ABOUT EACH
+
+Checking the model against the same floats it was built from would flatter us. We report the anchored buoys separately as a different and harder test, we note the depth range each comparison covers, and we decline to reduce the two to a single comparison.
+
+The venue network could fail, or a data provider could be down on the day. The demonstration carries its own data and makes no network requests. Two of the sources we tested were already unreachable from our own network, which is how we learned this early rather than on stage.
+
+We do not control the data providers. One archive we wanted had already stopped updating more than a year before the analysis it was meant to accompany. Because each source sits behind that common interface, we swapped in another provider without touching the rest of the system.
+
+A mistake in our cyclone calculations would still look believable. Those calculations are validated cell by cell against INCOIS's own published archive, as described above.
+
+The model is coarse, with each grid cell around a hundred kilometres across. So we never draw detail the data does not have, we say where there is no measurement rather than filling it in, and we turned down the option of using a finer current field purely to make the animation look better, because that would have made the picture finer than every number the platform actually reports.
+
+
+WHAT WE DELIBERATELY DID NOT BUILD
+
+Saying no is part of the design, and each of these was prototyped or specified before being cut.
+
+We prototyped a way of calculating current speed from the model alone and rejected it, because it gave a value roughly ten times too small for one of the strongest currents in this region, and put the fastest water in the basin in a place where the underlying assumption does not even hold. Finite and physical-looking is not the bar.
+
+We refused full three-dimensional particle tracking, because vertical motion in the ocean is model output here and is not measured, so a three-dimensional particle would be claiming a movement nobody observed. The current flow is drawn as moving dots on one chosen depth instead, and those dots run the exact same calculation as the drift model whose error we publish, so the animation is not decoration with different maths behind it.
+
+We removed a free colour-scale chooser. A colour scale belongs to a variable. Offering scales named after ocean quantities meant a reader could draw temperature in the colours of a measurement nobody had taken. The reader keeps a choice of look; the colours no longer claim to be a quantity.
+
+There is no login, no stored upload and no write access. The platform is read-only, and the single feature that accepts anything holds it in memory and stores nothing.
+
+And there is no glider layer. The problem statement names a specific glider archive, so we read it. It contains a few thousand measurements inside our region, from a single glider on two deployments, and the newest one is from 2022, which means none fall inside the period this build covers. Rather than quietly omit it, the platform reports that finding, because "the named archive has nothing recent here" is itself useful information for the people who asked the question.
+
+
+DATA SOURCES AND CREDITS
+
+Ocean analyses are produced by the Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Government of India. Float data are collected and made freely available by the International Argo Program and the national programmes that contribute to it; the Argo Program is part of the Global Ocean Observing System. Cyclone track data are from the India Meteorological Department. Ocean currents, biology and satellite fields are from the E.U. Copernicus Marine Service. The long-term average and the anchored buoy reports are from NOAA. Colour scales are from a published scientific colour set for oceanography. Coastlines are from Natural Earth.
+
+The scientific methods implemented follow published work on cyclone heat potential, on mixed layer depth, on ocean front detection from satellite images, on the international standard for seawater properties, and on the Argo programme's own quality control procedures. The platform serves data using the internationally standard formats for ocean and geographic data.
+
+
+IN ONE PARAGRAPH
+
+OceanVerity takes ocean information India already collects and brings it into one interactive 3D platform in a browser tab, where the model and the real instruments that measured the same water are shown together and checked against each other, with the error printed, the empty areas drawn as empty, and the calculations validated against INCOIS's own published archive. A cyclone forecaster sees the storm's fuel through the depth of the water rather than at its surface. A search and rescue team gets a drift track that comes with its own measured error. A fisheries team sees the fronts, the plankton and the oxygen an advisory is built from. A climate researcher sees this year against a thirty-year normal at every depth. And a student finally sees the ocean as a three-dimensional place instead of another flat map. One platform, one browser tab, one place to understand the ocean.

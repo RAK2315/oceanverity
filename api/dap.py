@@ -15,7 +15,7 @@ Why this is hand-written rather than a library
 
 `xpublish` is the sanctioned xarray route and needs Python 3.11; this project runs 3.10.
 `xpublish-wms` pulls in Cartopy, dask, distributed, datashader, numba and pyarrow - forty
-packages to serve five one-degree fields. DAP2 over a rectangular array is a small, completely
+packages to serve a handful of one-degree fields. DAP2 over a rectangular array is a small, completely
 specified protocol: three responses, two of them plain text. Writing it costs less than the
 dependency and is testable against a real client, which `test_dap.py` does - it opens these
 endpoints with `pydap` and checks the numbers that come back against the Grid they came from.

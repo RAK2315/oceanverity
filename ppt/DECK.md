@@ -178,7 +178,7 @@ label. The slide render replaced a hand-built one that named **Leaflet and GeoPa
 installed in this project - drew **five of the nine** sources, and fed the browser from FastAPI,
 which is backwards: the deployed site has no API at all.
 
-**The shape is the argument, and the shape is a fork, not a pipeline.** Nine providers go through
+**The shape is the argument, and the shape is a fork, not a pipeline.** Ten providers go through
 one seam into one Grid. From the Grid, *numbers* go straight out to the API, the standards and
 every panel in the browser. The Volume hangs **off** the Grid and its only arrow goes to the
 screen. Drawn that way, the picture itself says that nothing reads a number back out of the
@@ -250,7 +250,7 @@ in each title is the point: it names what that consumer reads.
 
 | Card title | Mono sub-label |
 | --- | --- |
-| Static bake ← both | `192 MB committed · 0 network calls` |
+| Static bake ← both | `223 MB committed · 0 network calls` |
 | Browser ← both | `Three.js · WebGL2 · GLSL ES 3.00` |
 | REST API ← Grid | `FastAPI · 21 routes` |
 | Open standards ← Grid | `OPeNDAP DAP2 · CF-1.8 · WMS 1.3.0` |
@@ -426,7 +426,7 @@ for, does more work."*
 | | |
 | --- | --- |
 | **Social** | Opens in **any browser, with no install, no login and no cost**, so the same tool serves a forecaster's console and a school classroom. Every control explains in plain language what it does and whether it changed the science or only the picture. Directly answers the outreach, exhibition and e-learning mandate the problem statement asks for. |
-| **Economic** | **No licence, no GPU cluster, and no new data collection.** 192 MB of static files plus one small Python service is the entire deployment. It cuts a three-program comparison down to one browser tab, and adding a new sensor costs one class, not a rebuilt tool. |
+| **Economic** | **No licence, no GPU cluster, and no new data collection.** 223 MB of static files plus one small Python service is the entire deployment. It cuts a three-program comparison down to one browser tab, and adding a new sensor costs one class, not a rebuilt tool. |
 | **Environmental** | Chlorophyll and oxygen from the biogeochemical floats sit beside the physics, so the biology is read in the same picture as the water that drives it. Unusual bodies of water are found automatically, each with a z-score, a depth band and a footprint in km², which is how anomalous warm water gets noticed early. And about **a tenth** of the block is marked as having no evidence behind it rather than quietly filled in. |
 
 ### Block C - where it goes next

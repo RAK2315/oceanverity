@@ -51,24 +51,42 @@ cd pipeline
 4. Before using a screenshot, read its counts and timeline off the picture and compare them
    with `FACTS.md`.
 
-`check_figures.py` checks eleven figures people actually quote: tests, browser probes, moored
-buoys, analyses, instruments, the two typical gaps, the floats-to-buoys ratio (always flagged),
-the coverage gap, drift floats and variables. It is narrow on purpose. It does not know about
-every number - `scripts/ppt_diagrams.html` also says "15 REST routes" against a real 21, and
-nothing caught that - so a document it passes is not proven right, only not caught wrong.
+`check_figures.py` checks **twenty-two** figures people actually quote. Twelve are the originals:
+tests, browser probes, moored buoys, analyses, instruments, the two typical gaps, the
+floats-to-buoys ratio (always flagged), the coverage gap, drift floats, the window length and
+variables. Ten were added on 2026-09-23, after the audit in
+[`audit/2026-09-22-audit.md`](audit/2026-09-22-audit.md) found every one of them written down
+wrong somewhere in a run that reported **no current mismatch at all**: the baked size in MB, the
+adapter count, the provider count, the explained-control count, the tour steps, the Explore
+questions, the REST and total route counts, the size of a float pool a gap was measured over,
+and the drift cycle count.
+
+Three holes were closed with them, and they are worth knowing because each is a way a figure
+hides:
+
+- **It used to read line by line.** Prose here wraps at about 96 characters, so "Fifteen /
+  variables in five groups" put the number and its noun on different lines and nothing saw it -
+  in `web/src`, which is a checked root, for a figure it already knew. It reads across the wrap
+  now and reports only matches that cross the boundary.
+- **It used to skip `api/`, the probes, `DESIGN.md` and this file.** Three `api/` docstrings
+  framed the service around a Field count four rounds old, and the file that tells everyone else
+  to check their figures was in neither list.
+- **A year is not a count.** Widening the patterns made "the September 2026 Fields" a mismatch,
+  so a bare four-digit year is skipped for any figure that could not legitimately be one.
+
+It is still narrow on purpose, and a document it passes is still not proven right, only not
+caught wrong.
 
 ---
 
-## Figures still wrong in documents, as of this audit
+## Figures still wrong in documents
 
-Run `check_figures.py` for the live list. On 2026-09-13, after fixing the README, the long
-README, the demo script, the technical approach and the landing page, these remain:
+**Run `check_figures.py`. It is the list.** This section used to name three files and was wrong
+about two of them within a week, because a hand-kept list of stale figures goes stale exactly
+the way the figures do. On 2026-09-23 the script reports **0 current** mismatches over
+twenty-two figures and twenty-six roots, and everything it lists under HISTORY is quoted as it was on
+purpose.
 
-- `ppt/DECK.md` and `ppt/NOTES.md` - test and probe counts. Left alone: the deck now lives in Canva.
-- `scripts/dossier.html` - 377 and 409 tests, and "84 floats, median 0.46 degC" from an older bake.
-  The dossier PDF needs regenerating after these are fixed.
-- `scripts/ppt_diagrams.html` - 15 probes, and 15 REST routes against 21.
-
-Moving targets to expect: the **test count** moves whenever a test is added (it is 495 now), and
-the **probe count** is 16 now that `probe-case.mjs` exists. Both are read from the build by
-`collect_facts.py`; anything typing them by hand will drift again.
+Moving targets to expect: the **test count** moves whenever a test is added, the **probe count**
+whenever a probe is, and the **baked size** whenever the bake window does. All three are read
+from the build; anything typing them by hand will drift again.

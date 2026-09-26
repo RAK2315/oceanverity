@@ -627,7 +627,7 @@ function BiasMap({ onFocus, onPan }: { onFocus: Focus; onPan: Focus }) {
         * inputs. Their
         * typical gap is larger, but they stop at 500 m against the floats' 2000 m and deep water
         * is easy to match, so the ratio is not quoted (measured 2026-09-13, `docs/NUMBERS.md`). Pooled into one figure
-        * the seventeen of them vanish into 249 floats and the headline becomes a statement about
+        * the seventeen of them vanish into 246 floats and the headline becomes a statement about
         * self-consistency, so the independent number is printed beside it - with its own count,
         * because seventeen instruments is a small sample and saying so is part of the answer.
         *

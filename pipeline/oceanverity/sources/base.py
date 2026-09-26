@@ -68,7 +68,7 @@ class FieldSpec:
     # float32 on the Grid's own horizontal axes. That is not an optimisation, it is the first
     # rule - a sheet a user reads a depth off is answering a scientific question.
     render: str = "volume"
-    # Which group of the Variable selector this belongs in. Fifteen Fields cannot be a flat
+    # Which group of the Variable selector this belongs in. Nineteen Fields cannot be a flat
     # list, and they are grouped the way a forecaster thinks rather than the way the data
     # arrived: "state", "hazard", "circulation", "evidence", "change".
     group: str = "state"

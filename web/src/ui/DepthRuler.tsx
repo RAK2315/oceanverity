@@ -109,20 +109,45 @@ export function DepthRuler({ scene }: { scene: OceanScene | null }) {
        * measured rather than assumed, and so is the caption's own height. (The source credits
        * used to be a third band here; they were removed on 2026-09-11.)
        */
-      const tall = note.current?.getBoundingClientRect().height ?? 0;
-      // Clear whichever starts higher. Clamping to one band alone once put the caption behind the
-      // other, where it was invisible rather than overlapping - the same bug wearing a hat.
-      let top = Number.POSITIVE_INFINITY;
-      // The map key is in this list because the bays are anchored to the glass now, so the key's
-      // step-clear puts it in the same column the ruler sits in - measured, 1,767 px2 of overlap
-      // at 1280x720. It is draggable, so where it is cannot be assumed; it is measured like the
-      // rest.
-      for (const sel of [".timeline", ".mapkey"]) {
-        const band = document.querySelector(sel)?.getBoundingClientRect();
-        if (band && band.height > 0) top = Math.min(top, band.top);
+      const own = note.current?.getBoundingClientRect();
+      const tall = own?.height ?? 0;
+      const left = clear - 58;
+      const right = left + (own?.width ?? 0);
+      // Where the caption would sit with nothing in the way.
+      const natural = foot ? foot.y + drop : Number.POSITIVE_INFINITY;
+      /*
+       * The map key is in this list because the bays are anchored to the glass now, so the key's
+       * step-clear puts it in the same column the ruler sits in - measured, 1,767 px2 of overlap
+       * at 1280x720. It is draggable, so where it is cannot be assumed; it is measured like the
+       * rest.
+       *
+       * **And it has to be measured in both axes, or the caption follows it around the screen.**
+       * Only the top edge was read, so a key dragged anywhere raised the floor wherever it went:
+       * measured at 1400x800, dragging the key from y 570 to y 214 took the caption from y 547
+       * to y 215, and parking it in the top right corner - clear of the caption's own column,
+       * with nothing to avoid at all - still pulled the caption up to y 30. Reported by the
+       * owner, who could see the one move with the other.
+       *
+       * A band is in the way only if it overlaps the caption's column *and* reaches down to
+       * where the caption is going. The timeline spans the frame and sits on its foot, so it
+       * passes both tests at every width and behaves as it always did.
+       *
+       * Lowest band first, and each one tested against the position the one below it left
+       * behind: clearing the time axis can walk the caption straight into a key parked just
+       * above it, and one pass over unordered bands would not see that. It is the same failure
+       * that put the caption behind the second band when only one was clamped against.
+       */
+      const bands = [".timeline", ".mapkey"]
+        .map((sel) => document.querySelector(sel)?.getBoundingClientRect())
+        // A `display: none` element still has a rect and it is all zeros, so height is what says
+        // whether the band is there at all.
+        .filter((b): b is DOMRect => !!b && b.height > 0 && b.right > left && b.left < right)
+        .sort((a, b) => b.top - a.top);
+      let y = natural;
+      for (const band of bands) {
+        if (band.bottom > y) y = band.top - CAPTION_CLEAR - tall;
       }
-      const floor = Number.isFinite(top) ? top - CAPTION_CLEAR - tall : Number.POSITIVE_INFINITY;
-      setCaption(foot ? { x: clear - 58, y: Math.min(foot.y + drop, floor) } : null);
+      setCaption(foot ? { x: left, y } : null);
 
       frame.current = requestAnimationFrame(update);
     };

@@ -236,17 +236,17 @@ a provider means adding an Adapter and nothing else. The problem statement's
 "ingest new data streams without re-engineering" requirement lives or dies here.
 
 Eleven of them now: ten read a provider at bake time, and one reads a file a visitor supplies.
-The count was written as eight here for a round because the World Ocean Atlas adapter was left
-out of it. The 15 September 2026 round added two more - Copernicus Marine's biogeochemical model
-and its satellite temperature and chlorophyll - and again touched no renderer. The September 2026 round added four - INCOIS's second analysis, Copernicus
-Marine's current vectors, the EGO glider archive and the World Ocean Atlas normal - and touched
-no renderer, no API endpoint and no UI file, which is the claim demonstrated rather than
-asserted.
+The September 2026 round added four - INCOIS's second analysis, Copernicus Marine's current
+vectors, the EGO glider archive and the World Ocean Atlas normal - and the 15 September round
+added two more, Copernicus Marine's biogeochemical model and its satellite temperature and
+chlorophyll. Between them they touched no renderer, no API endpoint and no UI file, which is the
+claim demonstrated rather than asserted.
 
-The ninth is the one a judge can check: `sources/netcdf.py` reads a **file a visitor drops on
+The eleventh is the one a judge can check: `sources/netcdf.py` reads a **file a visitor drops on
 the page**, through the same protocol, and its variables become Fields in the same selector. It
 refuses rather than guesses - an axis it cannot identify is named in the message and nothing is
-drawn - because a file rendered on a guessed axis looks entirely normal and is wrong.
+drawn - because a file rendered on a guessed axis looks entirely normal and is wrong. This
+paragraph called it the ninth for a round, four lines under the sentence that says eleven.
 _Avoid_: parser, driver, connector, plugin, loader
 
 ---

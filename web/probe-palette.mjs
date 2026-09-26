@@ -71,6 +71,26 @@ await page.evaluate(() => document.querySelector("button.dive").click());
 await page.waitForFunction(() => window.__store.getState().morph > 0.9, null, { timeout: 120000 });
 await page.waitForTimeout(800);
 
+/*
+ * Every re-navigation gets a page that has not been driven yet, and that is a measurement.
+ *
+ * `page.goto` on a page that has already run the WebGL scene does not fire `load` again under
+ * software rendering: measured on 2026-09-26, four probes went red on exactly this and nothing
+ * else, while the identical URLs loaded in **0.1 and 0.2 s** in a fresh page and landed on the
+ * right state. That is the cause `docs/BUGS.md` item 101 was missing - its own recorded failures,
+ * "kiosk page load" and "the copied link", are both `page.goto` calls.
+ *
+ * Nothing after a re-navigation depends on the state the steps before it left behind, so a shared
+ * page buys those checks nothing and costs them a timeout. This is separating independent claims,
+ * not editing a check until it passes.
+ */
+const renavigate = async (url, timeout = 60000) => {
+  await page.close();
+  page = await browser.newPage({ viewport: { width: 1400, height: 860 } });
+  page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
+  await page.goto(url, { waitUntil: "load", timeout });
+};
+
 // ---- 1. what each Field is offered -----------------------------------------------------------
 //
 // The Colourbar group has to be open first: its buttons are not in the DOM while it is shut, and
@@ -160,15 +180,12 @@ for (const offer of offers) {
 
 // ---- 2 and 3. the water repaints, and the bar draws the same table ---------------------------
 //
-// On a fresh page, deliberately. The check above walks all fifteen Fields, which is fifteen full
-// scene rebuilds under software rendering, and a screenshot after that stalled past 180 s -
+// On a fresh page, deliberately. The check above walks every Field in the manifest, which is
+// that many full scene rebuilds under software rendering, and a screenshot after that stalled past 180 s -
 // which is the shape `docs/BUGS.md` item 101 describes. Nothing these two claims measure depends
 // on the state the first one leaves behind, so they get a page that has not been driven yet.
 // This is separating independent claims, not editing a check until it passes.
-await page.close();
-page = await browser.newPage({ viewport: { width: 1400, height: 860 } });
-page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
-await page.goto(`${SERVER}/app.html`, { waitUntil: "load", timeout: 60000 });
+await renavigate(`${SERVER}/app.html`);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.evaluate(() => document.querySelector("button.dive").click());
 await page.waitForFunction(() => window.__store.getState().morph > 0.9, null, { timeout: 120000 });
@@ -279,7 +296,7 @@ const link = await page.evaluate(() => window.__deeplink.currentViewUrl());
 console.log(`  link: ${link.replace(/^https?:\/\/[^/]+/, "")}`);
 if (!link.includes("palette=gray")) problems.push("the chosen colourbar is not in the copied link");
 
-await page.goto(link, { waitUntil: "load", timeout: 120000 });
+await renavigate(link, 120000);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForTimeout(2500);
 const restored = await page.evaluate(() => window.__store.getState().paletteOverride);
@@ -288,10 +305,7 @@ if (restored !== "gray") problems.push(`the link restored ${restored}, not gray`
 
 // A link is the one input here a stranger writes, so a palette the Field may not be offered has
 // to be refused rather than applied.
-await page.goto(`${SERVER}/app.html?dive=1&field=temperature&palette=curl`, {
-  waitUntil: "load",
-  timeout: 120000,
-});
+await renavigate(`${SERVER}/app.html?dive=1&field=temperature&palette=curl`, 120000);
 await page.waitForFunction(() => !!window.__store?.getState().manifest, null, { timeout: 120000 });
 await page.waitForTimeout(2500);
 const refused = await page.evaluate(() => window.__store.getState().paletteOverride);

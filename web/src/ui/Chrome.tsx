@@ -116,7 +116,7 @@ export function Chrome({
   onFrame?: (preset: CameraPreset) => void;
 }) {
   const store = useStore();
-  const { manifest, stage, morph, field, timestepIndex, theme, touched, set } = store;
+  const { manifest, stage, morph, field, timestepIndex, theme, touched, set, startTour } = store;
   // What the copy button last did, so it can say so for a moment. A control that fires and
   // shows nothing is a control a user presses three times.
   const [copied, setCopied] = useState<"" | "copied" | "failed">("");
@@ -247,7 +247,7 @@ export function Chrome({
                 ones who would never find it in a panel. */}
             <button
               className="ghost tour-start"
-              onClick={() => set("tourStep", 0)}
+              onClick={() => startTour()}
               title="A guided walk through every control, in six chapters"
             >
               Show me around

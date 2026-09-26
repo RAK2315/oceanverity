@@ -1,10 +1,15 @@
 # PS 26067 coverage, audited clause by clause, and what to build next
 
 Written 2026-09-02 against the bake of that morning, and revised the same evening after the
-round that built A1, A2, A3, C1 and the bias map. Current figures: **15 Fields, 8 Source
-Adapters** plus a ninth for a file a visitor supplies, 276 instruments, 36 Timesteps, **192 MB**
-baked - up from 58.8 MB, which is the vertical section's native float32 Grids (7.0 MB), the
-climatological anomaly's twelve Volumes, the drift check (0.58 MB) and the bias map (0.15 MB).
+round that built A1, A2, A3, C1 and the bias map. **Figures as they were on 2026-09-02:**
+15 Fields, 8 Source Adapters plus a ninth for a file a visitor supplies, 276 instruments,
+36 Timesteps, 192 MB baked - up from 58.8 MB, which is the vertical section's native float32
+Grids (7.0 MB), the climatological anomaly's twelve Volumes, the drift check (0.58 MB) and the
+bias map (0.15 MB).
+
+**On 2026-09-23 the build is 19 Fields, 11 adapters, 274 instruments, 36 Timesteps and 223 MB.**
+This document said "Current figures" over the 2026-09-02 set for three weeks. Read every figure
+below as of its own date and `ppt/FACTS.md` for what is true now.
 
 Three parts. **Part 1** is an audit: every clause of the problem statement against the thing that
 answers it, and what happens if nothing does. **Part 2** is ideas, ordered by how much of the
@@ -29,7 +34,7 @@ still asking for something, and what would other teams leave on the table?**
 | No web-based, platform-independent **3D rendering with depth-resolved volumetric views** | Ray-marched Volume, 56 x 36 x 48, WebGL2 | **Closed** |
 | No unified display of **Argo and Glider profiles alongside model fields** | Argo, BGC, moorings drawn in the water; Glider adapter built | **Argo half closed. Glider half is an adapter with no data to draw** - newest cast in the box is 2022-10-14 |
 | Absence of **variable selection, depth-slice, time animation, colorbars** | All four, plus vertical exaggeration and a log scale | **Closed** |
-| Inability to **ingest new streams without re-engineering** | 8 adapters behind 2 protocols; 3 added in September touching no renderer, and the eighth reads a file a visitor supplies | **Closed, and demonstrated rather than asserted** - a judge can falsify it in fifteen seconds with a file off their own laptop |
+| Inability to **ingest new streams without re-engineering** | 11 adapters behind 2 protocols; 3 added in September touching no renderer, and the eighth reads a file a visitor supplies | **Closed, and demonstrated rather than asserted** - a judge can falsify it in fifteen seconds with a file off their own laptop |
 | Lack of tools for **intuitive, rapid understanding** | Guide panel, tour, hazard preset, map key, the bias map, and a **vertical section cut live from a line you draw** | **Stronger, and still the weakest of the five for the audiences in section 1.4.** The section is the figure an oceanographer recognises before reading a label; the outreach gap is a different audience |
 
 ### 1.2 The six core functional requirements
@@ -81,8 +86,8 @@ settings**.
 
 | Named by the PS | What answers it |
 | --- | --- |
-| school and college students | **Explore**, eight questions each of which sets the whole scene up, and *what does one robot float actually do* as a narrated journey through a real track. The tour went from 5 steps to **21 in 6 chapters** and now visits all **43** explained controls, which is what a teacher or a presenting teammate needs |
-| the general public | The same eight questions, plus **true scale** - the block collapsing from 1800x to 1x in nine seconds, which is the one fact about the ocean nobody feels from a sentence - and depth landmarks on the ruler |
+| school and college students | **Explore**, nine questions each of which sets the whole scene up, and *what does one robot float actually do* as a narrated journey through a real track. The tour went from 5 steps to **23 in 6 chapters** and now visits all **48** explained controls, which is what a teacher or a presenting teammate needs |
+| the general public | The same nine questions, plus **true scale** - the block collapsing from 1800x to 1x in nine seconds, which is the one fact about the ocean nobody feels from a sentence - and depth landmarks on the ruler |
 | policymakers | Every question carries the caveat its simplification costs, on the card, beside the answer. A one-page printable brief is still not built; see D3 |
 | outreach events, **exhibitions** | **`?kiosk=1`**: panels hidden, type scaled, the questions on a loop, and a reset 30 seconds after the last visitor walks away. Escape leaves. Measured by `probe-outreach.mjs`, which stands there for 7 seconds doing nothing and checks the screen moved on by itself |
 | **e-learning** | **Copy this view** - the inverse of `applyDeepLink`, which had read eleven parameters since the requirements page was built and had nothing to write one. A worksheet is six links |
@@ -112,6 +117,25 @@ Each carries what it is, which clause it answers, what already exists, an effort
 (not a measurement), and the honesty caveat that has to ship with it.
 
 Ordered within each group by value per hour.
+
+### What has happened to this list since, as of 2026-09-23
+
+**This block is the only status in the file; the idea bodies below are unchanged and undated.**
+Seven of the eighteen are built and the list said nothing about it, which is how a future round
+re-proposes something that already ships.
+
+| Idea | State |
+| --- | --- |
+| **A5. A CTD adapter** | **Refused, on a measurement.** The newest GO-SHIP section in this box is April 2025, before the window opens. `web/requirements.html` states the refusal. Not built, and should not be. |
+| **A6. Fronts** | **Built**, 2026-09-15. Satellite SST and chlorophyll fronts as a Drape, `oceanverity/fronts.py`. ADR 0018. Never called a fishing zone. |
+| **B1. Exhibition mode** | **Built.** `?kiosk=1`, with the camera restored before every question and a reset after the last visitor. |
+| **B2. True scale** | **Built.** `trueScale()` in `web/src/explore.ts`, one run at a time. |
+| **B3. Depth landmarks** | **Built.** `DEPTH_LANDMARKS`, drawn on the ruler in kiosk mode. |
+| **B4. Copy this view** | **Built.** `web/src/deeplink.ts` writes what `applyDeepLink` reads, round-tripped by `probe-outreach.mjs`. |
+| **B7. Three questions instead of a toolkit** | **Built and then some.** Explore holds nine questions, not three. |
+| **C2. Depth against time at one point** | **Built on 2026-09-22 and rejected by the owner the same day.** Removed completely. Do not rebuild it without asking. |
+| **D3. Three refusals on the requirements page** | **Two-thirds built.** The machine-learning refusal is on the page. The geostrophic one is on no public page. The third row, "no palette chooser", **has had its premise removed**: the Colourbar group offers three or four alternates now, labelled by their colours (ADR 0010, amended). |
+| Everything else | Unbuilt, and the bodies below still hold. |
 
 ### Group A: close a clause the PS names and the build does not answer
 
@@ -548,6 +572,11 @@ would need a third amendment saying exactly why this is not the thing it deleted
 **Not built this round.** It is a considered "not yet", not an oversight.
 
 ## 3.6 The timeline, measured - and why it is a design change rather than a bake flag
+
+> **Answered since, 2026-09-23.** The slider is **36 steps, 2025-08-10 to 2026-07-30** - a full
+> year - and the bake is 223 MB. The complaint below was written against a twelve-step build and
+> the projections in its table were made from that build. Read the section as the argument for
+> why a year rather than three, which still holds, and not as a description of the timeline.
 
 The obvious complaint about the moving flow is that the slider it moves along is short: **12
 steps, 2026-04-10 to 2026-07-30**, against INCOIS's own archive of **813** ten-day steps back to

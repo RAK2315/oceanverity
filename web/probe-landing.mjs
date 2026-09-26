@@ -218,7 +218,6 @@ if (fclaim === undefined) {
 
 /** Pictures that are the same in both themes on purpose, and why. */
 const FIXED = {
-  "kiosk.jpg": "an exhibition screen is a dark screen in any theme; a light copy would be the wrong picture",
   // The only hazard frame committed today is the light one, shipped deliberately so the cyclone
   // card stops borrowing the kiosk picture under alt text promising heat potential. It gains a
   // dark twin the day one is captured, and this line comes out with it.
@@ -244,12 +243,20 @@ const swap = await page.evaluate(async () => {
     const bg = el ? getComputedStyle(el, "::after").backgroundImage : "";
     return bg && bg !== "none" ? bg : null;
   };
+  /*
+   * The page opens **light** since 2026-09-26, so the first click is the one that makes it dark.
+   * This block used to read `dataset.theme === "light"` after one click and was asserting the
+   * old default rather than the toggle, so flipping the default turned a working page red.
+   * What is actually being checked either way is that the two clicks are a round trip, so both
+   * ends are read rather than one.
+   */
+  const opensLight = document.documentElement.dataset.theme === "light";
   const before = shot();
   const globeBefore = globeTheme();
   const fallbackBefore = fallbackPic();
   document.getElementById("themeToggle").click();
   await new Promise((r) => setTimeout(r, 0));
-  const light = document.documentElement.dataset.theme === "light";
+  const flipped = document.documentElement.dataset.theme !== "light";
   const after = shot();
   const globeAfter = globeTheme();
   const fallbackAfter = fallbackPic();
@@ -257,10 +264,13 @@ const swap = await page.evaluate(async () => {
   await new Promise((r) => setTimeout(r, 0));
   const back = shot();
   const globeBack = globeTheme();
-  return { before, after, light, back, globeBefore, globeAfter, globeBack, fallbackBefore, fallbackAfter };
+  const backLight = document.documentElement.dataset.theme === "light";
+  return { before, after, opensLight, flipped, backLight, back, globeBefore, globeAfter, globeBack, fallbackBefore, fallbackAfter };
 });
 
-if (!swap.light) fail("clicking the theme toggle did not put the page into light");
+if (!swap.opensLight) fail("a first visit should open light and did not");
+if (!swap.flipped) fail("clicking the theme toggle did not take the page out of light");
+if (!swap.backLight) fail("a second click did not bring the page back to light");
 let moved = 0;
 let held = 0;
 for (let i = 0; i < swap.before.length; i += 1) {
@@ -281,9 +291,9 @@ console.log(`\npictures on the theme toggle: ${moved} swapped, ${held} deliberat
 for (const [file, why] of Object.entries(FIXED)) note(`${file} stays put: ${why}`);
 
 // ---- the turning globe wears the theme too, and it is drawn from data, not a picture ----
-if (swap.globeBefore !== "dark") fail(`the globe should start dark and reads "${swap.globeBefore}"`);
-if (swap.globeAfter !== "light") fail(`the globe should turn light with the page and reads "${swap.globeAfter}"`);
-if (swap.globeBack !== "dark") fail(`the globe should return to dark and reads "${swap.globeBack}"`);
+if (swap.globeBefore !== "light") fail(`the globe should start light and reads "${swap.globeBefore}"`);
+if (swap.globeAfter !== "dark") fail(`the globe should turn dark with the page and reads "${swap.globeAfter}"`);
+if (swap.globeBack !== "light") fail(`the globe should return to light and reads "${swap.globeBack}"`);
 if (swap.fallbackBefore) fail(`the no-WebGL fallback carries a picture ("${swap.fallbackBefore}") and must be a plain gradient`);
 if (swap.fallbackAfter) fail(`the no-WebGL fallback acquired a picture ("${swap.fallbackAfter}") and must be a plain gradient`);
 console.log(`globe on the theme toggle: canvas ${swap.globeBefore} -> ${swap.globeAfter} -> ${swap.globeBack}, fallback picture-free`);
@@ -295,13 +305,23 @@ const lum = (r, g, b) => {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 };
 const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+// Hero text only. This check composites ink over the **rendered photograph** behind it, which is
+// what the hero needs and is the wrong instrument for anything on a flat CSS ground.
+//
+// `.stat-strip b` and `.stat-strip span` were in this list and the figure came back at exactly
+// **1.00:1 in both themes** - which is arithmetically impossible for two different inks over one
+// ground, and so was the tell. Measured directly on 2026-09-24 the figure is `rgb(29,29,29)` on
+// light and `rgb(236,236,234)` on dark, at alpha 1, both perfectly readable: the page was right
+// and the ground sample was wrong, because the strip sits below the hero and its box does not
+// land on the frame this function screenshots.
+//
+// Flat-ground type is `probe-chrome.mjs`'s job - it walks ancestors for a real background colour
+// instead of sampling pixels - and the two stat roles belong there if they are wanted back.
 const TYPE = [
   ["eyebrow", ".hero .eyebrow"],
   ["headline", ".hero h1"],
   ["lede", ".hero .lede"],
   ["sub", ".hero .sub"],
-  ["stat figure", ".stat-strip b"],
-  ["stat label", ".stat-strip span"],
 ];
 
 /** Every hero text block against the frame with the hero's words taken away. */
@@ -343,7 +363,7 @@ const heroContrast = async (theme, width) => {
   }
   if (sphere) console.log(`\n  ${width} px: no hero text block overlaps the globe box`);
   await p.addStyleTag({
-    content: ".hero h1, .hero .lede, .hero .sub, .hero .eyebrow, .stat-strip b, .stat-strip span { visibility: hidden !important; }",
+    content: ".hero h1, .hero .lede, .hero .sub, .hero .eyebrow { visibility: hidden !important; }",
   });
   await p.waitForTimeout(400);
   const png = decodePng(await p.screenshot({ clip: { x: 0, y: 0, width, height: 1400 } }));
