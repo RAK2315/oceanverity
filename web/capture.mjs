@@ -227,7 +227,9 @@ const PUBLISH_MAP = [
   // element is a per-entry theme override, and this is the only thing that needs one: without
   // it, `docs` and `ppt` both want light and a light run quietly replaced the dark kiosk.
   ["kiosk", "web/public/images/kiosk.jpg", "dark"],
-  ["kiosk", "docs/images/kiosk.jpg", "dark"],
+  // Light, like every other picture the README loads. It was the one dark frame in a
+  // light document, which read as a hole on GitHub's white page.
+  ["kiosk", "docs/images/kiosk.jpg", "light"],
   ["kiosk", "ppt/images/spare-kiosk.jpg", "dark"],
 ];
 
