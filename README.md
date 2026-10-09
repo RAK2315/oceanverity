@@ -80,8 +80,7 @@ policymakers, and `?kiosk=1` runs it unattended on an exhibition screen all day.
 
 ## The numbers
 
-Every figure here is read off the running build by
-[`pipeline/scripts/collect_facts.py`](pipeline/scripts/collect_facts.py). Nothing is typed by hand.
+Every figure here is read off the running build by a script. Nothing is typed by hand.
 
 | | |
 | --- | --- |
@@ -116,85 +115,59 @@ Every figure here is read off the running build by
 
 ## How it works
 
-**Eleven adapters feed one common form, and that form splits in two: the numbers stay exact, and
-a compressed copy goes to the graphics card.** That split is the whole design, and it is what
-guarantees point 2 above.
+**Ten public sources become one common form. That form splits in two: the exact numbers, and a
+compressed copy for the graphics card.** Everything anyone reads comes from the exact side.
 
 ```mermaid
-flowchart TD
-    subgraph SRC["① ELEVEN SOURCE ADAPTERS"]
-        direction LR
-        A1["INCOIS ERDDAP<br/>temperature, salinity"]
-        A2["Argo floats<br/>Ifremer"]
-        A3["Moored buoys<br/>NOAA OSMC"]
-        A4["Copernicus Marine<br/>currents, biology"]
-        A5["World Ocean Atlas<br/>30-year normal"]
-        A6["Your own file<br/>dropped on the page"]
-    end
+flowchart LR
+    S1["INCOIS<br/>ocean analysis"]
+    S2["Argo floats<br/>moored buoys"]
+    S3["Copernicus<br/>currents, biology"]
+    S4["Your own<br/>NetCDF file"]
 
-    SRC --> SEAM["② ONE ADAPTER SEAM<br/><i>sources/base.py</i><br/>the only code that has heard of ERDDAP<br/>quality control per channel · land masked, never filled"]
+    S1 --> AD
+    S2 --> AD
+    S3 --> AD
+    S4 --> AD
 
-    SEAM --> GRID["③ THE GRID — the scientific truth<br/><b>float64 · 1 degree · 24 levels · land is NaN</b><br/>every number anyone reads comes from here"]
+    AD["<b>ADAPTERS</b><br/>one per source"]
+    AD --> QC["<b>QUALITY CONTROL</b><br/>and derived variables"]
+    QC --> GRID
 
-    GRID --> DERIVED["Derived variables<br/>density · cyclone heat potential<br/>mixed layer · fronts · oxygen floor"]
-    DERIVED --> GRID
+    GRID[("<b>THE GRID</b><br/>full precision<br/>every number comes from here")]
 
-    GRID -->|"numbers, unchanged"| OUT
-    GRID -->|"THE BAKE<br/>quantise · warp the depth axis"| VOL["THE VOLUME — a picture for the GPU<br/>56 × 36 × 48 · 1 byte a value<br/><i>a dead end: nothing reads a value back out</i>"]
+    GRID ==> BROWSER["<b>BROWSER</b><br/>3D ocean, works offline"]
+    GRID ==> API["<b>REST API</b>"]
+    GRID ==> STD["<b>OPEN STANDARDS</b><br/>OPeNDAP · CF · WMS"]
 
-    VOL -->|"pixels only"| BROWSER
+    GRID -. "compressed copy,<br/>for drawing only" .-> VOL["GPU volume"]
+    VOL -. "pixels, never numbers" .-> BROWSER
 
-    subgraph OUT["④ FOUR WAYS OUT"]
-        direction LR
-        O1["Static bake<br/>223 MB · 0 network calls"]
-        O2["REST API<br/>FastAPI · 21 routes"]
-        O3["Open standards<br/>OPeNDAP · CF-1.8 · WMS"]
-    end
+    classDef src fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef work fill:#f1f5f9,stroke:#64748b,color:#1e293b
+    classDef out fill:#0891b2,stroke:#0e7490,color:#ffffff
+    classDef truth fill:#0f766e,stroke:#115e59,color:#ffffff
+    classDef ghost fill:#ffffff,stroke:#94a3b8,color:#64748b,stroke-dasharray:4 4
 
-    OUT --> BROWSER["⑤ THE BROWSER<br/>React · TypeScript · Three.js on WebGL2<br/>no install · works offline"]
-    OUT --> TOOLS["⑤ OTHER TOOLS<br/>GIS · Python clients · ocean data portals"]
-
-    style GRID fill:#0f766e,color:#fff,stroke:#0f766e
-    style VOL fill:#e2e8f0,color:#334155,stroke:#94a3b8,stroke-dasharray: 5 5
-    style SEAM fill:#1e293b,color:#fff,stroke:#1e293b
-    style BROWSER fill:#0891b2,color:#fff,stroke:#0891b2
+    class S1,S2,S3,S4 src
+    class AD,QC work
+    class GRID truth
+    class BROWSER,API,STD out
+    class VOL ghost
 ```
 
-### The one rule the shape is drawn to show
+**The thick arrows carry numbers. The dotted ones carry pixels.** The compressed copy exists only
+so the ocean can be drawn at sixty frames a second, and nothing ever reads a value back out of
+it - not the figure under your cursor, not the comparison chart, not a file served to another
+program. That one rule is why a number on this platform can be trusted.
 
-**Every number a human or a machine reads comes from the Grid. The Volume's only arrow goes to
-the screen.** This matters most at the API, because someone pulling a file over the network
-cannot see which copy they were handed.
-
-### Why one adapter per source matters
-
-[`oceanverity/sources/base.py`](pipeline/oceanverity/sources/base.py) declares two interfaces and
-nothing else. Eleven small classes implement them, and **they are the only code in the project
-that has ever heard of ERDDAP**, or of a column layout, or of an FTP index. Each one asks its
-provider for just the region and window needed, rather than downloading a global archive.
-
-That is easy to claim, so it was tested: the September 2026 round added **four new providers** -
-INCOIS's second analysis, Copernicus Marine, the EGO glider archive and the World Ocean Atlas -
-and **touched no renderer, no endpoint and no interface file.**
-
-### The three layers
-
-| Layer | Responsible for | The seam below it |
-| --- | --- | --- |
-| **`pipeline/`** · Python | Reading every provider, quality-controlling every observation, computing every derived variable, writing the bake. **All tested logic lives here** - 511 tests. | `oceanverity/sources/base.py`. A provider is one class. |
-| **`api/`** · FastAPI | What a static folder cannot answer: an arbitrary column, an arbitrary section line, an uploaded NetCDF file. Also serves OPeNDAP, CF-1.8 NetCDF and OGC WMS. | `data/grids/*.npz`. **Every endpoint reads the Grid.** |
-| **`web/`** · React + TypeScript + Three.js | One WebGL scene for globe and volume, every control and panel, and the two pieces of science that must run offline. | `web/public/data/`. The browser reads **files, not endpoints**. |
-
-They are genuinely separable: the pipeline runs with no browser, the browser runs with no API.
-That is why the demo survives a dead network, and why the public deployment works with no server
-behind it at all.
-
----
+**Adding a source touches nothing else.** Each one sits behind a small adapter, and the rest of
+the system never learns where data came from. Tested rather than claimed: a later round added
+four new providers and changed no renderer, no endpoint and no screen.
 
 ## The providers, in full
 
-Each one public, each tested and dated in
-[`docs/plan/00-data-sources-verified.md`](docs/plan/00-data-sources-verified.md).
+Each one public, and each tested and dated before it was used.
 
 | Provider | What it gives us |
 | --- | --- |
@@ -260,23 +233,17 @@ cd pipeline && ../.venv/Scripts/python -m oceanverity.bake
 
 ### Check the claims yourself
 
-Nothing in this README is asserted without something that can fail:
+Nothing in this README is asserted without something that can fail.
 
 ```bash
-cd pipeline && ../.venv/Scripts/python -m pytest -q         # 511 tests
-cd web && npm run typecheck && npx vite build
-
-# the 16 browser probes measure the rendered page rather than trusting it.
-# They need a preview server; each takes a minute or two.
-cd web && npx vite preview --port 4173 &
-node probe-guide.mjs        # every control is explained, every figure came from the bake
-node probe-controls.mjs     # six rules per variable, checked rather than eyeballed
-node probe-drift.mjs        # the browser's integrator against the pipeline's, in kilometres
-node probe-landing.mjs      # no external request, and the hero's contrast in both themes
-node probe-chrome.mjs       # every text role in the console, in both themes
+cd pipeline && ../.venv/Scripts/python -m pytest -q    # 511 tests on the science
+cd web && npm run typecheck && npx vite build          # the whole front end
 ```
 
-`probe-section.mjs` and `probe-upload.mjs` additionally need the API on port 8000; the rest do not.
+On top of those, **16 automated browser checks measure what the page actually drew** rather than
+trusting that it drew it: every control is explained, every figure on screen came from the data,
+the colourbar and the water agree, and the drift model matches the one it was scored against.
+They run against a preview server, and two of them also need the API.
 
 ---
 
