@@ -78,6 +78,55 @@ policymakers, and `?kiosk=1` runs it unattended on an exhibition screen all day.
 
 ---
 
+## What is in it
+
+### Nineteen variables, in six groups
+
+Four come straight from INCOIS, two from Copernicus Marine, and **thirteen are computed here** -
+each one held to a worked example, because a wrong constant in an ocean formula produces a number
+that is smooth, plausible and completely wrong.
+
+| Group | Variables | What the group answers |
+| --- | --- | --- |
+| **Ocean state** | Temperature · Salinity · Density | What the water is, right now, at every depth |
+| **Hazard** | Cyclone Heat Potential · Depth of 26 °C · Mixed Layer Depth · Isothermal Layer Depth · Barrier Layer Thickness | How much fuel a storm has, and how deep it reaches |
+| **Circulation** | Current Speed | Where the water is going |
+| **Evidence** | Observation Coverage · INCOIS Cast Count · INCOIS Error Estimate · Analysis Spread | How much real measurement stands behind each cell |
+| **Change** | Temperature Anomaly · Temperature vs Normal | How this water compares with its own average, and with a thirty-year normal |
+| **Biology** | Chlorophyll · Dissolved Oxygen · Oxygen Floor · Surface Fronts | The conditions marine life depends on |
+
+Not every variable is a block of water. A depth is drawn as a **curved sheet** sitting at that
+depth inside the ocean, a column total is **draped on the sea surface**, and currents are
+**arrows or moving dots** - because drawing a depth as a solid volume would be drawing the wrong
+thing.
+
+### What you can do
+
+| | |
+| --- | --- |
+| **Fly into the ocean** | A single ray-marched block from 5 m to 2000 m. Rotate it, slice it by depth, hide everything outside a value range to isolate one body of water. |
+| **Compare any instrument with the model** | Click a float or buoy and get both curves on one depth axis, the gap between them shaded, and a plain verdict. |
+| **See where the model is strongest** | Colour every instrument in the basin by its own agreement, with a ranked list and the worst 5° box named. |
+| **Set up a cyclone question in one press** | Swaps in the five hazard variables and arranges the scene for them. Validated against INCOIS's own published archive. |
+| **Follow something adrift** | Drop a pin and watch the currents carry it, with the method's own measured error printed beside the track. |
+| **Cut the ocean open** | Draw any line and get a vertical section computed from the data, with the real casts near that line drawn on it. |
+| **Find unusual water automatically** | The platform marks each coherent body that departs from its own average, and explains in words where it is, how unusual, and why it is probably there. |
+| **Travel through a year** | 36 analyses ten days apart. Press play and the water, the instruments and everything derived from them move together. |
+| **Bring your own data** | Drop a NetCDF file on the page. Its variables appear in a tab of their own and behave exactly like the built-in ones. |
+| **Ask it nine plain questions** | For students, the public and policymakers: *Where could a cyclone get stronger? Why do fish gather here? Where would something adrift go?* Each answer is the same platform, set up for you. |
+| **Leave it running all day** | An exhibition mode with no panels, type sized for a room, questions on a loop, and a reset after the last visitor leaves. |
+| **Learn it in six chapters** | A guided tour that visits every one of the 48 explained controls, and pauses instead of closing if you touch something. |
+
+### Walkthroughs of real events
+
+Two step-by-step stories, on the dates they happened, with every figure computed rather than
+written in. **Cyclone Montha** crossed the Bay of Bengal in October 2025 on the India
+Meteorological Department's own track: follow the heat it drew out of the water and the cold wake
+it left. **Under a fishing advisory** walks the fronts, plankton, oxygen and depth limits that an
+advisory is built from.
+
+---
+
 ## The numbers
 
 Every figure here is read off the running build by a script. Nothing is typed by hand.
